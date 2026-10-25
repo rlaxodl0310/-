@@ -33,7 +33,7 @@ test('prior interaction and relationship change observable greeting without gran
  s.relations['soyul>taei']={familiarity:5,affection:4,trust:4,tension:0};assert.match(libraryGreeting(s,'soyul'),/빈 의자/);
  s.relations['soyul>taei'].tension=4;assert.match(libraryGreeting(s,'soyul'),/시선을 돌린다/);
  const encounter=arrive(s,'library').encounter;assert.match(encounter.text,/시선을 돌린다/);
- s.relations['soyul>taei'].tension=0;s.dialogue.facts.soyul={photo:'keep',speech:'casual'};
+ s.relations['soyul>taei'].tension=0;s.dialogue.facts??={};s.dialogue.facts.soyul={photo:'keep',speech:'casual'};
  assert.match(libraryGreeting(s,'soyul'),/안 지웠어\./);
  s.day=3;assert.match(libraryGreeting(s,'soyul'),/출력물/);assert.doesNotMatch(libraryGreeting(s,'soyul'),/안 지웠어/);
  s.encounters.old.outcome='passed';assert.equal(libraryGreeting(s,'soyul'),'');
