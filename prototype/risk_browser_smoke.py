@@ -1,4 +1,5 @@
 """Sharing a real observation changes an NPC plan; duties override affection; escorts really participate."""
+from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_bulletin, end_day, go_campus
 from playwright.sync_api import sync_playwright
 import os
 base=os.environ.get('CAMPUS_TEST_URL','http://127.0.0.1:8000')
@@ -6,6 +7,7 @@ with sync_playwright() as p:
     browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium')
     for path in ['/prototype/','/demo/campus-demo.html']:
         page=browser.new_page(viewport={'width':390,'height':844})
+        page.set_default_timeout(7000)
         errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
         page.goto(base+path)
         page.get_by_role('button',name='메뉴',exact=True).click()
@@ -13,14 +15,14 @@ with sync_playwright() as p:
         page.get_by_role('button',name='하던 일을 계속하며 지나간다.').click()
         for day,activity in [(1,'합주 2시간'),(2,'개인 음악 작업 2시간')]:
             if day==2:
-                page.get_by_role('button',name='학생회관 들어가기',exact=True).click()
+                visit_place(page, 'hall')
                 page.get_by_role('button',name='하던 일을 계속하며 지나간다.').click()
-            page.get_by_role('button',name='오후 활동 고르기',exact=True).click()
-            page.get_by_role('button',name=activity,exact=True).click()
+            open_schedule(page)
+            page.locator(f'[data-routine="{"rehearsal" if day==1 else "work"}"] [data-action="select"]').click()
             page.get_by_role('button',name='이 활동 진행',exact=True).click()
-            page.get_by_role('button',name='하루 마무리하기',exact=True).click()
+            end_day(page)
             page.get_by_role('button',name=f'{day+1}일차 시작하기',exact=True).click()
-        page.get_by_role('button',name='학생회관 들어가기',exact=True).click()
+        visit_place(page, 'hall')
         page.locator('[data-action="encounter"][data-value="engage"]').click()
         page.get_by_role('button',name='← 대화 마치기',exact=True).click()
         page.get_by_role('button',name='뒤편 출입문 쪽으로 걸어간다',exact=True).click()
@@ -39,11 +41,10 @@ with sync_playwright() as p:
         page.get_by_role('button',name='안내 확인에 동행 제안하기',exact=True).click()
         assert '같이 안내부터 확인해봐요' in page.locator('blockquote').inner_text()
         if path=='/prototype/':page.screenshot(path='/tmp/campus-risk-escort.png',full_page=True)
-        page.get_by_role('button',name='활동 살펴보기',exact=True).click()
-        page.get_by_role('button',name='교내 안내 확인 90분',exact=True).click()
+        choose_activity(page, 'checkCampus')
         page.get_by_role('button',name='이 활동 진행',exact=True).click()
         assert '한서연과 함께 안내를 확인' in page.locator('.lead').inner_text()
-        page.get_by_role('button',name='캠퍼스로 돌아가기',exact=True).click()
+        page.get_by_role('button',name='건물 밖으로 나와 주변을 둘러본다.',exact=True).click()
         page.get_by_role('button',name='메뉴',exact=True).click()
         page.get_by_role('button',name='저장',exact=True).first.click()
         saved=page.evaluate("JSON.parse(localStorage.getItem('campus.slot.1'))")

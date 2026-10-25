@@ -1,4 +1,5 @@
 """Check immediate discovery feedback, collection UI, persistence and narrow layouts."""
+from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_bulletin, end_day, go_campus
 from playwright.sync_api import sync_playwright
 import os
 base=os.environ.get('CAMPUS_TEST_URL','http://127.0.0.1:8000')
@@ -6,10 +7,11 @@ with sync_playwright() as p:
     browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium')
     for path in ['/prototype/','/demo/campus-demo.html']:
         page=browser.new_page(viewport={'width':390,'height':844})
+        page.set_default_timeout(7000)
         errors=[]
         page.on('pageerror',lambda error: errors.append(str(error)))
         page.goto(base+path)
-        page.get_by_role('button',name='다른 장소로 이동').click()
+        open_map(page)
         page.get_by_role('button',name='도서관 찾아가기').click()
         assert '도서관 층별 안내' in page.locator('.discovery-notice').inner_text()
         page.get_by_role('button',name='확인',exact=True).click()

@@ -1,4 +1,5 @@
 """Voluntary membership, activity offers and NPC initiative in both browser builds."""
+from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_bulletin, end_day, go_campus
 from playwright.sync_api import sync_playwright
 import os
 base=os.environ.get('CAMPUS_TEST_URL','http://127.0.0.1:8000')
@@ -6,10 +7,11 @@ with sync_playwright() as p:
     browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium')
     for path in ['/prototype/','/demo/campus-demo.html']:
         page=browser.new_page(viewport={'width':390,'height':844})
+        page.set_default_timeout(7000)
         errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
         page.goto(base+path)
-        page.get_by_role('button',name='동아리 살펴보기',exact=True).click()
-        assert '아직 가입한 동아리는 없습니다' in page.locator('.page').inner_text()
+        open_bulletin(page)
+        assert page.locator('[data-action="clubDetail"]').count()==3
         page.locator('[data-action="clubDetail"][data-value="football"]').click()
         page.get_by_role('button',name='이 동아리에 가입하기',exact=True).click()
         assert '가입 중입니다' in page.locator('.page').inner_text()
@@ -20,6 +22,7 @@ with sync_playwright() as p:
         assert '참석 예정' in football.inner_text()
         page.get_by_role('button',name='← 뒤로',exact=True).click()
         page.get_by_role('button',name='← 뒤로',exact=True).click()
+        go_campus(page)
         page.get_by_role('button',name='메뉴',exact=True).click()
         page.get_by_role('button',name='저장',exact=True).first.click()
         saved=page.evaluate("JSON.parse(localStorage.getItem('campus.slot.1'))")
@@ -41,6 +44,7 @@ with sync_playwright() as p:
         # Fresh relationship example: accept and actually keep an NPC-originated meeting.
         page.get_by_role('button',name='← 뒤로',exact=True).click()
         page.get_by_role('button',name='← 뒤로',exact=True).click()
+        go_campus(page)
         page.get_by_role('button',name='메뉴',exact=True).click()
         page.get_by_role('button',name='친한 동료',exact=True).click()
         page.get_by_role('button',name='하던 일을 계속하며 지나간다.').click()
@@ -48,12 +52,11 @@ with sync_playwright() as p:
         page.locator('[data-appointment-id="npc:seoyeon:1"]').get_by_role('button',name='수락하기',exact=True).click()
         page.get_by_role('button',name='← 뒤로',exact=True).click()
         page.get_by_role('button',name='← 뒤로',exact=True).click()
-        page.get_by_role('button',name='오후 활동 고르기',exact=True).click()
-        page.get_by_role('button',name='합주 2시간',exact=True).click()
+        choose_activity(page, 'rehearsal')
         page.get_by_role('button',name='이 활동 진행',exact=True).click()
-        page.get_by_role('button',name='하루 마무리하기',exact=True).click()
+        end_day(page)
         page.get_by_role('button',name='2일차 시작하기',exact=True).click()
-        page.get_by_role('button',name='다른 장소로 이동',exact=True).click()
+        open_map(page)
         page.get_by_role('button',name='대학가 카페 찾아가기',exact=True).click()
         assert '약속이 떠오른다' in page.locator('.lead').inner_text()
         page.locator('[data-action="encounter"][data-value="engage"]').click()

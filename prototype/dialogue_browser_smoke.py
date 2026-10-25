@@ -1,10 +1,12 @@
 """Check sustained character conversations reached through incidental encounters."""
+from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_bulletin, end_day, go_campus
 from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, executable_path='/usr/bin/chromium')
     for path in ['/prototype/', '/demo/campus-demo.html']:
         page = browser.new_page(viewport={'width': 1440, 'height': 1000})
+        page.set_default_timeout(7000)
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.goto('http://127.0.0.1:8000' + path)
@@ -16,7 +18,7 @@ with sync_playwright() as p:
                 try { await image.decode(); return image.naturalWidth > 0; }
                 catch { return false; }
             }''')
-        page.get_by_role('button', name='학생회관 들어가기').click()
+        visit_place(page, 'hall')
         page.get_by_role('button', name='하던 일을 계속하며 지나간다.').click()
         page.get_by_role('button', name='창가 쪽 빈자리를 찾아본다').click()
         page.locator('[data-action="encounter"][data-value="engage"]').click()
@@ -51,11 +53,10 @@ with sync_playwright() as p:
         page.locator('[data-action="encounter"][data-value="engage"]').click()
         page.get_by_role('button', name='다른 이야기로 넘어가기').click()
         page.get_by_role('button', name='오늘 봉사 활동에 갈게요.').click()
-        page.get_by_role('button', name='활동 살펴보기').click()
-        page.get_by_role('button', name='합주 2시간').click()
+        choose_activity(page, 'rehearsal')
         assert page.get_by_text('봉사 참석 약속을 지키지 못하게 됩니다.', exact=False).is_visible()
         page.get_by_role('button', name='이 활동 진행').click()
-        page.get_by_role('button', name='학생회관으로 돌아간다').click()
+        page.get_by_role('button', name='정리 중인 학생회관 쪽으로 돌아간다.').click()
         page.get_by_role('button', name='하던 일을 계속하며 지나간다.').click()
         page.get_by_role('button', name='게시판 쪽으로 걸어간다').click()
         page.locator('[data-action="encounter"][data-value="engage"]').click()

@@ -1,4 +1,5 @@
 """Travel and empty-location exploration must visibly progress in both builds."""
+from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_bulletin, end_day, go_campus
 from playwright.sync_api import sync_playwright
 import os
 
@@ -7,20 +8,21 @@ with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, executable_path='/usr/bin/chromium')
     for path in ['/prototype/', '/demo/campus-demo.html']:
         page = browser.new_page()
+        page.set_default_timeout(7000)
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.goto(base + path)
-        page.get_by_role('button', name='다른 장소로 이동').click()
+        open_map(page)
         page.get_by_role('button', name='도서관 찾아가기').click()
         assert '반납기 작동음' in page.locator('.page > .notice').inner_text()
         page.get_by_role('button', name='반납대와 자료실을 둘러본다').click()
         assert '공용 프린터' in page.locator('.page > .notice').inner_text()
-        page.get_by_role('button', name='다른 장소로 이동').click()
+        open_map(page)
         page.get_by_role('button', name='대학가 카페 찾아가기').click()
         assert '커피 향' in page.locator('.page > .notice').inner_text()
         page.get_by_role('button', name='주문대 쪽으로 간다').click()
         assert '충전용 콘센트' in page.locator('.page > .notice').inner_text()
-        page.get_by_role('button', name='다른 장소로 이동').click()
+        open_map(page)
         page.get_by_role('button', name='학생회관 찾아가기').click()
         assert '영수증' in page.locator('.lead').inner_text()
         page.locator('[data-action="encounter"][data-value="engage"]').click()

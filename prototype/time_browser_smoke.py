@@ -1,4 +1,5 @@
 """Exercise the timed first day and unchanged later-day flow in both builds."""
+from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_bulletin, end_day, go_campus
 from playwright.sync_api import sync_playwright
 import os
 base=os.environ.get('CAMPUS_TEST_URL','http://127.0.0.1:8000')
@@ -6,10 +7,11 @@ with sync_playwright() as p:
     browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium')
     for path in ['/prototype/','/demo/campus-demo.html']:
         page=browser.new_page(viewport={'width':390,'height':844})
+        page.set_default_timeout(7000)
         errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
         page.goto(base+path)
         assert '13:00' in page.locator('.badge').inner_text()
-        page.get_by_role('button',name='다른 장소로 이동',exact=True).click()
+        open_map(page)
         button=page.get_by_role('button',name='도서관 찾아가기',exact=True)
         assert '분' not in button.inner_text();button.click()
         assert '13:00' in page.locator('.lead').inner_text()
@@ -34,13 +36,12 @@ with sync_playwright() as p:
         assert '사진 출력 수량 협의' in page.locator('.discovery-notice').inner_text()
         page.get_by_role('button',name='← 뒤로',exact=True).click()
         # Activity selection remains reachable even when all paid travel is blocked.
-        page.get_by_role('button',name='오후 활동 고르기',exact=True).click()
-        page.get_by_role('button',name='합주 2시간',exact=True).click()
+        choose_activity(page, 'rehearsal')
         assert '16:00 시작' in page.locator('.page').inner_text()
         page.get_by_role('button',name='이 활동 진행',exact=True).click()
-        page.get_by_role('button',name='캠퍼스로 돌아가기',exact=True).click()
+        page.get_by_role('button',name='건물 밖으로 나와 주변을 둘러본다.',exact=True).click()
         assert '18:00' in page.locator('.badge').inner_text()
-        page.get_by_role('button',name='하루 마무리하기',exact=True).click()
+        end_day(page)
         page.get_by_role('button',name='2일차 시작하기',exact=True).click()
         assert '2일차' in page.locator('.badge').inner_text()
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
