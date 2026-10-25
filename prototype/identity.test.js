@@ -6,9 +6,9 @@ import {contact,displayName,hearGroupLine,presentationText} from './identity.js'
 import {personalMessage} from './social-reasoning.js';
 function newGame(){const s=clubGame();s.contacts={};return s;}
 
-test('club roster gives names without private acquaintance or automatic affinity',()=>{
- const s=clubGame();
- for(const id of Object.keys(s.npcs)){assert.equal(displayName(s,id),s.npcs[id].name);assert.equal(contact(s,id).introduced,false);assert.equal(s.relations[id+'>taei'],undefined);}
+test('new protagonist has no club membership or automatically known club names',()=>{
+ const s=clubGame();assert.deepEqual(s.memberships,{});
+ for(const id of Object.keys(s.npcs)){assert.equal(contact(s,id).nameLevel,'unknown');assert.equal(contact(s,id).introduced,false);assert.equal(s.relations[id+'>taei'],undefined);}
 });
 
 test('unfamiliar-person fixture does not reveal names, roles or existing friendship',()=>{

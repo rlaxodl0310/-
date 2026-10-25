@@ -8,6 +8,7 @@ button[aria-pressed="true"]{border-color:#9adad4;background:#2d5960;box-shadow:i
 .information-text{color:#81e6f4}.item-text{color:#ffd580}.discovery-notice{max-width:900px;margin:12px auto;padding:16px 22px;background:#142f3a;border:1px solid #81e6f466;border-left:4px solid #81e6f4;border-radius:12px;line-height:1.7}.discovery-notice p{margin:4px 0;overflow-wrap:anywhere}.discovery-notice .actions{margin-top:10px}.discovery-notice button{padding:9px 14px;font-size:14px}.list p{margin:4px 0}strong.information-text,strong.item-text{font-weight:700}@media(max-width:650px){.discovery-notice{margin:8px;padding:12px 14px}}
 .time-cost{display:block;margin-top:5px;color:#c1e4df;font-size:12px;font-weight:400}.time-cost::before{content:'◷ ';}.card .time-cost{margin-top:10px}
 .pace-summary{color:#b4c5c7;font-size:14px;line-height:1.7;border-left:2px solid #527c80;padding-left:12px;margin:0 0 24px}.time-summary{max-width:900px;margin:12px auto;padding:14px 20px;border:1px solid #82b8b855;border-radius:12px;background:#19383e;line-height:1.7}@media(max-width:650px){.time-summary{margin:8px}}
+.invitation-alert{max-width:900px;margin:12px auto;padding:12px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#273443;border:1px solid #b8c9f055;border-radius:12px}.invitation-alert span{color:#c5d2df;font-size:13px}@media(max-width:650px){.invitation-alert{margin:8px}}
 </style></head><body><main id="app"><section style="padding:32px;font-family:system-ui;line-height:1.8"><h1>캠퍼스의 하루</h1><p>게임 화면을 준비하고 있습니다.</p><p>이 안내가 계속 보이면 파일 미리보기 대신 다운로드한 HTML을 Chrome 또는 Edge에서 직접 열어주세요. GitHub 파일 보기 화면에서는 게임이 실행되지 않습니다.</p></section></main><noscript>게임 실행에는 JavaScript가 필요합니다. JavaScript를 허용하는 브라우저에서 열어주세요.</noscript><script>
 window.addEventListener('error', function(event) {
   var app = document.getElementById('app');
@@ -112,7 +113,7 @@ function presentationText(s,text){
 }
 function firstContact(s,id){
  const c=contact(s,id),p=identities[id];
- if(c.asked)return {intro:true,opening:{seoyeon:'성함은요? 제가 제 이름만 말했네요.',yeogyeong:'성함 여쭤봐도 돼요? 제가 아직 부원 이름을 다 외우지는 못해서요.',soyul:'성함이… 어떻게 되세요?'}[id],stage:'자기소개를 들었다. 아직 서로 인사를 마친 사이는 아니다.',options:[{id:'intro:introduce',label:'김태이예요. 이번에 복학해서 아직 낯선 얼굴이 많네요.'},{id:'intro:leave',label:'아, 지금은 일이 있어서요. 다음에 제대로 인사할게요.'}]};
+ if(c.asked)return {intro:true,opening:{seoyeon:'성함은요? 제가 제 이름만 말했네요.',yeogyeong:'성함 여쭤봐도 돼요? 아직 제대로 인사를 못 드렸죠.',soyul:'성함이… 어떻게 되세요?'}[id],stage:'자기소개를 들었다. 아직 서로 인사를 마친 사이는 아니다.',options:[{id:'intro:introduce',label:'김태이예요. 이번에 복학해서 아직 낯선 얼굴이 많네요.'},{id:'intro:leave',label:'아, 지금은 일이 있어서요. 다음에 제대로 인사할게요.'}]};
  return {intro:true,opening:{seoyeon:'안녕하세요. 혹시 뭐 찾으세요?',yeogyeong:'아, 잠시만요. 이것만 적고… 네, 무슨 일이세요?',soyul:'아… 안녕하세요.'}[id],stage:c.approaches>1?'시선이 다시 마주친다. 아직 서로 이름을 소개하지 않았다.':{seoyeon:'단발머리 학생이 고개를 들어 눈을 맞춘다.',yeogyeong:'수첩을 펼쳐놓은 학생이 펜을 잠시 내려놓는다.',soyul:'사진을 보던 학생이 휴대폰을 조금 내린다.'}[id],options:[{id:'intro:greet',label:c.nameLevel==='unknown'?'안녕하세요. 혹시 봉사단 분이세요?':`${displayName(s,id)} 씨 맞으세요? 저는 아직 인사를 못 드렸네요.`},{id:'intro:leave',label:'지금 바빠 보이네. 나중에 말을 걸자.'}]};
 }
 function respondIntroduction(state,id,choice){
@@ -120,7 +121,7 @@ function respondIntroduction(state,id,choice){
  const s=structuredClone(state);s.contacts??={};s.contacts[id]=contact(s,id);let text;
  if(choice==='intro:greet'){
   learnIdentity(s,id,'self-introduction');s.contacts[id].asked=true;
-  text={seoyeon:'네, 맞아요. 저는 한서연이에요. 저희 제대로 인사하는 건 처음이죠?',yeogyeong:'네. 저는 차여경이에요. 봉사단 재무 맡고 있어요. 혹시 이번 활동 때문에 오셨어요?',soyul:'네… 박소율이에요. 봉사단 분 맞으시죠?'}[id];
+  text={seoyeon:'네, 맞아요. 저는 한서연이에요. 저희 제대로 인사하는 건 처음이죠?',yeogyeong:'네. 저는 차여경이에요. 봉사단 재무 맡고 있어요. 혹시 이번 활동 때문에 오셨어요?',soyul:'네… 박소율이에요. 오늘 처음 오신 거예요?'}[id];
  }else if(choice==='intro:introduce'){
   introduce(s,id);text={seoyeon:'아, 태이 선배. 저는 여기서 준비하고 있었어요. 아직 시간 있으시면 잠깐 이야기해도 되고요.',yeogyeong:'김태이 선배… 네, 기억할게요. 저는 여기서 물품 확인하고 있었어요.',soyul:'아, 네. 태이 선배. 저는 사진 고르고 있었어요. 잠깐 보고 가셔도 돼요.'}[id];
   s.memory.push(`[${s.day??1}일차] ${identities[id].name}과 서로 이름을 소개했다.`);
@@ -360,7 +361,7 @@ const days={
   routes:{rehearsal:{name:'합주',duration:120,description:'연습실에서 합주하고 장비 위치를 익힙니다.',memory:'합주를 마쳤다. 연습실 장비 보관 위치를 확인했다.',knowledge:['연습실','장비 보관 위치']},volunteer:{name:'봉사 활동',duration:180,description:'물품 준비를 함께 합니다.',memory:'물품을 다시 세는 일을 도와 포장 누락을 확인했다.',knowledge:['봉사 준비실','물품 수량 불일치 사건']},explore:{name:'자유 탐색',duration:60,description:'학생회관에서 도서관까지 걸으며 길을 알아봅니다.',memory:'학생회관 주변을 걸으며 도서관으로 이어지는 길을 확인했다.',knowledge:['학생회관','도서관으로 이어지는 길']}},
   schedules:{afternoon:{yeogyeong:'hall',seoyeon:'hall',soyul:'hall'},evening:{yeogyeong:'hall',seoyeon:'hall',soyul:'hall'}}},
  2:{title:'어제의 말이 남은 자리',weekday:'금요일',event:'photo-selection',
-  routes:{work:{name:'개인 음악 작업',duration:120,description:'어제의 합주 경험을 바탕으로 자작곡 데모를 다듬습니다.',memory:'자작곡 데모를 다듬었다. 떠오른 이야기를 가사 메모로 남겼다.',knowledge:['작업 데모']},review:{name:'사진 정리 함께하기',duration:90,description:'도서관에서 소율과 봉사 사진을 고릅니다. 관계에 따라 대화가 달라집니다.',memory:'소율과 사진을 정리했다. 여경이 요청한 파일을 함께 분류했다.',knowledge:['봉사 사진 정리']},walk:{name:'대학가 산책',duration:60,description:'대학가를 걸으며 카페와 공연장 사이의 길을 살펴봅니다.',memory:'대학가에서 공연장 옆 출입구와 연결 통로를 확인했다.',knowledge:['대학가 연결 통로']}},
+  routes:{football:{name:'축구 동아리 체험 훈련',duration:90,description:'운동장에서 공개 체험 훈련에 참여합니다. 가입 여부와 관계없이 한 번 경험할 수 있습니다.',memory:'축구 동아리 공개 훈련에 참여했다. 운동장과 공용 장비 보관 장소를 살폈다.',knowledge:['운동장','축구 공용 장비 보관 위치']},work:{name:'개인 음악 작업',duration:120,description:'어제의 합주 경험을 바탕으로 자작곡 데모를 다듬습니다.',memory:'자작곡 데모를 다듬었다. 떠오른 이야기를 가사 메모로 남겼다.',knowledge:['작업 데모']},review:{name:'사진 정리 함께하기',duration:90,description:'도서관에서 소율과 봉사 사진을 고릅니다. 관계에 따라 대화가 달라집니다.',memory:'소율과 사진을 정리했다. 여경이 요청한 파일을 함께 분류했다.',knowledge:['봉사 사진 정리']},walk:{name:'대학가 산책',duration:60,description:'대학가를 걸으며 카페와 공연장 사이의 길을 살펴봅니다.',memory:'대학가에서 공연장 옆 출입구와 연결 통로를 확인했다.',knowledge:['대학가 연결 통로']}},
   schedules:{afternoon:{yeogyeong:'hall',seoyeon:'cafe',soyul:'library'},evening:{yeogyeong:'hall',seoyeon:'hall',soyul:'hall'}}},
  3:{title:'겹쳐진 약속',weekday:'토요일',event:'campus-showcase',
   routes:{backstage:{name:'공연 리허설 참여',duration:120,description:'합주 일정에 참여해 무대 준비를 돕습니다. 사진 전시 준비와 시간이 겹칩니다.',memory:'공연 리허설에 참여했다. 음악 작업과 무대 준비를 이어갔다.',knowledge:['공연 준비 경험']},exhibit:{name:'사진 전시 준비',duration:120,description:'봉사단의 작은 활동 사진 전시를 준비합니다. 리허설과 시간이 겹칩니다.',memory:'봉사단 사진 전시 준비를 함께했다. 사진을 고른 사람들의 이야기를 들었다.',knowledge:['사진 전시 준비']},shortcut:{name:'연결 통로로 장비 운반 돕기',duration:60,description:'미리 알아둔 길로 공연 장비를 옮깁니다. 짧은 시간에 물품을 전달할 수 있지만 다른 활동에 끝까지 참여하지는 못합니다.',memory:'미리 알아둔 연결 통로로 장비를 전달했다. 길을 알아둔 경험이 도움이 됐다.',knowledge:['연결 통로 활용'],requiresAny:['도서관으로 이어지는 길','대학가 연결 통로']}},
@@ -749,11 +750,87 @@ function finishSituation(s,encounter,engage){
  return s;
 }
 
+
+const clubs={
+ volunteer:{name:'봉사단',description:'지역 봉사와 물품 준비를 함께하는 동아리. 공개 활동을 체험한 뒤 가입할 수도 있다.',place:'학생회관',events:[{day:1,activity:'volunteer',label:'봉사 물품 준비'},{day:3,activity:'exhibit',label:'활동 사진 전시 준비'}]},
+ football:{name:'축구 동아리',description:'정기적으로 모여 축구를 한다. 선수는 남학생, 여성 부원은 매니저로 참여한다. 현재 시제품은 체험 활동만 제공한다.',place:'운동장',events:[{day:2,activity:'football',label:'축구 동아리 체험 훈련'}]},
+ music:{name:'음악 동아리',description:'합주와 공연 준비를 함께한다. 태이의 전공 합주와 동아리 가입은 별개다.',place:'합주실 · 공연장',events:[{day:3,activity:'backstage',label:'공연 리허설 돕기'}]}
+};
+function joinClub(state,id){
+ if(!clubs[id])throw new Error('알 수 없는 동아리입니다.');
+ const s=structuredClone(state);s.memberships??={};
+ if(s.memberships[id])throw new Error('이미 가입한 동아리입니다.');
+ s.memberships[id]={joinedDay:s.day};s.memory.push(`[${s.day}일차] ${clubs[id].name}에 가입했다.`);
+ if(id==='volunteer')for(const person of clubRoster)learnIdentity(s,person,'joined-club-notice');
+ const event=clubs[id].events.find(e=>e.day>s.day||(e.day===s.day&&s.phase==='afternoon'));
+ if(event)s.appointments.push({id:`club:${id}:${event.day}`,kind:'club',proposer:'club',club:id,day:event.day,phase:'afternoon',activity:event.activity,label:event.label,status:'offered'});
+ return s;
+}
+function invitationReady(s,id){
+ const intent=socialIntent(s,id);
+ return contact(s,id).introduced&&intent.mode!=='guarded'&&!intent.unresolved&&(s.relations[`${id}>taei`]?.tension??0)<3;
+}
+function targetDay(s){return s.day+1;}
+function npcOccupied(s,id,day){return s.appointments.some(a=>a.person===id&&a.day===day&&a.status==='pending');}
+function evaluateInvitations(state){
+ const s=structuredClone(state);s.invitationDecisions??={};
+ if(s.day>=3)return s;
+ for(const id of ['yeogyeong','seoyeon','soyul']){
+  const key=`npc:${id}:${s.day}`;
+  if(s.invitationDecisions[key]||!invitationReady(s,id))continue;
+  const r=s.relations[`${id}>taei`]??{},intent=socialIntent(s,id),day=targetDay(s);
+  // Different personalities ask for different things. Affection never overrides low trust.
+  const eligible=id==='yeogyeong'?r.familiarity>=3&&r.trust>=2:id==='seoyeon'?r.familiarity>=4&&r.trust>=3:intent.feelsSafe&&r.familiarity>=3;
+  if(!eligible||npcOccupied(s,id,day))continue;
+  const practical=id==='yeogyeong';
+  const activity=practical?(day===2?'review':'exhibit'):undefined;
+  const location=days[day].schedules.afternoon[id];
+  const label=practical?(day===2?'사진 정리 함께하기':'사진 전시 준비'):id==='seoyeon'?'잠깐 쉬며 이야기하기':'사진 이야기 이어가기';
+  const text=id==='yeogyeong'?'내일 준비할 게 좀 남았는데, 같이 해볼래요? 일정 괜찮을 때만요.':id==='seoyeon'?(r.affection>=3?'내일 잠깐 같이 있을래요? 바쁜 일이 있으면 다음에 봐도 되고요.':'내일 쉬는 시간에 이야기 좀 더 할래요? 시간 괜찮으면요.'):'아까 이야기, 내일 조금 더 해도 될까요? 사진도 같이 보고 싶어서요.';
+  const offer={id:key,kind:practical?'activity':'meeting',proposer:'npc',person:id,day,phase:'afternoon',activity,location,label,status:'offered',text};
+  s.appointments.push(offer);s.invitationDecisions[key]='offered';
+  s.messages.push({day:s.day,from:s.npcs[id].name,text,appointmentId:key});
+ }
+ return s;
+}
+function appointmentConflicts(s,offer){return s.appointments.filter(a=>a!==offer&&a.status==='pending'&&a.day===offer.day&&(a.phase??'afternoon')===(offer.phase??'afternoon')&&(!a.activity||!offer.activity||a.activity!==offer.activity));}
+function replyOffer(state,id,accept){
+ const s=structuredClone(state),a=s.appointments.find(x=>x.id===id);
+ if(!a||a.status!=='offered')throw new Error('지금 응답할 수 있는 제안이 아닙니다.');
+ if(a.day<s.day||(a.day===s.day&&s.phase==='evening'))throw new Error('이미 지난 제안입니다.');
+ a.status=accept?'pending':'declined';
+ s.memory.push(`[${s.day}일차] ${a.label} 제안을 ${accept?'수락했다.':'정중히 거절했다.'}`);
+ return s;
+}
+function suggestMeeting(state,id){
+ if(!contact(state,id).introduced||state.day>=3)throw new Error('먼저 인사를 나누거나 이후 일정이 있는 날에 제안해 주세요.');
+ const s=structuredClone(state);s.invitationDecisions??={};const key=`player:${id}:${s.day}`;
+ if(s.invitationDecisions[key])throw new Error('오늘은 이미 의사를 물었습니다. 답변을 존중해 주세요.');
+ const day=targetDay(s),intent=socialIntent(s,id),r=s.relations[`${id}>taei`]??{};
+ const willing=invitationReady(s,id)&&intent.invite&&r.trust>=2&&!npcOccupied(s,id,day);
+ s.invitationDecisions[key]=willing?'accepted':'refused';
+ const text=willing?'내일 잠깐이면 괜찮아요. 그때 이야기해요.':'내일은 따로 약속을 잡기 어려울 것 같아요. 다음에 봐요.';
+ if(willing)s.appointments.push({id:key,kind:'meeting',proposer:'player',person:id,day,phase:'afternoon',location:days[day].schedules.afternoon[id],label:'따로 만나 이야기하기',status:'pending',text});
+ s.messages.push({day:s.day,from:s.npcs[id].name,text});s.memory.push(`[${s.day}일차] ${s.npcs[id].name}에게 만남을 제안했고 ${willing?'수락받았다.':'상대가 이번에는 어렵다고 답했다.'}`);
+ return {state:s,accepted:willing};
+}
+function meetAppointments(state,person){
+ const s=structuredClone(state);
+ for(const a of s.appointments)if(a.kind==='meeting'&&a.status==='pending'&&a.person===person&&a.day===s.day&&a.phase===s.phase&&a.location===s.location){
+  a.status='kept';changeRelationship(s,person,'taei',{trust:1,familiarity:1});s.memory.push(`[${s.day}일차] ${s.npcs[person].name}과 만나 ${a.label} 약속을 지켰다.`);
+ }
+ return s;
+}
+function expireOffers(state){
+ const s=structuredClone(state);
+ for(const a of s.appointments)if(a.status==='offered'&&(a.day<s.day||(a.day===s.day&&s.phase==='evening')))a.status='expired';
+ return s;
+}
+
 function newGame(profile='acquaintance') {
  const s={version:6,clock:{minute:780},pace:{count:0,seen:{}},world:{stage:'campus'},eventState:{flags:{},plans:{},knowledge:{}},contacts:{},encounters:{},day:1,phase:'afternoon',choice:null,minutes:0,location:'campus',
   known:[],inventory:[],discoveries:[],messages:[],events:[],relations:{},npcs:{yeogyeong:{name:'차여경',location:'hall'},seoyeon:{name:'한서연',location:'hall'},soyul:{name:'박소율',location:'hall'}},
-  memory:[],dayHistory:[],appointments:[],lastResult:'',dialogue:{history:[],promises:{}}};
- for(const id of clubRoster){learnIdentity(s,id,'club-roster');s.contacts[id].playerNameKnown=true;}
+  memberships:{},invitationDecisions:{},memory:[],dayHistory:[],appointments:[],lastResult:'',dialogue:{history:[],promises:{}}};
  changeRelationship(s,'seoyeon','soyul',{familiarity:20,trust:12,affection:8});
  changeRelationship(s,'soyul','seoyeon',{familiarity:20,trust:12,affection:8});
  if(profile!=='acquaintance')for(const id of Object.keys(s.npcs))changeRelationship(s,id,'taei',profile==='close'?{familiarity:8,trust:5,affection:5}:{familiarity:6,trust:4,affection:0});
@@ -773,15 +850,15 @@ function act(state,choice,options={}){
  remember(s,route.memory);know(s,...route.knowledge);
  if(day===1&&choice==='volunteer'){
   changeRelationship(s,'yeogyeong','taei',{trust:1});
-  s.messages.push({day,from:'봉사단 단체방',text:'오늘 정리까지 도와주셔서 감사합니다.'});
+  s.messages.push({day,from:s.memberships?.volunteer?'봉사단 단체방':'교내 활동 게시판',text:'오늘 정리까지 도와주셔서 감사합니다.'});
  }else if(day===2&&choice==='review'){
   changeRelationship(s,'soyul','taei',{familiarity:2,trust:1});
   changeRelationship(s,'yeogyeong','taei',{trust:1});
   s.messages.push({day,from:'박소율',text:relationship(s,'soyul').familiarity>=4?'아까 같이 골라줘서 고마워. 여경이한테 파일 보냈어.':'오늘 사진 같이 봐주셔서 감사해요. 파일은 여경이한테 보냈어요.'});
  }else if(day===3&&choice==='exhibit'){
   for(const id of Object.keys(s.npcs))changeRelationship(s,id,'taei',{familiarity:1,trust:1});
-  s.messages.push({day,from:'봉사단 단체방',text:'사진 전시 준비를 마쳤습니다. 도와주셔서 감사합니다.'});
- }else s.messages.push({day,from:'봉사단 단체방',text:day===1?'오늘 활동 마쳤습니다. 참여하신 분들 수고하셨어요.':'오늘 일정 마쳤습니다. 모두 수고하셨어요.'});
+  s.messages.push({day,from:s.memberships?.volunteer?'봉사단 단체방':'교내 활동 게시판',text:'사진 전시 준비를 마쳤습니다. 도와주셔서 감사합니다.'});
+ }else s.messages.push({day,from:s.memberships?.volunteer?'봉사단 단체방':'교내 활동 게시판',text:day===1?'오늘 활동 마쳤습니다. 참여하신 분들 수고하셨어요.':'오늘 일정 마쳤습니다. 모두 수고하셨어요.'});
  s=activityEvents(s,choice,options.approach);
  if(day===2&&choice==='work'&&s.dayHistory.some(h=>h.choice==='rehearsal')){
   s.lastResult+=' 어제 합주에서 확인한 부분을 수정해 데모를 녹음했다.';remember(s,'어제의 합주를 바탕으로 데모를 녹음했다.');
@@ -794,11 +871,11 @@ function act(state,choice,options={}){
  }
  for(const appointment of s.appointments.filter(a=>a.day===day&&a.status==='pending')){
   const kept=appointment.activity===choice;appointment.status=kept?'kept':'broken';
-  changeRelationship(s,appointment.person,'taei',kept?{trust:2}:{trust:-1,tension:1});
-  remember(s,`${s.npcs[appointment.person].name}과 한 ${appointment.label} 약속을 ${kept?'지켰다.':'지키지 못했다.'}`);
+  if(appointment.person)changeRelationship(s,appointment.person,'taei',kept?{trust:2}:{trust:-1,tension:1});
+  remember(s,`${appointment.person?s.npcs[appointment.person].name+'과 한 ':''}${appointment.label} 약속을 ${kept?'지켰다.':'지키지 못했다.'}`);
  }
  for(const [id,npc] of Object.entries(s.npcs))npc.location=days[day].schedules.evening[id];
- return s;
+ return expireOffers(s);
 }
 function nextDay(state){
  if(state.phase!=='evening')throw new Error('오후 활동을 마친 뒤 하루를 마무리할 수 있습니다.');
@@ -808,9 +885,9 @@ function nextDay(state){
  s.clock={minute:780};s.pace={count:0,seen:{}};s.day++;s.phase='afternoon';s.choice=null;s.minutes=0;s.lastResult='';s.location='campus';s.dialogue.promises={};
  for(const [id,npc] of Object.entries(s.npcs))npc.location=days[s.day].schedules.afternoon[id];
  if(s.day===2){
-  s.messages.push({day:2,from:'봉사단 단체방',text:'오늘 여경은 학생회관에서 정리하고, 소율은 도서관에서 사진을 고릅니다. 서연은 오후에 대학가 카페에 있어요.'});
+  s.messages.push({day:2,from:s.memberships?.volunteer?'봉사단 단체방':'교내 활동 게시판',text:'오늘 여경은 학생회관에서 정리하고, 소율은 도서관에서 사진을 고릅니다. 서연은 오후에 대학가 카페에 있어요.'});
   for(const id of Object.keys(s.npcs)){const text=personalMessage(s,id);if(text)s.messages.push({day:2,from:s.npcs[id].name,text});}
- }else s.messages.push({day:3,from:'봉사단 단체방',text:'오늘 사진 전시 준비는 학생회관에서 진행합니다. 소율은 먼저 도서관에서 파일을 챙깁니다. 공연 리허설도 같은 오후에 있어요.'});
+ }else s.messages.push({day:3,from:s.memberships?.volunteer?'봉사단 단체방':'교내 활동 게시판',text:'오늘 사진 전시 준비는 학생회관에서 진행합니다. 소율은 먼저 도서관에서 파일을 챙깁니다. 공연 리허설도 같은 오후에 있어요.'});
  return phaseEvents(s);
 }
 function acceptAppointment(state,person){
@@ -823,10 +900,10 @@ function acceptAppointment(state,person){
  return s;
 }
 function cancelAppointment(state,person){
- const s=structuredClone(state),a=s.appointments.find(a=>a.person===person&&a.status==='pending');
+ const s=structuredClone(state),a=s.appointments.find(a=>(a.id===person||a.person===person)&&a.status==='pending');
  if(!a||(s.day===3&&s.phase==='evening'))throw new Error('취소할 수 있는 약속이 없습니다.');
- a.status='cancelled';remember(s,`${s.npcs[person].name}에게 미리 연락해 ${a.label} 약속을 취소했다.`);
- s.messages.push({day:s.day,from:s.npcs[person].name,text:'미리 알려줘서 고마워요. 그럼 이번 일정은 다른 사람들과 진행할게요.'});
+ a.status='cancelled';remember(s,`${a.person?s.npcs[a.person].name: '동아리 담당자'}에게 미리 연락해 ${a.label} 약속을 취소했다.`);
+ s.messages.push({day:s.day,from:a.person?s.npcs[a.person].name:'동아리 안내',text:'미리 알려줘서 고마워요. 그럼 이번 일정은 다른 사람들과 진행할게요.'});
  return s;
 }
 function save(state){return JSON.stringify(state);}
@@ -848,6 +925,7 @@ function restore(raw){
  }
  if(s?.version!==6||!s.world||!s.eventState||!s.encounters||!s.contacts||!Number.isInteger(s.day)||s.day<1||s.day>3||!['afternoon','evening'].includes(s.phase)||!Array.isArray(s.memory)||!Array.isArray(s.known)||!Array.isArray(s.messages)||!Array.isArray(s.events)||!Array.isArray(s.dayHistory)||!Array.isArray(s.appointments)||!s.npcs||!s.relations||!Array.isArray(s.dialogue?.history)||!s.dialogue?.promises)throw new Error('지원하지 않는 저장 파일입니다.');
  s.clock??={minute:s.phase==='evening'?1140:780};
+ s.memberships??={};s.invitationDecisions??={};
  s.pace??={count:0,seen:{}};
  s.inventory??=[];s.discoveries??=[];
  return s;
@@ -918,6 +996,8 @@ function arrive(state,location,spot='entry'){
   encounter.condition='caption-request';encounter.text='자료실 앞에서 막 출력된 종이를 맞춰 쥔 박소율과 마주친다. 어젯밤 메시지에서 말했던 사진 설명이 맨 위에 보인다. 소율은 복사기 앞을 비켜서며 종이를 다시 살핀다.';
   encounter.action='인쇄물을 건네며 묻는다. “어제 이야기한 문구, 이거예요?”';encounter.prefix='네, 어제 보낸 그거예요. ';
  }
+ const meeting=s.appointments.find(a=>a.kind==='meeting'&&a.status==='pending'&&a.person===person&&a.day===s.day&&a.phase===s.phase&&a.location===s.location);
+ if(meeting){encounter.text+=' 오늘 이곳에서 잠깐 이야기하기로 했던 약속이 떠오른다.';encounter.action='하던 일을 방해하지 않게 가까이 가 인사한다. “오늘 잠깐 보기로 했죠. 지금 괜찮아요?”';encounter.prefix='네, 잠깐 괜찮아요. ';}
  if(resuming){encounter.text=`${content.text} 아까 나누던 이야기가 잠깐 떠오른다.`;encounter.action='아까 멈춘 이야기의 뒷부분을 조심스럽게 꺼낸다.';encounter.prefix='';}
  s.encounters[key]??={day:s.day,phase:s.phase,person,group,resolved:false};
  observeSituation(s,encounter);return {state:s,encounter};
@@ -929,13 +1009,14 @@ function resolveEncounter(state,encounter,engage){
  if(encounter.group?!(present.includes('seoyeon')&&present.includes('soyul')):!present.includes(encounter.person))throw new Error('지금 그 장소에서 일어나는 장면이 아닙니다.');
  record.resolved=true;record.outcome=engage?'engaged':'passed';finishSituation(s,encounter,engage);
  if(!engage||encounter.group)return {state:s,result:null,group:engage&&encounter.group};
+ const firstExchange=!contact(s,encounter.person).introduced;
  introduce(s,encounter.person,'incidental-exchange');
  // The interaction comes from the encountered action, not a character-selection menu.
  const opened=openConversation(s,encounter.person);
  const next=dialogue(opened.state,encounter.person);
  const response=opened.result?opened:next.scene?{state:opened.state,result:{text:next.opening,stage:next.stage}}:next.options.some(o=>o.id==='personal')?respond(opened.state,encounter.person,'personal'):{state:opened.state,result:{text:next.opening,stage:next.stage}};
- response.result={...response.result,playerLine:encounter.action,text:(socialIntent(s,encounter.person).mode==='guarded'?'':encounter.prefix??'')+response.result.text};
- return response;
+ response.result={...response.result,playerLine:encounter.action+(firstExchange?' “아, 저는 김태이예요. 이번에 복학했어요.”':''),text:(firstExchange?`저는 ${s.npcs[encounter.person].name}이에요. `:'')+(socialIntent(s,encounter.person).mode==='guarded'?'':encounter.prefix??'')+response.result.text};
+ response.state=meetAppointments(response.state,encounter.person);return response;
 }
 
 
@@ -1023,11 +1104,17 @@ function portrait(column){return `<div class="portrait" style="--column:${column
 function page(title,body,back='campus'){return `<section class="page"><header>${btn('← 뒤로','go',back)}<h1>${title}</h1></header>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}${state.day===1&&state.phase==='afternoon'?`<p class="pace-summary">${paceSummary(state)}</p>`:''}${body}<p class="footnote">대학생활 3일 시제품 · 사건·요일·일정은 검증용 예시입니다.</p></section>`;}
 function timeLabel(){return `${state.day}일차 · ${days[state.day].weekday} · ${state.day===1?clockLabel(state)+' · ':''} ${state.phase==='evening'?'저녁':'오후'}`;}
 function pending(){return state.appointments.filter(a=>a.status==='pending');}
-function commitments(){return pending().map(a=>`<article class="list">${esc(nameOf(a.person))} · ${a.day}일차 오후 · ${a.label} ${btn('미리 연락해 취소','cancelAppointment',a.person)}</article>`).join('')||'<p class="muted">예정된 약속이 없습니다.</p>';}
+const appointmentStatuses={offered:'응답 전',pending:'참석 예정',declined:'거절함',cancelled:'미리 취소함',kept:'지킴',broken:'지키지 못함',expired:'제안 기한 지남'};
+function appointmentCard(a){
+ const who=a.person?nameOf(a.person):clubs[a.club]?.name??'동아리';
+ const conflicts=appointmentConflicts(state,a);
+ return `<article class="list" data-appointment-id="${esc(a.id??a.person??'legacy')}"><strong>${esc(who)} · ${esc(a.label)}</strong><p>${a.day}일차 오후${a.location?' · '+esc(locations[a.location]??a.location):''} · ${appointmentStatuses[a.status]??a.status}</p><p class="muted">${a.proposer==='npc'?'상대가 먼저 제안':a.proposer==='club'?'가입한 동아리의 활동 안내':a.proposer==='player'?'태이가 제안':'대화에서 잡은 약속'}</p>${a.text?`<p>${esc(a.text)}</p>`:''}${['offered','pending'].includes(a.status)&&conflicts.length?`<p class="notice">${conflicts.map(c=>esc(c.label)).join(', ')} 일정과 시간이 겹칠 수 있습니다. 같은 오후의 긴 활동은 하나만 선택할 수 있습니다.</p>`:''}<div class="actions">${a.status==='offered'?btn(conflicts.length?'겹치는 일정 확인 후 수락':'수락하기','acceptOffer',a.id)+btn('정중히 거절하기','declineOffer',a.id):a.status==='pending'?btn('미리 연락해 취소','cancelAppointment',a.id??a.person):''}</div></article>`;
+}
+function commitments(){return state.appointments.map(appointmentCard).join('')||'<p class="muted">아직 약속이나 제안이 없습니다.</p>';}
 function atPlace(){return locations[state.location]?state.location:'hall';}
 function render(){
  const evening=state.phase==='evening',day=days[state.day],routes=availableRoutes(state);
- if(screen==='campus')app.innerHTML=`<section class="explore"><div class="top"><span class="badge">${timeLabel()}</span><nav>${btn('휴대폰','phone')}${btn('메뉴','go','menu')}</nav></div>${portrait(0)}<div class="prompt"><span>${day.title}</span>${btn('학생회관 들어가기','visit','hall')}${state.day===1&&!evening?btn('오후 활동 고르기','go','activities'):''}${btn('다른 장소로 이동','go','travel')}${evening?btn(state.day<3?'하루 마무리하기':'3일의 기록 보기','go','dayEnd'):''}</div></section>`;
+ if(screen==='campus')app.innerHTML=`<section class="explore"><div class="top"><span class="badge">${timeLabel()}</span><nav>${btn('휴대폰','phone')}${btn('메뉴','go','menu')}</nav></div>${portrait(0)}<div class="prompt"><span>${day.title}</span>${btn('학생회관 들어가기','visit','hall')}${btn('동아리 살펴보기','go','clubs')}${state.day===1&&!evening?btn('오후 활동 고르기','go','activities'):''}${btn('다른 장소로 이동','go','travel')}${evening?btn(state.day<3?'하루 마무리하기':'3일의 기록 보기','go','dayEnd'):''}</div></section>`;
  if(screen==='travel')app.innerHTML=page('캠퍼스 이동',`<p class="muted">인물은 각자의 일정에 따라 장소를 옮깁니다. 1일차에는 여러 이동·탐색·대화를 묶어 약 30분이 한 번에 흐릅니다. 짧은 대답마다 시간이 차감되지는 않습니다. 16:00부터 오후 활동을 시작하며, 메뉴 확인에는 시간이 들지 않습니다. 2~3일차는 기존 오후·저녁 단위로 진행합니다.</p><div class="grid">${Object.entries(locations).map(([id,label])=>`<button class="card" aria-label="${label} 찾아가기" data-action="visit" data-value="${id}" ${!canSpendTime(state,timeCost(state,'visit',id))?'disabled':''}><strong>${label}</strong>찾아가기</button>`).join('')}</div>`);
  if(screen==='place'){
   const here=atPlace();
@@ -1039,18 +1126,20 @@ function render(){
  if(screen==='dialogue'){
   const d=dialogue(state,speaker),p=people[speaker];
   const invitation=reply?.choice==='invite'&&!state.appointments.some(a=>a.person===speaker&&a.status==='pending');
-  app.innerHTML=`<section class="conversation"><header class="top">${btn('← 대화 마치기','go','place')}<span class="badge">${timeLabel()} · ${locations[atPlace()]}</span></header><div class="conversation-body">${portrait(p.column)}<article class="dialogue-panel"><p class="eyebrow">${esc(nameOf(screen==='group'?line.person:speaker))}</p>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}<p class="muted">${narrative(reply?.stage??d.stage)}</p>${reply?.playerLine?`<p class="player-line"><span>김태이</span>${narrative(reply.playerLine)}</p>`:''}<blockquote>${esc(reply?.text??d.opening)}</blockquote>${reply?.followup?`<p class="inner-line">${esc(reply.followup)}</p>`:''}<div class="dialogue-options">${invitation?btn('내일 같이 하기로 약속한다','acceptAppointment',speaker):''}${d.options.map(o=>btn(narrative(o.label),'answer',o.id)).join('')}</div><div class="actions">${d.scene?btn('다른 이야기로 넘어가기','endTopic'):''}${btn('활동 살펴보기','go','activities')}</div></article></div></section>`;
+  app.innerHTML=`<section class="conversation"><header class="top">${btn('← 대화 마치기','go','place')}<span class="badge">${timeLabel()} · ${locations[atPlace()]}</span></header><div class="conversation-body">${portrait(p.column)}<article class="dialogue-panel"><p class="eyebrow">${esc(nameOf(screen==='group'?line.person:speaker))}</p>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}<p class="muted">${narrative(reply?.stage??d.stage)}</p>${reply?.playerLine?`<p class="player-line"><span>김태이</span>${narrative(reply.playerLine)}</p>`:''}<blockquote>${esc(reply?.text??d.opening)}</blockquote>${reply?.followup?`<p class="inner-line">${esc(reply.followup)}</p>`:''}<div class="dialogue-options">${invitation?btn('내일 같이 하기로 약속한다','acceptAppointment',speaker):''}${d.options.map(o=>btn(narrative(o.label),'answer',o.id)).join('')}</div><div class="actions">${d.scene?btn('다른 이야기로 넘어가기','endTopic'):''}${state.day<3&&contact(state,speaker).introduced?btn('따로 만날 시간 물어보기','suggestMeeting',speaker):''}${btn('활동 살펴보기','go','activities')}</div></article></div></section>`;
  }
  if(screen==='group'){
   const line=groupLines[groupIndex],p=people[line.person],end=groupIndex===groupLines.length-1;
   app.innerHTML=`<section class="conversation"><header class="top">${btn('← 대화 마치기','go','place')}<span class="badge">${timeLabel()} · 함께 나누는 대화</span></header><div class="conversation-body">${portrait(p.column)}<article class="dialogue-panel"><p class="eyebrow">${esc(nameOf(screen==='group'?line.person:speaker))}</p><p class="muted">${narrative(`${nameOf('seoyeon')}과 ${nameOf('soyul')}이 휴대폰의 사진을 함께 보고 있다.`)}</p><blockquote>${esc(line.text)}</blockquote><div class="dialogue-options">${!end?btn('다음 대화','groupNext'):groupAnswered?btn('대화 마치기','go','place'):[btn('천천히 골라요. 아직 시간 있어요.','groupAnswer','wait'),btn('나도 같이 봐도 돼요?','groupAnswer','include'),btn(contact(state,'seoyeon').nameLevel==='unknown'?'옆에 있는 분이 먼저 골라주면 빠르겠네.':'서연 씨가 먼저 골라주면 빠르겠네.','groupAnswer','speakFor')].join('')}</div></article></div></section>`;
  }
- if(screen==='activities')app.innerHTML=page(`${state.day}일차 오후 활동`,evening?'<p>이미 오후 활동을 완료했습니다.</p>':`<p class="muted">${Object.values(state.dialogue.promises).includes('pending')?'봉사 참석을 약속한 상태입니다. 다른 활동을 택하면 약속을 지키지 못합니다.':'활동 하나를 선택하면 저녁으로 이동합니다. 1일차 오후 활동은 16:00에 시작하며, 일찍 선택하면 시작 시각까지 건너뜁니다.'} 선택하지 않은 장소에서도 일정은 진행됩니다.</p>${pending().filter(a=>a.day===state.day).map(a=>`<p class="notice">${esc(nameOf(a.person))}과 ${a.label} 약속이 있습니다.</p>`).join('')}<div class="grid">${routes.map(r=>`<button class="card" data-action="select" data-value="${r.id}" ${r.locked?'disabled':''}><strong>${r.name}</strong>${duration(r.duration)}${r.locked?'<p>이전 탐색으로 연결 통로를 알아야 합니다.</p>':''}</button>`).join('')}</div>`,'place');
- if(screen==='detail'&&selected){const r=routes.find(r=>r.id===selected);if(r)app.innerHTML=page(r.name,`<p class="lead">${narrative(r.description)}</p><p>소요 시간: ${duration(r.duration)}${state.day===1?' · 16:00 시작 (일찍 선택하면 시작 시각까지 대기)':''}</p>${eventApproaches(state,selected).length?`<h2>어떻게 참여할까?</h2><div class="dialogue-options">${eventApproaches(state,selected).map(o=>`<button data-action="plan" data-value="${o.id}" aria-pressed="${(state.eventState?.plans?.[`${state.day}:${selected}`]??'listen')===o.id}">${o.label}</button>`).join('')}</div>`:''}<p class="muted">실행하면 저녁으로 이동합니다. 다른 활동에 직접 참여할 수 없습니다.${selected!=='volunteer'&&Object.values(state.dialogue.promises).includes('pending')?' 봉사 참석 약속을 지키지 못하게 됩니다.':''}</p>${pending().filter(a=>a.day===state.day&&a.activity!==selected).map(a=>`<p class="notice">${esc(nameOf(a.person))}과 한 ${a.label} 약속을 지키지 못하게 됩니다. 일정 화면에서 먼저 연락해 취소할 수 있습니다.</p>`).join('')}<div class="actions">${btn('이 활동 진행','act',selected)}${btn('취소','go','activities')}</div>`,'activities');}
+ if(screen==='activities')app.innerHTML=page(`${state.day}일차 오후 활동`,evening?'<p>이미 오후 활동을 완료했습니다.</p>':`<p class="muted">${Object.values(state.dialogue.promises).includes('pending')?'봉사 참석을 약속한 상태입니다. 다른 활동을 택하면 약속을 지키지 못합니다.':'활동 하나를 선택하면 저녁으로 이동합니다. 1일차 오후 활동은 16:00에 시작하며, 일찍 선택하면 시작 시각까지 건너뜁니다.'} 선택하지 않은 장소에서도 일정은 진행됩니다.</p>${pending().filter(a=>a.day===state.day).map(a=>`<p class="notice">${esc(a.person?nameOf(a.person):clubs[a.club]?.name??'동아리')}과 ${a.label} 약속이 있습니다.</p>`).join('')}<div class="grid">${routes.map(r=>`<button class="card" data-action="select" data-value="${r.id}" ${r.locked?'disabled':''}><strong>${r.name}</strong>${duration(r.duration)}${r.locked?'<p>이전 탐색으로 연결 통로를 알아야 합니다.</p>':''}</button>`).join('')}</div>`,'place');
+ if(screen==='detail'&&selected){const r=routes.find(r=>r.id===selected);if(r)app.innerHTML=page(r.name,`<p class="lead">${narrative(r.description)}</p><p>소요 시간: ${duration(r.duration)}${state.day===1?' · 16:00 시작 (일찍 선택하면 시작 시각까지 대기)':''}</p>${eventApproaches(state,selected).length?`<h2>어떻게 참여할까?</h2><div class="dialogue-options">${eventApproaches(state,selected).map(o=>`<button data-action="plan" data-value="${o.id}" aria-pressed="${(state.eventState?.plans?.[`${state.day}:${selected}`]??'listen')===o.id}">${o.label}</button>`).join('')}</div>`:''}<p class="muted">실행하면 저녁으로 이동합니다. 다른 활동에 직접 참여할 수 없습니다.${selected!=='volunteer'&&Object.values(state.dialogue.promises).includes('pending')?' 봉사 참석 약속을 지키지 못하게 됩니다.':''}</p>${pending().filter(a=>a.day===state.day&&a.activity!==selected).map(a=>`<p class="notice">${esc(a.person?nameOf(a.person):clubs[a.club]?.name??'동아리')}과 한 ${a.label} 약속을 지키지 못하게 됩니다. 일정 화면에서 먼저 연락해 취소할 수 있습니다.</p>`).join('')}<div class="actions">${btn('이 활동 진행','act',selected)}${btn('취소','go','activities')}</div>`,'activities');}
  if(screen==='result')app.innerHTML=page('활동 완료',`<p class="lead">${narrative(state.lastResult)}</p><p class="muted">${state.minutes}분이 지났습니다. 새 메시지가 도착했습니다.</p><div class="actions">${btn('캠퍼스로 돌아가기','go','campus')}${btn('학생회관으로 돌아간다','visit','hall')}${btn(state.day<3?'하루 마무리하기':'3일의 기록 보기','go','dayEnd')}</div>`);
- if(screen==='phone')app.innerHTML=page('휴대폰',`<div class="grid">${[['일정','schedule'],['메시지','messages'],['알게 된 정보 · 소지품','discoveries'],['지도','map'],['일지','journal']].map(([t,id])=>`<button class="card" data-action="go" data-value="${id}"><strong>${t}</strong></button>`).join('')}</div>`,returnTo);
- if(screen==='schedule')app.innerHTML=page('오늘의 일정',`<p>${timeLabel()} · ${day.title}</p>${routes.map(r=>`<div class="list">${r.name} · ${duration(r.duration)} ${state.choice===r.id?'— 완료':''}${r.locked?' — 경로 미확인':''}</div>`).join('')}<h2>잡아둔 약속</h2>${commitments()}`,'phone');
- if(screen==='messages')app.innerHTML=page('메시지',state.messages.length?state.messages.map(m=>`<article class="list"><strong>${esc(Object.entries(people).find(([,p])=>p.name===m.from)?nameOf(Object.entries(people).find(([,p])=>p.name===m.from)[0]):m.from)} · ${m.day??1}일차</strong><p>${esc(m.text)}</p></article>`).join(''):'<p class="muted">새 메시지가 없습니다.</p>','phone');
+ if(screen==='phone')app.innerHTML=page('휴대폰',`<div class="grid">${[['일정','schedule'],['메시지','messages'],['알게 된 정보 · 소지품','discoveries'],['동아리','clubs'],['지도','map'],['일지','journal']].map(([t,id])=>`<button class="card" data-action="go" data-value="${id}"><strong>${t}</strong></button>`).join('')}</div>`,returnTo);
+ if(screen==='schedule')app.innerHTML=page('오늘의 일정',`<p>${timeLabel()} · ${day.title}</p>${routes.map(r=>`<div class="list">${r.name} · ${duration(r.duration)} ${state.choice===r.id?'— 완료':''}${r.locked?' — 경로 미확인':''}</div>`).join('')}<h2>약속 제안 · 참석 일정</h2>${commitments()}`,'phone');
+ if(screen==='clubs')app.innerHTML=page('동아리 살펴보기',`<p class="muted">${Object.keys(state.memberships??{}).length?'가입한 동아리와 다른 곳의 안내를 확인할 수 있습니다.':'복학 후 아직 가입한 동아리는 없습니다. 관심 있는 곳의 안내를 읽고 직접 가입할 수 있습니다.'} 가입과 활동 참석은 별개입니다.</p><div class="grid">${Object.entries(clubs).map(([id,c])=>`<button class="card" data-action="clubDetail" data-value="${id}"><strong>${esc(c.name)}</strong>${state.memberships?.[id]?'가입 중':'모집 안내 보기'} · ${esc(c.place)}</button>`).join('')}</div>`);
+ if(screen==='clubDetail'&&clubs[selected]){const c=clubs[selected];app.innerHTML=page(c.name,`<p class="lead">${esc(c.description)}</p><p>주요 활동 장소 · ${esc(c.place)}</p><p class="muted">가입하면 예정된 공개 활동을 약속 제안으로 안내받습니다. 수락해야 참석 약속이 됩니다. 공개 체험 활동은 가입 전에도 참여할 수 있습니다.</p>${state.memberships?.[selected]?'<p class="information-text">가입 중입니다. 활동 참석 여부는 휴대폰 일정에서 정할 수 있습니다.</p>':btn('이 동아리에 가입하기','joinClub',selected)}<div class="actions">${btn('약속과 일정 보기','go','schedule')}</div>`,'clubs');}
+ if(screen==='messages')app.innerHTML=page('메시지',state.messages.length?state.messages.map(m=>`<article class="list"><strong>${esc(Object.entries(people).find(([,p])=>p.name===m.from)?nameOf(Object.entries(people).find(([,p])=>p.name===m.from)[0]):m.from)} · ${m.day??1}일차</strong><p>${narrative(m.text)}</p>${m.appointmentId?btn('약속 제안 보기','go','schedule'):''}</article>`).join(''):'<p class="muted">새 메시지가 없습니다.</p>','phone');
  if(screen==='discoveries')app.innerHTML=page('알게 된 정보 · 소지품',`<p class="muted">직접 확인하거나 전해 들은 정보와 실제로 보유한 물건을 구분합니다. 보관 위치를 알았다고 물건을 얻은 것은 아닙니다.</p><h2 class="information-text">◇ 알게 된 정보 · ${state.known.length}개</h2>${state.known.map(x=>{const record=(state.discoveries??[]).find(d=>d.kind==='information'&&d.name===x);return `<article class="list"><strong class="information-text">${esc(x)}</strong><p class="muted">${record?`${record.day}일차 · ${record.phase==='evening'?'저녁':'오후'} · ${esc(locations[record.location]??'활동 중')}에 확인`:'이전 진행에서 확인한 정보'}${record?.action?`<br>행동: ${esc(record.action)}`:''}</p></article>`;}).join('')||'<p class="muted">아직 확인한 정보가 없습니다.</p>'}<h2 class="item-text">▣ 소지품</h2>${(state.inventory??[]).map(i=>`<article class="list item-text">${esc(i.name)} × ${i.quantity}</article>`).join('')||'<p class="muted">획득한 아이템이 없습니다.</p>'}`,'phone');
  if(screen==='map')app.innerHTML=page('알고 있는 정보',`<p class="muted">활동과 대화에서 확인한 장소와 정보입니다. 직접 본 것과 전해 들은 경위는 일지에 남습니다.</p>${state.known.map(x=>`<div class="list">${narrative(x)}</div>`).join('')||'<p>아직 기록된 장소가 없습니다.</p>'}`,'phone');
  if(screen==='journal')app.innerHTML=page('지금까지의 기록',state.memory.map(x=>`<div class="list">${narrative(x)}</div>`).join('')||'<p class="muted">아직 기록이 없습니다.</p>','phone');
@@ -1060,6 +1149,7 @@ function render(){
  }
  if(screen==='menu')app.innerHTML=page('메뉴',`<p>김태이 · ${timeLabel()}</p><div class="grid">${[1,2,3].map(i=>`<article class="list"><strong>저장 슬롯 ${i}</strong><div class="actions">${btn('저장','save',i)}${btn('불러오기','load',i)}</div></article>`).join('')}</div>${btn('새 하루 시작','go','reset')}<hr><p class="muted">관계별 대화 비교 · 아래 버튼은 1일차부터 새 예시를 시작합니다. 현재 진행은 초기화되며 저장 슬롯은 유지됩니다.</p><div class="actions">${btn('서먹한 사이','scenario','acquaintance')}${btn('친한 동료','scenario','friend')}${btn('호감이 쌓인 사이','scenario','close')}</div>`);
  if(screen==='reset')app.innerHTML=page('새로 시작',`<p>진행을 1일차로 초기화합니다. 기존 저장 슬롯은 유지합니다.</p>${btn('새로 시작','reset')}`,'menu');
+ const offers=state.appointments.filter(a=>a.status==='offered');if(offers.length&&screen!=='schedule')app.insertAdjacentHTML('afterbegin',`<section class="invitation-alert">${btn(`약속 제안 ${offers.length}개 확인`,'go','schedule')}<span>수락하기 전에는 참석 약속이 아닙니다.</span></section>`);
  if(paceNotice)app.insertAdjacentHTML('afterbegin',`<section class="time-summary" role="status">${esc(paceNotice)}</section>`);
  if(gains.length)app.insertAdjacentHTML('afterbegin',`<section class="discovery-notice" aria-label="새로 얻은 정보와 아이템"><div role="status" aria-live="polite">${gains.map(g=>`<p class="${g.kind==='item'?'item-text':'information-text'}"><strong>${g.kind==='item'?'▣ 아이템 획득':'◇ 새 정보'}</strong> · ${esc(g.name)}${g.quantity?` × ${g.quantity}`:''}</p>`).join('')}</div><div class="actions">${btn('정보 · 소지품 확인','go','discoveries')}${btn('확인','dismissDiscoveries')}</div></section>`);
 }
@@ -1085,12 +1175,17 @@ app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return
  if(a==='answer'){const next=respond(state,speaker,v);state=next.state;reply=next.result;if(reply.leave){reply=null;screen='place';}}
  if(a==='endTopic'){state=endTopic(state,speaker);reply=null;}
  if(a==='groupNext'){groupIndex++;hearGroupLine(state,groupLines[groupIndex]);}
- if(a==='groupAnswer'){for(const id of ['seoyeon','soyul'])introduce(state,id,'incidental-group-exchange');const next=respondGroup(state,v);state=next.state;groupLines=next.lines;groupIndex=0;groupAnswered=true;hearGroupLine(state,groupLines[0]);}
+ if(a==='groupAnswer'){for(const id of ['seoyeon','soyul'])introduce(state,id,'incidental-group-exchange');const next=respondGroup(state,v);state=next.state;for(const id of ['seoyeon','soyul'])state=meetAppointments(state,id);groupLines=next.lines;groupIndex=0;groupAnswered=true;hearGroupLine(state,groupLines[0]);}
  if(a==='acceptAppointment'){state=acceptAppointment(state,v);note='내일 약속을 잡았습니다. 겹치는 약속은 휴대폰 일정에서 확인하고 미리 취소할 수 있습니다.';}
  if(a==='cancelAppointment'){state=cancelAppointment(state,v);note='미리 연락해 약속을 취소했습니다.';}
  if(a==='nextDay'){state=nextDay(state);screen='campus';reply=null;selected=null;encounter=null;returnTo='campus';}
  if(a==='scenario'){const arrived=arrive(newGame(v),'hall');state=arrived.state;encounter=arrived.encounter;reply=null;screen=encounter?'encounter':'place';}
  if(a==='phone'){returnTo=screen;screen='phone';}
+ if(a==='clubDetail'){selected=v;screen='clubDetail';}
+ if(a==='joinClub'){state=joinClub(state,v);note='가입했습니다. 남아 있는 활동 제안이 있다면 일정에서 참석 여부를 선택해 주세요.';}
+ if(a==='acceptOffer'){state=replyOffer(state,v,true);note='약속을 수락했습니다. 겹치는 일정은 미리 연락해 취소할 수 있습니다.';}
+ if(a==='declineOffer'){state=replyOffer(state,v,false);note='정중히 거절했습니다. 수락 전의 거절은 약속 불이행으로 처리하지 않습니다.';}
+ if(a==='suggestMeeting'){const result=suggestMeeting(state,v);state=result.state;note=result.accepted?'상대가 수락했습니다. 휴대폰 일정에 기록했습니다.':'상대가 이번에는 어렵다고 답했습니다. 같은 날 다시 조르지는 않기로 합니다.';}
  if(a==='select'){selected=v;screen='detail';}
  if(a==='plan')state=planEvent(state,selected,v);
  if(a==='act'){state=act(state,v);screen='result';}
@@ -1101,6 +1196,7 @@ app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return
   const paced=paceAction(before,state,{action:a,value:v,from:fromScreen,to:screen,person:fromScreen==='group'?'group':speaker});state=paced.state;
   if(paced.minutes)paceNotice=`${a==='wait'?'잠시 쉬고 나니':'여러 일을 마치고 나니'} 어느새 ${clockLabel(state)}. 약 ${paced.minutes}분이 지났다.`;
  }
+ if(!['load','save','reset'].includes(a))state=evaluateInvitations(state);
  if(a==='dismissDiscoveries')gains=[];
  if(['load','reset','scenario'].includes(a))gains=[];else {const found=recordDiscoveries(before,state,b.textContent.trim());if(found.length)gains=found;}
 }catch(err){note=err.message;}render();});

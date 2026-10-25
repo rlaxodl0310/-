@@ -24,7 +24,7 @@ with sync_playwright() as p:
         for _ in range(2):page.get_by_role('button',name='잠시 쉬며 시간을 보낸다',exact=True).click()
         assert '14:00' in page.locator('.lead').inner_text()
         page.get_by_role('button',name='반납대와 자료실을 둘러본다',exact=True).click()
-        assert '박소율' in page.locator('.lead').inner_text()
+        assert '사진을 살펴보는 학생' in page.locator('.lead').inner_text()
         page.locator('[data-action="encounter"][data-value="engage"]').click()
         assert '14:00' in page.locator('.badge').inner_text()
         page.get_by_role('button',name='← 대화 마치기',exact=True).click()

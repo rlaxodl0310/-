@@ -1,3 +1,4 @@
+import {meetAppointments} from './appointments.js';
 import {observeSituation,finishSituation} from './event-engine.js';
 import {eventKey} from './event-view.js';
 import {presentPeople} from './days.js';
@@ -69,6 +70,8 @@ export function arrive(state,location,spot='entry'){
   encounter.condition='caption-request';encounter.text='자료실 앞에서 막 출력된 종이를 맞춰 쥔 박소율과 마주친다. 어젯밤 메시지에서 말했던 사진 설명이 맨 위에 보인다. 소율은 복사기 앞을 비켜서며 종이를 다시 살핀다.';
   encounter.action='인쇄물을 건네며 묻는다. “어제 이야기한 문구, 이거예요?”';encounter.prefix='네, 어제 보낸 그거예요. ';
  }
+ const meeting=s.appointments.find(a=>a.kind==='meeting'&&a.status==='pending'&&a.person===person&&a.day===s.day&&a.phase===s.phase&&a.location===s.location);
+ if(meeting){encounter.text+=' 오늘 이곳에서 잠깐 이야기하기로 했던 약속이 떠오른다.';encounter.action='하던 일을 방해하지 않게 가까이 가 인사한다. “오늘 잠깐 보기로 했죠. 지금 괜찮아요?”';encounter.prefix='네, 잠깐 괜찮아요. ';}
  if(resuming){encounter.text=`${content.text} 아까 나누던 이야기가 잠깐 떠오른다.`;encounter.action='아까 멈춘 이야기의 뒷부분을 조심스럽게 꺼낸다.';encounter.prefix='';}
  s.encounters[key]??={day:s.day,phase:s.phase,person,group,resolved:false};
  observeSituation(s,encounter);return {state:s,encounter};
@@ -80,11 +83,12 @@ export function resolveEncounter(state,encounter,engage){
  if(encounter.group?!(present.includes('seoyeon')&&present.includes('soyul')):!present.includes(encounter.person))throw new Error('지금 그 장소에서 일어나는 장면이 아닙니다.');
  record.resolved=true;record.outcome=engage?'engaged':'passed';finishSituation(s,encounter,engage);
  if(!engage||encounter.group)return {state:s,result:null,group:engage&&encounter.group};
+ const firstExchange=!contact(s,encounter.person).introduced;
  introduce(s,encounter.person,'incidental-exchange');
  // The interaction comes from the encountered action, not a character-selection menu.
  const opened=openConversation(s,encounter.person);
  const next=dialogue(opened.state,encounter.person);
  const response=opened.result?opened:next.scene?{state:opened.state,result:{text:next.opening,stage:next.stage}}:next.options.some(o=>o.id==='personal')?respond(opened.state,encounter.person,'personal'):{state:opened.state,result:{text:next.opening,stage:next.stage}};
- response.result={...response.result,playerLine:encounter.action,text:(socialIntent(s,encounter.person).mode==='guarded'?'':encounter.prefix??'')+response.result.text};
- return response;
+ response.result={...response.result,playerLine:encounter.action+(firstExchange?' “아, 저는 김태이예요. 이번에 복학했어요.”':''),text:(firstExchange?`저는 ${s.npcs[encounter.person].name}이에요. `:'')+(socialIntent(s,encounter.person).mode==='guarded'?'':encounter.prefix??'')+response.result.text};
+ response.state=meetAppointments(response.state,encounter.person);return response;
 }

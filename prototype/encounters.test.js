@@ -10,7 +10,7 @@ test('arrival frames an ongoing action, not a named conversation roster',()=>{
  assert.equal(r.encounter.person,'yeogyeong');
  assert.match(r.encounter.text,/영수증/);assert.match(r.encounter.action,/건네며/);
  assert.ok(!r.encounter.text.includes('기다리'));
- assert.equal(displayName(r.state,'yeogyeong'),'차여경');
+ assert.equal(displayName(r.state,'yeogyeong'),'수첩을 정리하는 학생');
  assert.equal(contact(r.state,'yeogyeong').introduced,false);
  for(const actions of Object.values(placeActions))for(const a of actions)assert.ok(!/차여경|한서연|박소율|대화하기/.test(a.label));
 });
@@ -32,7 +32,7 @@ test('situational exchange begins a relevant topic without another formal introd
  assert.match(n.result.playerLine,/영수증/);
  assert.match(n.result.text,/계산|휴대폰/);
  assert.equal(dialogue(n.state,'yeogyeong').scene,true);
- assert.ok(!n.result.text.includes('저는 차여경'));
+ assert.match(n.result.text,/저는 차여경/);assert.match(n.result.playerLine,/김태이/);
  const returning=arrive(n.state,'hall','tables');
  assert.match(returning.encounter.action,/아까 멈춘 이야기/);
  const resumed=resolveEncounter(returning.state,returning.encounter,true);

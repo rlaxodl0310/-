@@ -34,7 +34,7 @@ export function presentationText(s,text){
 }
 export function firstContact(s,id){
  const c=contact(s,id),p=identities[id];
- if(c.asked)return {intro:true,opening:{seoyeon:'성함은요? 제가 제 이름만 말했네요.',yeogyeong:'성함 여쭤봐도 돼요? 제가 아직 부원 이름을 다 외우지는 못해서요.',soyul:'성함이… 어떻게 되세요?'}[id],stage:'자기소개를 들었다. 아직 서로 인사를 마친 사이는 아니다.',options:[{id:'intro:introduce',label:'김태이예요. 이번에 복학해서 아직 낯선 얼굴이 많네요.'},{id:'intro:leave',label:'아, 지금은 일이 있어서요. 다음에 제대로 인사할게요.'}]};
+ if(c.asked)return {intro:true,opening:{seoyeon:'성함은요? 제가 제 이름만 말했네요.',yeogyeong:'성함 여쭤봐도 돼요? 아직 제대로 인사를 못 드렸죠.',soyul:'성함이… 어떻게 되세요?'}[id],stage:'자기소개를 들었다. 아직 서로 인사를 마친 사이는 아니다.',options:[{id:'intro:introduce',label:'김태이예요. 이번에 복학해서 아직 낯선 얼굴이 많네요.'},{id:'intro:leave',label:'아, 지금은 일이 있어서요. 다음에 제대로 인사할게요.'}]};
  return {intro:true,opening:{seoyeon:'안녕하세요. 혹시 뭐 찾으세요?',yeogyeong:'아, 잠시만요. 이것만 적고… 네, 무슨 일이세요?',soyul:'아… 안녕하세요.'}[id],stage:c.approaches>1?'시선이 다시 마주친다. 아직 서로 이름을 소개하지 않았다.':{seoyeon:'단발머리 학생이 고개를 들어 눈을 맞춘다.',yeogyeong:'수첩을 펼쳐놓은 학생이 펜을 잠시 내려놓는다.',soyul:'사진을 보던 학생이 휴대폰을 조금 내린다.'}[id],options:[{id:'intro:greet',label:c.nameLevel==='unknown'?'안녕하세요. 혹시 봉사단 분이세요?':`${displayName(s,id)} 씨 맞으세요? 저는 아직 인사를 못 드렸네요.`},{id:'intro:leave',label:'지금 바빠 보이네. 나중에 말을 걸자.'}]};
 }
 export function respondIntroduction(state,id,choice){
@@ -42,7 +42,7 @@ export function respondIntroduction(state,id,choice){
  const s=structuredClone(state);s.contacts??={};s.contacts[id]=contact(s,id);let text;
  if(choice==='intro:greet'){
   learnIdentity(s,id,'self-introduction');s.contacts[id].asked=true;
-  text={seoyeon:'네, 맞아요. 저는 한서연이에요. 저희 제대로 인사하는 건 처음이죠?',yeogyeong:'네. 저는 차여경이에요. 봉사단 재무 맡고 있어요. 혹시 이번 활동 때문에 오셨어요?',soyul:'네… 박소율이에요. 봉사단 분 맞으시죠?'}[id];
+  text={seoyeon:'네, 맞아요. 저는 한서연이에요. 저희 제대로 인사하는 건 처음이죠?',yeogyeong:'네. 저는 차여경이에요. 봉사단 재무 맡고 있어요. 혹시 이번 활동 때문에 오셨어요?',soyul:'네… 박소율이에요. 오늘 처음 오신 거예요?'}[id];
  }else if(choice==='intro:introduce'){
   introduce(s,id);text={seoyeon:'아, 태이 선배. 저는 여기서 준비하고 있었어요. 아직 시간 있으시면 잠깐 이야기해도 되고요.',yeogyeong:'김태이 선배… 네, 기억할게요. 저는 여기서 물품 확인하고 있었어요.',soyul:'아, 네. 태이 선배. 저는 사진 고르고 있었어요. 잠깐 보고 가셔도 돼요.'}[id];
   s.memory.push(`[${s.day??1}일차] ${identities[id].name}과 서로 이름을 소개했다.`);
