@@ -11,4 +11,12 @@ export const days={
 };
 export const locations={hall:'학생회관',library:'도서관',cafe:'대학가 카페'};
 export function availableRoutes(s){return Object.entries(days[s.day??1].routes).map(([id,r])=>({id,...r,locked:!!r.requiresAny&&!r.requiresAny.some(k=>s.known.includes(k))}));}
-export function presentPeople(s,location){const plan=days[s.day??1].schedules[s.phase];return Object.keys(plan).filter(id=>plan[id]===location);}
+export function currentSchedule(s){
+ if(s.day!==1||s.phase!=='afternoon'||!s.clock)return days[s.day??1].schedules[s.phase];
+ const m=s.clock.minute;
+ if(m<840)return {yeogyeong:'hall',seoyeon:'hall',soyul:'hall'};
+ if(m<900)return {yeogyeong:'hall',seoyeon:'cafe',soyul:'library'};
+ if(m<960)return {yeogyeong:(s.relations['yeogyeong>soyul']?.tension??0)>=3?'hall':'library',seoyeon:'hall',soyul:'library'};
+ return {yeogyeong:'hall',seoyeon:'hall',soyul:'hall'};
+}
+export function presentPeople(s,location){const plan=currentSchedule(s);return Object.keys(plan).filter(id=>plan[id]===location);}

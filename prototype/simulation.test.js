@@ -4,7 +4,7 @@ import {newGame,act,save,restore} from './simulation.js';
 
 for(const route of ['rehearsal','volunteer','explore']) test(`${route}: world event resolves without duplicate execution`,()=>{
  const initial=newGame(),s=act(initial,route);
- assert.equal(initial.phase,'afternoon');assert.equal(s.events.length,1);
+ assert.equal(initial.phase,'afternoon');assert.deepEqual(s.events.map(e=>e.id),['day1-peer-message','day1-library-check','supplies']);
  assert.equal(s.npcs.soyul.location,'hall');
  assert.equal(s.relations['yeogyeong>soyul'].trust,1);
  assert.throws(()=>act(s,route));
