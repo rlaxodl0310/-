@@ -1,28 +1,31 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {newGame,act,restore,save} from './simulation.js';
-import {dialogue,respond,relationship,changeRelationship,groupDialogue,respondGroup} from './dialogue.js';
+import {dialogue,respond,relationship,changeRelationship,groupDialogue,respondGroup,endTopic,openConversation} from './dialogue.js';
 
 test('same joke lands differently with familiarity and maintains distinct voices',()=>{
  for(const id of ['seoyeon','yeogyeong','soyul']){
   const a=respond(newGame(),id,'joke');
   const b=respond(newGame('friend'),id,'joke');
   assert.notEqual(a.result.text,b.result.text);
-  assert.equal(relationship(a.state,id).tension,1);
+  assert.equal(relationship(a.state,id).tension,0);
   assert.equal(relationship(b.state,id).affection,1);
  }
  const lines=['seoyeon','yeogyeong','soyul'].map(id=>respond(newGame(),id,'push').result.text);
  assert.equal(new Set(lines).size,3);
 });
-test('affection changes a close character response independently of familiarity',()=>{
- const a=respond(newGame('friend'),'soyul','personal');
- const b=respond(newGame('close'),'soyul','personal');
- assert.notEqual(a.result.text,b.result.text);
+test('affection affects an earned invitation inside the topic, not every sentence',()=>{
+ const finish=profile=>{
+  let s=respond(newGame(profile),'soyul','personal').state;
+  for(const choice of ['empty','film','mess'])s=respond(s,'soyul','scene:'+choice).state;
+  return dialogue(s,'soyul').opening;
+ };
+ assert.notEqual(finish('friend'),finish('close'));
 });
 test('NPC friendship affects what Seoyeon says about Soyul',()=>{
  const a=newGame(),b=newGame();
- b.relations['seoyeon>soyul'].familiarity=0;
- assert.notEqual(respond(a,'seoyeon','listen').result.text,respond(b,'seoyeon','listen').result.text);
+ b.relations['soyul>seoyeon'].familiarity=0;
+ assert.notEqual(groupDialogue(a)[2].text,groupDialogue(b)[2].text);
 });
 test('repeat visits recall friction and repeated options cannot farm relationships',()=>{
  const a=respond(newGame(),'seoyeon','push');
@@ -61,12 +64,13 @@ test('high trust changes post-activity greeting and tension affects boundaries',
  const c=newGame();changeRelationship(c,'seoyeon','taei',{tension:4});
  assert.match(dialogue(c,'seoyeon').opening,/혼자/);
 });
-test('followup is unlocked by the prior topic and trust gates disclosure',()=>{
- const a=respond(newGame(),'seoyeon','personal').state;
- const b=respond(newGame('friend'),'seoyeon','personal').state;
- assert.ok(dialogue(a,'seoyeon').options.some(o=>o.id==='deepen'));
- assert.notEqual(respond(a,'seoyeon','deepen').result.text,respond(b,'seoyeon','deepen').result.text);
- assert.throws(()=>respond(newGame(),'seoyeon','deepen'));
+test('private writing is not disclosed on affection alone',()=>{
+ const low=newGame('close');low.day=2;low.relations['soyul>taei'].trust=0;
+ const high=newGame('close');high.day=2;
+ const read=s=>respond(respond(s,'soyul','personal').state,'soyul','scene:ask').result.text;
+ assert.match(read(low),/정리한 다음/);
+ assert.match(read(high),/보여줄 수/);
+ assert.throws(()=>respond(newGame(),'soyul','scene:ask'));
 });
 test('repair acknowledges conflict without erasing the original memory',()=>{
  const a=respond(newGame(),'soyul','push').state;

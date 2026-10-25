@@ -1,4 +1,4 @@
-import {people,dialogue,respond,groupDialogue,respondGroup} from './dialogue.js';
+import {people,dialogue,respond,groupDialogue,respondGroup,endTopic,openConversation} from './dialogue.js';
 import {newGame,act,nextDay,acceptAppointment,cancelAppointment,save,restore} from './simulation.js';
 import {days,locations,availableRoutes,presentPeople} from './days.js';
 let state=newGame(),screen='campus',selected=null,note='',returnTo='campus',speaker='seoyeon',reply=null,groupLines=[],groupIndex=0,groupAnswered=false;
@@ -23,11 +23,11 @@ function render(){
  if(screen==='dialogue'){
   const d=dialogue(state,speaker),p=people[speaker];
   const invitation=reply?.choice==='invite'&&!state.appointments.some(a=>a.person===speaker&&a.status==='pending');
-  app.innerHTML=`<section class="conversation"><header class="top">${btn('← 대화 마치기','go','place')}<span class="badge">${timeLabel()} · ${locations[atPlace()]}</span></header><div class="conversation-body">${portrait(p.column)}<article class="dialogue-panel"><p class="eyebrow">${p.name}</p>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}<p class="muted">${esc(reply?.stage??d.stage)}</p><blockquote>${esc(reply?.text??d.opening)}</blockquote>${reply?.followup?`<p class="inner-line">${esc(reply.followup)}</p>`:''}<div class="dialogue-options">${invitation?btn('내일 같이 하기로 약속한다','acceptAppointment',speaker):''}${reply?btn('이야기를 이어간다','continue'):d.options.map(o=>btn(esc(o.label),'answer',o.id)).join('')}</div><div class="actions">${btn('활동 살펴보기','go','activities')}</div></article></div></section>`;
+  app.innerHTML=`<section class="conversation"><header class="top">${btn('← 대화 마치기','go','place')}<span class="badge">${timeLabel()} · ${locations[atPlace()]}</span></header><div class="conversation-body">${portrait(p.column)}<article class="dialogue-panel"><p class="eyebrow">${p.name}</p>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}<p class="muted">${esc(reply?.stage??d.stage)}</p>${reply?.playerLine?`<p class="player-line"><span>김태이</span>${esc(reply.playerLine)}</p>`:''}<blockquote>${esc(reply?.text??d.opening)}</blockquote>${reply?.followup?`<p class="inner-line">${esc(reply.followup)}</p>`:''}<div class="dialogue-options">${invitation?btn('내일 같이 하기로 약속한다','acceptAppointment',speaker):''}${d.options.map(o=>btn(esc(o.label),'answer',o.id)).join('')}</div><div class="actions">${d.scene?btn('다른 이야기로 넘어가기','endTopic'):''}${btn('활동 살펴보기','go','activities')}</div></article></div></section>`;
  }
  if(screen==='group'){
   const line=groupLines[groupIndex],p=people[line.person],end=groupIndex===groupLines.length-1;
-  app.innerHTML=`<section class="conversation"><header class="top">${btn('← 대화 마치기','go','place')}<span class="badge">${timeLabel()} · 함께 나누는 대화</span></header><div class="conversation-body">${portrait(p.column)}<article class="dialogue-panel"><p class="eyebrow">${p.name}</p><p class="muted">서연과 소율이 휴대폰의 사진을 함께 보고 있다.</p><blockquote>${esc(line.text)}</blockquote><div class="dialogue-options">${!end?btn('다음 대화','groupNext'):groupAnswered?btn('대화 마치기','go','place'):[btn('소율이 고를 때까지 기다린다.','groupAnswer','wait'),btn('나도 같이 봐도 돼요?','groupAnswer','include'),btn('서연이가 대신 설명해주면 되겠네.','groupAnswer','speakFor')].join('')}</div></article></div></section>`;
+  app.innerHTML=`<section class="conversation"><header class="top">${btn('← 대화 마치기','go','place')}<span class="badge">${timeLabel()} · 함께 나누는 대화</span></header><div class="conversation-body">${portrait(p.column)}<article class="dialogue-panel"><p class="eyebrow">${p.name}</p><p class="muted">서연과 소율이 휴대폰의 사진을 함께 보고 있다.</p><blockquote>${esc(line.text)}</blockquote><div class="dialogue-options">${!end?btn('다음 대화','groupNext'):groupAnswered?btn('대화 마치기','go','place'):[btn('천천히 골라요. 아직 시간 있어요.','groupAnswer','wait'),btn('나도 같이 봐도 돼요?','groupAnswer','include'),btn('서연 씨가 먼저 골라주면 빠르겠네.','groupAnswer','speakFor')].join('')}</div></article></div></section>`;
  }
  if(screen==='activities')app.innerHTML=page(`${state.day}일차 오후 활동`,evening?'<p>이미 오후 활동을 완료했습니다.</p>':`<p class="muted">${Object.values(state.dialogue.promises).includes('pending')?'봉사 참석을 약속한 상태입니다. 다른 활동을 택하면 약속을 지키지 못합니다.':'활동 하나를 선택하면 저녁으로 이동합니다.'} 선택하지 않은 장소에서도 일정은 진행됩니다.</p>${pending().filter(a=>a.day===state.day).map(a=>`<p class="notice">${state.npcs[a.person].name}과 ${a.label} 약속이 있습니다.</p>`).join('')}<div class="grid">${routes.map(r=>`<button class="card" data-action="select" data-value="${r.id}" ${r.locked?'disabled':''}><strong>${r.name}</strong>${duration(r.duration)}${r.locked?'<p>이전 탐색으로 연결 통로를 알아야 합니다.</p>':''}</button>`).join('')}</div>`,'place');
  if(screen==='detail'&&selected){const r=routes.find(r=>r.id===selected);if(r)app.innerHTML=page(r.name,`<p class="lead">${r.description}</p><p>소요 시간: ${duration(r.duration)}</p><p class="muted">실행하면 저녁으로 이동합니다. 다른 활동에 직접 참여할 수 없습니다.${selected!=='volunteer'&&Object.values(state.dialogue.promises).includes('pending')?' 봉사 참석 약속을 지키지 못하게 됩니다.':''}</p>${pending().filter(a=>a.day===state.day&&a.activity!==selected).map(a=>`<p class="notice">${state.npcs[a.person].name}과 한 ${a.label} 약속을 지키지 못하게 됩니다. 일정 화면에서 먼저 연락해 취소할 수 있습니다.</p>`).join('')}<div class="actions">${btn('이 활동 진행','act',selected)}${btn('취소','go','activities')}</div>`,'activities');}
@@ -47,9 +47,9 @@ function render(){
 app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.action,v=b.dataset.value;note='';try{
  if(a==='go'){screen=v;reply=null;}
  if(a==='visit'){if(!locations[v])throw new Error('알 수 없는 장소입니다.');state.location=v;screen='place';reply=null;}
- if(a==='talk'){if(!presentPeople(state,atPlace()).includes(v))throw new Error('지금 이 장소에 없는 사람입니다.');speaker=v;reply=null;screen='dialogue';}
- if(a==='answer'){const next=respond(state,speaker,v);state=next.state;reply=next.result;}
- if(a==='continue')reply=null;
+ if(a==='talk'){if(!presentPeople(state,atPlace()).includes(v))throw new Error('지금 이 장소에 없는 사람입니다.');speaker=v;const opened=openConversation(state,v);state=opened.state;reply=opened.result;screen='dialogue';}
+ if(a==='answer'){const next=respond(state,speaker,v);state=next.state;reply=next.result;if(reply.leave){reply=null;screen='place';}}
+ if(a==='endTopic'){state=endTopic(state,speaker);reply=null;}
  if(a==='group'){
   const present=presentPeople(state,atPlace());if(!present.includes('seoyeon')||!present.includes('soyul'))throw new Error('지금은 두 사람이 함께 있지 않습니다.');
   groupLines=groupDialogue(state);groupIndex=0;groupAnswered=false;screen='group';

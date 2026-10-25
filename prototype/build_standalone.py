@@ -17,7 +17,7 @@ def inline_module(filename):
     source = (root / filename).read_text()
     source = re.sub(r'^import .*?;\n', '', source, flags=re.MULTILINE)
     return re.sub(r'\bexport (?=function |const )', '', source)
-simulation = inline_module('days.js') + '\n' + inline_module('dialogue.js') + '\n' + inline_module('simulation.js')
+simulation = inline_module('social-reasoning.js') + '\n' + inline_module('conversation-scenes.js') + '\n' + inline_module('days.js') + '\n' + inline_module('dialogue.js') + '\n' + inline_module('simulation.js')
 app = inline_module('app.js')
 html = (root / 'index.html').read_text()
 html = html.replace('<link rel="stylesheet" href="style.css">', '<style>' + css + '</style>')

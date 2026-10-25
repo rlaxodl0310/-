@@ -1,3 +1,4 @@
+import {personalMessage} from './social-reasoning.js';
 import {changeRelationship,relationship} from './dialogue.js';
 import {days,availableRoutes} from './days.js';
 export function newGame(profile='acquaintance') {
@@ -7,6 +8,7 @@ export function newGame(profile='acquaintance') {
  changeRelationship(s,'seoyeon','soyul',{familiarity:20,trust:12,affection:8});
  changeRelationship(s,'soyul','seoyeon',{familiarity:20,trust:12,affection:8});
  if(profile!=='acquaintance')for(const id of Object.keys(s.npcs))changeRelationship(s,id,'taei',profile==='close'?{familiarity:8,trust:5,affection:5}:{familiarity:6,trust:4,affection:0});
+ if(profile!=='acquaintance'){s.dialogue.facts={};for(const id of Object.keys(s.npcs))s.dialogue.facts[id]={speech:'casual'};}
  return s;
 }
 function remember(s,text){s.memory.push(`[${s.day}일차] ${text}`);}
@@ -62,8 +64,7 @@ export function nextDay(state){
  for(const [id,npc] of Object.entries(s.npcs))npc.location=days[s.day].schedules.afternoon[id];
  if(s.day===2){
   s.messages.push({day:2,from:'봉사단 단체방',text:'오늘 여경은 학생회관에서 정리하고, 소율은 도서관에서 사진을 고릅니다. 서연은 오후에 대학가 카페에 있어요.'});
-  for(const id of Object.keys(s.npcs))if(relationship(s,id).familiarity>=2&&relationship(s,id).tension<3)
-   s.messages.push({day:2,from:s.npcs[id].name,text:{seoyeon:'어제 이야기하다 보니 시간이 금방 갔네요. 오늘은 카페에서 잠깐 쉬려고요.',yeogyeong:'어제 고마웠어요. 저는 오늘도 학생회관에 있어요. 시간 되면 들러요.',soyul:'어제 이야기… 고마웠어요. 오늘은 도서관에서 사진 고르려고요.'}[id]});
+  for(const id of Object.keys(s.npcs)){const text=personalMessage(s,id);if(text)s.messages.push({day:2,from:s.npcs[id].name,text});}
  }else s.messages.push({day:3,from:'봉사단 단체방',text:'오늘 사진 전시 준비는 학생회관에서 진행합니다. 소율은 먼저 도서관에서 파일을 챙깁니다. 공연 리허설도 같은 오후에 있어요.'});
  return s;
 }

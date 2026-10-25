@@ -1,3 +1,5 @@
+import {sceneKey,sceneNodes,scenePrompt} from './conversation-scenes.js';
+import {socialIntent} from './social-reasoning.js';
 export const people={
  seoyeon:{name:'한서연',column:1,habit:'서연은 서두르지 않고 말을 고른다.'},
  yeogyeong:{name:'차여경',column:2,habit:'여경은 펼쳐둔 수첩에서 시선을 든다.'},
@@ -17,18 +19,18 @@ export function groupDialogue(s){
  {person:'seoyeon',text:s.day===2?'여경이랑 사진 골랐다며? 전시 구성도 정했어?':'오늘 사진 설명은 네가 직접 할 거야?'},
  {person:'soyul',text:s.day===2?(friends?'응. 같이 고르니까 내가 놓친 것도 보이더라. 내일 설명도 같이 정하기로 했어.':'네. 여경 씨랑 같이 골랐어요.'):(friends?'응. 여경이랑 순서도 맞췄어. 떨리긴 하는데, 해보려고.':'제가 고른 사진부터 설명해보려고요.')},
  {person:'seoyeon',text:friends?'잘됐네. 네가 찍은 거니까 네 이야기가 제일 궁금하지.':'좋네요. 준비한 이야기 들려주세요.'},
- {person:'soyul',text:relationship(s,'soyul').familiarity>=4?'태이도 볼래? 이 사진, 어제 이야기하던 거야.':'괜찮으시면 같이 보실래요?'}
+ {person:'soyul',text:s.dialogue?.facts?.soyul?.speech==='casual'?'태이도 볼래? 이 사진, 어제 이야기하던 거야.':'괜찮으시면 같이 보실래요?'}
  ];
  return [
- {person:'seoyeon',text:s.phase==='afternoon'?'소율아, 지난번 사진 같이 골라볼래? 네가 찍은 게 잘 나왔더라.':'오늘 수고했어. 가기 전에 지난번 사진만 같이 골라볼까?'},
- {person:'soyul',text:friends?'또 나 나온 거부터 고르려고 그러지. 풍경 찍은 것도 좀 봐.':'네… 제가 찍은 사진도 몇 장 있어요.'},
- {person:'seoyeon',text:friends?'알았어. 네가 먼저 골라. 나 나온 것도 마음대로 지우지는 말고.':'좋아요. 괜찮은 것부터 보여주세요.'},
- {person:'soyul',text:relationship(s,'soyul').familiarity>=4?'태이도 볼래? …이상하게 찍은 건 없으니까.':'아, 안녕하세요. 저희 지난 활동 사진 보고 있었어요.'}
+ {person:'seoyeon',text:s.phase==='afternoon'?'소율아, 이거 안 지웠지? 너 표정 진짜 잘 나왔는데.':'가기 전에 사진 하나만 봐봐. 아까 이거 보여주려다 말았어.'},
+ {person:'soyul',text:friends?'너 말하는 잘 나왔다는 걸 내가 못 믿겠어. 지난번에도 눈 감은 거 보냈잖아.':'네… 제가 찍은 사진도 몇 장 있어요.'},
+ {person:'seoyeon',text:friends?'그건 네가 웃었잖아. 알았어, 네가 먼저 골라. 대신 내 사진도 마음대로 지우진 말고.':'좋아요. 괜찮은 것부터 보여주세요.'},
+ {person:'soyul',text:s.dialogue?.facts?.soyul?.speech==='casual'?'태이도 볼래? …이상하게 찍은 건 없으니까.':'아, 안녕하세요. 저희 지난 활동 사진 보고 있었어요.'}
  ];
 }
 export function respondGroup(state,choice){
  if(!['wait','include','speakFor'].includes(choice))throw new Error('알 수 없는 대답입니다.');
- const s=structuredClone(state),close=relationship(s,'soyul').familiarity>=4;
+ const s=structuredClone(state),close=s.dialogue?.facts?.soyul?.speech==='casual';
  const repeated=s.dialogue.history.some(h=>h.person==='group'&&(h.day??1)===(s.day??1)&&h.phase===s.phase&&h.choice===choice);
  let lines;
  if(choice==='wait'){
@@ -38,15 +40,20 @@ export function respondGroup(state,choice){
   lines=[{person:'soyul',text:close?'응. 이쪽으로 와. 화면 작아서 잘 안 보이겠다.':'네, 괜찮아요. …이 사진부터 볼까요?'},{person:'seoyeon',text:relationship(s,'seoyeon').affection>=3?'선배가 찍으면 어떤 걸 찍을지도 궁금한데요.':'좋아요. 다음 활동 때 사진 담당도 한번 해볼래요?'}];
   if(!repeated)changeRelationship(s,'soyul','taei',{familiarity:1});
  }else{
-  lines=[{person:'soyul',text:close?'내가 말할게. 서연이가 나보다 말을 잘하는 건 맞는데… 그래도.':'저도… 제 생각은 말씀드릴 수 있어요.'},{person:'seoyeon',text:'소율이한테 직접 물어봐주면 좋겠어요. 제가 대신 정할 일은 아니니까.'}];
+  lines=[{person:'soyul',text:close?'잠깐, 내 사진인데 왜 서연이가 골라. 내가 말할게.':'잠깐만요. 제가 고르던 거라… 저도 말씀드릴 수 있어요.'},{person:'seoyeon',text:'저한테 맡기면 또 소율이 눈 감은 걸로 골라요. 본인한테 물어봐줘요.'}];
   if(!repeated){changeRelationship(s,'soyul','taei',{tension:1});changeRelationship(s,'seoyeon','taei',{trust:-1});}
  }
  s.dialogue.history.push({person:'group',choice,day:s.day??1,phase:s.phase,lines});
  return {state:s,lines};
 }
 export function dialogue(s,id){
+ const active=s.dialogue?.sessions?.[sceneKey(s,id)];
+ if(active&&!active.closed){
+  const n=sceneNodes(s,id,active)[active.node];
+  if(n)return {opening:n.text,stage:n.stage,scene:true,options:n.options.map(o=>({id:'scene:'+o.id,label:o.label}))};
+ }
  if(!people[id])throw new Error('알 수 없는 인물입니다.');
- const r=relationship(s,id),close=r.familiarity>=4,warm=r.affection>=3,trusted=r.trust>=3;
+ const r=relationship(s,id),comfortable=r.familiarity>=4,close=s.dialogue?.facts?.[id]?.speech==='casual',warm=r.affection>=3,trusted=r.trust>=3;
  const d=s.dialogue??{history:[],promises:{}};
  const history=d.history.filter(h=>h.person===id&&(h.day??1)===(s.day??1));
  const latest=history.at(-1);
@@ -72,22 +79,26 @@ export function dialogue(s,id){
  else if(latest?.choice==='promise') opening={seoyeon:'이따 준비실에서 봐요. 일정 바뀌면 알려주고요.',yeogyeong:'오는 걸로 적어뒀어요. 혹시 못 오면 메시지 주세요.',soyul:'이따 오시는 거죠? …네, 알겠어요.'}[id];
  else if(latest) opening={seoyeon:close?'또 만났네요. 이번엔 무슨 이야기예요?':'아까 이야기하다 말았죠. 더 물어볼 게 있어요?',yeogyeong:close?'아, 또 왔네. 영수증 맡기러 온 건 아니죠?':'아직 근처에 있었네요. 무슨 일이에요?',soyul:close?'또 왔네. …아니, 싫다는 말은 아니고.':'아, 네. 아까 뵀죠.'}[id];
  else opening={seoyeon:close?(warm?'왔어요? 오늘은 조금 일찍 봤으면 했는데.':'왔네요. 오늘도 일정 꽉 찼어요?'):'안녕하세요. 봉사단에서 뵀죠? 오늘 활동에도 오세요?',yeogyeong:close?'태이 선배, 잠깐만요. 이 수량 한번 같이 봐줄래요?':'안녕하세요. 혹시 오늘 활동 참여하시는지 여쭤봐도 돼요?',soyul:close?(warm?'왔네. …오늘은 먼저 인사하려고 했는데.':'안녕. 서연이는 안쪽에 있어.'):'안녕하세요. …봉사단 분, 맞으시죠?'}[id];
- const topic={seoyeon:close?'지난번에 말했던 카페, 정말 가봤어요?':'활동 없을 때는 보통 뭐 해요?',yeogyeong:close?'오늘도 수첩이 꽉 찼네. 쉴 틈은 있어?':'재무 일은 혼자 다 맡는 거예요?',soyul:close?'사진 찍는 거 좋아한다며. 요즘 찍은 거 있어?':'들고 있는 건 활동 사진이에요?'}[id];
+ if(active?.closed)opening={seoyeon:'아, 그러고 보니 선배 오늘 일정은 어떻게 돼요?',yeogyeong:'선배도 뭐 하러 온 거 아니었어요? 제가 제 얘기만 했네.',soyul:'아, 그리고… 더 물어볼 거 있어요?'}[id];
+ const topic=scenePrompt(s,id);
+ const joke={seoyeon:'커피랑 눈싸움 중이에요? 아까부터 보고만 있네.',yeogyeong:'계산기가 잘못했네. 여경 씨 표정이 아까부터 심각해.',soyul:'사진 고르는 게 찍는 것보다 오래 걸리네.'}[id];
  return {opening,stage:people[id].habit,options:[
- ...(['listen','personal'].includes(latest?.choice)?[{id:'deepen',label:'그때 어떤 기분이었어요?'},{id:'share',label:'나도 내 이야기를 조금 꺼내본다.'}]:[]),
  ...((latest||old.length)&&r.tension>0?[{id:'repair',label:latest?'아까는 내 말이 앞섰어요. 미안해요.':'지난번에는 내 말이 앞섰어요. 미안해요.'}]:[]),
  ...(s.day===2&&r.familiarity>=2&&r.tension<3?[{id:'invite',label:'내일은 어떤 일정이에요?'}]:[]),
- {id:'listen',label:evening?'오늘 어땠는지 좀 더 들어도 돼요?':'지금 무슨 일 하고 있었어요?'},
- {id:'personal',label:topic},
- {id:'joke',label:close?'조금 장난스럽게 말을 건넨다.':'가벼운 농담으로 어색함을 풀어본다.'},
+ ...(evening||(s.day??1)>1?[{id:'listen',label:evening?'오늘은 어땠어요? 아까 좀 바빠 보이던데.':'아까부터 바빠 보이던데, 뭐 하고 있었어요?'}]:[]),
+ ...(!active?.finished?[{id:'personal',label:topic}]:[]),
+ ...(comfortable&&s.dialogue?.facts?.[id]?.speech!=='casual'?[{id:'speech',label:'우리 조금 편하게 말할까요? 불편하면 지금처럼 해도 되고.'}]:[]),
+ ...(!evening&&(s.day??1)===1&&!active?.finished?[{id:'joke',label:joke}]:[]),
  ...(!evening&&(s.day??1)===1?[{id:'promise',label:'오늘 봉사 활동에 갈게요.'}]:[]),
- {id:'push',label:evening?'다음부터는 그냥 내 말대로 하면 되잖아요.':'내가 도와줄 테니까, 다른 일정은 미뤄요.'}
+ {id:'push',label:{seoyeon:'힘들면 그냥 못 한다고 해요. 계속 받아주니까 더 맡기는 거죠.',yeogyeong:'확인은 이쯤 해도 되지 않아요? 계속 보면 끝이 없을 텐데.',soyul:'그냥 빨리 고르면 안 돼요? 계속 보고 있으면 달라지나.'}[id]}
  ]};
 }
 export function respond(state,id,choice){
+ if(choice.startsWith('scene:'))return advanceScene(state,id,choice.slice(6));
+ if(['personal','joke'].includes(choice)||(choice==='listen'&&state.phase==='afternoon'&&(state.day??1)===1))return beginScene(state,id,choice);
  const current=dialogue(state,id);
  if(!current.options.some(o=>o.id===choice))throw new Error('지금 할 수 없는 대답입니다.');
- const s=structuredClone(state),r=relationship(s,id),close=r.familiarity>=4,warm=r.affection>=3;
+ const s=structuredClone(state),r=relationship(s,id),comfortable=r.familiarity>=4,close=s.dialogue?.facts?.[id]?.speech==='casual',warm=r.affection>=3;
  s.dialogue??={history:[],promises:{}};
  const repeated=s.dialogue.history.some(h=>h.person===id&&h.choice===choice&&(h.day??1)===(s.day??1)&&h.phase===s.phase);
  let text,stage,followup;
@@ -95,6 +106,11 @@ export function respond(state,id,choice){
  if(repeated){
   text={seoyeon:'그 이야기는 아까 했죠. 이번에는 선배 이야기도 듣고 싶은데요.',yeogyeong:'아까랑 같은 질문인데요? 제 대답도 같아요.',soyul:'아까… 말씀드렸던 것 같아요.'}[id];
   stage='상대는 앞서 나눈 이야기를 기억하고 있다.';
+ }else if(choice==='speech'){
+  const willing=r.trust>=2&&r.tension<3;
+  if(willing){s.dialogue.facts??={};s.dialogue.facts[id]??={};s.dialogue.facts[id].speech='casual';}
+  text=willing?{seoyeon:'좋아요. 근데 갑자기 바꾸려니까 좀 어색하네. …방금도 존댓말 할 뻔했어요.',yeogyeong:'그럴까요? 아, 근데 재무 얘기할 땐 저도 모르게 딱딱해질 수 있어요. 그건 양해해줘요.',soyul:'응… 그래도 돼요. 아니, 돼. 벌써 이상하게 말했네.'}[id]:{seoyeon:'저는 아직 지금이 편해요. 좀 더 친해지면 그때 이야기해도 되죠?',yeogyeong:'아직은 이대로가 편한데, 조금만 나중에 해도 될까요?',soyul:'저는… 아직은 이렇게 말하는 게 편해요.'}[id];
+  stage='말을 놓는 일도 서로 동의한 뒤에 바뀐다.';
  }else if(choice==='invite'){
   text={seoyeon:'내일 리허설 때 입구 안내를 도와주기로 했어요. 같이 준비할래요? 봉사단 사진 전시랑은 시간이 겹친대요.',yeogyeong:'내일 학생회관에서 사진 전시 준비해요. 도와줄 수 있어요? 공연 리허설이랑 시간이 같아서 확인은 해줘야 해요.',soyul:close?'내일 전시 준비… 같이 할래? 리허설도 있다던데, 시간 괜찮으면.':'내일 사진 전시 준비해요. 시간 괜찮으시면 같이 해주실래요? 리허설이랑 겹친다고는 들었어요.'}[id];
   stage='초대에 응할지는 직접 결정할 수 있다. 질문만으로 약속이 잡히지는 않는다.';
@@ -125,7 +141,7 @@ export function respond(state,id,choice){
  }else if(choice==='joke'){
   if(close){Object.assign(delta,{affection:1});text={seoyeon:'그 말 다른 사람한테도 하고 다니는 건 아니죠? …농담이에요. 그렇게 진지하게 보지 말고.',yeogyeong:'그럼 오늘 선배 간식값부터 정산할까요? 농담은 제가 더 잘하거든요.',soyul:warm?'…진짜, 그런 말은 갑자기 하지 마. 웃는 거 보고 일부러 그러지?':'또 장난친다. 나 이번에는 안 속아.'}[id];}
   else {Object.assign(delta,{tension:1});text={seoyeon:'아… 그런 뜻이었어요? 아직 선배 농담에는 적응이 안 돼서요.',yeogyeong:'농담이죠? 제가 진지하게 듣고 있었는데.',soyul:'네? …아, 농담이었구나.'}[id];}
-  stage=close?'익숙한 말투 사이로 짧은 웃음이 오간다.':'가볍게 던진 말이 아직 편하게 닿지는 않는다.';
+  stage=close?'서로 웃는 동안 다음 말이 조금 늦어진다.':'상대가 태이의 표정을 잠깐 살핀다.';
  }else if(choice==='deepen'){
   const safe=r.trust>=3;
   if(safe)Object.assign(delta,{trust:1,affection:1});
@@ -136,6 +152,7 @@ export function respond(state,id,choice){
   text={seoyeon:close?'선배도 혼자 다 처리하려고 하는 편이네요. 힘들 때는 괜찮다고만 하지 말아요. 저도 그래볼 테니까.':'곡에 자기 이야기를 담는 거군요. 무대에서 봤을 때는 그런 고민까지는 몰랐어요.',yeogyeong:'합주에 작업에 공부까지요? 그럼 선배도 일정 확인해줄 사람이 있어야 하는 거 아니에요?',soyul:close?'그 곡… 완성되면 들려줄래? 잘 몰라도 그냥 들어줄 수는 있으니까.':'자기 이야기를 남한테 들려주는 거, 안 떨려요? 저는 사진 한 장 보여주는 것도 망설이는데.'}[id];
   stage='태이는 만들고 있는 곡과 복학 후의 생활을 이야기한다. 대화가 한쪽의 질문에만 머무르지 않는다.';
  }else if(choice==='repair'){
+  if(s.dialogue.observations?.[id])s.dialogue.observations[id].boundary='acknowledged';
   Object.assign(delta,{tension:-1});
   text={seoyeon:'알아줘서 고마워요. 다음에는 먼저 물어봐주면 좋겠어요.',yeogyeong:'네. 저도 바로 이야기할게요. 혼자 기분 나빠하고 있지는 않을게요.',soyul:'…응. 말해줘서 고마워. 나도 싫으면 제대로 얘기해볼게.'}[id];
   stage='사과를 받아들였다고 불편했던 기억까지 바로 사라지지는 않는다.';
@@ -145,11 +162,72 @@ export function respond(state,id,choice){
   stage='상대는 참석하겠다는 말을 약속으로 받아들였다.';
  }else{
   Object.assign(delta,{trust:-1,tension:2});
-  text={seoyeon:'도와주려는 건 고마워요. 그래도 제 일정은 제가 정할게요.',yeogyeong:'도움받는 거랑 제 일정을 대신 정하는 건 다른 얘기잖아요.',soyul:close?'그렇게 정해버리지는 않았으면 좋겠어. 내 생각도 있는데.':'아… 저는 다른 약속도 있어서요. 그건 좀 어려워요.'}[id];
+  text={seoyeon:'그건 알아요. 그래도 지금은 제가 정리할게요. 제 일정은 제가 정하고 싶어요.',yeogyeong:'선배 눈에는 답답하겠죠. 그래도 제가 확인하고 끝내고 싶은 일이에요.',soyul:close?'나도 고르려고 보고 있는 거야. 그냥 멍하니 있는 거 아니고.':'저도 고르려고 보고 있어요. 그냥 보고만 있는 건 아니에요.'}[id];
   stage='선의로 건넨 말이어도 상대가 원하는 방식은 아닐 수 있다.';
  }
  if(!repeated)changeRelationship(s,id,'taei',delta);
- const result={person:id,choice,day:s.day??1,phase:s.phase,text,stage,followup:followup??'',repeated};
+ const result={person:id,choice,day:s.day??1,phase:s.phase,text,stage,playerLine:current.options.find(o=>o.id===choice)?.label??'',followup:'',repeated};
  s.dialogue.history.push(result);
  return {state:s,result};
+}
+
+function ensureConversations(s){
+ s.dialogue.sessions??={};s.dialogue.facts??={};s.dialogue.observations??={};s.dialogue.sceneAwards??={};
+}
+export function endTopic(state,id){
+ const s=structuredClone(state);ensureConversations(s);
+ const session=s.dialogue.sessions[sceneKey(s,id)];if(session){const n=sceneNodes(s,id,session)[session.node];session.closed=true;session.finished=n?.options.every(o=>o.next==='_close')??false;}
+ return s;
+}
+function beginScene(state,id,choice,initiated=false){
+ const current=dialogue(state,id);
+ if(current.scene||!current.options.some(o=>o.id===choice))throw new Error('지금 나누던 이야기에 먼저 답해주세요.');
+ const s=structuredClone(state);ensureConversations(s);
+ const key=sceneKey(s,id),intent=socialIntent(s,id),prior=s.dialogue.sessions[key];
+ const session={node:prior?.lastNode??'start',closed:false,casual:s.dialogue.facts?.[id]?.speech==='casual',variant:intent.mode==='guarded'?'guarded':'normal'};
+ if(choice==='joke'&&!prior&&(s.day??1)===1)session.node={seoyeon:'ice',yeogyeong:'joke',soyul:'start'}[id];
+ if(session.variant==='guarded')session.node='start';
+ s.dialogue.sessions[key]=session;
+ const n=sceneNodes(s,id,session)[session.node]??sceneNodes(s,id,session).start;
+ const award=key+':entry';
+ if(!s.dialogue.sceneAwards[award]){
+  if(!initiated)changeRelationship(s,id,'taei',{familiarity:1,...(choice==='joke'&&intent.willingToJoke?{affection:1}:{})});
+  s.dialogue.sceneAwards[award]=true;
+ }
+ const result={person:id,day:s.day??1,phase:s.phase,choice:initiated?'npc:personal':choice,initiated,playerLine:initiated?'':current.options.find(o=>o.id===choice).label,text:n.text,stage:n.stage,scene:true,repeated:!!prior};
+ s.dialogue.history.push(result);return {state:s,result};
+}
+function advanceScene(state,id,choice){
+ const s=structuredClone(state);ensureConversations(s);
+ const key=sceneKey(s,id),session=s.dialogue.sessions[key];
+ if(!session||session.closed)throw new Error('진행 중인 대화가 없습니다.');
+ const nodes=sceneNodes(s,id,session),current=nodes[session.node];
+ const selected=current?.options.find(o=>o.id===choice);
+ if(!selected)throw new Error('현재 이야기와 맞지 않는 대답입니다.');
+ const award=key+':'+choice;
+ if(!s.dialogue.sceneAwards[award]){
+  changeRelationship(s,id,'taei',selected.delta);s.dialogue.sceneAwards[award]=true;
+ }
+ if(choice==='apologize'&&s.dialogue.observations[id])s.dialogue.observations[id].boundary='acknowledged';
+ if(selected.fact){
+  const [name,value]=selected.fact;s.dialogue.facts[id]??={};s.dialogue.facts[id][name]=value;
+  s.dialogue.observations[id]??={};s.dialogue.observations[id][name]=value;
+ }
+ const leaving=selected.next==='_close';
+ if(leaving){session.closed=true;session.finished=true;session.lastNode=session.node;}
+ else {session.node=selected.next;session.lastNode=selected.next;}
+ const next=leaving?current:sceneNodes(s,id,session)[session.node];
+ if(!next)throw new Error('대화의 다음 장면이 없습니다.');
+ const result={person:id,day:s.day??1,phase:s.phase,choice:'scene:'+choice,playerLine:selected.label,text:next.text,stage:next.stage,scene:true,leave:leaving};
+ s.dialogue.history.push(result);return {state:s,result};
+}
+
+export function openConversation(state,id){
+ const current=dialogue(state,id),intent=socialIntent(state,id);
+ if(current.scene)return {state,result:null};
+ const key=sceneKey(state,id);
+ // A person can initiate a topic once per encounter period, not every menu visit.
+ if(!state.dialogue?.sessions?.[key]&&['seek-company','cautious-interest','guarded','task'].includes(intent.mode))
+  return beginScene(state,id,'personal',true);
+ return {state,result:null};
 }

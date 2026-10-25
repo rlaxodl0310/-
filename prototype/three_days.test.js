@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {newGame,act,nextDay,acceptAppointment,cancelAppointment,save,restore} from './simulation.js';
 import {availableRoutes,presentPeople} from './days.js';
-import {dialogue,respond,relationship,groupDialogue} from './dialogue.js';
+import {dialogue,respond,relationship,groupDialogue,endTopic} from './dialogue.js';
 
 test('days cannot be skipped, replayed, or advanced past day three',()=>{
  assert.throws(()=>nextDay(newGame()));
@@ -27,7 +27,10 @@ test('prior promises survive through morning greetings without being silently cl
 });
 test('same topic is remembered within day but can develop on another day',()=>{
  const a=respond(newGame(),'soyul','personal').state;
- assert.equal(respond(a,'soyul','personal').result.repeated,true);
+ assert.throws(()=>respond(a,'soyul','personal'));
+ const reentered=respond(endTopic(a,'soyul'),'soyul','personal');
+ assert.equal(reentered.result.repeated,true);
+ assert.deepEqual(reentered.state.relations,a.relations);
  const b=nextDay(act(a,'explore'));
  assert.equal(respond(b,'soyul','personal').result.repeated,false);
  assert.equal(b.dialogue.history[0].day,1);

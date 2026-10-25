@@ -10,7 +10,7 @@ with sync_playwright() as p:
     page.wait_for_url('**/prototype/')
     page.get_by_role('button', name='학생회관 들어가기').click()
     page.get_by_role('button', name='한서연 이야기하기').click()
-    page.get_by_role('button', name='지금 무슨 일 하고 있었어요?').click()
+    page.get_by_role('button', name='그 커피 맛있어요? 아까부터 계속 젓던데.').click()
     page.get_by_role('button', name='활동 살펴보기').click()
     page.get_by_role('button', name='봉사 활동').click()
     page.get_by_role('button', name='취소', exact=True).click()
