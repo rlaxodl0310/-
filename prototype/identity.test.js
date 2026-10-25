@@ -87,7 +87,7 @@ test('identity and evidence survive saving without introducing the rest of the c
 
 test('legacy world-only relations do not count as meeting; actual interactions can migrate',()=>{
  const old=newGame();old.version=3;delete old.contacts;
- const unknown=restore(save(old));assert.equal(unknown.version,5);
+ const unknown=restore(save(old));assert.equal(unknown.version,6);
  assert.equal(contact(unknown,'soyul').introduced,false);
  old.dialogue.history.push({person:'yeogyeong',day:1,phase:'afternoon',choice:'personal'});
  const migrated=restore(save(old));assert.equal(contact(migrated,'yeogyeong').introduced,true);

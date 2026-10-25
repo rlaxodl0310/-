@@ -1,3 +1,5 @@
+import {observeSituation,finishSituation} from './event-engine.js';
+import {eventKey} from './event-view.js';
 import {presentPeople} from './days.js';
 import {contact,introduce,seePeople} from './identity.js';
 import {socialIntent} from './social-reasoning.js';
@@ -50,16 +52,21 @@ export function arrive(state,location,spot='entry'){
  if(!person&&!group){s.encounters[key]={day:s.day,phase:s.phase,resolved:true,outcome:'quiet'};return {state:s,encounter:null};}
  const content=group?{text:'휴게공간을 지나는데 낮은 웃음소리가 들린다. 한서연과 박소율이 같은 휴대폰을 들여다보고 있다. 두 사람은 이쪽을 보지 못한 채 사진 이야기를 이어간다.',action:'걸음을 늦추고 잠깐 이야기를 듣는다.',prefix:''}:encounterContent(s,person);
  const encounter={key,day:s.day,phase:s.phase,person,group,...content};
+ const request=s.events.find(e=>e.id==='caption-request');
+ if(person==='soyul'&&s.day===3&&s.location==='library'&&request&&s.eventState?.knowledge?.[eventKey(request)]){
+  encounter.condition='caption-request';encounter.text='자료실 앞에서 막 출력된 종이를 맞춰 쥔 박소율과 마주친다. 어젯밤 메시지에서 말했던 사진 설명이 맨 위에 보인다. 소율은 복사기 앞을 비켜서며 종이를 다시 살핀다.';
+  encounter.action='인쇄물을 건네며 묻는다. “어제 이야기한 문구, 이거예요?”';encounter.prefix='네, 어제 보낸 그거예요. ';
+ }
  if(resuming){encounter.text=`${content.text} 아까 나누던 이야기가 잠깐 떠오른다.`;encounter.action='아까 멈춘 이야기의 뒷부분을 조심스럽게 꺼낸다.';encounter.prefix='';}
  s.encounters[key]??={day:s.day,phase:s.phase,person,group,resolved:false};
- return {state:s,encounter};
+ observeSituation(s,encounter);return {state:s,encounter};
 }
 export function resolveEncounter(state,encounter,engage){
  const s=structuredClone(state),record=s.encounters?.[encounter?.key];
  if(!record||record.resolved||encounter.day!==s.day||encounter.phase!==s.phase)throw new Error('이미 지나간 장면입니다.');
  const present=presentPeople(s,s.location);
  if(encounter.group?!(present.includes('seoyeon')&&present.includes('soyul')):!present.includes(encounter.person))throw new Error('지금 그 장소에서 일어나는 장면이 아닙니다.');
- record.resolved=true;record.outcome=engage?'engaged':'passed';
+ record.resolved=true;record.outcome=engage?'engaged':'passed';finishSituation(s,encounter,engage);
  if(!engage||encounter.group)return {state:s,result:null,group:engage&&encounter.group};
  introduce(s,encounter.person,'incidental-exchange');
  // The interaction comes from the encountered action, not a character-selection menu.

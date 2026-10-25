@@ -10,12 +10,12 @@ test('days cannot be skipped, replayed, or advanced past day three',()=>{
  let s=newGame();
  for(const choice of ['rehearsal','work','backstage']){
   const day=s.day;s=act(s,choice);
-  assert.equal(s.events.filter(e=>e.day===day).length,1);
+  assert.equal(s.events.filter(e=>e.day===day&&e.kind==='scheduled').length,1);
   assert.throws(()=>act(s,choice));
   if(day<3)s=nextDay(s);
  }
  assert.throws(()=>nextDay(s));assert.equal(s.dayHistory.length,2);
- assert.equal(new Set(s.events.map(e=>e.id)).size,3);
+ assert.equal(new Set(s.events.filter(e=>e.kind==='scheduled').map(e=>e.id)).size,3);
 });
 test('prior promises survive through morning greetings without being silently cleared',()=>{
  const base=respond(newGame(),'seoyeon','promise').state;
@@ -89,7 +89,7 @@ test('all reachable three-day routes preserve state across save and restore',()=
    for(const third of availableRoutes(day3).filter(r=>!r.locked)){
     const end=act(restore(save(day3)),third.id);
     assert.deepEqual(restore(save(end)),end);
-    assert.equal(end.events.length,3);count++;
+    assert.equal(end.events.filter(e=>e.kind==='scheduled').length,3);count++;
    }
   }
  }
@@ -99,5 +99,5 @@ test('version-two saves migrate to day one and retain relationships',()=>{
  const old=newGame('friend');old.version=2;
  delete old.day;delete old.dayHistory;delete old.appointments;
  const loaded=restore(save(old));assert.equal(loaded.day,1);
- assert.equal(loaded.version,5);assert.equal(relationship(loaded,'soyul').trust,4);
+ assert.equal(loaded.version,6);assert.equal(relationship(loaded,'soyul').trust,4);
 });

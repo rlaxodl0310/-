@@ -1,3 +1,4 @@
+import {photoReport,showcaseReport,scheduledEvent,learnEvent} from './event-view.js';
 import {contact,firstContact,respondIntroduction} from './identity.js';
 import {sceneKey,sceneNodes,scenePrompt} from './conversation-scenes.js';
 import {socialIntent} from './social-reasoning.js';
@@ -16,6 +17,11 @@ export function changeRelationship(s,from,to,delta){
 }
 export function groupDialogue(s){
  const friends=relationship(s,'soyul','seoyeon').familiarity>=4;
+ const exhibition=scheduledEvent(s,'campus-showcase');
+ if(s.day===3&&s.phase==='evening'&&exhibition){const joint=exhibition.outcome==='joint-display';return [{person:'seoyeon',text:'사진은 다 붙였어? 아까 비어 있던 칸이 있던데.'},{person:'soyul',text:joint?'응. 고른 이유를 쓰고 나니까 순서도 정해지더라.':exhibition.outcome==='separate-display'?'응. 각자 고른 건 각자 붙였어. 다음에는 기준부터 이야기해야겠어.':'사진은 붙였어. 설명은 다음 활동 때 조금 더 보완하려고.'},{person:'seoyeon',text:joint?'이제 사진 옆에 네 이야기도 있네. 그냥 사진만 볼 때랑 또 다르다.':'오늘 다 해결하려고 하지는 마. 각자 뭘 남기고 싶은지부터 이야기해봐.'},{person:'soyul',text:'응. 일단 오늘은 집에 가서 다시 고르지는 말아야겠다.'}];}
+
+ if((s.day??1)>1&&scheduledEvent(s,'photo-selection')?.outcome==='practical')return [{person:'seoyeon',text:'여경이랑 사진은 골랐다며? 설명도 정했어?'},{person:'soyul',text:'사진은 골랐어. 설명은… 각자 조금 더 써보기로 했고. 넣고 싶은 게 아직 남아서.'},{person:'seoyeon',text:'그럼 그 이야기도 해봐. 아직 붙이기 전이잖아.'},{person:'soyul',text:'응. 내일 다시 이야기해보려고.'}];
+ if((s.day??1)>1&&scheduledEvent(s,'photo-selection')?.outcome==='separate')return [{person:'seoyeon',text:'사진 정리는 잘됐어?'},{person:'soyul',text:'일단 따로 골랐어. 여경이랑 중요하게 보는 게 달라서.'},{person:'seoyeon',text:'서로 고른 이유는 들어봤고?'},{person:'soyul',text:'그것부터 다시 이야기해야 할 것 같아.'}];
  if((s.day??1)>1)return [
  {person:'seoyeon',text:s.day===2?'여경이랑 사진 골랐다며? 전시 구성도 정했어?':'오늘 사진 설명은 네가 직접 할 거야?'},
  {person:'soyul',text:s.day===2?(friends?'응. 같이 고르니까 내가 놓친 것도 보이더라. 내일 설명도 같이 정하기로 했어.':'네. 여경 씨랑 같이 골랐어요.'):(friends?'응. 여경이랑 순서도 맞췄어. 떨리긴 하는데, 해보려고.':'제가 고른 사진부터 설명해보려고요.')},
@@ -122,8 +128,11 @@ export function respond(state,id,choice){
   Object.assign(delta,{trust:1});
   if(s.day===2){
    text=s.phase==='evening'?{seoyeon:'소율이 여경이랑 사진 정리했대요. 둘이 내일 전시 구성을 같이 정했더라고요.',yeogyeong:'소율이가 사진을 보내줘서 같이 골랐어요. 다음에는 설명 문구도 같이 정하기로 했고요.',soyul:close?'여경이랑 사진 골랐어. 처음에는 어렵게 느꼈는데, 같이 보니까 이야기 잘 되더라.':'여경이랑 사진 정리했어요. 제가 고른 것도 전시에 쓰기로 했대요.'}[id]:{seoyeon:'오전에 수업 끝내고 잠깐 쉬는 중이에요. 소율이는 도서관에서 사진 고른다고 했고요.',yeogyeong:'어제 활동 자료 정리하고 있어요. 소율이가 사진 골라서 보내주기로 했어요.',soyul:'여기서 사진 고르고 있어요. 다 고르면 여경이한테 보내려고요.'}[id];
-   if(s.phase==='evening'&&!s.known.includes('소율과 여경의 사진 협업')){s.known.push('소율과 여경의 사진 협업');s.memory.push(`[2일차] ${people[id].name}에게 소율과 여경이 함께 전시 구성을 정했다는 이야기를 전해 들었다.`);}
+   if(s.phase==='evening')text=photoReport(s,id)??text;
+   if(s.phase==='evening'&&!s.known.includes('소율과 여경의 사진 협업')){const event=scheduledEvent(s,'photo-selection');if(event)learnEvent(s,event,'heard-from:'+id);s.known.push('소율과 여경의 사진 협업');s.memory.push(`[2일차] ${people[id].name}에게 소율과 여경이 함께 전시 구성을 정했다는 이야기를 전해 들었다.`);}
   }else text={seoyeon:'리허설 안내랑 전시 준비가 겹쳤어요. 저는 정한 일정대로 움직이려고요.',yeogyeong:'전시 준비 중이에요. 어제 소율이랑 정한 순서가 있어서 생각보다 수월하네요.',soyul:'어제 고른 파일 챙기고 있어요. 이번에는 제가 설명할 사진도 직접 골랐어요.'}[id];
+  if(s.day===3&&s.phase==='evening'){const event=scheduledEvent(s,'campus-showcase');text=showcaseReport(s,id)??text;if(event){const seen=!!s.eventState?.knowledge?.[`campus:${event.day}:${event.id}`];learnEvent(s,event,'heard-from:'+id);if(!seen)s.memory.push(`[3일차] ${people[id].name}에게 전해 들음: ${event.result}`);}}
+  else if(s.day===3)text=photoReport(s,id)??text;
   stage=people[id].habit;
  }else if(choice==='listen'){
   Object.assign(delta,{trust:1});
@@ -213,6 +222,7 @@ function advanceScene(state,id,choice){
   changeRelationship(s,id,'taei',selected.delta);s.dialogue.sceneAwards[award]=true;
  }
  if(choice==='apologize'&&s.dialogue.observations[id])s.dialogue.observations[id].boundary='acknowledged';
+ if(id==='soyul'&&s.day===3&&s.eventState?.flags?.captionEncountered&&socialIntent(s,id).feelsSafe&&['specific','honest','soft'].includes(choice)&&!s.eventState.flags.captionReviewed){s.eventState.flags.captionReviewed=true;s.memory.push('[3일차] 소율의 설명 문구를 함께 읽고 구체적인 의견을 나눴다.');}
  if(selected.fact){
   const [name,value]=selected.fact;s.dialogue.facts[id]??={};s.dialogue.facts[id][name]=value;
   s.dialogue.observations[id]??={};s.dialogue.observations[id][name]=value;

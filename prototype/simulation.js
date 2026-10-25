@@ -1,9 +1,10 @@
+import {activityEvents,phaseEvents} from './event-engine.js';
 import {introduce,contact,identities,learnIdentity,clubRoster} from './identity.js';
 import {personalMessage} from './social-reasoning.js';
 import {changeRelationship,relationship} from './dialogue.js';
 import {days,availableRoutes} from './days.js';
 export function newGame(profile='acquaintance') {
- const s={version:5,contacts:{},encounters:{},day:1,phase:'afternoon',choice:null,minutes:0,location:'campus',
+ const s={version:6,world:{stage:'campus'},eventState:{flags:{},plans:{},knowledge:{}},contacts:{},encounters:{},day:1,phase:'afternoon',choice:null,minutes:0,location:'campus',
   known:[],messages:[],events:[],relations:{},npcs:{yeogyeong:{name:'차여경',location:'hall'},seoyeon:{name:'한서연',location:'hall'},soyul:{name:'박소율',location:'hall'}},
   memory:[],dayHistory:[],appointments:[],lastResult:'',dialogue:{history:[],promises:{}}};
  for(const id of clubRoster){learnIdentity(s,id,'club-roster');s.contacts[id].playerNameKnown=true;}
@@ -15,22 +16,15 @@ export function newGame(profile='acquaintance') {
 }
 function remember(s,text){s.memory.push(`[${s.day}일차] ${text}`);}
 function know(s,...facts){for(const fact of facts)if(!s.known.includes(fact))s.known.push(fact);}
-export function act(state,choice){
+export function act(state,choice,options={}){
  if(state.phase!=='afternoon')throw new Error('오늘의 오후 활동은 이미 완료했습니다.');
  const route=availableRoutes(state).find(r=>r.id===choice);
  if(!route||route.locked)throw new Error('지금 선택할 수 없는 활동입니다.');
- const s=structuredClone(state),day=s.day;
+ let s=structuredClone(state);const day=s.day;
  s.choice=choice;s.minutes=route.duration;s.phase='evening';s.lastResult=route.memory;
  const encounters=choice==='volunteer'||choice==='exhibit'?Object.keys(s.npcs):choice==='review'?['soyul']:choice==='backstage'?['seoyeon']:[];
  for(const id of encounters)if(!contact(s,id).introduced){introduce(s,id,'shared-activity');s.lastResult=`활동에 앞서 ${identities[id].name}과 함께 준비를 시작하며 몇 마디 나눴다. `+s.lastResult;remember(s,`${identities[id].name}과 함께 활동하며 이야기를 나눴다.`);}
  remember(s,route.memory);know(s,...route.knowledge);
- const participants=day===2?['yeogyeong','soyul']:['yeogyeong','seoyeon','soyul'];
- const result={1:'포장 누락을 확인하고 남은 물품에 맞춰 진행 순서를 조정했다.',2:'소율이 정리한 사진을 여경에게 전달하고 둘이 전시 구성을 의논했다.',3:'봉사단이 사진 전시 준비를 마쳤다.'}[day];
- s.events.push({id:days[day].event,day,participants,result});
- // Independent outcomes are applied even when Tae-i chose another activity.
- changeRelationship(s,'yeogyeong','soyul',{trust:1,familiarity:1});
- changeRelationship(s,'soyul','yeogyeong',{trust:1,familiarity:1});
- if(day!==2)changeRelationship(s,'seoyeon','soyul',{trust:1});
  if(day===1&&choice==='volunteer'){
   changeRelationship(s,'yeogyeong','taei',{trust:1});
   s.messages.push({day,from:'봉사단 단체방',text:'오늘 정리까지 도와주셔서 감사합니다.'});
@@ -42,6 +36,7 @@ export function act(state,choice){
   for(const id of Object.keys(s.npcs))changeRelationship(s,id,'taei',{familiarity:1,trust:1});
   s.messages.push({day,from:'봉사단 단체방',text:'사진 전시 준비를 마쳤습니다. 도와주셔서 감사합니다.'});
  }else s.messages.push({day,from:'봉사단 단체방',text:day===1?'오늘 활동 마쳤습니다. 참여하신 분들 수고하셨어요.':'오늘 일정 마쳤습니다. 모두 수고하셨어요.'});
+ s=activityEvents(s,choice,options.approach);
  if(day===2&&choice==='work'&&s.dayHistory.some(h=>h.choice==='rehearsal')){
   s.lastResult+=' 어제 합주에서 확인한 부분을 수정해 데모를 녹음했다.';remember(s,'어제의 합주를 바탕으로 데모를 녹음했다.');
  }
@@ -62,7 +57,7 @@ export function act(state,choice){
 export function nextDay(state){
  if(state.phase!=='evening')throw new Error('오후 활동을 마친 뒤 하루를 마무리할 수 있습니다.');
  if(state.day>=3)throw new Error('3일간의 시제품을 모두 마쳤습니다.');
- const s=structuredClone(state);
+ let s=structuredClone(state);
  s.dayHistory.push({day:s.day,choice:s.choice,promises:structuredClone(s.dialogue.promises)});
  s.day++;s.phase='afternoon';s.choice=null;s.minutes=0;s.lastResult='';s.location='campus';s.dialogue.promises={};
  for(const [id,npc] of Object.entries(s.npcs))npc.location=days[s.day].schedules.afternoon[id];
@@ -70,7 +65,7 @@ export function nextDay(state){
   s.messages.push({day:2,from:'봉사단 단체방',text:'오늘 여경은 학생회관에서 정리하고, 소율은 도서관에서 사진을 고릅니다. 서연은 오후에 대학가 카페에 있어요.'});
   for(const id of Object.keys(s.npcs)){const text=personalMessage(s,id);if(text)s.messages.push({day:2,from:s.npcs[id].name,text});}
  }else s.messages.push({day:3,from:'봉사단 단체방',text:'오늘 사진 전시 준비는 학생회관에서 진행합니다. 소율은 먼저 도서관에서 파일을 챙깁니다. 공연 리허설도 같은 오후에 있어요.'});
- return s;
+ return phaseEvents(s);
 }
 export function acceptAppointment(state,person){
  if(state.day!==2||!state.npcs[person])throw new Error('지금은 다음 날 약속을 잡을 수 없습니다.');
@@ -100,6 +95,11 @@ export function restore(raw){
   for(const id of Object.keys(s.npcs??{}))if(oldInteractions.has(id)||s.dialogue?.facts?.[id]?.speech==='casual')introduce(s,id,'legacy-interaction');
  }
  if(s?.version===4){s.version=5;s.encounters={};for(const id of clubRoster)if(s.npcs?.[id])learnIdentity(s,id,'club-roster');}
- if(s?.version!==5||!s.encounters||!s.contacts||!Number.isInteger(s.day)||s.day<1||s.day>3||!['afternoon','evening'].includes(s.phase)||!Array.isArray(s.memory)||!Array.isArray(s.known)||!Array.isArray(s.messages)||!Array.isArray(s.events)||!Array.isArray(s.dayHistory)||!Array.isArray(s.appointments)||!s.npcs||!s.relations||!Array.isArray(s.dialogue?.history)||!s.dialogue?.promises)throw new Error('지원하지 않는 저장 파일입니다.');
+ if(s?.version===5){
+  s.version=6;s.world??={stage:'campus'};s.eventState??={flags:{},plans:{},knowledge:{}};
+  for(const event of s.events??[]){event.kind??='scheduled';event.stage??='campus';event.phase??='evening';}
+  if(s.events?.some(e=>e.id==='photo-selection'))s.eventState.flags.photoStyle='joint';
+ }
+ if(s?.version!==6||!s.world||!s.eventState||!s.encounters||!s.contacts||!Number.isInteger(s.day)||s.day<1||s.day>3||!['afternoon','evening'].includes(s.phase)||!Array.isArray(s.memory)||!Array.isArray(s.known)||!Array.isArray(s.messages)||!Array.isArray(s.events)||!Array.isArray(s.dayHistory)||!Array.isArray(s.appointments)||!s.npcs||!s.relations||!Array.isArray(s.dialogue?.history)||!s.dialogue?.promises)throw new Error('지원하지 않는 저장 파일입니다.');
  return s;
 }
