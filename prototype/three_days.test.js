@@ -10,12 +10,12 @@ test('days cannot be skipped, replayed, or advanced past day three',()=>{
  let s=newGame();
  for(const choice of ['rehearsal','work','backstage']){
   const day=s.day;s=act(s,choice);
-  assert.equal(s.events.filter(e=>e.day===day&&e.kind==='scheduled').length,day===1?2:1);
+  assert.equal(s.events.filter(e=>e.day===day&&e.kind==='scheduled').length,day===2?1:2);
   assert.throws(()=>act(s,choice));
   if(day<3)s=nextDay(s);
  }
  assert.throws(()=>nextDay(s));assert.equal(s.dayHistory.length,2);
- assert.equal(new Set(s.events.filter(e=>e.kind==='scheduled').map(e=>e.id)).size,4);
+ assert.equal(new Set(s.events.filter(e=>e.kind==='scheduled').map(e=>e.id)).size,5);
 });
 test('prior promises survive through morning greetings without being silently cleared',()=>{
  const base=respond(newGame(),'seoyeon','promise').state;
@@ -89,7 +89,7 @@ test('all reachable three-day routes preserve state across save and restore',()=
    for(const third of availableRoutes(day3).filter(r=>!r.locked)){
     const end=act(restore(save(day3)),third.id);
     assert.deepEqual(restore(save(end)),end);
-    assert.equal(end.events.filter(e=>e.kind==='scheduled').length,4);count++;
+    assert.equal(end.events.filter(e=>e.kind==='scheduled').length,5);count++;
    }
   }
  }

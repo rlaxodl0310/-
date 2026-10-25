@@ -1,3 +1,4 @@
+import {warningPhase,warningActivity} from './warnings.js';
 import {defaultWeather,weatherAdjustAppointments} from './weather.js';
 import {expireOffers} from './appointments.js';
 import {spendTime,campusMinute} from './campus-time.js';
@@ -7,7 +8,7 @@ import {personalMessage} from './social-reasoning.js';
 import {changeRelationship,relationship} from './dialogue.js';
 import {days,availableRoutes,currentSchedule} from './days.js';
 export function newGame(profile='acquaintance') {
- const s={version:6,weather:defaultWeather(),clock:{minute:780},pace:{count:0,seen:{}},world:{stage:'campus'},eventState:{flags:{},plans:{},knowledge:{}},contacts:{},encounters:{},day:1,phase:'afternoon',choice:null,minutes:0,location:'campus',
+ const s={version:6,warnings:{evidence:[],resolved:{}},weather:defaultWeather(),clock:{minute:780},pace:{count:0,seen:{}},world:{stage:'campus'},eventState:{flags:{},plans:{},knowledge:{}},contacts:{},encounters:{},day:1,phase:'afternoon',choice:null,minutes:0,location:'campus',
   known:[],inventory:[],discoveries:[],messages:[],events:[],relations:{},npcs:{yeogyeong:{name:'차여경',location:'hall'},seoyeon:{name:'한서연',location:'hall'},soyul:{name:'박소율',location:'hall'}},
   social:{facts:[],knowledge:{},shares:[],decisions:{},heardByPlayer:[]},memberships:{},invitationDecisions:{},memory:[],dayHistory:[],appointments:[],lastResult:'',dialogue:{history:[],promises:{}}};
  changeRelationship(s,'seoyeon','soyul',{familiarity:20,trust:12,affection:8});
@@ -55,7 +56,7 @@ export function act(state,choice,options={}){
   remember(s,`${appointment.person?s.npcs[appointment.person].name+'과 한 ':''}${appointment.label} 약속을 ${kept?'지켰다.':'지키지 못했다.'}`);
  }
  for(const [id,npc] of Object.entries(s.npcs))npc.location=currentSchedule(s)[id];
- return expireOffers(s);
+ return expireOffers(warningActivity(s,choice));
 }
 export function nextDay(state){
  if(state.phase!=='evening')throw new Error('오후 활동을 마친 뒤 하루를 마무리할 수 있습니다.');
@@ -68,7 +69,7 @@ export function nextDay(state){
   s.messages.push({day:2,from:s.memberships?.volunteer?'봉사단 단체방':'교내 활동 게시판',text:'오늘 여경은 학생회관에서 정리하고, 소율은 도서관에서 사진을 고릅니다. 서연은 오후에 대학가 카페에 있어요.'});
   for(const id of Object.keys(s.npcs)){const text=personalMessage(s,id);if(text)s.messages.push({day:2,from:s.npcs[id].name,text});}
  }else s.messages.push({day:3,from:s.memberships?.volunteer?'봉사단 단체방':'교내 활동 게시판',text:'오늘 사진 전시 준비는 학생회관에서 진행합니다. 소율은 먼저 도서관에서 파일을 챙깁니다. 공연 리허설도 같은 오후에 있어요.'});
- return weatherAdjustAppointments(phaseEvents(s),availableRoutes(s));
+ return warningPhase(weatherAdjustAppointments(phaseEvents(s),availableRoutes(s)));
 }
 export function acceptAppointment(state,person){
  if(state.day!==2||!state.npcs[person])throw new Error('지금은 다음 날 약속을 잡을 수 없습니다.');
@@ -104,6 +105,7 @@ export function restore(raw){
   if(s.events?.some(e=>e.id==='photo-selection'))s.eventState.flags.photoStyle='joint';
  }
  if(s?.version!==6||!s.world||!s.eventState||!s.encounters||!s.contacts||!Number.isInteger(s.day)||s.day<1||s.day>3||!['afternoon','evening'].includes(s.phase)||!Array.isArray(s.memory)||!Array.isArray(s.known)||!Array.isArray(s.messages)||!Array.isArray(s.events)||!Array.isArray(s.dayHistory)||!Array.isArray(s.appointments)||!s.npcs||!s.relations||!Array.isArray(s.dialogue?.history)||!s.dialogue?.promises)throw new Error('지원하지 않는 저장 파일입니다.');
+ s.warnings??={evidence:[],resolved:{}};
  s.weather??=defaultWeather();
  s.clock??={minute:s.phase==='evening'?1140:780};
  s.social??={facts:[],knowledge:{},shares:[],decisions:{},heardByPlayer:[]};

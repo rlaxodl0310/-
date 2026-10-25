@@ -1,3 +1,4 @@
+import {noteWarning} from './warning-records.js';
 export function eventKey(event){return `${event.stage??'campus'}:${event.day}:${event.id}`;}
 export function scheduledEvent(s,id){return s.events.findLast(e=>e.id===id&&(e.kind??'scheduled')==='scheduled')??null;}
 export function learnEvent(s,event,source){
@@ -10,7 +11,7 @@ export function readMessages(state){
  const s=structuredClone(state);
  for(const message of s.messages){
   message.read=true;
-  if(message.eventKey){const event=s.events.find(e=>eventKey(e)===message.eventKey);if(event&&!s.eventState?.knowledge?.[eventKey(event)]){learnEvent(s,event,'message');s.memory.push(`[${s.day}일차] 메시지로 알게 됨: ${event.result}`);}}
+  if(message.eventKey){const event=s.events.find(e=>eventKey(e)===message.eventKey);if(event?.warning)noteWarning(s,event.warning);if(event&&!s.eventState?.knowledge?.[eventKey(event)]){learnEvent(s,event,'message');if(!event.warning)s.memory.push(`[${s.day}일차] 메시지로 알게 됨: ${event.result}`);}}
  }
  return s;
 }

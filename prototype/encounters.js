@@ -1,3 +1,4 @@
+import {beginWarningSite} from './warnings.js';
 import {wetWeather,weatherAtmosphere} from './weather.js';
 import {socialNews} from './social-memory.js';
 import {meetAppointments} from './appointments.js';
@@ -9,9 +10,9 @@ import {socialIntent} from './social-reasoning.js';
 import {dialogue,openConversation,respond} from './dialogue.js';
 
 export const placeActions={
- hall:[{id:'noticeboard',label:'게시판 쪽으로 걸어간다'},{id:'tables',label:'공용 테이블 쪽으로 돌아간다'},{id:'window',label:'창가 쪽 빈자리를 찾아본다'},{id:'lounge',label:'휴게공간을 지나간다'}],
- library:[{id:'shelves',label:'반납대와 자료실을 둘러본다'}],
- cafe:[{id:'counter',label:'주문대 쪽으로 간다'}]
+ hall:[{id:'noticeboard',label:'게시판 쪽으로 걸어간다'},{id:'tables',label:'공용 테이블 쪽으로 돌아간다'},{id:'window',label:'창가 쪽 빈자리를 찾아본다'},{id:'lounge',label:'휴게공간을 지나간다'},{id:'sidegate',label:'뒤편 출입문 쪽으로 걸어간다',fromDay:3}],
+ library:[{id:'shelves',label:'반납대와 자료실을 둘러본다'},{id:'entrance',label:'로비의 출입 안내를 살펴본다',fromDay:3}],
+ cafe:[{id:'counter',label:'주문대 쪽으로 간다'},{id:'street',label:'창밖의 정류장 쪽을 살펴본다',fromDay:3}]
 };
 export function encounterKey(s,spot='entry'){return `${s.day}:${s.phase}:${s.location}:${spot}${s.day===1&&s.phase==='afternoon'&&s.clock?':'+Math.floor(s.clock.minute/60):''}`;}
 function encounterContent(s,id){
@@ -49,6 +50,7 @@ function observePlace(s,location,spot,repeated=false){
 }
 export function arrive(state,location,spot='entry'){
  const s=structuredClone(state);s.location=location;s.encounters??={};
+ const warning=beginWarningSite(s,location,spot);if(warning)return {state:warning.state,encounter:null,warning:warning.scene,observation:warning.observation};
  const present=presentPeople(s,location);seePeople(s,present);
  const key=encounterKey(s,spot);
  if(s.encounters[key]?.resolved)return {state:s,encounter:null,observation:observePlace(s,location,spot,true)};
