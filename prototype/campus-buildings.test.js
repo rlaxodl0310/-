@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {campusBuildings,buildingActivity,buildingActions,buildingAtmosphere,buildingLinks,enterBuildingArea,selectedBuildingArea} from './campus-buildings.js';
 import {locations} from './days.js';
-import {newGame,restore,save} from './simulation.js';
+import {newAfternoonScenario as newGame,restore,save} from './simulation.js';
 import {arrive} from './encounters.js';
 import {campusScene,placeContinuations} from './scene-flow.js';
 import {paceAction} from './campus-time.js';

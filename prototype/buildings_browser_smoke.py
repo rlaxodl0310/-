@@ -1,4 +1,5 @@
 """All added buildings via the visible phone map, local actions and save/load."""
+from flow_browser_helpers import finish_morning
 import os
 from playwright.sync_api import sync_playwright
 base=os.environ.get('CAMPUS_TEST_URL','http://127.0.0.1:8000')
@@ -8,6 +9,7 @@ with sync_playwright() as p:
   page=browser.new_page(viewport={'width':390,'height':844});page.set_default_timeout(7000);errors=[]
   page.on('pageerror',lambda e:errors.append(str(e)))
   page.goto(base+path)
+  finish_morning(page)
   assert page.locator('.prompt [data-value="cafeteria"]').is_visible()
   for id,name,action in [('cafeteria','외식관','menu'),('dorm','기숙사','guide'),('academic','은혜관','rooms'),('music','음악관','voice'),('gym','체육관','stretch')]:
    page.get_by_role('button',name='휴대폰',exact=True).click()

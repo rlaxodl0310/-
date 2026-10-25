@@ -1,4 +1,5 @@
 """A conversation's individual choices stay in one period; a batch advances after exit."""
+from flow_browser_helpers import finish_morning
 from playwright.sync_api import sync_playwright
 import os
 base=os.environ.get('CAMPUS_TEST_URL','http://127.0.0.1:8000')
@@ -9,6 +10,7 @@ with sync_playwright() as p:
         page.set_default_timeout(7000)
         errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
         page.goto(base+path)
+        finish_morning(page)
         page.get_by_role('button',name='메뉴',exact=True).click()
         page.get_by_role('button',name='호감이 쌓인 사이',exact=True).click()
         page.get_by_role('button',name='하던 일을 계속하며 지나간다.').click()

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newGame,act,nextDay,save,restore} from './simulation.js';
+import {newAfternoonScenario as newGame,act,nextDay,save,restore} from './simulation.js';
 import {arrive,resolveEncounter,placeActions} from './encounters.js';
 import {contact,displayName} from './identity.js';
 import {dialogue} from './dialogue.js';

@@ -1,4 +1,5 @@
 """Check sustained character conversations reached through incidental encounters."""
+from flow_browser_helpers import finish_morning
 from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_recruitment, end_day, go_campus, finish_afternoon
 from playwright.sync_api import sync_playwright
 
@@ -10,6 +11,7 @@ with sync_playwright() as p:
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.goto('http://127.0.0.1:8000' + path)
+        finish_morning(page)
         for selector in ['.explore', '.portrait']:
             assert page.locator(selector).evaluate('''async element => {
                 const match = getComputedStyle(element).backgroundImage.match(/url\\("?([^"\\)]+)"?\\)/);

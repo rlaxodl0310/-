@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newGame,act,save,restore} from './simulation.js';
+import {newAfternoonScenario as newGame,act,save,restore} from './simulation.js';
 
 for(const route of ['rehearsal','volunteer','explore']) test(`${route}: world event resolves without duplicate execution`,()=>{
  const initial=newGame(),s=act(initial,route);

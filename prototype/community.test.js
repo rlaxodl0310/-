@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newGame,act,nextDay,save,restore} from './simulation.js';
+import {newAfternoonScenario as newGame,act,nextDay,save,restore} from './simulation.js';
 import {advanceCommunity,publicCommunityContext} from './community-simulation.js';
 import {visibleCommunityPosts,readCommunityPost} from './community.js';
 import {knownSceneRoutes} from './scene-flow.js';

@@ -1,4 +1,5 @@
 """New students are initially unfamiliar, but interaction requires an encountered situation."""
+from flow_browser_helpers import finish_morning
 from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_recruitment, end_day, go_campus
 from playwright.sync_api import sync_playwright
 import json
@@ -11,6 +12,7 @@ with sync_playwright() as p:
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.goto('http://127.0.0.1:8000' + path)
+        finish_morning(page)
         visit_place(page, 'hall')
         assert '차여경' not in page.locator('.lead').inner_text()
         assert '발치' in page.locator('.lead').inner_text()

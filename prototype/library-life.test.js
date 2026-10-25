@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newGame,save,restore} from './simulation.js';
+import {newAfternoonScenario as newGame,save,restore} from './simulation.js';
 import {libraryActivity,libraryGreeting,libraryAtmosphere} from './library-life.js';
 import {paceAction} from './campus-time.js';
 import {arrive} from './encounters.js';

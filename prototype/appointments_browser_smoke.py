@@ -1,4 +1,5 @@
 """Voluntary membership, activity offers and NPC initiative in both browser builds."""
+from flow_browser_helpers import finish_morning
 from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_recruitment, end_day, go_campus
 from playwright.sync_api import sync_playwright
 import os
@@ -10,6 +11,7 @@ with sync_playwright() as p:
         page.set_default_timeout(7000)
         errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
         page.goto(base+path)
+        finish_morning(page)
         open_recruitment(page)
         assert page.locator('[data-action="readPost"][data-value$="-recruit"]').count()==3
         page.locator('[data-action="readPost"][data-value="football-recruit"]').click()

@@ -1,4 +1,5 @@
 """Offline residents publish over time; post reading, delayed comments and phone context work."""
+from flow_browser_helpers import finish_morning
 from playwright.sync_api import sync_playwright
 import os,re
 base=os.environ.get('CAMPUS_TEST_URL','http://127.0.0.1:8000')
@@ -10,6 +11,7 @@ with sync_playwright() as p:
         errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
         page.clock.install()
         page.goto(base+path)
+        finish_morning(page)
         before=page.locator('.badge').inner_text()
         page.get_by_role('button',name='휴대폰',exact=True).click()
         page.get_by_role('button',name='학내 커뮤니티',exact=True).click()

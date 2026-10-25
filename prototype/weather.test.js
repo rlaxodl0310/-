@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newGame,act,nextDay,restore,save} from './simulation.js';
+import {newAfternoonScenario as newGame,act,nextDay,restore,save} from './simulation.js';
 import {weatherNow,setWeatherExample,borrowUmbrella,weatherAdjustAppointments,hasUmbrella} from './weather.js';
 import {availableRoutes,presentPeople} from './days.js';
 import {spendTime,paceAction} from './campus-time.js';

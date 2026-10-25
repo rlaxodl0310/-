@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newGame,act,nextDay,restore,save,acceptAppointment} from './simulation.js';
+import {newAfternoonScenario as newGame,act,nextDay,restore,save,acceptAppointment} from './simulation.js';
 import {knownGame} from './fixtures.js';
 import {warningPhase,beginWarningSite,finishWarningSite,discussWarnings} from './warnings.js';
 import {readMessages,eventKey} from './event-view.js';

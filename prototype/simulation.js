@@ -1,3 +1,4 @@
+import {timetable} from './timetable.js';
 import {warningPhase,warningActivity} from './warnings.js';
 import {defaultWeather,weatherAdjustAppointments} from './weather.js';
 import {expireOffers} from './appointments.js';
@@ -8,15 +9,18 @@ import {personalMessage} from './social-reasoning.js';
 import {changeRelationship,relationship} from './dialogue.js';
 import {days,availableRoutes,currentSchedule} from './days.js';
 export function newGame(profile='acquaintance') {
- const s={version:6,playMode:'free',freeDay:{completed:[],settled:false},community:{beat:0,rng:641937,sequence:0,posts:[],jobs:[],agents:{},topics:{},nextPost:2,lastWorld:null},flow:{seen:{}},risk:{knowledge:{},decisions:{},positions:{},actions:[],sent:{},requests:{}},warnings:{evidence:[],resolved:{}},weather:defaultWeather(),clock:{minute:780},pace:{count:0,seen:{}},world:{stage:'campus'},eventState:{flags:{},plans:{},knowledge:{}},contacts:{},encounters:{},day:1,phase:'afternoon',choice:null,minutes:0,location:'campus',
+ const s={version:6,playMode:'free',freeDay:{completed:[],settled:false},community:{beat:0,rng:641937,sequence:0,posts:[],jobs:[],agents:{},topics:{},nextPost:2,lastWorld:null},flow:{seen:{}},risk:{knowledge:{},decisions:{},positions:{},actions:[],sent:{},requests:{}},warnings:{evidence:[],resolved:{}},weather:defaultWeather(),academics:{enabled:true,records:{},lesson:null},clock:{minute:540},pace:{count:0,seen:{}},world:{stage:'campus'},eventState:{flags:{},plans:{},knowledge:{}},contacts:{},encounters:{},day:1,phase:'afternoon',choice:null,minutes:0,location:'campus',
   known:[],inventory:[],discoveries:[],messages:[],events:[],relations:{},npcs:{yeogyeong:{name:'차여경',location:'hall'},seoyeon:{name:'한서연',location:'hall'},soyul:{name:'박소율',location:'hall'}},
   social:{facts:[],knowledge:{},shares:[],decisions:{},heardByPlayer:[]},memberships:{},invitationDecisions:{},memory:[],dayHistory:[],appointments:[],lastResult:'',dialogue:{history:[],promises:{}}};
  changeRelationship(s,'seoyeon','soyul',{familiarity:20,trust:12,affection:8});
  changeRelationship(s,'soyul','seoyeon',{familiarity:20,trust:12,affection:8});
  if(profile!=='acquaintance')for(const id of Object.keys(s.npcs))changeRelationship(s,id,'taei',profile==='close'?{familiarity:8,trust:5,affection:5}:{familiarity:6,trust:4,affection:0});
  if(profile!=='acquaintance'){for(const id of Object.keys(s.npcs))introduce(s,id,'relationship-demo');s.dialogue.facts={};for(const id of Object.keys(s.npcs))s.dialogue.facts[id]={speech:'casual'};}
+ for(const [id,place] of Object.entries(currentSchedule(s)))s.npcs[id].location=place;
  return s;
 }
+// Afternoon snapshots for existing authored-scene regression and relationship comparison.
+export function newAfternoonScenario(profile='acquaintance'){const s=newGame(profile);s.academics.enabled=false;s.clock.minute=780;for(const [id,place] of Object.entries(currentSchedule(s)))s.npcs[id].location=place;return s;}
 function remember(s,text){s.memory.push(`[${s.day}일차] ${text}`);}
 function know(s,...facts){for(const fact of facts)if(!s.known.includes(fact))s.known.push(fact);}
 // Legacy single-choice resolver for archived scenarios; normal play uses freeActivity.
@@ -64,7 +68,7 @@ export function nextDay(state){
  if(state.day>=3)throw new Error('3일간의 시제품을 모두 마쳤습니다.');
  let s=structuredClone(state);
  s.dayHistory.push({day:s.day,choice:s.choice,activities:structuredClone(s.freeDay?.completed??[]),promises:structuredClone(s.dialogue.promises)});
- s.freeDay={completed:[],settled:false};s.clock={minute:780};s.pace={count:0,seen:{}};s.day++;s.phase='afternoon';s.choice=null;s.minutes=0;s.lastResult='';s.location='campus';s.dialogue.promises={};
+ s.freeDay={completed:[],settled:false};s.clock={minute:s.academics?.enabled?540:780};s.pace={count:0,seen:{}};s.day++;s.phase='afternoon';s.choice=null;s.minutes=0;s.lastResult='';s.location='campus';s.dialogue.promises={};
  for(const [id,npc] of Object.entries(s.npcs))npc.location=currentSchedule(s)[id];
  if(s.day===2){
   s.messages.push({day:2,from:s.memberships?.volunteer?'봉사단 단체방':'캠퍼스톡 동아리 소식',text:s.memberships?.volunteer?'오늘 여경은 자유관에서 정리하고, 소율은 도서관에서 사진을 고릅니다. 서연은 오후에 대학가 카페에 있어요.':'오늘 공개 사진 정리는 도서관, 봉사단 준비 정리는 자유관에서 진행합니다.'});
@@ -109,6 +113,7 @@ export function restore(raw){
  if(!s.flow){s.flow={seen:{}};for(const place of ['hall','library','cafe'])if(Object.keys(s.encounters).some(k=>k.includes(':'+place+':')))s.flow.seen['visit:'+place]=true;if(Object.keys(s.memberships??{}).length)s.flow.seen.board=true;}
  if(s.flow.seen.board&&!s.flow.seen.community){s.flow.seen.community=true;for(const club of ['volunteer','football','music'])s.flow.seen['club:'+club]=true;}
  s.known=s.known.map(text=>text.replaceAll('학생회관','자유관').replaceAll('음악 연습동','음악관').replaceAll('강의동','은혜관'));
+ if(!s.academics){s.academics={enabled:true,records:{},lesson:null};for(let day=1;day<=s.day;day++)for(const c of timetable({...s,day}))if(day<s.day||c.end<=(s.clock?.minute??780))s.academics.records[c.key]={status:'untracked',day,course:c.id};}
  s.community??={beat:0,rng:641937,sequence:0,posts:[],jobs:[],agents:{},topics:{},nextPost:2,lastWorld:null};
  s.playMode='free';s.freeDay??={completed:s.choice&&s.phase==='evening'?[{id:s.choice,start:Math.max(780,(s.clock?.minute??1140)-(s.minutes??0)),end:s.clock?.minute??1140}]:[],settled:s.phase==='evening'};
  s.risk??={knowledge:{},decisions:{},positions:{},actions:[],sent:{},requests:{}};

@@ -1,3 +1,4 @@
+import {recordMissedLessons} from './timetable.js';
 import {applyCampusMoments} from './campus-moments.js';
 import {availableRoutes,currentSchedule} from './days.js';
 import {activityEvents} from './event-engine.js';
@@ -27,7 +28,7 @@ export function advanceFreeTime(state,minutes,{activeChoice=null,travelling=fals
  if(!Number.isInteger(minutes)||minutes<0)throw new Error('올바르지 않은 소요 시간입니다.');
  let s=structuredClone(state);const end=(s.clock?.minute??780)+minutes;
  if(end>1320)throw new Error('오늘은 너무 늦어집니다. 짧은 행동을 하거나 귀가할 수 있습니다.');
- const before=s.clock?.minute??780;s.clock={minute:end};applyCampusMoments(s,before,end,{travelling});s.phase=end>=1080?'evening':'afternoon';
+ const before=s.clock?.minute??780;s.clock={minute:end};recordMissedLessons(s,before,end);applyCampusMoments(s,before,end,{travelling});s.phase=end>=1080?'evening':'afternoon';
  s=settleFreeWorld(s,activeChoice);
  for(const [id,place] of Object.entries(currentSchedule(s)))s.npcs[id].location=place;
  return s;
@@ -49,5 +50,5 @@ export function freeActivity(state,id){
  s=warningActivity(s,id);s.memory.push(`[${s.day}일차] ${s.lastResult}`);return s;
 }
 export function goHome(state){
- let s=structuredClone(state);s.clock={minute:Math.max(s.clock?.minute??780,1080)};applyCampusMoments(s,state.clock?.minute??780,s.clock.minute,{travelling:true});s.phase='evening';s=settleFreeWorld(s);freeDay(s).home=true;return s;
+ let s=structuredClone(state);s.clock={minute:Math.max(s.clock?.minute??780,1080)};recordMissedLessons(s,state.clock.minute,s.clock.minute);applyCampusMoments(s,state.clock?.minute??780,s.clock.minute,{travelling:true});s.phase='evening';s=settleFreeWorld(s);freeDay(s).home=true;return s;
 }

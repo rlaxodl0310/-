@@ -1,4 +1,5 @@
 """Check immediate discovery feedback, collection UI, persistence and narrow layouts."""
+from flow_browser_helpers import finish_morning
 from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_recruitment, end_day, go_campus
 from playwright.sync_api import sync_playwright
 import os
@@ -11,6 +12,7 @@ with sync_playwright() as p:
         errors=[]
         page.on('pageerror',lambda error: errors.append(str(error)))
         page.goto(base+path)
+        finish_morning(page)
         open_map(page)
         page.get_by_role('button',name='도서관 찾아가기').click()
         assert '도서관 층별 안내' in page.locator('.discovery-notice').inner_text()

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {discoveryChanges,recordDiscoveries} from './discoveries.js';
-import {newGame,restore,save} from './simulation.js';
+import {newAfternoonScenario as newGame,restore,save} from './simulation.js';
 import {arrive} from './encounters.js';
 test('observing storage grants information only and records it once across save/load',()=>{
  const before=newGame(),after=arrive(before,'library','shelves').state;

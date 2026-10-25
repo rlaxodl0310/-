@@ -52,6 +52,7 @@ export function paceAction(before,after,{action,value,from,to,person}={}){
  }
  if(campusMinute(s)>=(s.playMode==='free'?1320:960))return {state:s,minutes:0};
  const stamp=campusMinute(s);let key=null;
+ if(action==='classTravel'&&before.location!==s.location)key=`${stamp}:classTravel:${s.location}`;
  if(action==='visit'&&before.location!==s.location)key=`${stamp}:visit:${before.location}:${s.location}`;
  if(action==='buildingArea')key=`${stamp}:area:${before.location}:${value}`;
  if(action==='buildingActivity')key=`${stamp}:building:${s.location}:${value}`;
@@ -59,10 +60,10 @@ export function paceAction(before,after,{action,value,from,to,person}={}){
  if(action==='walk')key=`${stamp}:walk:${s.location}:${value}`;
  const leavingConversation=['dialogue','group'].includes(from)&&['place','campus','activities','travel','result'].includes(to);
  if(leavingConversation)key=`${stamp}:conversation:${person??'group'}`;
- if(key&&!s.pace.seen[key]){s.pace.seen[key]=true;s.pace.count++;if(action==='visit'){s.pace.outdoor=true;s.pace.blockMinutes=Math.max(s.pace.blockMinutes??30,weatherBlockMinutes(s,true));}}
+ if(key&&!s.pace.seen[key]){s.pace.seen[key]=true;s.pace.count++;if(['visit','classTravel'].includes(action)){s.pace.outdoor=true;s.pace.blockMinutes=Math.max(s.pace.blockMinutes??30,weatherBlockMinutes(s,true));}}
  const safe=['place','campus','activities','travel'].includes(to);
  if(s.pace.count<3||!safe)return {state:s,minutes:0};
  const minutes=Math.min(s.pace.blockMinutes??30,(s.playMode==='free'?1320:960)-campusMinute(s));
- s=s.playMode==='free'?advanceFreeTime(s,minutes,{travelling:action==='visit'}):spendTime(s,minutes,{travelling:action==='visit'});s.pace={count:0,seen:{}};
+ s=s.playMode==='free'?advanceFreeTime(s,minutes,{travelling:['visit','classTravel'].includes(action)}):spendTime(s,minutes,{travelling:['visit','classTravel'].includes(action)});s.pace={count:0,seen:{}};
  return {state:s,minutes};
 }

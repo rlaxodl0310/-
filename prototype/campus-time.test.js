@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newGame as makeGame,act,save,restore} from './simulation.js';
+import {newAfternoonScenario as makeGame,act,save,restore} from './simulation.js';
 import {timeCost,spendTime,clockLabel,placeAtmosphere,paceAction} from './campus-time.js';
 function newGame(...args){const s=makeGame(...args);s.playMode='legacy';return s;}
 import {presentPeople} from './days.js';

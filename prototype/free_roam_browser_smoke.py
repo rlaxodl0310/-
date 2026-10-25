@@ -1,4 +1,5 @@
 """Arrive, choose any destination, use the phone voluntarily, and do multiple tasks before going home."""
+from flow_browser_helpers import finish_morning
 from playwright.sync_api import sync_playwright
 import os
 base=os.environ.get('CAMPUS_TEST_URL','http://127.0.0.1:8000')
@@ -8,7 +9,8 @@ with sync_playwright() as p:
         page=browser.new_page(viewport={'width':390,'height':844});page.set_default_timeout(7000)
         errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
         page.goto(base+path)
-        assert '학교에 도착했다' in page.locator('.prompt').inner_text()
+        finish_morning(page)
+        assert '공강' in page.locator('.prompt').inner_text()
         assert '커뮤니티' not in page.locator('.prompt').inner_text()
         assert not page.locator('.prompt [data-action="select"]').count()
         if path=='/prototype/':page.screenshot(path='/tmp/free-campus-arrival.png',full_page=True)
@@ -46,7 +48,7 @@ with sync_playwright() as p:
         page.get_by_role('button',name='오늘은 집으로 돌아간다.',exact=True).click()
         page.get_by_role('button',name='오늘은 귀가한다.',exact=True).click()
         page.get_by_role('button',name='2일차 시작하기',exact=True).click()
-        assert '학교에 도착했다' in page.locator('.prompt').inner_text()
+        assert '곧 수업이 시작된다' in page.locator('.prompt').inner_text()
         page.get_by_role('button',name='메뉴',exact=True).click()
         page.get_by_role('button',name='저장',exact=True).first.click()
         saved=page.evaluate("JSON.parse(localStorage.getItem('campus.slot.1'))")

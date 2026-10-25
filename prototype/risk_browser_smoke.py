@@ -1,4 +1,5 @@
 """Sharing a real observation changes an NPC plan; duties override affection; escorts really participate."""
+from flow_browser_helpers import finish_morning
 from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_recruitment, end_day, go_campus
 from playwright.sync_api import sync_playwright
 import os
@@ -10,6 +11,7 @@ with sync_playwright() as p:
         page.set_default_timeout(7000)
         errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
         page.goto(base+path)
+        finish_morning(page)
         page.get_by_role('button',name='메뉴',exact=True).click()
         page.get_by_role('button',name='호감이 쌓인 사이',exact=True).click()
         page.get_by_role('button',name='하던 일을 계속하며 지나간다.').click()

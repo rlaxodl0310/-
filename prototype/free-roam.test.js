@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newGame,nextDay,save,restore} from './simulation.js';
+import {newAfternoonScenario as newGame,nextDay,save,restore} from './simulation.js';
 import {freeActivity,advanceFreeTime,goHome} from './free-roam.js';
 import {campusScene} from './scene-flow.js';
 import {paceAction} from './campus-time.js';

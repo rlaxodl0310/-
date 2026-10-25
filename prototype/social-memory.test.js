@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newGame,act,nextDay,save,restore} from './simulation.js';
+import {newAfternoonScenario as newGame,act,nextDay,save,restore} from './simulation.js';
 import {knownGame} from './fixtures.js';
 import {addSocialFact,updateSocialWorld,shareSocialFacts,socialNews,socialOpinion} from './social-memory.js';
 import {evaluateInvitations} from './appointments.js';
