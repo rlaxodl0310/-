@@ -4,9 +4,9 @@ export function markFlow(state,kind,value){const s=structuredClone(state);flowSt
 export function campusScene(s){
  const seen=s.flow?.seen??{},evening=s.phase==='evening';
  if(evening)return {text:'건물 사이로 불이 하나둘 켜진다. 오늘 나눈 말과 남은 일들이 떠오른다.',choices:[{label:'아직 불이 켜진 학생회관 쪽으로 걷는다.',action:'visit',value:'hall'},{label:s.day<3?'자취방으로 돌아가 오늘을 마무리한다.':'돌아가는 길에 지난 며칠을 떠올린다.',action:'go',value:'dayEnd'}]};
- if(s.day===1&&!seen.board&&!seen['visit:hall'])return {text:'학생회관 앞에서 걸음을 늦춘다. 열린 문 안쪽에서 상자 끄는 소리가 들리고, 게시판에는 새 모집 안내가 겹쳐 붙어 있다.',choices:[{label:'게시판에 붙은 종이를 가까이서 읽는다.',action:'readBoard'},{label:'안쪽에서 들리는 소리를 따라 문을 연다.',action:'visit',value:'hall'}]};
- if(s.day===1)return {text:'게시판에서 고개를 들자 저편 연습실 쪽에서 합주 소리가 새어 나온다. 도서관으로 이어지는 길에는 나무가 줄지어 서 있다.',choices:[{label:'연습실 쪽으로 가서 합주 준비를 살펴본다.',action:'select',value:'rehearsal'},{label:'나무가 이어진 길을 따라 도서관 쪽으로 걷는다.',action:'visit',value:'library'},{label:seen.board?'열린 문으로 학생회관 안에 들어간다.':'아까 지나친 모집 안내를 읽어본다.',action:seen.board?'visit':'readBoard',value:seen.board?'hall':''}]};
- if(s.day===2){const football=seen.board||s.memberships?.football||s.appointments.some(a=>a.activity==='football');return {text:'휴대폰에 어제 작업하던 곡의 메모가 남아 있다. 교내에서는 각자 오늘 할 일을 시작하고, 대학가 카페 쪽으로 사람들이 걸어간다.',choices:[{label:'떠오른 가사를 잊기 전에 자취방에서 데모를 다듬는다.',action:'select',value:'work'},football?{label:'안내받은 축구 동아리 체험 장소로 향한다.',action:'select',value:'football'}:{label:'정리할 것이 남아 있던 학생회관으로 향한다.',action:'visit',value:'hall'},{label:'대학가 카페 쪽으로 천천히 걸어간다.',action:'visit',value:'cafe'}]};}
+ if(s.day===1&&!seen.community&&!seen['visit:hall'])return {text:'학생회관 앞에서 걸음을 늦춘다. 열린 문 안쪽에서 상자 끄는 소리가 들리고, 휴대폰에 학내 커뮤니티의 새 모집글 알림이 떠 있다.',choices:[{label:'휴대폰으로 학내 커뮤니티의 새 글을 확인한다.',action:'openCommunity'},{label:'안쪽에서 들리는 소리를 따라 문을 연다.',action:'visit',value:'hall'}]};
+ if(s.day===1)return {text:'휴대폰에서 고개를 들자 저편 연습실 쪽에서 합주 소리가 새어 나온다. 도서관으로 이어지는 길에는 나무가 줄지어 서 있다.',choices:[{label:'연습실 쪽으로 가서 합주 준비를 살펴본다.',action:'select',value:'rehearsal'},{label:'나무가 이어진 길을 따라 도서관 쪽으로 걷는다.',action:'visit',value:'library'},{label:seen.community?'열린 문으로 학생회관 안에 들어간다.':'아까 뜬 커뮤니티 알림을 확인한다.',action:seen.community?'visit':'openCommunity',value:seen.community?'hall':''}]};
+ if(s.day===2){const football=seen['club:football']||s.memberships?.football||s.appointments.some(a=>a.activity==='football');return {text:'휴대폰에 어제 작업하던 곡의 메모가 남아 있다. 교내에서는 각자 오늘 할 일을 시작하고, 대학가 카페 쪽으로 사람들이 걸어간다.',choices:[{label:'떠오른 가사를 잊기 전에 자취방에서 데모를 다듬는다.',action:'select',value:'work'},football?{label:'안내받은 축구 동아리 체험 장소로 향한다.',action:'select',value:'football'}:{label:'정리할 것이 남아 있던 학생회관으로 향한다.',action:'visit',value:'hall'},{label:'대학가 카페 쪽으로 천천히 걸어간다.',action:'visit',value:'cafe'}]};}
  return {text:'공연장 쪽에서 장비를 옮기는 소리가 들린다. 학생회관 입구에는 오늘 사진 전시 준비 안내가 붙어 있고, 도서관으로 향하는 학생들도 보인다.',choices:[{label:'공연장으로 가서 리허설 준비를 돕는다.',action:'select',value:'backstage'},{label:'사진 전시 안내가 붙은 학생회관으로 간다.',action:'visit',value:'hall'},{label:'자료실 쪽으로 가는 학생들을 따라 걷는다.',action:'visit',value:'library'}]};
 }
 export function placeContinuations(s,place){
@@ -31,8 +31,8 @@ export function knownSceneRoutes(s){
  const invited=id=>s.appointments.some(a=>a.activity===id&&['pending','offered','kept'].includes(a.status));
  return availableRoutes(s).filter(r=>{
   if(['rehearsal','work','backstage'].includes(r.id))return true;
-  if(r.id==='volunteer'||r.id==='exhibit')return seen.board||visited('hall')||s.memberships?.volunteer||invited(r.id);
-  if(r.id==='football')return seen.board||s.memberships?.football||invited(r.id);
+  if(r.id==='volunteer'||r.id==='exhibit')return seen['club:volunteer']||visited('hall')||s.memberships?.volunteer||invited(r.id);
+  if(r.id==='football')return seen['club:football']||s.memberships?.football||invited(r.id);
   if(r.id==='review')return visited('library')||s.contacts?.soyul?.introduced||invited(r.id);
   if(r.id==='explore')return visited('library');
   return r.id==='walk'||r.id==='checkCampus'||(r.id==='shortcut'&&!r.locked);

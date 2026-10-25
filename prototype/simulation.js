@@ -8,7 +8,7 @@ import {personalMessage} from './social-reasoning.js';
 import {changeRelationship,relationship} from './dialogue.js';
 import {days,availableRoutes,currentSchedule} from './days.js';
 export function newGame(profile='acquaintance') {
- const s={version:6,flow:{seen:{}},risk:{knowledge:{},decisions:{},positions:{},actions:[],sent:{},requests:{}},warnings:{evidence:[],resolved:{}},weather:defaultWeather(),clock:{minute:780},pace:{count:0,seen:{}},world:{stage:'campus'},eventState:{flags:{},plans:{},knowledge:{}},contacts:{},encounters:{},day:1,phase:'afternoon',choice:null,minutes:0,location:'campus',
+ const s={version:6,community:{beat:0,rng:641937,sequence:0,posts:[],jobs:[],agents:{},topics:{},nextPost:2,lastWorld:null},flow:{seen:{}},risk:{knowledge:{},decisions:{},positions:{},actions:[],sent:{},requests:{}},warnings:{evidence:[],resolved:{}},weather:defaultWeather(),clock:{minute:780},pace:{count:0,seen:{}},world:{stage:'campus'},eventState:{flags:{},plans:{},knowledge:{}},contacts:{},encounters:{},day:1,phase:'afternoon',choice:null,minutes:0,location:'campus',
   known:[],inventory:[],discoveries:[],messages:[],events:[],relations:{},npcs:{yeogyeong:{name:'차여경',location:'hall'},seoyeon:{name:'한서연',location:'hall'},soyul:{name:'박소율',location:'hall'}},
   social:{facts:[],knowledge:{},shares:[],decisions:{},heardByPlayer:[]},memberships:{},invitationDecisions:{},memory:[],dayHistory:[],appointments:[],lastResult:'',dialogue:{history:[],promises:{}}};
  changeRelationship(s,'seoyeon','soyul',{familiarity:20,trust:12,affection:8});
@@ -31,15 +31,15 @@ export function act(state,choice,options={}){
  remember(s,route.memory);know(s,...route.knowledge);
  if(day===1&&choice==='volunteer'){
   changeRelationship(s,'yeogyeong','taei',{trust:1});
-  s.messages.push({day,from:s.memberships?.volunteer?'봉사단 단체방':'교내 활동 게시판',text:'오늘 정리까지 도와주셔서 감사합니다.'});
+  s.messages.push({day,from:s.memberships?.volunteer?'봉사단 단체방':'캠퍼스톡 동아리 소식',text:'오늘 정리까지 도와주셔서 감사합니다.'});
  }else if(day===2&&choice==='review'){
   changeRelationship(s,'soyul','taei',{familiarity:2,trust:1});
   changeRelationship(s,'yeogyeong','taei',{trust:1});
   s.messages.push({day,from:'박소율',text:relationship(s,'soyul').familiarity>=4?'아까 같이 골라줘서 고마워. 여경이한테 파일 보냈어.':'오늘 사진 같이 봐주셔서 감사해요. 파일은 여경이한테 보냈어요.'});
  }else if(day===3&&choice==='exhibit'){
   for(const id of Object.keys(s.npcs))changeRelationship(s,id,'taei',{familiarity:1,trust:1});
-  s.messages.push({day,from:s.memberships?.volunteer?'봉사단 단체방':'교내 활동 게시판',text:'사진 전시 준비를 마쳤습니다. 도와주셔서 감사합니다.'});
- }else s.messages.push({day,from:s.memberships?.volunteer?'봉사단 단체방':'교내 활동 게시판',text:day===1?'오늘 활동 마쳤습니다. 참여하신 분들 수고하셨어요.':'오늘 일정 마쳤습니다. 모두 수고하셨어요.'});
+  s.messages.push({day,from:s.memberships?.volunteer?'봉사단 단체방':'캠퍼스톡 동아리 소식',text:'사진 전시 준비를 마쳤습니다. 도와주셔서 감사합니다.'});
+ }else s.messages.push({day,from:s.memberships?.volunteer?'봉사단 단체방':'캠퍼스톡 동아리 소식',text:day===1?'오늘 활동 마쳤습니다. 참여하신 분들 수고하셨어요.':'오늘 일정 마쳤습니다. 모두 수고하셨어요.'});
  s=activityEvents(s,choice,options.approach);
  if(day===2&&choice==='work'&&s.dayHistory.some(h=>h.choice==='rehearsal')){
   s.lastResult+=' 어제 합주에서 확인한 부분을 수정해 데모를 녹음했다.';remember(s,'어제의 합주를 바탕으로 데모를 녹음했다.');
@@ -66,9 +66,9 @@ export function nextDay(state){
  s.clock={minute:780};s.pace={count:0,seen:{}};s.day++;s.phase='afternoon';s.choice=null;s.minutes=0;s.lastResult='';s.location='campus';s.dialogue.promises={};
  for(const [id,npc] of Object.entries(s.npcs))npc.location=currentSchedule(s)[id];
  if(s.day===2){
-  s.messages.push({day:2,from:s.memberships?.volunteer?'봉사단 단체방':'교내 활동 게시판',text:'오늘 여경은 학생회관에서 정리하고, 소율은 도서관에서 사진을 고릅니다. 서연은 오후에 대학가 카페에 있어요.'});
+  s.messages.push({day:2,from:s.memberships?.volunteer?'봉사단 단체방':'캠퍼스톡 동아리 소식',text:s.memberships?.volunteer?'오늘 여경은 학생회관에서 정리하고, 소율은 도서관에서 사진을 고릅니다. 서연은 오후에 대학가 카페에 있어요.':'오늘 공개 사진 정리는 도서관, 봉사단 준비 정리는 학생회관에서 진행합니다.'});
   for(const id of Object.keys(s.npcs)){const text=personalMessage(s,id);if(text)s.messages.push({day:2,from:s.npcs[id].name,text});}
- }else s.messages.push({day:3,from:s.memberships?.volunteer?'봉사단 단체방':'교내 활동 게시판',text:'오늘 사진 전시 준비는 학생회관에서 진행합니다. 소율은 먼저 도서관에서 파일을 챙깁니다. 공연 리허설도 같은 오후에 있어요.'});
+ }else s.messages.push({day:3,from:s.memberships?.volunteer?'봉사단 단체방':'캠퍼스톡 동아리 소식',text:s.memberships?.volunteer?'오늘 사진 전시 준비는 학생회관에서 진행합니다. 소율은 먼저 도서관에서 파일을 챙깁니다. 공연 리허설도 같은 오후에 있어요.':'오늘 사진 전시 준비는 학생회관에서 진행합니다. 공개 공연 리허설도 같은 오후에 있습니다.'});
  return warningPhase(weatherAdjustAppointments(phaseEvents(s),availableRoutes(s)));
 }
 export function acceptAppointment(state,person){
@@ -106,6 +106,8 @@ export function restore(raw){
  }
  if(s?.version!==6||!s.world||!s.eventState||!s.encounters||!s.contacts||!Number.isInteger(s.day)||s.day<1||s.day>3||!['afternoon','evening'].includes(s.phase)||!Array.isArray(s.memory)||!Array.isArray(s.known)||!Array.isArray(s.messages)||!Array.isArray(s.events)||!Array.isArray(s.dayHistory)||!Array.isArray(s.appointments)||!s.npcs||!s.relations||!Array.isArray(s.dialogue?.history)||!s.dialogue?.promises)throw new Error('지원하지 않는 저장 파일입니다.');
  if(!s.flow){s.flow={seen:{}};for(const place of ['hall','library','cafe'])if(Object.keys(s.encounters).some(k=>k.includes(':'+place+':')))s.flow.seen['visit:'+place]=true;if(Object.keys(s.memberships??{}).length)s.flow.seen.board=true;}
+ if(s.flow.seen.board&&!s.flow.seen.community){s.flow.seen.community=true;for(const club of ['volunteer','football','music'])s.flow.seen['club:'+club]=true;}
+ s.community??={beat:0,rng:641937,sequence:0,posts:[],jobs:[],agents:{},topics:{},nextPost:2,lastWorld:null};
  s.risk??={knowledge:{},decisions:{},positions:{},actions:[],sent:{},requests:{}};
  s.warnings??={evidence:[],resolved:{}};
  s.weather??=defaultWeather();

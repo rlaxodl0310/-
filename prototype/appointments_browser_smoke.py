@@ -1,5 +1,5 @@
 """Voluntary membership, activity offers and NPC initiative in both browser builds."""
-from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_bulletin, end_day, go_campus
+from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_recruitment, end_day, go_campus
 from playwright.sync_api import sync_playwright
 import os
 base=os.environ.get('CAMPUS_TEST_URL','http://127.0.0.1:8000')
@@ -10,9 +10,10 @@ with sync_playwright() as p:
         page.set_default_timeout(7000)
         errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
         page.goto(base+path)
-        open_bulletin(page)
-        assert page.locator('[data-action="clubDetail"]').count()==3
-        page.locator('[data-action="clubDetail"][data-value="football"]').click()
+        open_recruitment(page)
+        assert page.locator('[data-action="readPost"][data-value$="-recruit"]').count()==3
+        page.locator('[data-action="readPost"][data-value="football-recruit"]').click()
+        page.get_by_role('button',name='이 글의 모집 안내를 자세히 읽는다.',exact=True).click()
         page.get_by_role('button',name='이 동아리에 가입하기',exact=True).click()
         assert '가입 중입니다' in page.locator('.page').inner_text()
         page.get_by_role('button',name='약속과 일정 보기',exact=True).click()

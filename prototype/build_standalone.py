@@ -18,7 +18,7 @@ def inline_module(filename):
     source = re.sub(r'^import .*?;\n', '', source, flags=re.MULTILINE)
     return re.sub(r'\bexport (?=function |const )', '', source)
 simulation = inline_module('weather.js') + '\n' + inline_module('discoveries.js') + '\n' + inline_module('warning-records.js') + '\n' + inline_module('event-view.js') + '\n' + inline_module('identity.js') + '\n' + inline_module('social-reasoning.js') + '\n' + inline_module('conversation-scenes.js') + '\n' + inline_module('days.js') + '\n' + inline_module('dialogue.js') + '\n' + inline_module('event-engine.js') + '\n' + inline_module('social-memory.js') + '\n' + inline_module('appointments.js') + '\n' + inline_module('risk-decisions.js') + '\n' + inline_module('warnings.js') + '\n' + inline_module('simulation.js') + '\n' + inline_module('encounters.js')
-app = inline_module('scene-flow.js') + '\n' + inline_module('campus-time.js') + '\n' + inline_module('app.js')
+app = inline_module('community-simulation.js') + '\n' + inline_module('community.js') + '\n' + inline_module('scene-flow.js') + '\n' + inline_module('campus-time.js') + '\n' + inline_module('app.js')
 html = (root / 'index.html').read_text()
 html = html.replace('<link rel="stylesheet" href="style.css">', '<style>' + css + '</style>')
 html = html.replace('<script type="module" src="app.js"></script>', '<script>' + simulation + '\n' + app + '</script>')

@@ -1,5 +1,5 @@
 """Forecast, weather presentation, real umbrella loan, wet activity and severe-weather controls."""
-from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_bulletin, end_day, go_campus
+from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_recruitment, end_day, go_campus
 from playwright.sync_api import sync_playwright
 import os
 base=os.environ.get('CAMPUS_TEST_URL','http://127.0.0.1:8000')
@@ -24,7 +24,8 @@ with sync_playwright() as p:
         # Checking weather did not silently pass the pending encounter.
         assert page.locator('[data-action="encounter"][data-value="engage"]').is_visible()
         page.get_by_role('button',name='하던 일을 계속하며 지나간다.').click()
-        open_bulletin(page)
+        open_recruitment(page)
+        page.locator('[data-action="readPost"][data-value="football-recruit"]').click()
         choose_activity(page, 'rehearsal')
         page.get_by_role('button',name='이 활동 진행',exact=True).click()
         end_day(page)

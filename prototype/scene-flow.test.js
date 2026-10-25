@@ -5,12 +5,12 @@ import {campusScene,markFlow,placeContinuations,knownSceneRoutes} from './scene-
 import {arrive} from './encounters.js';
 import {readMessages} from './event-view.js';
 test('opening starts with observable situations rather than feature categories',()=>{
- const s=newGame(),scene=campusScene(s);assert.equal(scene.choices.length,2);assert.match(scene.text,/게시판/);
+ const s=newGame(),scene=campusScene(s);assert.equal(scene.choices.length,2);assert.match(scene.text,/커뮤니티/);
  assert.ok(scene.choices.every(c=>!['activities','travel','clubs'].includes(c.value)));
  assert.deepEqual(knownSceneRoutes(s).map(r=>r.id),['rehearsal']);
 });
 test('reading and entering change the continuation without enrolling or advancing time',()=>{
- const s=newGame(),read=markFlow(s,'board');assert.notDeepEqual(campusScene(read).choices,campusScene(s).choices);
+ const s=newGame(),read=markFlow(s,'community');assert.notDeepEqual(campusScene(read).choices,campusScene(s).choices);
  assert.ok(campusScene(read).choices.some(c=>c.value==='rehearsal'));assert.deepEqual(read.memberships,{});assert.equal(read.clock.minute,s.clock.minute);
  const entered=markFlow(s,'visit','hall');assert.ok(knownSceneRoutes(entered).some(r=>r.id==='volunteer'));assert.ok(!knownSceneRoutes(entered).some(r=>r.id==='explore'));
 });

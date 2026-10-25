@@ -20,18 +20,11 @@ def choose_activity(page, route):
     open_schedule(page)
     page.locator(f'[data-routine="{route}"] [data-action="select"]').click()
 
-def open_bulletin(page):
-    if page.locator('[data-action="readBoard"]').count():
-        page.locator('[data-action="readBoard"]').first.click()
-    else:
-        visit_place(page,'hall')
-        if page.locator('[data-action="encounter"][data-value="pass"]').count():
-            page.locator('[data-action="encounter"][data-value="pass"]').click()
-        if page.locator('[data-action="readBoard"]').count():
-            page.locator('[data-action="readBoard"]').click()
-        else:
-            page.get_by_role('button',name='휴대폰',exact=True).click()
-            page.get_by_role('button',name='읽어둔 동아리 안내',exact=True).click()
+def open_recruitment(page):
+    page.get_by_role('button',name='휴대폰',exact=True).click()
+    page.get_by_role('button',name='학내 커뮤니티',exact=True).click()
+    page.get_by_role('button',name='모집',exact=True).click()
+
 
 def end_day(page):
     page.locator('[data-action="go"][data-value="dayEnd"]').click()

@@ -13,13 +13,13 @@ with sync_playwright() as p:
         for old in ['오후 활동 고르기','동아리 살펴보기','다른 장소로 이동']:
             assert not page.get_by_role('button',name=old,exact=True).count()
         if path=='/prototype/':page.screenshot(path='/tmp/scene-opening.png',full_page=True)
-        page.get_by_role('button',name='게시판에 붙은 종이를 가까이서 읽는다.',exact=True).click()
-        assert page.get_by_role('button',name='봉사단 모집 안내를 자세히 읽는다.',exact=True).is_visible()
-        page.get_by_role('button',name='봉사단 모집 안내를 자세히 읽는다.',exact=True).click()
+        page.get_by_role('button',name='휴대폰으로 학내 커뮤니티의 새 글을 확인한다.',exact=True).click()
+        page.locator('[data-action="readPost"][data-value="volunteer-recruit"]').click()
+        page.get_by_role('button',name='이 글의 모집 안내를 자세히 읽는다.',exact=True).click()
         page.get_by_role('button',name='이 동아리에 가입하기',exact=True).click()
         assert '가입 중입니다' in page.locator('.page').inner_text()
         page.get_by_role('button',name='← 뒤로',exact=True).click()
-        page.get_by_role('button',name='물품을 옮기는 학생회관 안쪽으로 들어간다.',exact=True).click()
+        page.get_by_role('button',name='글에서 말한 학생회관 쪽으로 가본다.',exact=True).click()
         assert '영수증' in page.locator('.lead').inner_text()
         page.get_by_role('button',name='하던 일을 계속하며 지나간다.',exact=True).click()
         page.get_by_role('button',name='쌓인 물품 상자 쪽으로 가서 준비를 도울지 살펴본다.',exact=True).click()
@@ -47,7 +47,7 @@ with sync_playwright() as p:
         page.get_by_role('button',name='메뉴',exact=True).click()
         page.get_by_role('button',name='저장',exact=True).first.click()
         saved=page.evaluate("JSON.parse(localStorage.getItem('campus.slot.1'))")
-        assert saved['flow']['seen']['board'] and saved['memberships']['volunteer']
+        assert saved['flow']['seen']['community'] and saved['memberships']['volunteer']
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
         assert not errors,errors
         page.close()
