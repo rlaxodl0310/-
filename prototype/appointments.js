@@ -5,7 +5,7 @@ import {changeRelationship} from './dialogue.js';
 import {days} from './days.js';
 
 export const clubs={
- volunteer:{name:'봉사단',description:'지역 봉사와 물품 준비를 함께하는 동아리. 공개 활동을 체험한 뒤 가입할 수도 있다.',place:'학생회관',events:[{day:1,activity:'volunteer',label:'봉사 물품 준비'},{day:3,activity:'exhibit',label:'활동 사진 전시 준비'}]},
+ volunteer:{name:'봉사단',description:'지역 봉사와 물품 준비를 함께하는 동아리. 공개 활동을 체험한 뒤 가입할 수도 있다.',place:'자유관',events:[{day:1,activity:'volunteer',label:'봉사 물품 준비'},{day:3,activity:'exhibit',label:'활동 사진 전시 준비'}]},
  football:{name:'축구 동아리',description:'정기적으로 모여 축구를 한다. 선수는 남학생, 여성 부원은 매니저로 참여한다. 현재 시제품은 체험 활동만 제공한다.',place:'운동장',events:[{day:2,activity:'football',label:'축구 동아리 체험 훈련'}]},
  music:{name:'음악 동아리',description:'합주와 공연 준비를 함께한다. 태이의 전공 합주와 동아리 가입은 별개다.',place:'합주실 · 공연장',events:[{day:3,activity:'backstage',label:'공연 리허설 돕기'}]}
 };

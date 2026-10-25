@@ -27,7 +27,7 @@ export function spendTime(state,minutes,{travelling=false}={}){
  return s;
 }
 export function placeAtmosphere(s,location){
- if(s.phase==='evening')return {hall:'학생회관 조명 아래서 남은 물건을 정리하거나 잠깐 쉬는 학생들이 보인다.',library:'자료실 쪽은 한결 조용해졌지만 열람실에 남아 있는 학생들이 보인다.',cafe:'창밖이 어두워지고 잔을 정리하는 소리가 낮게 들린다.'}[location]??'';
+ if(s.phase==='evening')return {hall:'자유관 조명 아래서 남은 물건을 정리하거나 잠깐 쉬는 학생들이 보인다.',library:'자료실 쪽은 한결 조용해졌지만 열람실에 남아 있는 학생들이 보인다.',cafe:'창밖이 어두워지고 잔을 정리하는 소리가 낮게 들린다.'}[location]??'';
  if(s.day!==1||s.phase!=='afternoon')return '';
  const m=campusMinute(s);
  if(location==='hall')return m<840?'점심 뒤라 공용 테이블에 사람들이 모여 있다. 컵과 활동 자료가 여기저기 놓여 있다.':m<900?'테이블 몇 자리가 비었다. 아까 보이던 사람들 중 일부는 자기 일을 보러 나간 듯하다.':m<960?'복도는 한결 조용해졌다. 프린터 옆에는 누군가 정리하던 자료가 남아 있다.':'늦은 오후의 복도에는 각자 남은 일을 마무리하는 학생들이 보인다.';
@@ -53,6 +53,7 @@ export function paceAction(before,after,{action,value,from,to,person}={}){
  if(campusMinute(s)>=(s.playMode==='free'?1320:960))return {state:s,minutes:0};
  const stamp=campusMinute(s);let key=null;
  if(action==='visit'&&before.location!==s.location)key=`${stamp}:visit:${before.location}:${s.location}`;
+ if(action==='buildingArea')key=`${stamp}:area:${before.location}:${value}`;
  if(action==='buildingActivity')key=`${stamp}:building:${s.location}:${value}`;
  if(action==='libraryActivity')key=`${stamp}:library:${value}`;
  if(action==='walk')key=`${stamp}:walk:${s.location}:${value}`;

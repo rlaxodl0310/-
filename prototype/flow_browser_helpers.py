@@ -18,7 +18,7 @@ def choose_activity(page, route):
         page.locator('[data-action="readPost"][data-value="football-recruit"]').click()
         page.locator('[data-action="select"][data-value="football"]').click()
         return
-    place='library' if route in ['explore','review','work'] else 'hall'
+    place='library' if route in ['explore','review','work'] else 'arts' if route in ['rehearsal','backstage'] else 'hall'
     visit_place(page,place)
     if page.locator('[data-action="encounter"][data-value="pass"]').count():
         page.locator('[data-action="encounter"][data-value="pass"]').click()

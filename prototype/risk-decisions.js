@@ -67,7 +67,7 @@ export function evolveRisk(state,{allowMove=false}={}){
   if(allowMove&&s.phase==='afternoon'&&!meeting){const old=r.positions[id];if(id==='soyul'&&mode==='regroup')r.positions[id]='hall';else delete r.positions[id];if(old!==r.positions[id])r.revision=(r.revision??0)+1;}
   const key=`risk-contact:${id}:${mode}`;
   if(!r.sent[key]&&s.phase==='afternoon'&&contact(s,id).introduced&&socialIntent(s,id).feelsSafe){
-   const text=id==='yeogyeong'?(duty.blocked?'저는 남은 물품이랑 참석 인원부터 다시 확인할게요. 다른 곳 확인하러 가면 일정 바뀐 것만 먼저 알려주세요.':'맡은 전시 준비는 마쳤어요. 더 확인할 일이 있으면 지금은 같이 움직일 수 있어요.'):id==='soyul'?(mode==='regroup'?'설명 정리했어요. 혼자 확인하러 다니기보다는 학생회관에서 같이 이야기해요.':(r.sent['friend:soyul:seoyeon:ambulance']?'서연이한테도 직접 본 게 있는지 물어봤어요. 저는 일단 출력물 마무리하고 있을게요. 확인 안 된 내용은 따로 올리지 않으려고요.':'저는 직접 본 것부터 확인하고 출력물을 마무리할게요. 확인 안 된 내용은 따로 올리지 않으려고요.')):(mode==='verify-route'?'전해 들은 내용이 몇 개 있어서 동선부터 확인하려고요. 이동할 거면 도착한 뒤에 한 번 연락해줄래요?':'저는 직접 본 게 없어서 다른 사람한테 확인부터 해볼게요. 급하게 결론내리지는 말아요.');
+   const text=id==='yeogyeong'?(duty.blocked?'저는 남은 물품이랑 참석 인원부터 다시 확인할게요. 다른 곳 확인하러 가면 일정 바뀐 것만 먼저 알려주세요.':'맡은 전시 준비는 마쳤어요. 더 확인할 일이 있으면 지금은 같이 움직일 수 있어요.'):id==='soyul'?(mode==='regroup'?'설명 정리했어요. 혼자 확인하러 다니기보다는 자유관에서 같이 이야기해요.':(r.sent['friend:soyul:seoyeon:ambulance']?'서연이한테도 직접 본 게 있는지 물어봤어요. 저는 일단 출력물 마무리하고 있을게요. 확인 안 된 내용은 따로 올리지 않으려고요.':'저는 직접 본 것부터 확인하고 출력물을 마무리할게요. 확인 안 된 내용은 따로 올리지 않으려고요.')):(mode==='verify-route'?'전해 들은 내용이 몇 개 있어서 동선부터 확인하려고요. 이동할 거면 도착한 뒤에 한 번 연락해줄래요?':'저는 직접 본 게 없어서 다른 사람한테 확인부터 해볼게요. 급하게 결론내리지는 말아요.');
    s.messages.push({day:s.day,from:s.npcs[id].name,text});r.sent[key]=true;
   }
   const opinion=escortOpinion(s,id),offerId=`risk-escort:${id}`;
@@ -95,6 +95,6 @@ export function requestEscort(state,id){
 }
 export function riskScene(s,location){
  if(s.day!==3||s.phase!=='afternoon')return '';
- const descriptions={yeogyeong:'전화 화면과 참석 명단을 번갈아 확인하고 있다.',soyul:s.risk?.decisions?.soyul?.mode==='regroup'?'정리한 출력물을 챙겨 학생회관 쪽에서 연락을 확인하고 있다.':'출력물을 맞춰놓고 가까운 사람에게 짧은 메시지를 보내고 있다.',seoyeon:'휴대폰의 안내와 이동 동선을 다시 대조하고 있다.'};
+ const descriptions={yeogyeong:'전화 화면과 참석 명단을 번갈아 확인하고 있다.',soyul:s.risk?.decisions?.soyul?.mode==='regroup'?'정리한 출력물을 챙겨 자유관 쪽에서 연락을 확인하고 있다.':'출력물을 맞춰놓고 가까운 사람에게 짧은 메시지를 보내고 있다.',seoyeon:'휴대폰의 안내와 이동 동선을 다시 대조하고 있다.'};
  return Object.keys(s.risk?.decisions??{}).filter(id=>presentPeople(s,location).includes(id)).map(id=>`${displayName(s,id)}은 ${descriptions[id]}`).join(' ');
 }

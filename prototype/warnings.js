@@ -6,7 +6,7 @@ import {socialIntent} from './social-reasoning.js';
 import {noteWarning,prepareWarnings} from './warning-records.js';
 
 export const warningSites={
- sidegate:{location:'hall',label:'학생회관 뒤편 출입구의 임시 통제',text:'뒤편 출입문 앞에 이동식 안내대가 놓여 있다. 직원이 지나가던 사람들에게 정문을 이용해 달라고 말한다. 종이 안내문은 가까이 가야 읽을 수 있다.',action:'출입문을 막지 않는 쪽에서 안내문을 읽는다.',detail:'안내문에는 응급 차량 동선 확보를 위해 잠시 다른 출입구를 이용해 달라고 적혀 있다. 누구를 위한 조치인지는 나와 있지 않다.',extra:'응급 차량 동선 확보 안내'},
+ sidegate:{location:'hall',label:'자유관 뒤편 출입구의 임시 통제',text:'뒤편 출입문 앞에 이동식 안내대가 놓여 있다. 직원이 지나가던 사람들에게 정문을 이용해 달라고 말한다. 종이 안내문은 가까이 가야 읽을 수 있다.',action:'출입문을 막지 않는 쪽에서 안내문을 읽는다.',detail:'안내문에는 응급 차량 동선 확보를 위해 잠시 다른 출입구를 이용해 달라고 적혀 있다. 누구를 위한 조치인지는 나와 있지 않다.',extra:'응급 차량 동선 확보 안내'},
  entrance:{location:'library',label:'도서관의 임시 운영 변경',text:'로비 전광판의 자료실 운영 시간이 평소보다 짧게 표시되어 있다. 옆에는 새 안내문이 붙어 있고, 열람실로 들어가는 사람들은 계속 보인다.',action:'안내문에서 바뀐 운영 범위를 확인한다.',detail:'일부 지원 인력의 부재로 자료실 운영을 단축한다는 내용이다. 열람실은 정상 운영한다. 부재 이유는 적혀 있지 않다.',extra:'도서관 지원 인력 공백 안내'},
  street:{location:'cafe',label:'정류장 앞에 정차한 구급차',text:'창밖 정류장 쪽에 구급차 한 대가 서 있다. 몇몇 사람이 거리를 두고 바라보고, 다른 학생들은 옆으로 돌아 지나간다. 이 자리에서는 무슨 일인지 알 수 없다.',action:'길을 막지 않고 창가에서 잠깐 상황을 지켜본다.',detail:'구급대원들이 한 사람을 들것에 옮긴다. 차 문이 닫히고 주변 사람들이 흩어진다. 쓰러진 이유나 상태를 확인할 수는 없었다.',extra:'정류장에서 목격한 응급 이송'}
 };
@@ -57,7 +57,7 @@ export function warningActivity(state,choice){
   }
   const companions=s.appointments.filter(a=>a.id?.startsWith('risk-escort:')&&a.status==='kept'&&a.activity==='checkCampus').map(a=>a.person);
   for(const id of companions){rememberRisk(s,id,{topic:'gate',kind:'direct',source:'self',label:'출입구 통제 안내'});rememberRisk(s,id,{topic:'library',kind:'direct',source:'self',label:'자료실 운영 변경'});s.risk.actions.push({id:`escort:${id}:3`,day:3,actor:id,kind:'accompanied-check'});}
-  s.location='library';s.lastResult='학생회관과 도서관의 현장 안내를 확인했다. 응급 차량 동선 확보와 자료실 운영 단축은 알게 됐지만, 같은 원인인지 확인할 근거는 없었다.';
+  s.location='library';s.lastResult='자유관과 도서관의 현장 안내를 확인했다. 응급 차량 동선 확보와 자료실 운영 단축은 알게 됐지만, 같은 원인인지 확인할 근거는 없었다.';
   if(companions.length)s.lastResult+=' '+companions.map(id=>identities[id].name).join(', ')+'과 함께 안내를 확인하고 각자의 정리 일정으로 돌아갔다.';
   s.memory.push('[3일차] 현장 안내를 확인했다. 남은 시간에는 다른 일을 이어갈 수 있다.');
  }

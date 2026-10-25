@@ -22,7 +22,7 @@ export function introduce(s,id,source='self-introduction'){
 }
 export function seePeople(s,ids){s.contacts??={};for(const id of ids)s.contacts[id]={...contact(s,id),seen:true};return s;}
 export function presentationText(s,text){
- let result=String(text??'');
+ let result=String(text??'').replaceAll('학생회관','자유관').replaceAll('음악 연습동','음악관').replaceAll('강의동','은혜관');
  for(const [id,p] of Object.entries(identities)){
   const label=displayName(s,id);
   if(label!==p.name)result=result.replaceAll(p.name,label);

@@ -38,7 +38,7 @@ with sync_playwright() as p:
         page.locator('[data-action="warningChoice"][data-value="inspect"]').click()
         assert '들것' in page.locator('.page > .notice').inner_text()
         open_map(page)
-        page.get_by_role('button',name='학생회관 찾아가기',exact=True).click()
+        page.get_by_role('button',name='자유관 찾아가기',exact=True).click()
         page.get_by_role('button',name='하던 일을 계속하며 지나간다.').click()
         page.get_by_role('button',name='뒤편 출입문 쪽으로 걸어간다',exact=True).click()
         page.locator('[data-action="openWeather"]').click()

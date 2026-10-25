@@ -1,7 +1,7 @@
 import {noteWarning} from './warning-records.js';
 import {learnEvent} from './event-view.js';
 export const communityPosts=[
- {id:'volunteer-recruit',day:1,board:'동아리 모집',author:'봉사단 운영진',kind:'club',club:'volunteer',title:'오늘 물품 준비 같이 해볼 사람? 가입 전 체험도 가능해요',body:'학생회관에서 봉사 물품을 준비하고 있어요. 동아리 가입부터 결정하지 않아도 됩니다. 잠깐 와서 어떤 활동인지 보고 가셔도 돼요.',comments:['시간 맞으면 잠깐 가봐도 되나요?','운영진: 네, 안내 읽고 편하게 들러주세요.']},
+ {id:'volunteer-recruit',day:1,board:'동아리 모집',author:'봉사단 운영진',kind:'club',club:'volunteer',title:'오늘 물품 준비 같이 해볼 사람? 가입 전 체험도 가능해요',body:'자유관에서 봉사 물품을 준비하고 있어요. 동아리 가입부터 결정하지 않아도 됩니다. 잠깐 와서 어떤 활동인지 보고 가셔도 돼요.',comments:['시간 맞으면 잠깐 가봐도 되나요?','운영진: 네, 안내 읽고 편하게 들러주세요.']},
  {id:'football-recruit',day:1,board:'동아리 모집',author:'축구 동아리 운영진',kind:'club',club:'football',title:'내일 공개 훈련 모집합니다 · 처음 와도 괜찮아요',body:'운동장에서 공개 체험 훈련을 진행합니다. 선수는 남학생, 여성 부원은 매니저로 참여합니다. 비가 오면 실내 기본 체력 훈련으로 대체해요. 가입 여부는 체험한 뒤 정해도 됩니다.',comments:['비 와도 취소 아닌가요?','운영진: 실내 대체로 진행할 예정입니다.']},
  {id:'music-recruit',day:1,board:'동아리 모집',author:'음악 동아리 운영진',kind:'club',club:'music',title:'같이 합주하고 공연 준비할 부원 구해요',body:'보컬이나 악기 파트에 관심 있으면 모집 안내를 읽어주세요. 이번 주 공연 리허설을 돕는 일정도 있습니다. 전공 합주에 참여하는 것과 동아리 가입은 별개예요.',comments:['공연 준비만 도와봐도 되나요?','운영진: 공개 체험 일정에서 먼저 만나봐요.']},
  {id:'library-seats',day:1,board:'자유',author:'익명',kind:'anonymous',title:'도서관 창가 자리 아까는 비어 있었음',body:'점심 먹고 지나갈 때는 몇 자리 남아 있었어요. 지금도 비어 있는지는 모르겠음.',comments:['직접 가봐야겠네','시간 지나면 또 다르니까 참고만 해']},

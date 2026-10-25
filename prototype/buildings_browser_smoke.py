@@ -9,11 +9,11 @@ with sync_playwright() as p:
   page.on('pageerror',lambda e:errors.append(str(e)))
   page.goto(base+path)
   assert page.locator('.prompt [data-value="cafeteria"]').is_visible()
-  for id,name,action in [('cafeteria','학식당','menu'),('dorm','기숙사','guide'),('academic','강의동','rooms'),('music','음악 연습동','voice'),('gym','체육관','stretch')]:
+  for id,name,action in [('cafeteria','외식관','menu'),('dorm','기숙사','guide'),('academic','은혜관','rooms'),('music','음악관','voice'),('gym','체육관','stretch')]:
    page.get_by_role('button',name='휴대폰',exact=True).click()
    page.get_by_role('button',name='지도',exact=True).click()
    assert page.get_by_role('heading',name='교내 지도와 장소',exact=True).is_visible()
-   assert page.locator('[data-action="visit"]').count()==8
+   assert page.locator('[data-action="visit"]').count()==13
    if id=='cafeteria' and path=='/prototype/':page.screenshot(path='/tmp/campus-buildings-preview.png',full_page=True)
    page.locator(f'[data-action="visit"][data-value="{id}"]').click()
    assert page.get_by_role('heading',name=name,exact=True).is_visible()
@@ -24,7 +24,7 @@ with sync_playwright() as p:
     page.get_by_role('button',name='배식대에서 식사를 받아 먹는다.',exact=True).click()
     assert not page.locator('[data-action="buildingActivity"][data-value="meal"]').count()
    if id=='dorm':assert '자취방' in page.locator('p.notice').inner_text()
-   if id=='music':assert page.locator('[data-action="select"][data-value="rehearsal"]').is_visible()
+   if id=='music':assert page.get_by_role('button',name='건물 안의 다른 공간으로 간다.',exact=True).is_visible()
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
   page.get_by_role('button',name='← 뒤로',exact=True).click()
   page.get_by_role('button',name='메뉴',exact=True).click()

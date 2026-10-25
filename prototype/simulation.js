@@ -67,9 +67,9 @@ export function nextDay(state){
  s.freeDay={completed:[],settled:false};s.clock={minute:780};s.pace={count:0,seen:{}};s.day++;s.phase='afternoon';s.choice=null;s.minutes=0;s.lastResult='';s.location='campus';s.dialogue.promises={};
  for(const [id,npc] of Object.entries(s.npcs))npc.location=currentSchedule(s)[id];
  if(s.day===2){
-  s.messages.push({day:2,from:s.memberships?.volunteer?'봉사단 단체방':'캠퍼스톡 동아리 소식',text:s.memberships?.volunteer?'오늘 여경은 학생회관에서 정리하고, 소율은 도서관에서 사진을 고릅니다. 서연은 오후에 대학가 카페에 있어요.':'오늘 공개 사진 정리는 도서관, 봉사단 준비 정리는 학생회관에서 진행합니다.'});
+  s.messages.push({day:2,from:s.memberships?.volunteer?'봉사단 단체방':'캠퍼스톡 동아리 소식',text:s.memberships?.volunteer?'오늘 여경은 자유관에서 정리하고, 소율은 도서관에서 사진을 고릅니다. 서연은 오후에 대학가 카페에 있어요.':'오늘 공개 사진 정리는 도서관, 봉사단 준비 정리는 자유관에서 진행합니다.'});
   for(const id of Object.keys(s.npcs)){const text=personalMessage(s,id);if(text)s.messages.push({day:2,from:s.npcs[id].name,text});}
- }else s.messages.push({day:3,from:s.memberships?.volunteer?'봉사단 단체방':'캠퍼스톡 동아리 소식',text:s.memberships?.volunteer?'오늘 사진 전시 준비는 학생회관에서 진행합니다. 소율은 먼저 도서관에서 파일을 챙깁니다. 공연 리허설도 같은 오후에 있어요.':'오늘 사진 전시 준비는 학생회관에서 진행합니다. 공개 공연 리허설도 같은 오후에 있습니다.'});
+ }else s.messages.push({day:3,from:s.memberships?.volunteer?'봉사단 단체방':'캠퍼스톡 동아리 소식',text:s.memberships?.volunteer?'오늘 사진 전시 준비는 자유관에서 진행합니다. 소율은 먼저 도서관에서 파일을 챙깁니다. 공연 리허설도 같은 오후에 있어요.':'오늘 사진 전시 준비는 자유관에서 진행합니다. 공개 공연 리허설도 같은 오후에 있습니다.'});
  return warningPhase(weatherAdjustAppointments(phaseEvents(s),availableRoutes(s)));
 }
 export function acceptAppointment(state,person){
@@ -108,6 +108,7 @@ export function restore(raw){
  if(s?.version!==6||!s.world||!s.eventState||!s.encounters||!s.contacts||!Number.isInteger(s.day)||s.day<1||s.day>3||!['afternoon','evening'].includes(s.phase)||!Array.isArray(s.memory)||!Array.isArray(s.known)||!Array.isArray(s.messages)||!Array.isArray(s.events)||!Array.isArray(s.dayHistory)||!Array.isArray(s.appointments)||!s.npcs||!s.relations||!Array.isArray(s.dialogue?.history)||!s.dialogue?.promises)throw new Error('지원하지 않는 저장 파일입니다.');
  if(!s.flow){s.flow={seen:{}};for(const place of ['hall','library','cafe'])if(Object.keys(s.encounters).some(k=>k.includes(':'+place+':')))s.flow.seen['visit:'+place]=true;if(Object.keys(s.memberships??{}).length)s.flow.seen.board=true;}
  if(s.flow.seen.board&&!s.flow.seen.community){s.flow.seen.community=true;for(const club of ['volunteer','football','music'])s.flow.seen['club:'+club]=true;}
+ s.known=s.known.map(text=>text.replaceAll('학생회관','자유관').replaceAll('음악 연습동','음악관').replaceAll('강의동','은혜관'));
  s.community??={beat:0,rng:641937,sequence:0,posts:[],jobs:[],agents:{},topics:{},nextPost:2,lastWorld:null};
  s.playMode='free';s.freeDay??={completed:s.choice&&s.phase==='evening'?[{id:s.choice,start:Math.max(780,(s.clock?.minute??1140)-(s.minutes??0)),end:s.clock?.minute??1140}]:[],settled:s.phase==='evening'};
  s.risk??={knowledge:{},decisions:{},positions:{},actions:[],sent:{},requests:{}};

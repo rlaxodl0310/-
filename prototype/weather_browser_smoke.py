@@ -54,7 +54,7 @@ with sync_playwright() as p:
         if path=='/prototype/':page.screenshot(path='/tmp/campus-weather-storm.png',full_page=True)
         visit_place(page,'library')
         assert not page.locator('[data-action="select"][data-value="explore"]').count()
-        visit_place(page,'hall')
+        visit_place(page,'arts')
         assert page.locator('[data-action="select"][data-value="rehearsal"]').is_enabled()
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
         assert not errors,errors

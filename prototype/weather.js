@@ -32,7 +32,7 @@ export function adaptWeatherSchedule(s,plan){
  return next;
 }
 export function borrowUmbrella(state,returning=false){
- if(state.location!=='hall')throw new Error('학생회관 공용 우산 대여대에서 이용할 수 있습니다.');
+ if(state.location!=='hall')throw new Error('자유관 공용 우산 대여대에서 이용할 수 있습니다.');
  const s=structuredClone(state);s.inventory??=[];
  if(returning){
   if(!hasUmbrella(s))throw new Error('반납할 대여 우산이 없습니다.');
@@ -40,8 +40,8 @@ export function borrowUmbrella(state,returning=false){
  }else{
   if(hasUmbrella(s))throw new Error('이미 대여 우산을 가지고 있습니다.');
   s.inventory.push({id:'umbrella',name:'대여 우산',quantity:1,borrowed:true});
-  if(!s.known.includes('학생회관 공용 우산 대여대'))s.known.push('학생회관 공용 우산 대여대');
-  s.memory.push(`[${s.day}일차] 학생회관에서 공용 우산을 빌렸다. 사용 뒤 반납할 수 있다.`);
+  if(!s.known.includes('자유관 공용 우산 대여대'))s.known.push('자유관 공용 우산 대여대');
+  s.memory.push(`[${s.day}일차] 자유관에서 공용 우산을 빌렸다. 사용 뒤 반납할 수 있다.`);
  }
  return s;
 }

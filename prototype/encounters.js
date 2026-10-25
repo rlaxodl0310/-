@@ -20,7 +20,7 @@ export function encounterKey(s,spot='entry'){return `${s.day}:${s.phase}:${s.loc
 function encounterContent(s,id){
  const day=s.day,evening=s.phase==='evening';
  if(evening)return {
-  yeogyeong:{text:'학생회관을 나가려는데 공용 테이블 아래에서 무언가 떨어지는 소리가 난다. 차여경이 가방에서 물병을 꺼내다 작은 필통을 떨어뜨렸다. 혼자 물건을 주워 담느라 발소리를 듣지 못한 듯하다.',action:'필통을 주워 건넨다. “가방에 뭘 그렇게 많이 넣었어요?”',prefix:'아, 감사합니다. '},
+  yeogyeong:{text:'자유관을 나가려는데 공용 테이블 아래에서 무언가 떨어지는 소리가 난다. 차여경이 가방에서 물병을 꺼내다 작은 필통을 떨어뜨렸다. 혼자 물건을 주워 담느라 발소리를 듣지 못한 듯하다.',action:'필통을 주워 건넨다. “가방에 뭘 그렇게 많이 넣었어요?”',prefix:'아, 감사합니다. '},
   seoyeon:{text:'출입문을 밀고 나가던 중, 안쪽에서 한서연이 다시 들어오는 모습이 보인다. 어깨에 가방까지 멨는데 무언가 놓고 온 모양이다.',action:'문을 잡아준다. “뭐 놓고 왔어요?”',prefix:'충전기요. '},
   soyul:{text:'복도 끝을 돌아 나오다가 박소율과 마주친다. 출입문 앞에서 휴대폰을 보고 있던 소율이 뒤늦게 몸을 옆으로 비킨다.',action:'발걸음을 늦춘다. “아직 사진 보고 있어요?”',prefix:''}
  }[id];
@@ -41,12 +41,12 @@ function encounterContent(s,id){
  }[day];
 }
 const surroundings={
- hall:{entry:['공용 테이블에는 물품 상자가 쌓여 있고, 벽에는 봉사단 활동 안내가 붙어 있다. 안쪽을 더 둘러볼 수 있을 것 같다.','학생회관 공용 테이블'],noticeboard:['게시판에서 이번 주 활동 안내를 읽었다. 모임 장소는 학생회관 안쪽 준비실로 표시되어 있다.','봉사 준비실 안내'],tables:['테이블 옆을 살펴보니 물품 상자와 문구류가 구분되어 있다. 지금은 함부로 가져가지 않고 보관 위치만 기억해 둔다.','학생회관 문구류 보관 위치'],window:['창가의 빈자리에 잠깐 앉았다. 유리 너머로 학생회관 앞 광장과 도서관 건물이 보인다.','학생회관 창가에서 보이는 광장'],lounge:['휴게공간을 지나며 콘센트가 있는 좌석과 정수기 위치를 확인했다. 잠시 쉬었다 가는 학생들이 보인다.','학생회관 정수기 위치']},
- library:{entry:['도서관에 들어서자 반납기 작동음이 들린다. 입구 안내판에는 자료실과 출력 공간이 표시되어 있다. 반납대 쪽으로 더 들어가 볼 수 있다.','도서관 층별 안내'],shelves:['반납대를 지나 자료실을 살폈다. 복사기 옆에 공용 프린터가 있고, 벽의 안내도에서 계단 위치를 확인했다. 주변 사람들은 각자의 자료에 집중하고 있다.','도서관 공용 프린터 위치']},
+ hall:{entry:['공용 테이블에는 물품 상자가 쌓여 있고, 벽에는 봉사단 활동 안내가 붙어 있다. 안쪽을 더 둘러볼 수 있을 것 같다.','자유관 공용 테이블'],noticeboard:['게시판에서 이번 주 활동 안내를 읽었다. 모임 장소는 자유관 안쪽 준비실로 표시되어 있다.','봉사 준비실 안내'],tables:['테이블 옆을 살펴보니 물품 상자와 문구류가 구분되어 있다. 지금은 함부로 가져가지 않고 보관 위치만 기억해 둔다.','자유관 문구류 보관 위치'],window:['창가의 빈자리에 잠깐 앉았다. 유리 너머로 자유관 앞 광장과 창조관이 보인다.','자유관 창가에서 보이는 광장'],lounge:['휴게공간을 지나며 콘센트가 있는 좌석과 정수기 위치를 확인했다. 잠시 쉬었다 가는 학생들이 보인다.','자유관 정수기 위치']},
+ library:{entry:['창조관 안 도서관에 들어서자 반납기 작동음이 들린다. 입구 안내판에는 자료실과 출력 공간이 표시되어 있다. 반납대 쪽으로 더 들어가 볼 수 있다.','도서관 층별 안내'],shelves:['반납대를 지나 자료실을 살폈다. 복사기 옆에 공용 프린터가 있고, 벽의 안내도에서 계단 위치를 확인했다. 주변 사람들은 각자의 자료에 집중하고 있다.','도서관 공용 프린터 위치']},
  cafe:{entry:['카페 문을 열자 커피 향과 잔 부딪히는 소리가 섞여 들어온다. 주문대에는 짧은 줄이 있고 창가 몇 자리는 비어 있다.','대학가 카페 위치'],counter:['주문대 옆 메뉴판을 살펴보고 줄에서 비켜섰다. 창가 좌석 옆에는 충전용 콘센트가 있다. 주문을 마친 사람들이 각자의 자리로 돌아간다.','카페 충전 좌석 위치']}
 };
 function observePlace(s,location,spot,repeated=false){
- if(campusBuildings[location]){const b=campusBuildings[location];if(!s.known.includes(b.fact)){s.known.push(b.fact);s.memory.push(`[${s.day}일차] ${b.entry}`);}return b.entry;}
+ if(campusBuildings[location]&&location!=='hall'){const b=campusBuildings[location];if(!s.known.includes(b.fact)){s.known.push(b.fact);s.memory.push(`[${s.day}일차] ${b.entry}`);}return b.entry;}
  const [text,information]=surroundings[location]?.[spot]??surroundings[location]?.entry??['주변을 둘러봤다.',null];
  if(information&&!s.known.includes(information)){s.known.push(information);s.memory.push(`[${s.day}일차] ${text}`);}
  return repeated?`다시 주변을 확인했다. ${text}`:text;
@@ -82,7 +82,7 @@ export function arrive(state,location,spot='entry'){
  const meeting=s.appointments.find(a=>a.kind==='meeting'&&a.status==='pending'&&a.person===person&&a.day===s.day&&a.phase===s.phase&&a.location===s.location);
  if(meeting){encounter.text+=' 오늘 이곳에서 잠깐 이야기하기로 했던 약속이 떠오른다.';encounter.action='하던 일을 방해하지 않게 가까이 가 인사한다. “오늘 잠깐 보기로 했죠. 지금 괜찮아요?”';encounter.prefix='네, 잠깐 괜찮아요. ';}
  if(resuming){encounter.text=`${content.text} 아까 나누던 이야기가 잠깐 떠오른다.`;encounter.action='아까 멈춘 이야기의 뒷부분을 조심스럽게 꺼낸다.';encounter.prefix='';}
- if(regrouped){encounter.text='학생회관 창가 쪽을 지나는데 박소율이 정리한 출력물을 가방에 넣고 있다. 도서관에서 하던 일을 마치고 이쪽으로 옮겨온 모양이다.';encounter.action='걸음을 늦춘다. “아까 하던 건 마무리했어요?”';encounter.prefix='네, 일단 정리했어요. ';}
+ if(regrouped){encounter.text='자유관 창가 쪽을 지나는데 박소율이 정리한 출력물을 가방에 넣고 있다. 도서관에서 하던 일을 마치고 이쪽으로 옮겨온 모양이다.';encounter.action='걸음을 늦춘다. “아까 하던 건 마무리했어요?”';encounter.prefix='네, 일단 정리했어요. ';}
  if(location==='library'&&person)encounter.text+=libraryGreeting(s,person);
  s.encounters[key]??={day:s.day,phase:s.phase,location:s.location,person,group,resolved:false};
  observeSituation(s,encounter);return {state:s,encounter};

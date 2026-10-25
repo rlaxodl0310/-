@@ -23,7 +23,7 @@ with sync_playwright() as p:
         page.get_by_role('button', name='주문대 쪽으로 간다').click()
         assert '충전용 콘센트' in page.locator('.page > .notice').inner_text()
         open_map(page)
-        page.get_by_role('button', name='학생회관 찾아가기').click()
+        page.get_by_role('button', name='자유관 찾아가기').click()
         assert '영수증' in page.locator('.lead').inner_text()
         page.locator('[data-action="encounter"][data-value="engage"]').click()
         assert page.locator('blockquote').is_visible()
