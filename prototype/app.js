@@ -61,7 +61,7 @@ app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return
  if(a==='visit'||a==='walk'){
   const destination=a==='walk'?atPlace():v;
   if(!locations[destination])throw new Error('알 수 없는 장소입니다.');
-  const arrived=arrive(state,destination,a==='walk'?v:'entry');state=arrived.state;encounter=arrived.encounter;screen=encounter?'encounter':'place';reply=null;
+  const arrived=arrive(state,destination,a==='walk'?v:'entry');state=arrived.state;encounter=arrived.encounter;screen=encounter?'encounter':'place';reply=null;note=arrived.observation??'';
  }
  if(a==='encounter'){
   const happened=resolveEncounter(state,encounter,v==='engage');state=happened.state;

@@ -34,22 +34,32 @@ function encounterContent(s,id){
   3:{text:'자료실 앞을 지나다가 막 인쇄된 종이 한 장이 바닥으로 미끄러지는 걸 본다. 박소율이 출력물을 맞춰 쥐느라 떨어진 종이를 바로 줍지 못한다.',action:'인쇄물을 주워준다. “이게 오늘 붙일 거예요?”',prefix:'감사해요. '}
  }[day];
 }
+const surroundings={
+ hall:{entry:['공용 테이블에는 물품 상자가 쌓여 있고, 벽에는 봉사단 활동 안내가 붙어 있다. 안쪽을 더 둘러볼 수 있을 것 같다.','학생회관 공용 테이블'],noticeboard:['게시판에서 이번 주 활동 안내를 읽었다. 모임 장소는 학생회관 안쪽 준비실로 표시되어 있다.','봉사 준비실 안내'],tables:['테이블 옆을 살펴보니 물품 상자와 문구류가 구분되어 있다. 지금은 함부로 가져가지 않고 보관 위치만 기억해 둔다.','학생회관 문구류 보관 위치'],window:['창가의 빈자리에 잠깐 앉았다. 유리 너머로 학생회관 앞 광장과 도서관 건물이 보인다.','학생회관 창가에서 보이는 광장'],lounge:['휴게공간을 지나며 콘센트가 있는 좌석과 정수기 위치를 확인했다. 잠시 쉬었다 가는 학생들이 보인다.','학생회관 정수기 위치']},
+ library:{entry:['도서관에 들어서자 반납기 작동음이 들린다. 입구 안내판에는 자료실과 출력 공간이 표시되어 있다. 반납대 쪽으로 더 들어가 볼 수 있다.','도서관 층별 안내'],shelves:['반납대를 지나 자료실을 살폈다. 복사기 옆에 공용 프린터가 있고, 벽의 안내도에서 계단 위치를 확인했다. 주변 사람들은 각자의 자료에 집중하고 있다.','도서관 공용 프린터 위치']},
+ cafe:{entry:['카페 문을 열자 커피 향과 잔 부딪히는 소리가 섞여 들어온다. 주문대에는 짧은 줄이 있고 창가 몇 자리는 비어 있다.','대학가 카페 위치'],counter:['주문대 옆 메뉴판을 살펴보고 줄에서 비켜섰다. 창가 좌석 옆에는 충전용 콘센트가 있다. 주문을 마친 사람들이 각자의 자리로 돌아간다.','카페 충전 좌석 위치']}
+};
+function observePlace(s,location,spot,repeated=false){
+ const [text,information]=surroundings[location]?.[spot]??surroundings[location]?.entry??['주변을 둘러봤다.',null];
+ if(information&&!s.known.includes(information)){s.known.push(information);s.memory.push(`[${s.day}일차] ${text}`);}
+ return repeated?`다시 주변을 확인했다. ${text}`:text;
+}
 export function arrive(state,location,spot='entry'){
  const s=structuredClone(state);s.location=location;s.encounters??={};
  const present=presentPeople(s,location);seePeople(s,present);
  const key=encounterKey(s,spot);
- if(s.encounters[key]?.resolved)return {state:s,encounter:null};
+ if(s.encounters[key]?.resolved)return {state:s,encounter:null,observation:observePlace(s,location,spot,true)};
  let person=null,group=false;
  if(location==='hall'&&spot==='lounge')group=present.includes('seoyeon')&&present.includes('soyul');
  else if(location==='hall')person=spot==='noticeboard'?'seoyeon':spot==='window'?'soyul':'yeogyeong';
- else if(location==='library'&&spot==='entry')person='soyul';
- else if(location==='cafe'&&spot==='entry')person='seoyeon';
+ else if(location==='library'&&['entry','shelves'].includes(spot))person='soyul';
+ else if(location==='cafe'&&['entry','counter'].includes(spot))person='seoyeon';
  if(person&&!present.includes(person))person=null;
  // Someone already spoken to keeps doing their own work; don't respawn a waiting dialogue target.
  const session=person?s.dialogue?.sessions?.[`${s.day}:${s.phase}:${person}`]:null;
  const resuming=!!session&&!session.closed;
  if(person&&!resuming&&Object.values(s.encounters).some(e=>e.day===s.day&&e.phase===s.phase&&e.person===person&&['engaged','passed'].includes(e.outcome)))person=null;
- if(!person&&!group){s.encounters[key]={day:s.day,phase:s.phase,resolved:true,outcome:'quiet'};return {state:s,encounter:null};}
+ if(!person&&!group){s.encounters[key]={day:s.day,phase:s.phase,resolved:true,outcome:'quiet'};return {state:s,encounter:null,observation:observePlace(s,location,spot)};}
  const content=group?{text:'휴게공간을 지나는데 낮은 웃음소리가 들린다. 한서연과 박소율이 같은 휴대폰을 들여다보고 있다. 두 사람은 이쪽을 보지 못한 채 사진 이야기를 이어간다.',action:'걸음을 늦추고 잠깐 이야기를 듣는다.',prefix:''}:encounterContent(s,person);
  const encounter={key,day:s.day,phase:s.phase,person,group,...content};
  const request=s.events.find(e=>e.id==='caption-request');
