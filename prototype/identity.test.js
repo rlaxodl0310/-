@@ -1,11 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newGame,act,nextDay,save,restore,acceptAppointment} from './simulation.js';
+import {newGame as clubGame,act,nextDay,save,restore,acceptAppointment} from './simulation.js';
 import {dialogue,respond,groupDialogue,openConversation} from './dialogue.js';
 import {contact,displayName,hearGroupLine,presentationText} from './identity.js';
 import {personalMessage} from './social-reasoning.js';
+function newGame(){const s=clubGame();s.contacts={};return s;}
 
-test('new game does not reveal names, roles or existing friendship to the player',()=>{
+test('club roster gives names without private acquaintance or automatic affinity',()=>{
+ const s=clubGame();
+ for(const id of Object.keys(s.npcs)){assert.equal(displayName(s,id),s.npcs[id].name);assert.equal(contact(s,id).introduced,false);assert.equal(s.relations[id+'>taei'],undefined);}
+});
+
+test('unfamiliar-person fixture does not reveal names, roles or existing friendship',()=>{
  const s=newGame();
  assert.equal(displayName(s,'yeogyeong'),'수첩을 정리하는 학생');
  for(const id of Object.keys(s.npcs)){
@@ -81,8 +87,8 @@ test('identity and evidence survive saving without introducing the rest of the c
 
 test('legacy world-only relations do not count as meeting; actual interactions can migrate',()=>{
  const old=newGame();old.version=3;delete old.contacts;
- const unknown=restore(save(old));assert.equal(unknown.version,4);
- assert.equal(contact(unknown,'soyul').nameLevel,'unknown');
+ const unknown=restore(save(old));assert.equal(unknown.version,5);
+ assert.equal(contact(unknown,'soyul').introduced,false);
  old.dialogue.history.push({person:'yeogyeong',day:1,phase:'afternoon',choice:'personal'});
  const migrated=restore(save(old));assert.equal(contact(migrated,'yeogyeong').introduced,true);
  assert.equal(contact(migrated,'soyul').introduced,false);
