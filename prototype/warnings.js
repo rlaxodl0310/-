@@ -1,3 +1,4 @@
+import {initializeRisk,tellRiskEvidence,rememberRisk} from './risk-decisions.js';
 import {learnEvent} from './event-view.js';
 import {recordEvent} from './event-engine.js';
 import {contact,identities} from './identity.js';
@@ -10,7 +11,7 @@ export const warningSites={
  street:{location:'cafe',label:'정류장 앞에 정차한 구급차',text:'창밖 정류장 쪽에 구급차 한 대가 서 있다. 몇몇 사람이 거리를 두고 바라보고, 다른 학생들은 옆으로 돌아 지나간다. 이 자리에서는 무슨 일인지 알 수 없다.',action:'길을 막지 않고 창가에서 잠깐 상황을 지켜본다.',detail:'구급대원들이 한 사람을 들것에 옮긴다. 차 문이 닫히고 주변 사람들이 흩어진다. 쓰러진 이유나 상태를 확인할 수는 없었다.',extra:'정류장에서 목격한 응급 이송'}
 };
 export function warningPhase(state){
- const s=structuredClone(state);prepareWarnings(s);
+ const s=initializeRisk(state);prepareWarnings(s);
  if(s.day!==3||s.phase!=='afternoon'||(s.world?.stage??'campus')!=='campus')return s;
  const scheduled=recordEvent(s,{id:'campus-staff-delay',kind:'scheduled',participants:[],status:'resolved',visibility:'notice',result:'행사 지원 인력 일부의 도착이 늦어져 남은 인원으로 준비를 이어가기로 했다.',warning:{id:'staff-delay',label:'행사 지원 인력의 도착 지연',detail:'행사 안내에는 지원 인력 일부가 늦으며 준비는 예정대로 진행한다고 적혀 있다. 이유는 안내되지 않았다.',source:'교내 행사 안내',kind:'notice'}});
  if(scheduled.created)s.messages.push({day:s.day,from:'교내 행사 안내',read:false,eventKey:`campus:3:campus-staff-delay`,text:'오늘 행사 지원 인력 일부의 도착이 늦고 있습니다. 준비는 예정대로 진행하며 담당 구역은 현장에서 다시 안내하겠습니다.'});
@@ -54,18 +55,21 @@ export function warningActivity(state,choice){
    noteWarning(s,{id:spot+'-detail',label:site.extra,detail:site.detail,source:'현장 안내문',kind:'notice'});
    prepareWarnings(s).resolved[spot]='checked';
   }
+  const companions=s.appointments.filter(a=>a.id?.startsWith('risk-escort:')&&a.status==='kept'&&a.activity==='checkCampus').map(a=>a.person);
+  for(const id of companions){rememberRisk(s,id,{topic:'gate',kind:'direct',source:'self',label:'출입구 통제 안내'});rememberRisk(s,id,{topic:'library',kind:'direct',source:'self',label:'자료실 운영 변경'});s.risk.actions.push({id:`escort:${id}:3`,day:3,actor:id,kind:'accompanied-check'});}
   s.location='library';s.lastResult='학생회관과 도서관의 현장 안내를 확인했다. 응급 차량 동선 확보와 자료실 운영 단축은 알게 됐지만, 같은 원인인지 확인할 근거는 없었다.';
+  if(companions.length)s.lastResult+=' '+companions.map(id=>identities[id].name).join(', ')+'과 함께 안내를 확인하고 각자의 정리 일정으로 돌아갔다.';
   s.memory.push('[3일차] 확인에 시간을 썼고 공연·전시 준비에는 참여하지 못했다.');
  }
  return s;
 }
 
-export function discussWarnings(state,id){
+export function discussWarnings(state,id,evidenceKey){
  if(state.day!==3||!contact(state,id).introduced||!(state.warnings?.evidence?.length))throw new Error('먼저 직접 확인하거나 전달받은 일이 있어야 이야기할 수 있습니다.');
- const s=structuredClone(state),direct=s.warnings.evidence.find(e=>e.kind==='direct'),e=direct??s.warnings.evidence[0];
- const playerLine=direct?`아까 ${e.label} 상황을 직접 봤어요. 혹시 무슨 일인지 들은 거 있어요?`:`${e.source}에서 ${e.label} 이야기를 접했어요. 혹시 더 들은 건 있어요?`;
+ let s=structuredClone(state);const chosen=evidenceKey?s.warnings.evidence.find(e=>e.key===evidenceKey):null;if(evidenceKey&&!chosen)throw new Error('접한 내용만 이야기할 수 있습니다.');const direct=s.warnings.evidence.find(e=>e.kind==='direct'),e=chosen??direct??s.warnings.evidence[0];s=tellRiskEvidence(s,id,e.key);
+ const playerLine=e.kind==='direct'?`아까 ${e.label} 상황을 직접 봤어요. 혹시 무슨 일인지 들은 거 있어요?`:`${e.source}에서 ${e.label} 이야기를 접했어요. 혹시 더 들은 건 있어요?`;
  const safe=socialIntent(s,id).feelsSafe;
  const text={yeogyeong:safe?'저도 연락 안 되는 담당자 때문에 확인 중이에요. 근데 서로 같은 일인지는 모르겠어요. 일단 인원부터 다시 맞춰보려고요. 선배도 일정 바뀌면 먼저 알려줘요.':'자세한 사정은 저도 몰라요. 지금 안내된 내용대로 준비하고 있어요.',soyul:safe?'뭔가 신경 쓰이기는 해요. 그래도 무슨 일인지 모르는 상태에서 찍거나 올리고 싶지는 않아요. 확인된 얘기 있으면 그때 말해줘요.':'저는 아직 아는 게 없어요. 그냥 보고 지나간 걸로 단정하고 싶지는 않아요.',seoyeon:safe?'신경 쓰이죠. 그래도 지금은 확실한 것부터 보자고요. 가던 길 바꿀 거면 연락하고, 막힌 문은 다른 쪽으로 돌아가요.':'안내문에 적힌 것부터 확인해봐요. 저도 이유는 모르니까요.'}[id];
- const result={person:id,day:s.day,phase:s.phase,choice:'warning:discuss',playerLine,text,stage:'태이는 자신이 확인하거나 전해 들은 범위에서만 이야기를 꺼낸다.'};
+ const result={riskReport:true,person:id,day:s.day,phase:s.phase,choice:'warning:discuss',playerLine,text,stage:'태이는 자신이 확인하거나 전해 들은 범위에서만 이야기를 꺼낸다.'};
  s.dialogue.history.push(result);return {state:s,result};
 }

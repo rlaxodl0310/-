@@ -1,3 +1,4 @@
+import {evolveRisk,requestEscort,riskScene} from './risk-decisions.js';
 import {finishWarningSite,discussWarnings,warningPhase} from './warnings.js';
 import {weatherTypes,weatherNow,weatherAtmosphere,hasUmbrella,borrowUmbrella,setWeatherExample,weatherAdjustAppointments} from './weather.js';
 import {updateSocialWorld} from './social-memory.js';
@@ -25,7 +26,8 @@ const narrative=text=>{
  for(const match of value.matchAll(pattern)){html+=esc(value.slice(start,match.index));const item=(state.inventory??[]).some(i=>i.name===match[0]);html+=`<strong class="${item?'item-text':'information-text'}">${esc(match[0])}</strong>`;start=match.index+match[0].length;}
  return html+esc(value.slice(start));
 };
-const btn=(text,action,value='')=>{const cost=action==='encounter'&&value==='pass'?0:timeCost(state,action,value);return `<button aria-label="${text}" aria-description="${cost?cost+'분 소요':'여러 활동을 마친 뒤 시간을 묶어서 진행'}" data-action="${action}" data-value="${value}" ${action==='wait'&&state.day===1&&state.phase==='afternoon'&&state.clock.minute>=960?'disabled':''}>${text}${cost?`<small class="time-cost">${cost}분</small>`:''}</button>`;};
+const buttonLabel=text=>{const node=document.createElement('span');node.innerHTML=text;return esc(node.textContent);};
+const btn=(text,action,value='')=>{const cost=action==='encounter'&&value==='pass'?0:timeCost(state,action,value);return `<button aria-label="${buttonLabel(text)}" aria-description="${cost?cost+'분 소요':'여러 활동을 마친 뒤 시간을 묶어서 진행'}" data-action="${action}" data-value="${esc(value)}" ${action==='wait'&&state.day===1&&state.phase==='afternoon'&&state.clock.minute>=960?'disabled':''}>${text}${cost?`<small class="time-cost">${cost}분</small>`:''}</button>`;};
 const duration=n=>n%60?`${n}분`:`${n/60}시간`;
 function portrait(column){return `<div class="portrait" style="--column:${column}" role="img" aria-label="${column===0?'김태이':nameOf(Object.entries(people).find(([,p])=>p.column===column)?.[0])} 정면 초상화"></div>`;}
 function page(title,body,back='campus',backAction='go'){return `<section class="page"><header>${btn('← 뒤로',backAction,back)}<h1>${title}</h1></header>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}${state.day===1&&state.phase==='afternoon'?`<p class="pace-summary">${paceSummary(state)}</p>`:''}${body}<p class="footnote">대학생활 3일 시제품 · 사건·요일·일정은 검증용 예시입니다.</p></section>`;}
@@ -45,17 +47,19 @@ function render(){
  if(screen==='travel')app.innerHTML=page('캠퍼스 이동',`<p class="muted">인물은 각자의 일정에 따라 장소를 옮깁니다. 1일차에는 여러 이동·탐색·대화를 묶어 시간이 한 번에 흐릅니다. 보통 약 30분이며, 비 오는 날의 야외 이동과 우산 준비에 따라 달라집니다. 짧은 대답마다 시간이 차감되지는 않습니다. 16:00부터 오후 활동을 시작하며, 메뉴 확인에는 시간이 들지 않습니다. 2~3일차는 기존 오후·저녁 단위로 진행합니다.</p><div class="grid">${Object.entries(locations).map(([id,label])=>`<button class="card" aria-label="${label} 찾아가기" data-action="visit" data-value="${id}" ${!canSpendTime(state,timeCost(state,'visit',id))?'disabled':''}><strong>${label}</strong>찾아가기</button>`).join('')}</div>`);
  if(screen==='place'){
   const here=atPlace();
-  app.innerHTML=page(locations[here],`<p class="lead">${timeLabel()}</p><p class="muted">${placeAtmosphere(state,here)||{hall:'복도에는 물품 상자와 활동 안내문이 놓여 있다. 안쪽에서 종이를 넘기는 소리가 들린다.',library:'책장을 넘기는 소리와 낮은 대화가 들린다. 사람들은 각자 하던 일을 이어간다.',cafe:'주문을 부르는 목소리가 들린다. 창가의 햇빛이 조금 길어졌다.'}[here]}</p><p class="weather-scene">${weatherAtmosphere(state,here)}</p><div class="actions">${placeActions[here].filter(a=>!a.fromDay||a.fromDay<=state.day).map(a=>btn(a.label,'walk',a.id)).join('')}</div><div class="actions">${!evening?btn('오후 활동 고르기','go','activities'):btn(state.day<3?'하루 마무리하기':'3일의 기록 보기','go','dayEnd')}${btn('다른 장소로 이동','go','travel')}${state.day===1&&!evening?btn('잠시 쉬며 시간을 보낸다','wait'):''}</div>`);
+  app.innerHTML=page(locations[here],`<p class="lead">${timeLabel()}</p><p class="muted">${placeAtmosphere(state,here)||{hall:'복도에는 물품 상자와 활동 안내문이 놓여 있다. 안쪽에서 종이를 넘기는 소리가 들린다.',library:'책장을 넘기는 소리와 낮은 대화가 들린다. 사람들은 각자 하던 일을 이어간다.',cafe:'주문을 부르는 목소리가 들린다. 창가의 햇빛이 조금 길어졌다.'}[here]}</p><p class="weather-scene">${weatherAtmosphere(state,here)}</p>${riskScene(state,here)?`<p class="muted">${narrative(riskScene(state,here))}</p>`:''}<div class="actions">${placeActions[here].filter(a=>!a.fromDay||a.fromDay<=state.day).map(a=>btn(a.label,'walk',a.id)).join('')}</div><div class="actions">${!evening?btn('오후 활동 고르기','go','activities'):btn(state.day<3?'하루 마무리하기':'3일의 기록 보기','go','dayEnd')}${btn('다른 장소로 이동','go','travel')}${state.day===1&&!evening?btn('잠시 쉬며 시간을 보낸다','wait'):''}</div>`);
  }
  if(screen==='encounter'&&encounter){
   app.innerHTML=page(locations[atPlace()],`<p class="muted">${timeLabel()}</p><p class="lead">${narrative(encounter.text)}</p><div class="dialogue-options">${btn(narrative(encounter.action),'encounter','engage')}${btn('하던 일을 계속하며 지나간다.','encounter','pass')}</div>`);
  }
  if(screen==='warningScene'&&warningScene)app.innerHTML=page(locations[atPlace()],`<p class="muted">${timeLabel()}</p><p class="lead">${narrative(warningScene.text)}</p><div class="dialogue-options">${btn(narrative(warningScene.action),'warningChoice','inspect')}${btn('더 확인하지 않고 원래 가던 길로 돌아간다.','warningChoice','pass')}</div>`,'place');
+ if(screen==='warningShare')app.innerHTML=page('어떤 일을 이야기할까',`<p class="muted">직접 본 것과 전달받은 내용을 구분해 말합니다. 말하지 않은 내용은 상대가 자동으로 알지 못합니다.</p><div class="dialogue-options">${state.warnings.evidence.map(e=>btn(narrative(e.label)+`<small>${narrative(e.source)}</small>`,'shareWarning',e.key)).join('')}</div>`,'dialogue');
  if(screen==='observations')app.innerHTML=page('확인한 일',`<p class="muted">직접 본 것, 안내문에 적힌 내용, 다른 사람에게 들은 내용을 구분해 기록합니다. 같은 원인이라고 단정할 근거는 아직 없습니다.</p>${(state.warnings?.evidence??[]).map(e=>`<article class="list"><strong class="information-text">${narrative(e.label)}</strong><p class="muted">${e.day}일차 · ${e.kind==='direct'?'직접 목격':e.kind==='notice'?'안내 확인':'전해 들음'} · ${narrative(e.source)}</p><p>${narrative(e.detail)}</p></article>`).join('')||'<p>아직 따로 기록한 일이 없습니다.</p>'}`,'phone');
  if(screen==='dialogue'){
-  const d=dialogue(state,speaker),p=people[speaker];
+  const d=dialogue(state,speaker),p=people[speaker],riskReply=reply?.riskEscort||reply?.riskReport;
+  const riskOptions=reply?.riskEscort?(reply.willing?btn('활동 살펴보기','go','activities'):btn('알겠어요. 맡은 일 먼저 마무리해요.','resumeConversation'))+btn('약속과 일정 확인','go','schedule')+btn('남은 이야기를 이어간다','resumeConversation'):reply?.riskReport?(!evening?btn('안내 확인에 동행 제안하기','requestEscort',speaker):'')+btn('알려줘서 고마워요. 남은 이야기 마저 해요.','resumeConversation')+btn('이야기를 마치고 돌아간다','go','place'):'';
   const invitation=reply?.choice==='invite'&&!state.appointments.some(a=>a.person===speaker&&a.status==='pending');
-  app.innerHTML=`<section class="conversation"><header class="top">${btn('← 대화 마치기','go','place')}<span class="badge">${timeLabel()} · ${locations[atPlace()]}</span></header><div class="conversation-body">${portrait(p.column)}<article class="dialogue-panel"><p class="eyebrow">${esc(nameOf(screen==='group'?line.person:speaker))}</p>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}<p class="muted">${narrative(reply?.stage??d.stage)}</p>${reply?.socialNews?`<p class="heard-report"><span>전해 들은 이야기</span>${narrative(reply.socialNews)}</p>`:''}${reply?.playerLine?`<p class="player-line"><span>김태이</span>${narrative(reply.playerLine)}</p>`:''}<blockquote>${esc(reply?.text??d.opening)}</blockquote>${reply?.followup?`<p class="inner-line">${esc(reply.followup)}</p>`:''}<div class="dialogue-options">${invitation?btn('내일 같이 하기로 약속한다','acceptAppointment',speaker):''}${d.options.map(o=>btn(narrative(o.label),'answer',o.id)).join('')}</div><div class="actions">${d.scene?btn('다른 이야기로 넘어가기','endTopic'):''}${state.day<3&&contact(state,speaker).introduced?btn('따로 만날 시간 물어보기','suggestMeeting',speaker):''}${state.day===3&&(state.warnings?.evidence?.length??0)>0?btn('주변에서 접한 일 이야기하기','warningTalk',speaker):''}${btn('활동 살펴보기','go','activities')}</div></article></div></section>`;
+  app.innerHTML=`<section class="conversation"><header class="top">${btn('← 대화 마치기','go','place')}<span class="badge">${timeLabel()} · ${locations[atPlace()]}</span></header><div class="conversation-body">${portrait(p.column)}<article class="dialogue-panel"><p class="eyebrow">${esc(nameOf(screen==='group'?line.person:speaker))}</p>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}<p class="muted">${narrative(reply?.stage??d.stage)}</p>${reply?.socialNews?`<p class="heard-report"><span>전해 들은 이야기</span>${narrative(reply.socialNews)}</p>`:''}${reply?.playerLine?`<p class="player-line"><span>김태이</span>${narrative(reply.playerLine)}</p>`:''}<blockquote>${esc(reply?.text??d.opening)}</blockquote>${reply?.followup?`<p class="inner-line">${esc(reply.followup)}</p>`:''}<div class="dialogue-options">${invitation?btn('내일 같이 하기로 약속한다','acceptAppointment',speaker):''}${riskReply?riskOptions:d.options.map(o=>btn(narrative(o.label),'answer',o.id)).join('')}</div>${!riskReply?`<div class="actions">${d.scene?btn('다른 이야기로 넘어가기','endTopic'):''}${state.day<3&&contact(state,speaker).introduced?btn('따로 만날 시간 물어보기','suggestMeeting',speaker):''}${state.day===3&&(state.warnings?.evidence?.length??0)>0?btn('주변에서 접한 일 이야기하기','warningTalk',speaker)+(!evening?btn('안내 확인에 동행 제안하기','requestEscort',speaker):''):''}${btn('활동 살펴보기','go','activities')}</div>`:''}</article></div></section>`;
  }
  if(screen==='group'){
   const line=groupLines[groupIndex],p=people[line.person],end=groupIndex===groupLines.length-1;
@@ -101,7 +105,10 @@ app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return
   const arrived=arrive(state,destination,a==='walk'?v:'entry');state=arrived.state;encounter=arrived.encounter;warningScene=arrived.warning??null;screen=warningScene?'warningScene':encounter?'encounter':'place';reply=null;note=arrived.observation??'';
  }
  if(a==='warningChoice'){const result=finishWarningSite(state,warningScene,v==='inspect');state=result.state;note=result.text;warningScene=null;screen='place';}
- if(a==='warningTalk'){const result=discussWarnings(state,v);state=result.state;reply=result.result;}
+ if(a==='resumeConversation')reply=null;
+ if(a==='warningTalk'){speaker=v;screen='warningShare';}
+ if(a==='shareWarning'){const result=discussWarnings(state,speaker,v);state=result.state;reply=result.result;screen='dialogue';}
+ if(a==='requestEscort'){const result=requestEscort(state,v);state=result.state;reply=result.result;}
  if(a==='encounter'){
   const happened=resolveEncounter(state,encounter,v==='engage');state=happened.state;
   if(v!=='engage'){encounter=null;screen='place';}
@@ -139,6 +146,7 @@ app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return
  }
  if(!['load','save','reset','scenario'].includes(a))state=warningPhase(state);
  if(!['load','save','reset','scenario'].includes(a))state=updateSocialWorld(before,state);
+ if(!['load','save','reset','scenario'].includes(a)){state=evolveRisk(state,{allowMove:['place','campus','travel','activities','result'].includes(screen)});for(const [id,place] of Object.entries(currentSchedule(state)))state.npcs[id].location=place;}
  if(!['load','save','reset'].includes(a))state=evaluateInvitations(state);
  if(a==='dismissDiscoveries')gains=[];
  if(['load','reset','scenario'].includes(a))gains=[];else {const found=recordDiscoveries(before,state,b.textContent.trim());if(found.length)gains=found;}

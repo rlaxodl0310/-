@@ -20,5 +20,5 @@ function baseSchedule(s){
  if(m<960)return {yeogyeong:(s.relations['yeogyeong>soyul']?.tension??0)>=3?'hall':'library',seoyeon:'hall',soyul:'library'};
  return {yeogyeong:'hall',seoyeon:'hall',soyul:'hall'};
 }
-export function currentSchedule(s){return adaptWeatherSchedule(s,baseSchedule(s));}
+export function currentSchedule(s){const plan=adaptWeatherSchedule(s,baseSchedule(s));if(s.day===3&&s.phase==='afternoon'&&(s.world?.stage??'campus')==='campus')Object.assign(plan,s.risk?.positions??{});return plan;}
 export function presentPeople(s,location){const plan=currentSchedule(s);return Object.keys(plan).filter(id=>plan[id]===location);}
