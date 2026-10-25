@@ -6,7 +6,8 @@ with sync_playwright() as p:
     page = browser.new_page(viewport={'width': 1440, 'height': 900})
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
-    page.goto('http://127.0.0.1:8000/prototype/')
+    page.goto('http://127.0.0.1:8000/')
+    page.wait_for_url('**/prototype/')
     page.get_by_role('button', name='학생회관 들어가기').click()
     page.get_by_role('button', name='한서연과 이야기하기').click()
     page.get_by_role('button', name='준비할 게 있어요?').click()
