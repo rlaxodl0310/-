@@ -1,6 +1,7 @@
+import {knownGame as newGame} from './fixtures.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newGame,act,nextDay,acceptAppointment,cancelAppointment,save,restore} from './simulation.js';
+import {act,nextDay,acceptAppointment,cancelAppointment,save,restore} from './simulation.js';
 import {availableRoutes,presentPeople} from './days.js';
 import {dialogue,respond,relationship,groupDialogue,endTopic} from './dialogue.js';
 
@@ -98,5 +99,5 @@ test('version-two saves migrate to day one and retain relationships',()=>{
  const old=newGame('friend');old.version=2;
  delete old.day;delete old.dayHistory;delete old.appointments;
  const loaded=restore(save(old));assert.equal(loaded.day,1);
- assert.equal(loaded.version,3);assert.equal(relationship(loaded,'soyul').trust,4);
+ assert.equal(loaded.version,4);assert.equal(relationship(loaded,'soyul').trust,4);
 });

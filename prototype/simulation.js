@@ -1,14 +1,15 @@
+import {introduce,contact,identities} from './identity.js';
 import {personalMessage} from './social-reasoning.js';
 import {changeRelationship,relationship} from './dialogue.js';
 import {days,availableRoutes} from './days.js';
 export function newGame(profile='acquaintance') {
- const s={version:3,day:1,phase:'afternoon',choice:null,minutes:0,location:'campus',
+ const s={version:4,contacts:{},day:1,phase:'afternoon',choice:null,minutes:0,location:'campus',
   known:[],messages:[],events:[],relations:{},npcs:{yeogyeong:{name:'차여경',location:'hall'},seoyeon:{name:'한서연',location:'hall'},soyul:{name:'박소율',location:'hall'}},
   memory:[],dayHistory:[],appointments:[],lastResult:'',dialogue:{history:[],promises:{}}};
  changeRelationship(s,'seoyeon','soyul',{familiarity:20,trust:12,affection:8});
  changeRelationship(s,'soyul','seoyeon',{familiarity:20,trust:12,affection:8});
  if(profile!=='acquaintance')for(const id of Object.keys(s.npcs))changeRelationship(s,id,'taei',profile==='close'?{familiarity:8,trust:5,affection:5}:{familiarity:6,trust:4,affection:0});
- if(profile!=='acquaintance'){s.dialogue.facts={};for(const id of Object.keys(s.npcs))s.dialogue.facts[id]={speech:'casual'};}
+ if(profile!=='acquaintance'){for(const id of Object.keys(s.npcs))introduce(s,id,'relationship-demo');s.dialogue.facts={};for(const id of Object.keys(s.npcs))s.dialogue.facts[id]={speech:'casual'};}
  return s;
 }
 function remember(s,text){s.memory.push(`[${s.day}일차] ${text}`);}
@@ -19,6 +20,8 @@ export function act(state,choice){
  if(!route||route.locked)throw new Error('지금 선택할 수 없는 활동입니다.');
  const s=structuredClone(state),day=s.day;
  s.choice=choice;s.minutes=route.duration;s.phase='evening';s.lastResult=route.memory;
+ const encounters=choice==='volunteer'||choice==='exhibit'?Object.keys(s.npcs):choice==='review'?['soyul']:choice==='backstage'?['seoyeon']:[];
+ for(const id of encounters)if(!contact(s,id).introduced){introduce(s,id,'shared-activity');s.lastResult=`활동에 앞서 ${identities[id].name}과 서로 이름을 소개했다. `+s.lastResult;remember(s,`${identities[id].name}과 활동을 시작하며 서로 소개했다.`);}
  remember(s,route.memory);know(s,...route.knowledge);
  const participants=day===2?['yeogyeong','soyul']:['yeogyeong','seoyeon','soyul'];
  const result={1:'포장 누락을 확인하고 남은 물품에 맞춰 진행 순서를 조정했다.',2:'소율이 정리한 사진을 여경에게 전달하고 둘이 전시 구성을 의논했다.',3:'봉사단이 사진 전시 준비를 마쳤다.'}[day];
@@ -70,7 +73,7 @@ export function nextDay(state){
 }
 export function acceptAppointment(state,person){
  if(state.day!==2||!state.npcs[person])throw new Error('지금은 다음 날 약속을 잡을 수 없습니다.');
- if(relationship(state,person).familiarity<2||relationship(state,person).tension>=3)throw new Error('아직 함께 일정을 잡을 만큼 이야기하지 않았습니다.');
+ if(!contact(state,person).introduced||relationship(state,person).familiarity<2||relationship(state,person).tension>=3)throw new Error('아직 함께 일정을 잡을 만큼 이야기하지 않았습니다.');
  const s=structuredClone(state),activity=person==='seoyeon'?'backstage':'exhibit';
  if(s.appointments.some(a=>a.person===person&&a.status==='pending'))throw new Error('이미 수락한 약속입니다.');
  s.appointments.push({person,day:3,activity,label:activity==='backstage'?'리허설':'전시 준비',status:'pending'});
@@ -89,6 +92,12 @@ export function restore(raw){
  const s=JSON.parse(raw);
  if(s?.version===1){s.version=2;s.dialogue={history:[],promises:{}};}
  if(s?.version===2){s.version=3;s.day=1;s.dayHistory=[];s.appointments=[];s.lastResult=s.memory?.at(-1)??'';for(const h of s.dialogue?.history??[])h.day=1;for(const npc of Object.values(s.npcs??{}))npc.location='hall';}
- if(s?.version!==3||!Number.isInteger(s.day)||s.day<1||s.day>3||!['afternoon','evening'].includes(s.phase)||!Array.isArray(s.memory)||!Array.isArray(s.known)||!Array.isArray(s.messages)||!Array.isArray(s.events)||!Array.isArray(s.dayHistory)||!Array.isArray(s.appointments)||!s.npcs||!s.relations||!Array.isArray(s.dialogue?.history)||!s.dialogue?.promises)throw new Error('지원하지 않는 저장 파일입니다.');
+ if(s?.version===3){
+  s.version=4;s.contacts??={};
+  const oldInteractions=new Set((s.dialogue?.history??[]).filter(h=>h.person!=='group').map(h=>h.person));
+  for(const a of s.appointments??[])oldInteractions.add(a.person);
+  for(const id of Object.keys(s.npcs??{}))if(oldInteractions.has(id)||s.dialogue?.facts?.[id]?.speech==='casual')introduce(s,id,'legacy-interaction');
+ }
+ if(s?.version!==4||!s.contacts||!Number.isInteger(s.day)||s.day<1||s.day>3||!['afternoon','evening'].includes(s.phase)||!Array.isArray(s.memory)||!Array.isArray(s.known)||!Array.isArray(s.messages)||!Array.isArray(s.events)||!Array.isArray(s.dayHistory)||!Array.isArray(s.appointments)||!s.npcs||!s.relations||!Array.isArray(s.dialogue?.history)||!s.dialogue?.promises)throw new Error('지원하지 않는 저장 파일입니다.');
  return s;
 }

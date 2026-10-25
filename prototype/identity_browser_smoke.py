@@ -1,0 +1,57 @@
+"""Check name discovery on real rendered UI, including accessible portrait labels."""
+from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True, executable_path='/usr/bin/chromium')
+    for path in ['/prototype/', '/demo/campus-demo.html']:
+        page = browser.new_page(viewport={'width': 1440, 'height': 1000})
+        errors = []
+        page.on('pageerror', lambda error: errors.append(str(error)))
+        page.goto('http://127.0.0.1:8000' + path)
+        page.get_by_role('button', name='학생회관 들어가기').click()
+        for name in ['차여경', '한서연', '박소율']:
+            assert name not in page.locator('body').inner_text()
+        assert page.get_by_role('button', name='수첩을 정리하는 학생 다가가기').is_visible()
+        if path == '/prototype/':
+            page.screenshot(path='/tmp/identity-first.png', full_page=True)
+        page.locator('[data-action="talk"][data-value="yeogyeong"]').click()
+        assert page.get_by_role('img', name='수첩을 정리하는 학생 정면 초상화').is_visible()
+        assert '차여경' not in page.locator('body').inner_text()
+        assert '재무' not in page.locator('body').inner_text()
+        page.get_by_role('button', name='안녕하세요. 혹시 봉사단 분이세요?').click()
+        assert '차여경' in page.locator('blockquote').inner_text()
+        assert page.get_by_role('img', name='차여경 정면 초상화').is_visible()
+        assert page.get_by_role('button', name='김태이예요.', exact=False).is_visible()
+        page.get_by_role('button', name='아, 지금은 일이 있어서요.', exact=False).click()
+        assert page.get_by_role('button', name='차여경 인사하기').is_visible()
+        page.locator('[data-action="talk"][data-value="yeogyeong"]').click()
+        page.get_by_role('button', name='김태이예요.', exact=False).click()
+        page.get_by_role('button', name='← 대화 마치기').click()
+        assert page.get_by_role('button', name='차여경 이야기하기').is_visible()
+        page.get_by_role('button', name='두 학생의 대화에 다가간다').click()
+        assert '소율아' in page.locator('blockquote').inner_text()
+        assert '한서연' not in page.locator('body').inner_text()
+        assert '박소율' not in page.locator('body').inner_text()
+        page.get_by_role('button', name='다음 대화').click()
+        assert page.get_by_role('img', name='소율 정면 초상화').is_visible()
+        page.get_by_role('button', name='← 대화 마치기').click()
+        assert page.get_by_role('button', name='소율 인사하기').is_visible()
+        assert page.get_by_role('button', name='단발머리 학생 다가가기').is_visible()
+        if path == '/prototype/':
+            page.screenshot(path='/tmp/identity-learned.png', full_page=True)
+        page.get_by_role('button', name='← 뒤로').click()
+        page.get_by_role('button', name='메뉴', exact=True).click()
+        page.locator('[data-action="save"][data-value="3"]').click()
+        page.get_by_role('button', name='새 하루 시작').click()
+        page.get_by_role('button', name='새로 시작', exact=True).click()
+        page.get_by_role('button', name='메뉴', exact=True).click()
+        page.locator('[data-action="load"][data-value="3"]').click()
+        page.get_by_role('button', name='← 뒤로').click()
+        page.get_by_role('button', name='학생회관 들어가기').click()
+        assert page.get_by_role('button', name='소율 인사하기').is_visible()
+        assert page.get_by_role('button', name='차여경 이야기하기').is_visible()
+        assert page.get_by_role('button', name='단발머리 학생 다가가기').is_visible()
+        assert not errors, errors
+        print(path + ': unknown labels/ARIA, name disclosure, mutual introduction, overheard given name and save/load passed.')
+        page.close()
+    browser.close()

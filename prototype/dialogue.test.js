@@ -1,6 +1,7 @@
+import {knownGame as newGame} from './fixtures.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newGame,act,restore,save} from './simulation.js';
+import {act,restore,save} from './simulation.js';
 import {dialogue,respond,relationship,changeRelationship,groupDialogue,respondGroup,endTopic,openConversation} from './dialogue.js';
 
 test('same joke lands differently with familiarity and maintains distinct voices',()=>{

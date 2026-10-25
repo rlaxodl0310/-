@@ -17,7 +17,9 @@ with sync_playwright() as p:
                 catch { return false; }
             }'''), path + ': image missing'
         page.get_by_role('button', name='학생회관 들어가기').click()
-        page.get_by_role('button', name='박소율 이야기하기').click()
+        page.locator('[data-action="talk"][data-value="soyul"]').click()
+        page.get_by_role('button', name='안녕하세요. 혹시 봉사단 분이세요?').click()
+        page.get_by_role('button', name='김태이예요. 이번에 복학해서 아직 낯선 얼굴이 많네요.').click()
         page.get_by_role('button', name='사진 고르는 중이에요?').click()
         page.get_by_role('button', name='사람들 있는 쪽. 저 사람 웃는 거 보니까 분위기가 보여서.').click()
         assert '빈 의자' in page.locator('blockquote').inner_text()

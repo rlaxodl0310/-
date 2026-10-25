@@ -1,6 +1,7 @@
+import {knownGame as newGame} from './fixtures.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newGame,act,nextDay,acceptAppointment,save,restore} from './simulation.js';
+import {act,nextDay,acceptAppointment,save,restore} from './simulation.js';
 import {dialogue,respond,endTopic,openConversation,relationship} from './dialogue.js';
 import {socialIntent,personalMessage} from './social-reasoning.js';
 

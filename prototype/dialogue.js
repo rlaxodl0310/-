@@ -1,3 +1,4 @@
+import {contact,firstContact,respondIntroduction} from './identity.js';
 import {sceneKey,sceneNodes,scenePrompt} from './conversation-scenes.js';
 import {socialIntent} from './social-reasoning.js';
 export const people={
@@ -25,7 +26,7 @@ export function groupDialogue(s){
  {person:'seoyeon',text:s.phase==='afternoon'?'소율아, 이거 안 지웠지? 너 표정 진짜 잘 나왔는데.':'가기 전에 사진 하나만 봐봐. 아까 이거 보여주려다 말았어.'},
  {person:'soyul',text:friends?'너 말하는 잘 나왔다는 걸 내가 못 믿겠어. 지난번에도 눈 감은 거 보냈잖아.':'네… 제가 찍은 사진도 몇 장 있어요.'},
  {person:'seoyeon',text:friends?'그건 네가 웃었잖아. 알았어, 네가 먼저 골라. 대신 내 사진도 마음대로 지우진 말고.':'좋아요. 괜찮은 것부터 보여주세요.'},
- {person:'soyul',text:s.dialogue?.facts?.soyul?.speech==='casual'?'태이도 볼래? …이상하게 찍은 건 없으니까.':'아, 안녕하세요. 저희 지난 활동 사진 보고 있었어요.'}
+ {person:'soyul',text:s.dialogue?.facts?.soyul?.speech==='casual'?'태이도 볼래? …이상하게 찍은 건 없으니까.':'아, 안녕하세요. 사진 보고 있었는데… 같이 보실래요?'}
  ];
 }
 export function respondGroup(state,choice){
@@ -47,6 +48,7 @@ export function respondGroup(state,choice){
  return {state:s,lines};
 }
 export function dialogue(s,id){
+ if(!contact(s,id).introduced)return firstContact(s,id);
  const active=s.dialogue?.sessions?.[sceneKey(s,id)];
  if(active&&!active.closed){
   const n=sceneNodes(s,id,active)[active.node];
@@ -94,6 +96,8 @@ export function dialogue(s,id){
  ]};
 }
 export function respond(state,id,choice){
+ if(choice.startsWith('intro:'))return respondIntroduction(state,id,choice);
+ if(!contact(state,id).introduced)throw new Error('먼저 인사를 나누거나 상황에 맞게 만나야 합니다.');
  if(choice.startsWith('scene:'))return advanceScene(state,id,choice.slice(6));
  if(['personal','joke'].includes(choice)||(choice==='listen'&&state.phase==='afternoon'&&(state.day??1)===1))return beginScene(state,id,choice);
  const current=dialogue(state,id);
@@ -223,6 +227,7 @@ function advanceScene(state,id,choice){
 }
 
 export function openConversation(state,id){
+ if(!contact(state,id).introduced){const s=structuredClone(state);s.contacts??={};s.contacts[id]={...contact(s,id),seen:true,approaches:contact(s,id).approaches+1};return {state:s,result:null};}
  const current=dialogue(state,id),intent=socialIntent(state,id);
  if(current.scene)return {state,result:null};
  const key=sceneKey(state,id);

@@ -1,3 +1,4 @@
+import {contact} from './identity.js';
 // A transparent decision model for authored NPC behavior, not a language model.
 export function socialIntent(s,id){
  const r={familiarity:0,affection:0,trust:0,tension:0,...s.relations[`${id}>taei`]};
@@ -23,6 +24,7 @@ export function socialIntent(s,id){
   motives:{finishTask:workPressure?4:1,shareTime:personallyInterested?3:1,protectPrivacy:feelsSafe?0:3}};
 }
 export function personalMessage(s,id){
+ if(!contact(s,id).introduced)return null;
  const intent=socialIntent(s,id),facts=s.dialogue?.facts?.[id]??{};
  if(intent.unresolved)return {seoyeon:'어제 못 올 거면 한마디만 해줬으면 했어요. 오늘은 일정 확인하고 얘기해요.',yeogyeong:'어제 기다렸어요. 다음에는 못 오면 먼저 알려주세요.',soyul:'어제 기다렸는데… 오늘은 무리해서 약속 안 해도 돼요.'}[id];
  if(intent.mode==='guarded')return null;
