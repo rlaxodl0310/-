@@ -1,3 +1,4 @@
+import {updateSocialWorld} from './social-memory.js';
 import {clubs,joinClub,evaluateInvitations,replyOffer,suggestMeeting,appointmentConflicts,meetAppointments} from './appointments.js';
 import {timeCost,canSpendTime,clockLabel,placeAtmosphere,paceAction,paceSummary} from './campus-time.js';
 import {recordDiscoveries} from './discoveries.js';
@@ -28,7 +29,7 @@ function portrait(column){return `<div class="portrait" style="--column:${column
 function page(title,body,back='campus'){return `<section class="page"><header>${btn('← 뒤로','go',back)}<h1>${title}</h1></header>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}${state.day===1&&state.phase==='afternoon'?`<p class="pace-summary">${paceSummary(state)}</p>`:''}${body}<p class="footnote">대학생활 3일 시제품 · 사건·요일·일정은 검증용 예시입니다.</p></section>`;}
 function timeLabel(){return `${state.day}일차 · ${days[state.day].weekday} · ${state.day===1?clockLabel(state)+' · ':''} ${state.phase==='evening'?'저녁':'오후'}`;}
 function pending(){return state.appointments.filter(a=>a.status==='pending');}
-const appointmentStatuses={offered:'응답 전',pending:'참석 예정',declined:'거절함',cancelled:'미리 취소함',kept:'지킴',broken:'지키지 못함',expired:'제안 기한 지남'};
+const appointmentStatuses={offered:'응답 전',pending:'참석 예정',declined:'거절함',cancelled:'미리 취소함',kept:'지킴',broken:'지키지 못함',expired:'제안 기한 지남',withdrawn:'상대가 제안 보류'};
 function appointmentCard(a){
  const who=a.person?nameOf(a.person):clubs[a.club]?.name??'동아리';
  const conflicts=appointmentConflicts(state,a);
@@ -50,7 +51,7 @@ function render(){
  if(screen==='dialogue'){
   const d=dialogue(state,speaker),p=people[speaker];
   const invitation=reply?.choice==='invite'&&!state.appointments.some(a=>a.person===speaker&&a.status==='pending');
-  app.innerHTML=`<section class="conversation"><header class="top">${btn('← 대화 마치기','go','place')}<span class="badge">${timeLabel()} · ${locations[atPlace()]}</span></header><div class="conversation-body">${portrait(p.column)}<article class="dialogue-panel"><p class="eyebrow">${esc(nameOf(screen==='group'?line.person:speaker))}</p>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}<p class="muted">${narrative(reply?.stage??d.stage)}</p>${reply?.playerLine?`<p class="player-line"><span>김태이</span>${narrative(reply.playerLine)}</p>`:''}<blockquote>${esc(reply?.text??d.opening)}</blockquote>${reply?.followup?`<p class="inner-line">${esc(reply.followup)}</p>`:''}<div class="dialogue-options">${invitation?btn('내일 같이 하기로 약속한다','acceptAppointment',speaker):''}${d.options.map(o=>btn(narrative(o.label),'answer',o.id)).join('')}</div><div class="actions">${d.scene?btn('다른 이야기로 넘어가기','endTopic'):''}${state.day<3&&contact(state,speaker).introduced?btn('따로 만날 시간 물어보기','suggestMeeting',speaker):''}${btn('활동 살펴보기','go','activities')}</div></article></div></section>`;
+  app.innerHTML=`<section class="conversation"><header class="top">${btn('← 대화 마치기','go','place')}<span class="badge">${timeLabel()} · ${locations[atPlace()]}</span></header><div class="conversation-body">${portrait(p.column)}<article class="dialogue-panel"><p class="eyebrow">${esc(nameOf(screen==='group'?line.person:speaker))}</p>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}<p class="muted">${narrative(reply?.stage??d.stage)}</p>${reply?.socialNews?`<p class="heard-report"><span>전해 들은 이야기</span>${narrative(reply.socialNews)}</p>`:''}${reply?.playerLine?`<p class="player-line"><span>김태이</span>${narrative(reply.playerLine)}</p>`:''}<blockquote>${esc(reply?.text??d.opening)}</blockquote>${reply?.followup?`<p class="inner-line">${esc(reply.followup)}</p>`:''}<div class="dialogue-options">${invitation?btn('내일 같이 하기로 약속한다','acceptAppointment',speaker):''}${d.options.map(o=>btn(narrative(o.label),'answer',o.id)).join('')}</div><div class="actions">${d.scene?btn('다른 이야기로 넘어가기','endTopic'):''}${state.day<3&&contact(state,speaker).introduced?btn('따로 만날 시간 물어보기','suggestMeeting',speaker):''}${btn('활동 살펴보기','go','activities')}</div></article></div></section>`;
  }
  if(screen==='group'){
   const line=groupLines[groupIndex],p=people[line.person],end=groupIndex===groupLines.length-1;
@@ -120,6 +121,7 @@ app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return
   const paced=paceAction(before,state,{action:a,value:v,from:fromScreen,to:screen,person:fromScreen==='group'?'group':speaker});state=paced.state;
   if(paced.minutes)paceNotice=`${a==='wait'?'잠시 쉬고 나니':'여러 일을 마치고 나니'} 어느새 ${clockLabel(state)}. 약 ${paced.minutes}분이 지났다.`;
  }
+ if(!['load','save','reset','scenario'].includes(a))state=updateSocialWorld(before,state);
  if(!['load','save','reset'].includes(a))state=evaluateInvitations(state);
  if(a==='dismissDiscoveries')gains=[];
  if(['load','reset','scenario'].includes(a))gains=[];else {const found=recordDiscoveries(before,state,b.textContent.trim());if(found.length)gains=found;}

@@ -1,3 +1,4 @@
+import {socialOpinion} from './social-memory.js';
 import {contact,learnIdentity,clubRoster} from './identity.js';
 import {socialIntent} from './social-reasoning.js';
 import {changeRelationship} from './dialogue.js';
@@ -29,6 +30,10 @@ export function evaluateInvitations(state){
  if(s.day>=3)return s;
  for(const id of ['yeogyeong','seoyeon','soyul']){
   const key=`npc:${id}:${s.day}`;
+  if(socialOpinion(s,id).cautious){
+   for(const offer of s.appointments.filter(a=>a.person===id&&a.proposer==='npc'&&a.status==='offered')){offer.status='withdrawn';s.messages.push({day:s.day,from:s.npcs[id].name,text:'아까 말한 일정은 시간부터 한 번 더 확인하고 정해요. 지금 바로 확정하진 않을게요.'});}
+   continue;
+  }
   if(s.invitationDecisions[key]||!invitationReady(s,id))continue;
   const r=s.relations[`${id}>taei`]??{},intent=socialIntent(s,id),day=targetDay(s);
   // Different personalities ask for different things. Affection never overrides low trust.

@@ -8,7 +8,7 @@ import {days,availableRoutes} from './days.js';
 export function newGame(profile='acquaintance') {
  const s={version:6,clock:{minute:780},pace:{count:0,seen:{}},world:{stage:'campus'},eventState:{flags:{},plans:{},knowledge:{}},contacts:{},encounters:{},day:1,phase:'afternoon',choice:null,minutes:0,location:'campus',
   known:[],inventory:[],discoveries:[],messages:[],events:[],relations:{},npcs:{yeogyeong:{name:'차여경',location:'hall'},seoyeon:{name:'한서연',location:'hall'},soyul:{name:'박소율',location:'hall'}},
-  memberships:{},invitationDecisions:{},memory:[],dayHistory:[],appointments:[],lastResult:'',dialogue:{history:[],promises:{}}};
+  social:{facts:[],knowledge:{},shares:[],decisions:{},heardByPlayer:[]},memberships:{},invitationDecisions:{},memory:[],dayHistory:[],appointments:[],lastResult:'',dialogue:{history:[],promises:{}}};
  changeRelationship(s,'seoyeon','soyul',{familiarity:20,trust:12,affection:8});
  changeRelationship(s,'soyul','seoyeon',{familiarity:20,trust:12,affection:8});
  if(profile!=='acquaintance')for(const id of Object.keys(s.npcs))changeRelationship(s,id,'taei',profile==='close'?{familiarity:8,trust:5,affection:5}:{familiarity:6,trust:4,affection:0});
@@ -103,6 +103,7 @@ export function restore(raw){
  }
  if(s?.version!==6||!s.world||!s.eventState||!s.encounters||!s.contacts||!Number.isInteger(s.day)||s.day<1||s.day>3||!['afternoon','evening'].includes(s.phase)||!Array.isArray(s.memory)||!Array.isArray(s.known)||!Array.isArray(s.messages)||!Array.isArray(s.events)||!Array.isArray(s.dayHistory)||!Array.isArray(s.appointments)||!s.npcs||!s.relations||!Array.isArray(s.dialogue?.history)||!s.dialogue?.promises)throw new Error('지원하지 않는 저장 파일입니다.');
  s.clock??={minute:s.phase==='evening'?1140:780};
+ s.social??={facts:[],knowledge:{},shares:[],decisions:{},heardByPlayer:[]};
  s.memberships??={};s.invitationDecisions??={};
  s.pace??={count:0,seen:{}};
  s.inventory??=[];s.discoveries??=[];

@@ -9,6 +9,7 @@ button[aria-pressed="true"]{border-color:#9adad4;background:#2d5960;box-shadow:i
 .time-cost{display:block;margin-top:5px;color:#c1e4df;font-size:12px;font-weight:400}.time-cost::before{content:'◷ ';}.card .time-cost{margin-top:10px}
 .pace-summary{color:#b4c5c7;font-size:14px;line-height:1.7;border-left:2px solid #527c80;padding-left:12px;margin:0 0 24px}.time-summary{max-width:900px;margin:12px auto;padding:14px 20px;border:1px solid #82b8b855;border-radius:12px;background:#19383e;line-height:1.7}@media(max-width:650px){.time-summary{margin:8px}}
 .invitation-alert{max-width:900px;margin:12px auto;padding:12px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#273443;border:1px solid #b8c9f055;border-radius:12px}.invitation-alert span{color:#c5d2df;font-size:13px}@media(max-width:650px){.invitation-alert{margin:8px}}
+.heard-report{background:#233546;border-left:3px solid #a9bedf;padding:14px 16px;line-height:1.8;color:#dce6f5}.heard-report span{display:block;color:#b5cbea;font-size:12px;margin-bottom:6px}
 </style></head><body><main id="app"><section style="padding:32px;font-family:system-ui;line-height:1.8"><h1>캠퍼스의 하루</h1><p>게임 화면을 준비하고 있습니다.</p><p>이 안내가 계속 보이면 파일 미리보기 대신 다운로드한 HTML을 Chrome 또는 Edge에서 직접 열어주세요. GitHub 파일 보기 화면에서는 게임이 실행되지 않습니다.</p></section></main><noscript>게임 실행에는 JavaScript가 필요합니다. JavaScript를 허용하는 브라우저에서 열어주세요.</noscript><script>
 window.addEventListener('error', function(event) {
   var app = document.getElementById('app');
@@ -751,6 +752,87 @@ function finishSituation(s,encounter,engage){
 }
 
 
+function socialState(s){
+ s.social??={facts:[],knowledge:{},shares:[],decisions:{},heardByPlayer:[]};return s.social;
+}
+function socialRelation(s,from,to){return {trust:0,familiarity:0,tension:0,...s.relations[`${from}>${to}`]};}
+function addSocialFact(s,fact){
+ const social=socialState(s);if(social.facts.some(f=>f.id===fact.id))return;
+ social.facts.push({day:s.day,phase:s.phase,privacy:'public',subject:'taei',...fact});
+ for(const witness of fact.witnesses??[])rememberSocialFact(s,witness,fact.id,'direct',witness);
+}
+function rememberSocialFact(s,listener,factId,via,source){
+ const social=socialState(s);social.knowledge[listener]??=[];
+ if(social.knowledge[listener].some(k=>k.factId===factId))return false;
+ social.knowledge[listener].push({factId,via,source,day:s.day,phase:s.phase});return true;
+}
+function socialOpinion(s,id){
+ const social=s.social??{facts:[],knowledge:{}};
+ const known=social.knowledge[id]??[];
+ const missed=known.filter(k=>k.via==='heard'&&social.facts.find(f=>f.id===k.factId)?.type==='missed');
+ const incidents=new Set(missed.map(k=>{const fact=social.facts.find(f=>f.id===k.factId);return fact.incidentId??fact.id;}));
+ const ownKept=known.some(k=>k.via==='direct'&&social.facts.find(f=>f.id===k.factId)?.type==='kept')||(s.appointments??[]).some(a=>a.person===id&&a.status==='kept');
+ const ownTrust=socialRelation(s,id,'taei').trust;
+ return {cautious:incidents.size>=2&&!ownKept&&ownTrust<6,verify:missed.length>0,ownKept};
+}
+function updateSocialWorld(before,after){
+ const s=structuredClone(after);socialState(s);
+ if(s.day===1&&s.dialogue?.facts?.soyul?.photo&&!before.dialogue?.facts?.soyul?.photo)
+  addSocialFact(s,{id:`photo-talk:${s.day}`,type:'photo-talk',witnesses:['soyul']});
+ if(s.day===2&&s.choice==='review'&&before.choice!=='review')
+  addSocialFact(s,{id:'photo-work:2',type:'photo-work',witnesses:['soyul']});
+ const newLines=(s.dialogue?.history??[]).slice(before.dialogue?.history?.length??0);
+ if(newLines.some(h=>h.person==='soyul'&&h.day===2&&h.choice==='scene:ask'))
+  addSocialFact(s,{id:'private-draft:2',type:'private-draft',privacy:'private',witnesses:['soyul']});
+ for(const a of s.appointments??[]){
+  const prior=(before.appointments??[]).find(x=>a.id?x.id===a.id:x.person===a.person&&x.day===a.day&&x.activity===a.activity);
+  if(a.person&&['kept','broken'].includes(a.status)&&prior?.status==='pending')
+   addSocialFact(s,{id:`commitment:${a.person}:${a.day}:${a.activity??'meeting'}`,day:a.day,incidentId:a.activity?`activity:${a.day}:${a.activity}`:`meeting:${a.person}:${a.day}`,privacy:a.kind==='meeting'?'private':'public',type:a.status==='kept'?'kept':'missed',witnesses:[a.person]});
+ }
+ for(const [id,status] of Object.entries(s.dialogue?.promises??{}))if(before.dialogue?.promises?.[id]==='pending'&&['kept','broken'].includes(status))
+  addSocialFact(s,{id:`commitment:${id}:${s.day}:volunteer`,incidentId:`activity:${s.day}:volunteer`,type:status==='kept'?'kept':'missed',witnesses:[id]});
+ const changed=before.day!==s.day||before.phase!==s.phase||Math.floor((before.clock?.minute??780)/30)!==Math.floor((s.clock?.minute??780)/30);
+ if(changed)return shareSocialFacts(s);
+ return s;
+}
+function shareSocialFacts(state){
+ const s=structuredClone(state),social=socialState(s);
+ // Only firsthand witnesses can pass this prototype's reports on; no unlimited rumour cascade.
+ for(const fact of social.facts)for(const source of fact.witnesses??[])for(const listener of Object.keys(s.npcs)){
+  if(source===listener)continue;
+  const key=`${fact.id}:${source}:${listener}`;
+  if(social.decisions[key])continue;
+  const together=['hall','library','cafe'].some(place=>{const ids=presentPeople(s,place);return ids.includes(source)&&ids.includes(listener);});
+  const friend=socialRelation(s,source,listener),mutual=socialRelation(s,listener,source);
+  const messaging=friend.trust>=8&&friend.familiarity>=8;
+  if(!together&&!messaging)continue;
+  if(fact.privacy==='private'){social.decisions[key]='kept-private';continue;}
+  // Soyul shares experiences with a trusted friend; Yeogyeong shares scheduling concerns at work.
+  const willing=source==='soyul'?friend.trust>=8&&friend.tension<3:source==='yeogyeong'?['kept','missed','photo-work'].includes(fact.type)&&together&&friend.tension<3:friend.trust>=4&&friend.tension<3;
+  if(!willing)continue;
+  if(mutual.tension>=4){social.decisions[key]='not-received';continue;}
+  if(rememberSocialFact(s,listener,fact.id,'heard',source))social.shares.push({factId:fact.id,source,listener,day:s.day,phase:s.phase,channel:together?'conversation':'message'});
+  social.decisions[key]='shared';
+ }
+ return s;
+}
+function socialNews(state,id){
+ const s=structuredClone(state),social=socialState(s);
+ if(!contact(s,id).introduced)return {state:s,news:null};
+ const candidates=(social.knowledge[id]??[]).filter(k=>k.via==='heard'&&!social.heardByPlayer.includes(`${id}:${k.factId}`));
+ const k=candidates.findLast(k=>social.facts.find(f=>f.id===k.factId)?.type==='missed')??candidates.at(-1);
+ if(!k)return {state:s,news:null};
+ const fact=social.facts.find(f=>f.id===k.factId);if(!fact||fact.privacy==='private')return {state:s,news:null};
+ const source=identities[k.source].name,listener=identities[id].name,opinion=socialOpinion(s,id);
+ const text=fact.type==='photo-talk'?`${source}한테 들었어요. 같이 사진 보면서 이야기했다면서요. 어떤 사진이었는지 궁금하더라고요.`:fact.type==='photo-work'?`${source}한테 들었어요. 사진 정리 같이 해줬다면서요. 정리한 파일도 보냈다던데, 준비는 어땠어요?`:fact.type==='kept'?`${source}가 약속대로 와줘서 도움이 됐다고 하더라고요. 저는 그 자리에 없었지만요.`:opinion.ownKept?`${source}한테 약속이 어긋났다는 이야기는 들었어요. 그래도 저랑 한 약속은 지켰잖아요. 무슨 일이었는지는 직접 듣고 싶어요.`:opinion.cautious?`${source}한테 일정이 몇 번 어긋났다고 들었어요. 제가 직접 본 건 아니니까 단정하진 않을게요. 같이 준비하는 일은 시간부터 확실히 맞추고 싶어요.`:`${source}한테 그날 약속에 못 왔다는 이야기를 들었어요. 제가 직접 본 건 아니고요. 무슨 일이 있었어요?`;
+ social.heardByPlayer.push(`${id}:${fact.id}`);
+ const label=`${listener}에게 전해 들음: ${source}와의 ${fact.type.startsWith('photo')?'사진 이야기':fact.type==='kept'?'약속 이행':'약속 불참 이야기'}`;
+ if(!s.known.includes(label))s.known.push(label);
+ s.memory.push(`[${s.day}일차] ${label}. 상대도 직접 목격한 사실이 아니라 전해 들은 이야기라고 밝혔다.`);
+ return {state:s,news:{text,source:k.source,factId:fact.id,stage:'상대가 다른 사람에게 전해 들은 이야기를 꺼낸다.'}};
+}
+
+
 const clubs={
  volunteer:{name:'봉사단',description:'지역 봉사와 물품 준비를 함께하는 동아리. 공개 활동을 체험한 뒤 가입할 수도 있다.',place:'학생회관',events:[{day:1,activity:'volunteer',label:'봉사 물품 준비'},{day:3,activity:'exhibit',label:'활동 사진 전시 준비'}]},
  football:{name:'축구 동아리',description:'정기적으로 모여 축구를 한다. 선수는 남학생, 여성 부원은 매니저로 참여한다. 현재 시제품은 체험 활동만 제공한다.',place:'운동장',events:[{day:2,activity:'football',label:'축구 동아리 체험 훈련'}]},
@@ -777,6 +859,10 @@ function evaluateInvitations(state){
  if(s.day>=3)return s;
  for(const id of ['yeogyeong','seoyeon','soyul']){
   const key=`npc:${id}:${s.day}`;
+  if(socialOpinion(s,id).cautious){
+   for(const offer of s.appointments.filter(a=>a.person===id&&a.proposer==='npc'&&a.status==='offered')){offer.status='withdrawn';s.messages.push({day:s.day,from:s.npcs[id].name,text:'아까 말한 일정은 시간부터 한 번 더 확인하고 정해요. 지금 바로 확정하진 않을게요.'});}
+   continue;
+  }
   if(s.invitationDecisions[key]||!invitationReady(s,id))continue;
   const r=s.relations[`${id}>taei`]??{},intent=socialIntent(s,id),day=targetDay(s);
   // Different personalities ask for different things. Affection never overrides low trust.
@@ -830,7 +916,7 @@ function expireOffers(state){
 function newGame(profile='acquaintance') {
  const s={version:6,clock:{minute:780},pace:{count:0,seen:{}},world:{stage:'campus'},eventState:{flags:{},plans:{},knowledge:{}},contacts:{},encounters:{},day:1,phase:'afternoon',choice:null,minutes:0,location:'campus',
   known:[],inventory:[],discoveries:[],messages:[],events:[],relations:{},npcs:{yeogyeong:{name:'차여경',location:'hall'},seoyeon:{name:'한서연',location:'hall'},soyul:{name:'박소율',location:'hall'}},
-  memberships:{},invitationDecisions:{},memory:[],dayHistory:[],appointments:[],lastResult:'',dialogue:{history:[],promises:{}}};
+  social:{facts:[],knowledge:{},shares:[],decisions:{},heardByPlayer:[]},memberships:{},invitationDecisions:{},memory:[],dayHistory:[],appointments:[],lastResult:'',dialogue:{history:[],promises:{}}};
  changeRelationship(s,'seoyeon','soyul',{familiarity:20,trust:12,affection:8});
  changeRelationship(s,'soyul','seoyeon',{familiarity:20,trust:12,affection:8});
  if(profile!=='acquaintance')for(const id of Object.keys(s.npcs))changeRelationship(s,id,'taei',profile==='close'?{familiarity:8,trust:5,affection:5}:{familiarity:6,trust:4,affection:0});
@@ -925,6 +1011,7 @@ function restore(raw){
  }
  if(s?.version!==6||!s.world||!s.eventState||!s.encounters||!s.contacts||!Number.isInteger(s.day)||s.day<1||s.day>3||!['afternoon','evening'].includes(s.phase)||!Array.isArray(s.memory)||!Array.isArray(s.known)||!Array.isArray(s.messages)||!Array.isArray(s.events)||!Array.isArray(s.dayHistory)||!Array.isArray(s.appointments)||!s.npcs||!s.relations||!Array.isArray(s.dialogue?.history)||!s.dialogue?.promises)throw new Error('지원하지 않는 저장 파일입니다.');
  s.clock??={minute:s.phase==='evening'?1140:780};
+ s.social??={facts:[],knowledge:{},shares:[],decisions:{},heardByPlayer:[]};
  s.memberships??={};s.invitationDecisions??={};
  s.pace??={count:0,seen:{}};
  s.inventory??=[];s.discoveries??=[];
@@ -1016,7 +1103,7 @@ function resolveEncounter(state,encounter,engage){
  const next=dialogue(opened.state,encounter.person);
  const response=opened.result?opened:next.scene?{state:opened.state,result:{text:next.opening,stage:next.stage}}:next.options.some(o=>o.id==='personal')?respond(opened.state,encounter.person,'personal'):{state:opened.state,result:{text:next.opening,stage:next.stage}};
  response.result={...response.result,playerLine:encounter.action+(firstExchange?' “아, 저는 김태이예요. 이번에 복학했어요.”':''),text:(firstExchange?`저는 ${s.npcs[encounter.person].name}이에요. `:'')+(socialIntent(s,encounter.person).mode==='guarded'?'':encounter.prefix??'')+response.result.text};
- response.state=meetAppointments(response.state,encounter.person);return response;
+ response.state=meetAppointments(response.state,encounter.person);const heard=socialNews(response.state,encounter.person);response.state=heard.state;if(heard.news)response.result.socialNews=heard.news.text;return response;
 }
 
 
@@ -1104,7 +1191,7 @@ function portrait(column){return `<div class="portrait" style="--column:${column
 function page(title,body,back='campus'){return `<section class="page"><header>${btn('← 뒤로','go',back)}<h1>${title}</h1></header>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}${state.day===1&&state.phase==='afternoon'?`<p class="pace-summary">${paceSummary(state)}</p>`:''}${body}<p class="footnote">대학생활 3일 시제품 · 사건·요일·일정은 검증용 예시입니다.</p></section>`;}
 function timeLabel(){return `${state.day}일차 · ${days[state.day].weekday} · ${state.day===1?clockLabel(state)+' · ':''} ${state.phase==='evening'?'저녁':'오후'}`;}
 function pending(){return state.appointments.filter(a=>a.status==='pending');}
-const appointmentStatuses={offered:'응답 전',pending:'참석 예정',declined:'거절함',cancelled:'미리 취소함',kept:'지킴',broken:'지키지 못함',expired:'제안 기한 지남'};
+const appointmentStatuses={offered:'응답 전',pending:'참석 예정',declined:'거절함',cancelled:'미리 취소함',kept:'지킴',broken:'지키지 못함',expired:'제안 기한 지남',withdrawn:'상대가 제안 보류'};
 function appointmentCard(a){
  const who=a.person?nameOf(a.person):clubs[a.club]?.name??'동아리';
  const conflicts=appointmentConflicts(state,a);
@@ -1126,7 +1213,7 @@ function render(){
  if(screen==='dialogue'){
   const d=dialogue(state,speaker),p=people[speaker];
   const invitation=reply?.choice==='invite'&&!state.appointments.some(a=>a.person===speaker&&a.status==='pending');
-  app.innerHTML=`<section class="conversation"><header class="top">${btn('← 대화 마치기','go','place')}<span class="badge">${timeLabel()} · ${locations[atPlace()]}</span></header><div class="conversation-body">${portrait(p.column)}<article class="dialogue-panel"><p class="eyebrow">${esc(nameOf(screen==='group'?line.person:speaker))}</p>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}<p class="muted">${narrative(reply?.stage??d.stage)}</p>${reply?.playerLine?`<p class="player-line"><span>김태이</span>${narrative(reply.playerLine)}</p>`:''}<blockquote>${esc(reply?.text??d.opening)}</blockquote>${reply?.followup?`<p class="inner-line">${esc(reply.followup)}</p>`:''}<div class="dialogue-options">${invitation?btn('내일 같이 하기로 약속한다','acceptAppointment',speaker):''}${d.options.map(o=>btn(narrative(o.label),'answer',o.id)).join('')}</div><div class="actions">${d.scene?btn('다른 이야기로 넘어가기','endTopic'):''}${state.day<3&&contact(state,speaker).introduced?btn('따로 만날 시간 물어보기','suggestMeeting',speaker):''}${btn('활동 살펴보기','go','activities')}</div></article></div></section>`;
+  app.innerHTML=`<section class="conversation"><header class="top">${btn('← 대화 마치기','go','place')}<span class="badge">${timeLabel()} · ${locations[atPlace()]}</span></header><div class="conversation-body">${portrait(p.column)}<article class="dialogue-panel"><p class="eyebrow">${esc(nameOf(screen==='group'?line.person:speaker))}</p>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}<p class="muted">${narrative(reply?.stage??d.stage)}</p>${reply?.socialNews?`<p class="heard-report"><span>전해 들은 이야기</span>${narrative(reply.socialNews)}</p>`:''}${reply?.playerLine?`<p class="player-line"><span>김태이</span>${narrative(reply.playerLine)}</p>`:''}<blockquote>${esc(reply?.text??d.opening)}</blockquote>${reply?.followup?`<p class="inner-line">${esc(reply.followup)}</p>`:''}<div class="dialogue-options">${invitation?btn('내일 같이 하기로 약속한다','acceptAppointment',speaker):''}${d.options.map(o=>btn(narrative(o.label),'answer',o.id)).join('')}</div><div class="actions">${d.scene?btn('다른 이야기로 넘어가기','endTopic'):''}${state.day<3&&contact(state,speaker).introduced?btn('따로 만날 시간 물어보기','suggestMeeting',speaker):''}${btn('활동 살펴보기','go','activities')}</div></article></div></section>`;
  }
  if(screen==='group'){
   const line=groupLines[groupIndex],p=people[line.person],end=groupIndex===groupLines.length-1;
@@ -1196,6 +1283,7 @@ app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return
   const paced=paceAction(before,state,{action:a,value:v,from:fromScreen,to:screen,person:fromScreen==='group'?'group':speaker});state=paced.state;
   if(paced.minutes)paceNotice=`${a==='wait'?'잠시 쉬고 나니':'여러 일을 마치고 나니'} 어느새 ${clockLabel(state)}. 약 ${paced.minutes}분이 지났다.`;
  }
+ if(!['load','save','reset','scenario'].includes(a))state=updateSocialWorld(before,state);
  if(!['load','save','reset'].includes(a))state=evaluateInvitations(state);
  if(a==='dismissDiscoveries')gains=[];
  if(['load','reset','scenario'].includes(a))gains=[];else {const found=recordDiscoveries(before,state,b.textContent.trim());if(found.length)gains=found;}
