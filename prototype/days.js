@@ -1,3 +1,4 @@
+import {campusBuildings} from './campus-buildings.js';
 import {weatherRoute,adaptWeatherSchedule} from './weather.js';
 export const days={
  1:{title:'서로의 시간을 알아가는 날',weekday:'목요일',event:'supplies',
@@ -12,7 +13,7 @@ export const days={
 };
 const personalActivities={rehearsal:days[1].routes.rehearsal,work:days[2].routes.work,explore:days[1].routes.explore,walk:days[2].routes.walk};
 for(const day of Object.values(days))day.routes={...personalActivities,...day.routes};
-export const locations={hall:'학생회관',library:'도서관',cafe:'대학가 카페'};
+export const locations={hall:'학생회관',library:'도서관',cafe:'대학가 카페',...Object.fromEntries(Object.entries(campusBuildings).map(([id,b])=>[id,b.name]))};
 export function availableRoutes(s){return Object.entries(days[s.day??1].routes).filter(([,r])=>!r.requiresWarning||(s.warnings?.evidence?.length??0)>0).map(([id,r])=>weatherRoute(s,id,{id,...r,locked:!!r.requiresAny&&!r.requiresAny.some(k=>s.known.includes(k)),lockReason:r.requiresAny&&!r.requiresAny.some(k=>s.known.includes(k))?'이전 탐색으로 연결 통로를 알아야 합니다.':null}));}
 function baseSchedule(s){
  if(s.day!==1||s.phase!=='afternoon'||!s.clock)return days[s.day??1].schedules[s.phase];

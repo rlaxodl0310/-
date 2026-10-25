@@ -1,3 +1,4 @@
+import {buildingLinks} from './campus-buildings.js';
 import {availableRoutes} from './days.js';
 export function flowState(s){s.flow??={seen:{}};return s.flow;}
 export function markFlow(state,kind,value){const s=structuredClone(state);flowState(s).seen[kind+(value?':'+value:'')]=true;return s;}
@@ -6,12 +7,13 @@ export function campusScene(s){
   {label:'학생회관 쪽으로 걸어간다.',action:'visit',value:'hall'},
   {label:'도서관으로 이어지는 길을 따라간다.',action:'visit',value:'library'},
   {label:'대학가 카페 쪽으로 발길을 돌린다.',action:'visit',value:'cafe'},
+  ...buildingLinks('hall').filter(c=>['cafeteria','academic'].includes(c.value)),
   {label:s.day<3?'오늘은 집으로 돌아간다.':'집으로 돌아가 지난 며칠을 떠올린다.',action:'go',value:'dayEnd'}]};
 }
 export function placeContinuations(s,place){
  const choices=[];
  if(s.clock.minute<1320){
-  if(place==='hall')choices.push({label:'연습실에 들러 합주할 수 있을지 살펴본다.',action:'select',value:'rehearsal'});
+  if(['hall','music'].includes(place))choices.push({label:'연습실에 들러 합주할 수 있을지 살펴본다.',action:'select',value:'rehearsal'});
   if(['library','cafe'].includes(place))choices.push({label:'빈자리에 앉아 작업 중인 곡을 다듬는다.',action:'select',value:'work'});
   if(place==='library')choices.push({label:'돌아가기 전에 주변 길을 조금 더 알아둔다.',action:'select',value:'explore'});
   if(place==='cafe')choices.push({label:'카페를 나와 처마가 이어진 대학가 길을 돌아본다.',action:'select',value:'walk'});
@@ -27,6 +29,7 @@ export function placeContinuations(s,place){
  if(place!=='library')choices.push({label:'도서관으로 이어지는 길을 따라 걷는다.',action:'visit',value:'library'});
  if(place!=='hall')choices.push({label:'학생회관 쪽에서 들리는 말소리를 따라간다.',action:'visit',value:'hall'});
  if(place==='library')choices.push({label:'건너편 대학가 카페 쪽으로 발길을 돌린다.',action:'visit',value:'cafe'});
+ for(const link of buildingLinks(place))if(!choices.some(c=>c.action==='visit'&&c.value===link.value))choices.push(link);
  return choices.filter(c=>c.action!=='select'||((['rehearsal','work','explore','walk'].includes(c.value)||!(s.freeDay?.completed??[]).some(x=>x.id===c.value))&&availableRoutes(s).some(r=>r.id===c.value&&!r.locked&&s.clock.minute+r.duration<=1320)));
 }
 export function knownSceneRoutes(s){

@@ -5,7 +5,7 @@ import {campusScene,markFlow,placeContinuations,knownSceneRoutes} from './scene-
 import {arrive} from './encounters.js';
 import {readMessages} from './event-view.js';
 test('opening starts with observable situations rather than feature categories',()=>{
- const s=newGame(),scene=campusScene(s);assert.equal(scene.choices.length,4);assert.match(scene.text,/학교에 도착/);assert.ok(scene.choices.every(c=>c.action!=='openCommunity'&&c.action!=='select'));
+ const s=newGame(),scene=campusScene(s);assert.equal(scene.choices.length,6);assert.match(scene.text,/학교에 도착/);assert.ok(scene.choices.every(c=>c.action!=='openCommunity'&&c.action!=='select'));
  assert.ok(scene.choices.every(c=>!['activities','travel','clubs'].includes(c.value)));
  assert.ok(knownSceneRoutes(s).some(r=>r.id==='rehearsal'));assert.ok(!knownSceneRoutes(s).some(r=>r.id==='volunteer'||r.id==='football'));
 });

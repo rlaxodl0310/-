@@ -1,3 +1,4 @@
+import {campusBuildings} from './campus-buildings.js';
 import {libraryGreeting} from './library-life.js';
 import {beginWarningSite} from './warnings.js';
 import {wetWeather,weatherAtmosphere} from './weather.js';
@@ -45,6 +46,7 @@ const surroundings={
  cafe:{entry:['카페 문을 열자 커피 향과 잔 부딪히는 소리가 섞여 들어온다. 주문대에는 짧은 줄이 있고 창가 몇 자리는 비어 있다.','대학가 카페 위치'],counter:['주문대 옆 메뉴판을 살펴보고 줄에서 비켜섰다. 창가 좌석 옆에는 충전용 콘센트가 있다. 주문을 마친 사람들이 각자의 자리로 돌아간다.','카페 충전 좌석 위치']}
 };
 function observePlace(s,location,spot,repeated=false){
+ if(campusBuildings[location]){const b=campusBuildings[location];if(!s.known.includes(b.fact)){s.known.push(b.fact);s.memory.push(`[${s.day}일차] ${b.entry}`);}return b.entry;}
  const [text,information]=surroundings[location]?.[spot]??surroundings[location]?.entry??['주변을 둘러봤다.',null];
  if(information&&!s.known.includes(information)){s.known.push(information);s.memory.push(`[${s.day}일차] ${text}`);}
  return repeated?`다시 주변을 확인했다. ${text}`:text;

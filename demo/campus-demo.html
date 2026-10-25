@@ -27,7 +27,45 @@ window.addEventListener('error', function(event) {
   notice.textContent = '게임 화면을 불러오지 못했습니다: ' + (event.message || '파일 로딩 실패') + '. 이 문구를 알려주세요.';
   app.prepend(notice);
 });
-</script><script>const weatherTypes={
+</script><script>// Prototype buildings and access rules; not a surveyed map of the real campus.
+const campusBuildings={
+ cafeteria:{name:'학식당',description:'식사 공간과 식수대가 있는 학생 식당',entry:'식당 입구에서 식판 부딪히는 소리가 들린다. 메뉴 안내 옆으로 배식대와 퇴식구가 보인다.',fact:'학식당 위치',day:'식탁에 가방을 놓고 식사하거나 이야기를 나누는 학생들이 보인다.',night:'배식 시간이 지나면 직원들이 테이블을 닦는다. 입구 쪽 휴게 좌석에는 아직 사람이 있다.',actions:[
+  {id:'menu',label:'오늘의 메뉴와 배식 시간을 확인한다.',fact:'학식당 배식 시간',text:'안내에는 점심 12:00~14:30, 저녁 17:00~19:00라고 적혀 있다. 오늘 메뉴는 제육볶음과 두부 반찬이다. 식수대는 퇴식구 맞은편에 있다.'},
+  {id:'meal',label:'배식대에서 식사를 받아 먹는다.',fact:'학식당 식수대 위치',meal:true,text:'식판을 받아 자리를 잡는다. 급하게 먹지 않으려고 휴대폰은 가방에 넣어둔다. 식사를 마친 뒤 퇴식구에 식판을 정리하고 물을 마신다.'},
+  {id:'water',label:'식수대에서 물을 마시고 잠깐 쉰다.',fact:'학식당 식수대 위치',text:'물을 받아 마시고 입구 쪽 의자에 앉는다. 식당을 오가는 사람들 사이에서 다음에 어디로 갈지 생각해본다.'}]},
+ dorm:{name:'기숙사',description:'방문객이 이용할 수 있는 안내 데스크와 현관 앞 공간',entry:'기숙사 현관에는 학생들이 택배를 찾으러 오간다. 거주 구역 앞에는 출입 확인 장치가 있고, 방문객 안내는 현관 밖에 붙어 있다.',fact:'기숙사 현관 위치',day:'현관 밖 벤치에서 학생들이 통화한다. 안내 데스크 너머 생활 구역은 거주자만 드나든다.',night:'현관에 조명이 켜졌다. 출입 확인을 마친 학생들이 안으로 들어간다. 방문객은 현관 앞에서 기다린다.',actions:[
+  {id:'guide',label:'현관의 방문객 안내를 읽는다.',fact:'기숙사 방문객 출입 안내',text:'방문객은 현관 안내 공간을 이용하고 생활 구역은 허가 없이 들어갈 수 없다고 적혀 있다. 태이의 집은 학교 앞 자취방이다. 여기서 묵을 수 있는 것은 아니다.'},
+  {id:'bench',label:'현관 밖 벤치에서 잠깐 쉰다.',fact:'기숙사 앞 쉼터',text:'현관 밖 벤치에 앉아 가방끈을 고쳐 멘다. 택배를 들고 돌아가는 학생과 잠깐 시선이 마주친다. 이곳에서 생활하는 사람들의 하루가 따로 흐르고 있다.'}]},
+ academic:{name:'강의동',description:'강의실과 공용 학습 공간이 있는 건물',entry:'강의실 문 옆에 호실이 적혀 있다. 수업 중인 방에서는 낮은 목소리가 들리고, 복도 끝 공용 학습 공간에는 빈자리가 보인다.',fact:'강의동 위치',day:'수업을 마친 학생들과 다음 강의실을 찾는 학생들이 복도에서 엇갈린다.',night:'일부 강의실의 불이 꺼졌다. 공용 학습 공간에서는 노트북 화면이 빛난다.',actions:[
+  {id:'rooms',label:'층별 강의실 안내를 살펴본다.',fact:'강의동 계단과 층별 안내',text:'층별 안내에서 강의실 호실과 계단 위치를 확인한다. 문이 닫힌 강의실은 방해하지 않고 지나간다.'},
+  {id:'notes',label:'공용 학습 공간에서 노트를 정리한다.',fact:'강의동 공용 학습 공간',text:'공용 책상에 앉아 가방에서 노트를 꺼낸다. 밀린 메모를 정리하고 오늘 더 확인할 내용에는 작게 표시를 해둔다.'}]},
+ music:{name:'음악 연습동',description:'연습실과 합주 공간을 둘러볼 수 있는 건물',entry:'방음문 사이로 베이스의 낮은 진동이 전해진다. 복도에는 악기 케이스가 놓여 있고 연습실 앞에 이용 안내가 붙어 있다.',fact:'음악 연습동 위치',day:'방음문이 열릴 때마다 짧은 연주 소리가 새어 나온다. 학생들이 케이스를 메고 방을 오간다.',night:'복도는 한산해졌지만 몇몇 연습실은 아직 사용 중이다. 문 앞 이용 표시를 확인할 수 있다.',actions:[
+  {id:'rooms',label:'연습실 이용 안내와 위치를 확인한다.',fact:'음악 연습동 연습실 안내',text:'안내에서 개인 연습실과 합주실 위치를 확인한다. 사용 중 표시가 있는 방은 건드리지 않고 비어 있는 복도 쪽으로 물러난다.'},
+  {id:'voice',label:'휴게 공간에서 가사를 메모한다.',fact:'음악 연습동 휴게 공간',text:'휴게 공간에 앉아 떠오른 문장을 휴대폰 메모에 적는다. 아직 멜로디는 붙이지 않고, 부를 때 숨이 끊기는 위치만 표시한다.'}]},
+ gym:{name:'체육관',description:'실내 운동 공간과 공용 준비 공간',entry:'체육관 안에서 운동화가 바닥에 스치는 소리가 들린다. 입구 안내에는 사용 중인 구역과 이용 수칙이 적혀 있다.',fact:'체육관 위치',day:'실내 코트에서는 학생들이 공을 주고받는다. 준비 공간에는 몸을 풀 수 있는 자리가 남아 있다.',night:'운동을 마친 학생들이 장비를 정리한다. 입구의 이용 안내를 보고 비어 있는 준비 공간에 머문다.',actions:[
+  {id:'guide',label:'체육관 이용 안내를 확인한다.',fact:'체육관 이용 안내',text:'사용 중인 코트에는 들어가지 않고 이용 안내를 읽는다. 준비 공간과 장비 보관 구역은 구분되어 있다. 보관된 장비를 개인 물품처럼 챙기지는 않는다.'},
+  {id:'stretch',label:'준비 공간에서 가볍게 몸을 푼다.',fact:'체육관 준비 운동 공간',text:'가방을 옆에 두고 발목과 어깨부터 천천히 푼다. 무리한 훈련 대신 굳은 몸을 움직여 보고 호흡을 고른다.'}]}
+};
+function mealPeriod(s){const m=s.clock.minute;return m>=720&&m<870?'lunch':m>=1020&&m<1140?'dinner':null;}
+function buildingActions(s,place=s.location){return (campusBuildings[place]?.actions??[]).filter(a=>!a.meal||(mealPeriod(s)&&!(s.buildingLife?.meals??[]).includes(`${s.day}:${mealPeriod(s)}`)));}
+function buildingAtmosphere(s,place){const b=campusBuildings[place];if(!b)return '';return (s.clock.minute>=(place==='cafeteria'?1140:1080)?b.night:b.day)+(place==='cafeteria'?(mealPeriod(s)?' 지금은 배식 중이다.':' 지금은 배식 시간이 아니다. 입구 휴게 공간은 이용할 수 있다.'):'');}
+function buildingActivity(state,id){
+ const b=campusBuildings[state.location];const a=buildingActions(state).find(a=>a.id===id);
+ if(!b||!a)throw new Error('지금 이 장소에서 할 수 없는 행동입니다.');
+ if(state.clock.minute>=1320)throw new Error('오늘은 늦었습니다. 귀가할 시간입니다.');
+ const s=structuredClone(state);s.buildingLife??={history:[],meals:[]};
+ const repeated=s.buildingLife.history.some(h=>h.day===s.day&&h.minute===s.clock.minute&&h.place===s.location&&h.id===id);
+ if(a.meal)s.buildingLife.meals.push(`${s.day}:${mealPeriod(s)}`);
+ if(!repeated){s.buildingLife.history.push({day:s.day,minute:s.clock.minute,place:s.location,id});if(!s.known.includes(a.fact))s.known.push(a.fact);s.memory.push(`[${s.day}일차] ${b.name}: ${a.text}`);}
+ return {state:s,text:repeated?'방금 확인한 곳이다. 잠깐 더 머물다가 시선을 돌린다.':a.text};
+}
+function buildingLinks(place){
+ const paths={hall:['cafeteria','academic','music'],library:['academic'],cafe:['dorm'],cafeteria:['hall','dorm'],dorm:['cafeteria','cafe'],academic:['library','music','gym'],music:['academic','hall'],gym:['academic','cafeteria']};
+ const labels={cafeteria:'식당 쪽에서 나는 소리를 따라 학식당으로 간다.',dorm:'기숙사 현관 앞 길로 걸어간다.',academic:'강의동 쪽으로 걸어간다.',music:'음악 연습동으로 이어지는 길을 따라간다.',gym:'체육관 입구 쪽으로 걸어간다.',hall:'학생회관 쪽으로 걸어간다.',library:'도서관으로 이어지는 길을 따라 걷는다.',cafe:'대학가 카페 쪽으로 걸어간다.'};
+ return (paths[place]??[]).map(value=>({label:labels[value],action:'visit',value}));
+}
+
+const weatherTypes={
  sunny:{name:'맑음',icon:'☀',temperature:22},cloudy:{name:'흐림',icon:'☁',temperature:20},
  rain:{name:'비',icon:'☂',temperature:18},storm:{name:'강한 비',icon:'☂',temperature:16}
 };
@@ -448,7 +486,7 @@ const days={
 };
 const personalActivities={rehearsal:days[1].routes.rehearsal,work:days[2].routes.work,explore:days[1].routes.explore,walk:days[2].routes.walk};
 for(const day of Object.values(days))day.routes={...personalActivities,...day.routes};
-const locations={hall:'학생회관',library:'도서관',cafe:'대학가 카페'};
+const locations={hall:'학생회관',library:'도서관',cafe:'대학가 카페',...Object.fromEntries(Object.entries(campusBuildings).map(([id,b])=>[id,b.name]))};
 function availableRoutes(s){return Object.entries(days[s.day??1].routes).filter(([,r])=>!r.requiresWarning||(s.warnings?.evidence?.length??0)>0).map(([id,r])=>weatherRoute(s,id,{id,...r,locked:!!r.requiresAny&&!r.requiresAny.some(k=>s.known.includes(k)),lockReason:r.requiresAny&&!r.requiresAny.some(k=>s.known.includes(k))?'이전 탐색으로 연결 통로를 알아야 합니다.':null}));}
 function baseSchedule(s){
  if(s.day!==1||s.phase!=='afternoon'||!s.clock)return days[s.day??1].schedules[s.phase];
@@ -1357,6 +1395,7 @@ const surroundings={
  cafe:{entry:['카페 문을 열자 커피 향과 잔 부딪히는 소리가 섞여 들어온다. 주문대에는 짧은 줄이 있고 창가 몇 자리는 비어 있다.','대학가 카페 위치'],counter:['주문대 옆 메뉴판을 살펴보고 줄에서 비켜섰다. 창가 좌석 옆에는 충전용 콘센트가 있다. 주문을 마친 사람들이 각자의 자리로 돌아간다.','카페 충전 좌석 위치']}
 };
 function observePlace(s,location,spot,repeated=false){
+ if(campusBuildings[location]){const b=campusBuildings[location];if(!s.known.includes(b.fact)){s.known.push(b.fact);s.memory.push(`[${s.day}일차] ${b.entry}`);}return b.entry;}
  const [text,information]=surroundings[location]?.[spot]??surroundings[location]?.entry??['주변을 둘러봤다.',null];
  if(information&&!s.known.includes(information)){s.known.push(information);s.memory.push(`[${s.day}일차] ${text}`);}
  return repeated?`다시 주변을 확인했다. ${text}`:text;
@@ -1573,12 +1612,13 @@ function campusScene(s){
   {label:'학생회관 쪽으로 걸어간다.',action:'visit',value:'hall'},
   {label:'도서관으로 이어지는 길을 따라간다.',action:'visit',value:'library'},
   {label:'대학가 카페 쪽으로 발길을 돌린다.',action:'visit',value:'cafe'},
+  ...buildingLinks('hall').filter(c=>['cafeteria','academic'].includes(c.value)),
   {label:s.day<3?'오늘은 집으로 돌아간다.':'집으로 돌아가 지난 며칠을 떠올린다.',action:'go',value:'dayEnd'}]};
 }
 function placeContinuations(s,place){
  const choices=[];
  if(s.clock.minute<1320){
-  if(place==='hall')choices.push({label:'연습실에 들러 합주할 수 있을지 살펴본다.',action:'select',value:'rehearsal'});
+  if(['hall','music'].includes(place))choices.push({label:'연습실에 들러 합주할 수 있을지 살펴본다.',action:'select',value:'rehearsal'});
   if(['library','cafe'].includes(place))choices.push({label:'빈자리에 앉아 작업 중인 곡을 다듬는다.',action:'select',value:'work'});
   if(place==='library')choices.push({label:'돌아가기 전에 주변 길을 조금 더 알아둔다.',action:'select',value:'explore'});
   if(place==='cafe')choices.push({label:'카페를 나와 처마가 이어진 대학가 길을 돌아본다.',action:'select',value:'walk'});
@@ -1594,6 +1634,7 @@ function placeContinuations(s,place){
  if(place!=='library')choices.push({label:'도서관으로 이어지는 길을 따라 걷는다.',action:'visit',value:'library'});
  if(place!=='hall')choices.push({label:'학생회관 쪽에서 들리는 말소리를 따라간다.',action:'visit',value:'hall'});
  if(place==='library')choices.push({label:'건너편 대학가 카페 쪽으로 발길을 돌린다.',action:'visit',value:'cafe'});
+ for(const link of buildingLinks(place))if(!choices.some(c=>c.action==='visit'&&c.value===link.value))choices.push(link);
  return choices.filter(c=>c.action!=='select'||((['rehearsal','work','explore','walk'].includes(c.value)||!(s.freeDay?.completed??[]).some(x=>x.id===c.value))&&availableRoutes(s).some(r=>r.id===c.value&&!r.locked&&s.clock.minute+r.duration<=1320)));
 }
 function knownSceneRoutes(s){
@@ -1666,6 +1707,7 @@ function paceAction(before,after,{action,value,from,to,person}={}){
  if(campusMinute(s)>=(s.playMode==='free'?1320:960))return {state:s,minutes:0};
  const stamp=campusMinute(s);let key=null;
  if(action==='visit'&&before.location!==s.location)key=`${stamp}:visit:${before.location}:${s.location}`;
+ if(action==='buildingActivity')key=`${stamp}:building:${s.location}:${value}`;
  if(action==='libraryActivity')key=`${stamp}:library:${value}`;
  if(action==='walk')key=`${stamp}:walk:${s.location}:${value}`;
  const leavingConversation=['dialogue','group'].includes(from)&&['place','campus','activities','travel','result'].includes(to);
@@ -1715,7 +1757,7 @@ function render(){
  if(screen==='travel')app.innerHTML=page('캠퍼스 이동',`<p class="muted">인물은 각자의 일정에 따라 장소를 옮깁니다. 1일차에는 여러 이동·탐색·대화를 묶어 시간이 한 번에 흐릅니다. 보통 약 30분이며, 비 오는 날의 야외 이동과 우산 준비에 따라 달라집니다. 짧은 대답마다 시간이 차감되지는 않습니다. 머물 곳과 할 일은 직접 정할 수 있습니다. 휴대폰과 메뉴를 확인하는 동안에는 시간이 들지 않습니다.</p><div class="grid">${Object.entries(locations).map(([id,label])=>`<button class="card" aria-label="${label} 찾아가기" data-action="visit" data-value="${id}" ${!canSpendTime(state,timeCost(state,'visit',id))?'disabled':''}><strong>${label}</strong>찾아가기</button>`).join('')}</div>`);
  if(screen==='place'){
   const here=atPlace();
-  app.innerHTML=page(locations[here],`<p class="lead">${timeLabel()}</p><p class="muted">${narrative((here==='library'?libraryAtmosphere(state):placeAtmosphere(state,here))||{hall:'복도에는 물품 상자와 활동 안내문이 놓여 있다. 안쪽에서 종이를 넘기는 소리가 들린다.',library:'책장을 넘기는 소리와 낮은 대화가 들린다. 사람들은 각자 하던 일을 이어간다.',cafe:'주문을 부르는 목소리가 들린다. 창가의 햇빛이 조금 길어졌다.'}[here])}</p><p class="weather-scene">${weatherAtmosphere(state,here)}</p>${riskScene(state,here)?`<p class="muted">${narrative(riskScene(state,here))}</p>`:''}<div class="actions">${here==='library'&&state.clock.minute<1320?libraryActivities.map(a=>btn(a.label,'libraryActivity',a.id)).join(''):''}</div><div class="actions">${visibleSpatialActions(state,placeActions[here]).map(a=>btn(a.label,'walk',a.id)).join('')}</div><div class="actions">${placeContinuations(state,here).map(c=>btn(narrative(c.label),c.action,c.value)).join('')}${evening?btn(state.day<3?'자취방으로 돌아가 하루를 마친다.':'지난 며칠의 기록을 떠올린다.','go','dayEnd'):''}${state.clock.minute<1320?btn('잠시 쉬며 시간을 보낸다','wait'):''}</div>`);
+  app.innerHTML=page(locations[here],`<p class="lead">${timeLabel()}</p><p class="muted">${narrative((buildingAtmosphere(state,here)||(here==='library'?libraryAtmosphere(state):placeAtmosphere(state,here)))||{hall:'복도에는 물품 상자와 활동 안내문이 놓여 있다. 안쪽에서 종이를 넘기는 소리가 들린다.',library:'책장을 넘기는 소리와 낮은 대화가 들린다. 사람들은 각자 하던 일을 이어간다.',cafe:'주문을 부르는 목소리가 들린다. 창가의 햇빛이 조금 길어졌다.'}[here])}</p><p class="weather-scene">${weatherAtmosphere(state,here)}</p>${riskScene(state,here)?`<p class="muted">${narrative(riskScene(state,here))}</p>`:''}<div class="actions">${state.clock.minute<1320?buildingActions(state,here).map(a=>btn(a.label,'buildingActivity',a.id)).join(''):''}${here==='library'&&state.clock.minute<1320?libraryActivities.map(a=>btn(a.label,'libraryActivity',a.id)).join(''):''}</div><div class="actions">${visibleSpatialActions(state,placeActions[here]??[]).map(a=>btn(a.label,'walk',a.id)).join('')}</div><div class="actions">${placeContinuations(state,here).map(c=>btn(narrative(c.label),c.action,c.value)).join('')}${evening?btn(state.day<3?'자취방으로 돌아가 하루를 마친다.':'지난 며칠의 기록을 떠올린다.','go','dayEnd'):''}${state.clock.minute<1320?btn('잠시 쉬며 시간을 보낸다','wait'):''}</div>`);
  }
  if(screen==='encounter'&&encounter){
   app.innerHTML=page(locations[atPlace()],`<p class="muted">${timeLabel()}</p><p class="lead">${narrative(encounter.text)}</p><div class="dialogue-options">${btn(narrative(encounter.action),'encounter','engage')}${btn('하던 일을 계속하며 지나간다.','encounter','pass')}</div>`);
@@ -1742,7 +1784,7 @@ function render(){
  if(screen==='clubDetail'&&clubs[selectedClub]){const c=clubs[selectedClub];app.innerHTML=page(c.name,`<p class="lead">${esc(c.description)}</p><p>주요 활동 장소 · ${esc(c.place)}</p><p class="muted">가입하면 예정된 공개 활동을 약속 제안으로 안내받습니다. 수락해야 참석 약속이 됩니다. 공개 체험 활동은 가입 전에도 참여할 수 있습니다.</p>${state.memberships?.[selectedClub]?'<p class="information-text">가입 중입니다. 활동 참석 여부는 휴대폰 일정에서 정할 수 있습니다.</p>':btn('이 동아리에 가입하기','joinClub',selectedClub)}<div class="actions">${btn('약속과 일정 보기','go','schedule')}</div>`,clubReturn);}
  if(screen==='messages')app.innerHTML=page('메시지',state.messages.length?state.messages.map(m=>`<article class="list"><strong>${esc(Object.entries(people).find(([,p])=>p.name===m.from)?nameOf(Object.entries(people).find(([,p])=>p.name===m.from)[0]):m.from)} · ${m.day??1}일차</strong><p>${narrative(m.text)}</p>${m.appointmentId?btn('약속 제안 보기','go','schedule'):''}</article>`).join(''):'<p class="muted">새 메시지가 없습니다.</p>','phone');
  if(screen==='discoveries')app.innerHTML=page('알게 된 정보 · 소지품',`<p class="muted">직접 확인하거나 전해 들은 정보와 실제로 보유한 물건을 구분합니다. 보관 위치를 알았다고 물건을 얻은 것은 아닙니다.</p><h2 class="information-text">◇ 알게 된 정보 · ${state.known.length}개</h2>${state.known.map(x=>{const record=(state.discoveries??[]).find(d=>d.kind==='information'&&d.name===x);return `<article class="list"><strong class="information-text">${esc(x)}</strong><p class="muted">${record?`${record.day}일차 · ${record.phase==='evening'?'저녁':'오후'} · ${esc(locations[record.location]??'활동 중')}에 확인`:'이전 진행에서 확인한 정보'}${record?.action?`<br>행동: ${esc(record.action)}`:''}</p></article>`;}).join('')||'<p class="muted">아직 확인한 정보가 없습니다.</p>'}<h2 class="item-text">▣ 소지품</h2>${(state.inventory??[]).map(i=>`<article class="list item-text">${esc(i.name)} × ${i.quantity}</article>`).join('')||'<p class="muted">획득한 아이템이 없습니다.</p>'}`,'phone');
- if(screen==='map')app.innerHTML=page('알고 있는 정보',`<p class="muted">활동과 대화에서 확인한 장소와 정보입니다. 직접 본 것과 전해 들은 경위는 일지에 남습니다.</p>${state.known.map(x=>`<div class="list">${narrative(x)}</div>`).join('')||'<p>아직 기록된 장소가 없습니다.</p>'}<div class="actions">${btn('학교 길 안내를 확인한다.','go','travel')}</div>`,'phone');
+ if(screen==='map')app.innerHTML=page('교내 지도와 장소',`<p class="muted">교내 공개 길 안내입니다. 건물 안에서 직접 확인한 시설과 동선은 아래에 따로 기록됩니다.</p><h2>교내 길 안내</h2><div class="grid">${Object.entries(locations).map(([id,label])=>`<button class="card" data-action="visit" data-value="${id}"><strong>${label}</strong>${campusBuildings[id]?.description??'생활과 교류 공간'}${state.location===id?' · 현재 위치':''}</button>`).join('')}</div><h2>직접 알아둔 정보</h2>${state.known.map(x=>`<div class="list">${narrative(x)}</div>`).join('')||'<p>아직 기록된 장소가 없습니다.</p>'}<div class="actions">${btn('학교 길 안내를 확인한다.','go','travel')}</div>`,'phone');
  if(screen==='journal')app.innerHTML=page('지금까지의 기록',state.memory.map(x=>`<div class="list">${narrative(x)}</div>`).join('')||'<p class="muted">아직 기록이 없습니다.</p>','phone');
  if(screen==='dayEnd'){
   const history=[...state.dayHistory,{day:state.day,choice:state.choice,activities:state.freeDay?.completed??[]}];
@@ -1776,6 +1818,7 @@ app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return
   state=markFlow(state,'visit',destination);
   const arrived=arrive(state,destination,a==='walk'?v:'entry');state=arrived.state;encounter=arrived.encounter;warningScene=arrived.warning??null;screen=warningScene?'warningScene':encounter?'encounter':'place';reply=null;note=arrived.observation??'';
  }
+ if(a==='buildingActivity'){const result=buildingActivity(state,v);state=result.state;note=result.text;screen='place';}
  if(a==='libraryActivity'){const result=libraryActivity(state,v);state=result.state;note=result.text;screen='place';}
  if(a==='warningChoice'){const result=finishWarningSite(state,warningScene,v==='inspect');state=result.state;note=result.text;warningScene=null;screen='place';}
  if(a==='resumeConversation')reply=null;

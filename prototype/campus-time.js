@@ -53,6 +53,7 @@ export function paceAction(before,after,{action,value,from,to,person}={}){
  if(campusMinute(s)>=(s.playMode==='free'?1320:960))return {state:s,minutes:0};
  const stamp=campusMinute(s);let key=null;
  if(action==='visit'&&before.location!==s.location)key=`${stamp}:visit:${before.location}:${s.location}`;
+ if(action==='buildingActivity')key=`${stamp}:building:${s.location}:${value}`;
  if(action==='libraryActivity')key=`${stamp}:library:${value}`;
  if(action==='walk')key=`${stamp}:walk:${s.location}:${value}`;
  const leavingConversation=['dialogue','group'].includes(from)&&['place','campus','activities','travel','result'].includes(to);
