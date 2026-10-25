@@ -13,6 +13,12 @@ export function changeRelationship(s,from,to,delta){
 }
 export function groupDialogue(s){
  const friends=relationship(s,'soyul','seoyeon').familiarity>=4;
+ if((s.day??1)>1)return [
+ {person:'seoyeon',text:s.day===2?'여경이랑 사진 골랐다며? 전시 구성도 정했어?':'오늘 사진 설명은 네가 직접 할 거야?'},
+ {person:'soyul',text:s.day===2?(friends?'응. 같이 고르니까 내가 놓친 것도 보이더라. 내일 설명도 같이 정하기로 했어.':'네. 여경 씨랑 같이 골랐어요.'):(friends?'응. 여경이랑 순서도 맞췄어. 떨리긴 하는데, 해보려고.':'제가 고른 사진부터 설명해보려고요.')},
+ {person:'seoyeon',text:friends?'잘됐네. 네가 찍은 거니까 네 이야기가 제일 궁금하지.':'좋네요. 준비한 이야기 들려주세요.'},
+ {person:'soyul',text:relationship(s,'soyul').familiarity>=4?'태이도 볼래? 이 사진, 어제 이야기하던 거야.':'괜찮으시면 같이 보실래요?'}
+ ];
  return [
  {person:'seoyeon',text:s.phase==='afternoon'?'소율아, 지난번 사진 같이 골라볼래? 네가 찍은 게 잘 나왔더라.':'오늘 수고했어. 가기 전에 지난번 사진만 같이 골라볼까?'},
  {person:'soyul',text:friends?'또 나 나온 거부터 고르려고 그러지. 풍경 찍은 것도 좀 봐.':'네… 제가 찍은 사진도 몇 장 있어요.'},
@@ -23,7 +29,7 @@ export function groupDialogue(s){
 export function respondGroup(state,choice){
  if(!['wait','include','speakFor'].includes(choice))throw new Error('알 수 없는 대답입니다.');
  const s=structuredClone(state),close=relationship(s,'soyul').familiarity>=4;
- const repeated=s.dialogue.history.some(h=>h.person==='group'&&h.phase===s.phase&&h.choice===choice);
+ const repeated=s.dialogue.history.some(h=>h.person==='group'&&(h.day??1)===(s.day??1)&&h.phase===s.phase&&h.choice===choice);
  let lines;
  if(choice==='wait'){
   lines=[{person:'soyul',text:close?'고마워. 내가 먼저 골라볼게. 보고 싶은 거 있으면 말해.':'조금만 기다려주실래요? 제가 먼저 골라볼게요.'},{person:'seoyeon',text:'천천히 해. 우리도 급한 건 아니니까.'}];
@@ -35,18 +41,30 @@ export function respondGroup(state,choice){
   lines=[{person:'soyul',text:close?'내가 말할게. 서연이가 나보다 말을 잘하는 건 맞는데… 그래도.':'저도… 제 생각은 말씀드릴 수 있어요.'},{person:'seoyeon',text:'소율이한테 직접 물어봐주면 좋겠어요. 제가 대신 정할 일은 아니니까.'}];
   if(!repeated){changeRelationship(s,'soyul','taei',{tension:1});changeRelationship(s,'seoyeon','taei',{trust:-1});}
  }
- s.dialogue.history.push({person:'group',choice,phase:s.phase,lines});
+ s.dialogue.history.push({person:'group',choice,day:s.day??1,phase:s.phase,lines});
  return {state:s,lines};
 }
 export function dialogue(s,id){
  if(!people[id])throw new Error('알 수 없는 인물입니다.');
  const r=relationship(s,id),close=r.familiarity>=4,warm=r.affection>=3,trusted=r.trust>=3;
  const d=s.dialogue??{history:[],promises:{}};
- const history=d.history.filter(h=>h.person===id);
+ const history=d.history.filter(h=>h.person===id&&(h.day??1)===(s.day??1));
  const latest=history.at(-1);
  const evening=s.phase==='evening';
  let opening;
- if(evening&&d.promises[id]==='broken') opening={seoyeon:'오늘 온다고 했었죠. 못 올 수도 있는데, 연락은 해줄 수 있었잖아요.',yeogyeong:'아까 온다고 해서 인원에 넣었어요. 다음에는 못 오면 먼저 알려주세요.',soyul:'기다렸어요. …못 오게 됐으면 말해주지.'}[id];
+ const yesterday=s.dayHistory?.at(-1);
+ const old=d.history.filter(h=>h.person===id&&(h.day??1)<(s.day??1));
+ const appointment=s.appointments?.find(a=>a.person===id&&a.day===s.day&&['pending','broken','kept'].includes(a.status));
+ if((s.day??1)>1&&!latest){
+  if(appointment?.status==='broken') opening={seoyeon:'리허설에 오기로 했었죠. 못 온 것보다 연락이 없었던 게 마음에 걸려요.',yeogyeong:'전시 준비 인원에 넣어뒀었어요. 다음에는 바뀌면 먼저 알려주세요.',soyul:'오늘 온다고 해서… 기다렸어. 다음에는 먼저 말해줘.'}[id];
+  else if(appointment?.status==='kept') opening={seoyeon:'약속대로 와줬네요. 같이 준비하니까 훨씬 낫더라고요.',yeogyeong:'오늘 약속 지켜줘서 고마워요. 덕분에 무리 없이 끝냈어요.',soyul:'와줬네. …내가 고른 사진, 같이 봐줘서 좋았어.'}[id];
+  else if(appointment?.status==='pending') opening=`오늘 ${appointment.label}, 같이 하기로 한 거 기억하고 있어요. 일정 바뀌면 알려줘요.`;
+  else if(yesterday?.promises[id]==='broken')opening={seoyeon:'어제 오기로 했던 거요. 못 올 수도 있지만, 다음에는 먼저 알려줬으면 해요.',yeogyeong:'어제 기다렸어요. 오늘은 일정부터 확인하고 이야기해요.',soyul:'어제는… 기다렸어요. 오늘은 무리해서 약속하지 않아도 돼요.'}[id];
+  else if(yesterday?.promises[id]==='kept')opening={seoyeon:'어제 약속대로 와줘서 고마웠어요. 오늘은 좀 여유 있어요?',yeogyeong:'어제 같이 마무리해줘서 든든했어요. 오늘도 얼굴 보네요.',soyul:'어제 고마웠어요. 오늘은… 제가 먼저 인사하려고 했는데.'}[id];
+  else if(old.length||close)opening={seoyeon:'지난번에 나눈 이야기 생각났어요. 오늘은 잘 지냈어요?',yeogyeong:'또 보네요. 하던 일은 잘 끝났어요?',soyul:close?'왔네. 지난번 이야기하던 거… 조금 더 해도 돼?':'안녕하세요. 지난번에 뵀죠? 오늘은 사진 고르고 있었어요.'}[id];
+  else opening={seoyeon:'안녕하세요. 봉사단에서 이름은 봤어요. 이렇게 이야기하는 건 처음이죠?',yeogyeong:'안녕하세요. 저는 재무 맡고 있는 차여경이에요. 오늘은 무슨 일로 오셨어요?',soyul:'아… 안녕하세요. 박소율이에요. 봉사단 분 맞으시죠?'}[id];
+ }
+ else if(evening&&d.promises[id]==='broken') opening={seoyeon:'오늘 온다고 했었죠. 못 올 수도 있는데, 연락은 해줄 수 있었잖아요.',yeogyeong:'아까 온다고 해서 인원에 넣었어요. 다음에는 못 오면 먼저 알려주세요.',soyul:'기다렸어요. …못 오게 됐으면 말해주지.'}[id];
  else if(evening&&s.choice==='volunteer') opening={seoyeon:trusted?'아까 같이 확인해줘서 마음이 좀 놓였어요. 나 혼자 괜찮다고 넘겼을지도 몰라요.':'오늘 고생했어요. 수량 다시 확인해줘서 도움이 됐어요.',yeogyeong:'아까 같이 세준 거, 고마워요. 정산이 안 맞는 줄 알고 식겁했네.',soyul:close?'아까… 같이 확인해줘서 고마워. 내가 말을 너무 늦게 했지?':'아까 도와주셔서 감사했어요. 제가 먼저 말씀드렸어야 했는데.'}[id];
  else if(evening) opening={seoyeon:'오늘 일정은 잘 끝났어요? 우리는 조금 늦게 마쳤어요.',yeogyeong:'이제 정리 끝났어요. 다른 일정은 잘 마쳤어요?',soyul:'아… 아직 학교에 계셨네요. 저는 이제 가려고요.'}[id];
  else if(r.tension>=4) opening={seoyeon:'지금은 조금 혼자 있고 싶어요. 꼭 해야 할 이야기예요?',yeogyeong:'잠깐만요. 아까 이야기부터 정리하고 넘어가고 싶어요.',soyul:'지금은… 길게 이야기하기가 어려워요.'}[id];
@@ -57,11 +75,12 @@ export function dialogue(s,id){
  const topic={seoyeon:close?'지난번에 말했던 카페, 정말 가봤어요?':'활동 없을 때는 보통 뭐 해요?',yeogyeong:close?'오늘도 수첩이 꽉 찼네. 쉴 틈은 있어?':'재무 일은 혼자 다 맡는 거예요?',soyul:close?'사진 찍는 거 좋아한다며. 요즘 찍은 거 있어?':'들고 있는 건 활동 사진이에요?'}[id];
  return {opening,stage:people[id].habit,options:[
  ...(['listen','personal'].includes(latest?.choice)?[{id:'deepen',label:'그때 어떤 기분이었어요?'},{id:'share',label:'나도 내 이야기를 조금 꺼내본다.'}]:[]),
- ...(latest&&r.tension>0?[{id:'repair',label:'아까는 내 말이 앞섰어요. 미안해요.'}]:[]),
+ ...((latest||old.length)&&r.tension>0?[{id:'repair',label:latest?'아까는 내 말이 앞섰어요. 미안해요.':'지난번에는 내 말이 앞섰어요. 미안해요.'}]:[]),
+ ...(s.day===2&&r.familiarity>=2&&r.tension<3?[{id:'invite',label:'내일은 어떤 일정이에요?'}]:[]),
  {id:'listen',label:evening?'오늘 어땠는지 좀 더 들어도 돼요?':'지금 무슨 일 하고 있었어요?'},
  {id:'personal',label:topic},
  {id:'joke',label:close?'조금 장난스럽게 말을 건넨다.':'가벼운 농담으로 어색함을 풀어본다.'},
- ...(!evening?[{id:'promise',label:'오늘 봉사 활동에 갈게요.'}]:[]),
+ ...(!evening&&(s.day??1)===1?[{id:'promise',label:'오늘 봉사 활동에 갈게요.'}]:[]),
  {id:'push',label:evening?'다음부터는 그냥 내 말대로 하면 되잖아요.':'내가 도와줄 테니까, 다른 일정은 미뤄요.'}
  ]};
 }
@@ -70,12 +89,22 @@ export function respond(state,id,choice){
  if(!current.options.some(o=>o.id===choice))throw new Error('지금 할 수 없는 대답입니다.');
  const s=structuredClone(state),r=relationship(s,id),close=r.familiarity>=4,warm=r.affection>=3;
  s.dialogue??={history:[],promises:{}};
- const repeated=s.dialogue.history.some(h=>h.person===id&&h.choice===choice&&h.phase===s.phase);
+ const repeated=s.dialogue.history.some(h=>h.person===id&&h.choice===choice&&(h.day??1)===(s.day??1)&&h.phase===s.phase);
  let text,stage,followup;
  const delta={familiarity:1};
  if(repeated){
   text={seoyeon:'그 이야기는 아까 했죠. 이번에는 선배 이야기도 듣고 싶은데요.',yeogyeong:'아까랑 같은 질문인데요? 제 대답도 같아요.',soyul:'아까… 말씀드렸던 것 같아요.'}[id];
   stage='상대는 앞서 나눈 이야기를 기억하고 있다.';
+ }else if(choice==='invite'){
+  text={seoyeon:'내일 리허설 때 입구 안내를 도와주기로 했어요. 같이 준비할래요? 봉사단 사진 전시랑은 시간이 겹친대요.',yeogyeong:'내일 학생회관에서 사진 전시 준비해요. 도와줄 수 있어요? 공연 리허설이랑 시간이 같아서 확인은 해줘야 해요.',soyul:close?'내일 전시 준비… 같이 할래? 리허설도 있다던데, 시간 괜찮으면.':'내일 사진 전시 준비해요. 시간 괜찮으시면 같이 해주실래요? 리허설이랑 겹친다고는 들었어요.'}[id];
+  stage='초대에 응할지는 직접 결정할 수 있다. 질문만으로 약속이 잡히지는 않는다.';
+ }else if(choice==='listen'&&(s.day??1)>1){
+  Object.assign(delta,{trust:1});
+  if(s.day===2){
+   text=s.phase==='evening'?{seoyeon:'소율이 여경이랑 사진 정리했대요. 둘이 내일 전시 구성을 같이 정했더라고요.',yeogyeong:'소율이가 사진을 보내줘서 같이 골랐어요. 다음에는 설명 문구도 같이 정하기로 했고요.',soyul:close?'여경이랑 사진 골랐어. 처음에는 어렵게 느꼈는데, 같이 보니까 이야기 잘 되더라.':'여경이랑 사진 정리했어요. 제가 고른 것도 전시에 쓰기로 했대요.'}[id]:{seoyeon:'오전에 수업 끝내고 잠깐 쉬는 중이에요. 소율이는 도서관에서 사진 고른다고 했고요.',yeogyeong:'어제 활동 자료 정리하고 있어요. 소율이가 사진 골라서 보내주기로 했어요.',soyul:'여기서 사진 고르고 있어요. 다 고르면 여경이한테 보내려고요.'}[id];
+   if(s.phase==='evening'&&!s.known.includes('소율과 여경의 사진 협업')){s.known.push('소율과 여경의 사진 협업');s.memory.push(`[2일차] ${people[id].name}에게 소율과 여경이 함께 전시 구성을 정했다는 이야기를 전해 들었다.`);}
+  }else text={seoyeon:'리허설 안내랑 전시 준비가 겹쳤어요. 저는 정한 일정대로 움직이려고요.',yeogyeong:'전시 준비 중이에요. 어제 소율이랑 정한 순서가 있어서 생각보다 수월하네요.',soyul:'어제 고른 파일 챙기고 있어요. 이번에는 제가 설명할 사진도 직접 골랐어요.'}[id];
+  stage=people[id].habit;
  }else if(choice==='listen'){
   Object.assign(delta,{trust:1});
   if(s.phase==='evening'&&s.choice!=='volunteer'){
@@ -120,7 +149,7 @@ export function respond(state,id,choice){
   stage='선의로 건넨 말이어도 상대가 원하는 방식은 아닐 수 있다.';
  }
  if(!repeated)changeRelationship(s,id,'taei',delta);
- const result={person:id,choice,phase:s.phase,text,stage,followup:followup??'',repeated};
+ const result={person:id,choice,day:s.day??1,phase:s.phase,text,stage,followup:followup??'',repeated};
  s.dialogue.history.push(result);
  return {state:s,result};
 }

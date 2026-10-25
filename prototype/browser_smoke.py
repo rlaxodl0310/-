@@ -31,7 +31,7 @@ with sync_playwright() as p:
     page.get_by_role('button', name='새로 시작', exact=True).click()
     page.get_by_role('button', name='메뉴', exact=True).click()
     page.locator('[data-action="load"][data-value="1"]').click()
-    assert page.get_by_text('김태이 · 저녁', exact=True).is_visible()
+    assert page.get_by_text('김태이 · 1일차 · 목요일 · 저녁', exact=True).is_visible()
     assert not errors, errors
     page.get_by_role('button', name='← 뒤로').click()
     page.screenshot(path='/tmp/campus-prototype.png')

@@ -12,7 +12,22 @@ window.addEventListener('error', function(event) {
   notice.textContent = '게임 화면을 불러오지 못했습니다: ' + (event.message || '파일 로딩 실패') + '. 이 문구를 알려주세요.';
   app.prepend(notice);
 });
-</script><script>const people={
+</script><script>const days={
+ 1:{title:'서로의 시간을 알아가는 날',weekday:'목요일',event:'supplies',
+  routes:{rehearsal:{name:'합주',duration:120,description:'연습실에서 합주하고 장비 위치를 익힙니다.',memory:'합주를 마쳤다. 연습실 장비 보관 위치를 확인했다.',knowledge:['연습실','장비 보관 위치']},volunteer:{name:'봉사 활동',duration:180,description:'물품 준비를 함께 합니다.',memory:'물품을 다시 세는 일을 도와 포장 누락을 확인했다.',knowledge:['봉사 준비실','물품 수량 불일치 사건']},explore:{name:'자유 탐색',duration:60,description:'학생회관에서 도서관까지 걸으며 길을 알아봅니다.',memory:'학생회관 주변을 걸으며 도서관으로 이어지는 길을 확인했다.',knowledge:['학생회관','도서관으로 이어지는 길']}},
+  schedules:{afternoon:{yeogyeong:'hall',seoyeon:'hall',soyul:'hall'},evening:{yeogyeong:'hall',seoyeon:'hall',soyul:'hall'}}},
+ 2:{title:'어제의 말이 남은 자리',weekday:'금요일',event:'photo-selection',
+  routes:{work:{name:'개인 음악 작업',duration:120,description:'어제의 합주 경험을 바탕으로 자작곡 데모를 다듬습니다.',memory:'자작곡 데모를 다듬었다. 떠오른 이야기를 가사 메모로 남겼다.',knowledge:['작업 데모']},review:{name:'사진 정리 함께하기',duration:90,description:'도서관에서 소율과 봉사 사진을 고릅니다. 관계에 따라 대화가 달라집니다.',memory:'소율과 사진을 정리했다. 여경이 요청한 파일을 함께 분류했다.',knowledge:['봉사 사진 정리']},walk:{name:'대학가 산책',duration:60,description:'대학가를 걸으며 카페와 공연장 사이의 길을 살펴봅니다.',memory:'대학가에서 공연장 옆 출입구와 연결 통로를 확인했다.',knowledge:['대학가 연결 통로']}},
+  schedules:{afternoon:{yeogyeong:'hall',seoyeon:'cafe',soyul:'library'},evening:{yeogyeong:'hall',seoyeon:'hall',soyul:'hall'}}},
+ 3:{title:'겹쳐진 약속',weekday:'토요일',event:'campus-showcase',
+  routes:{backstage:{name:'공연 리허설 참여',duration:120,description:'합주 일정에 참여해 무대 준비를 돕습니다. 사진 전시 준비와 시간이 겹칩니다.',memory:'공연 리허설에 참여했다. 음악 작업과 무대 준비를 이어갔다.',knowledge:['공연 준비 경험']},exhibit:{name:'사진 전시 준비',duration:120,description:'봉사단의 작은 활동 사진 전시를 준비합니다. 리허설과 시간이 겹칩니다.',memory:'봉사단 사진 전시 준비를 함께했다. 사진을 고른 사람들의 이야기를 들었다.',knowledge:['사진 전시 준비']},shortcut:{name:'연결 통로로 장비 운반 돕기',duration:60,description:'미리 알아둔 길로 공연 장비를 옮깁니다. 짧은 시간에 물품을 전달할 수 있지만 다른 활동에 끝까지 참여하지는 못합니다.',memory:'미리 알아둔 연결 통로로 장비를 전달했다. 길을 알아둔 경험이 도움이 됐다.',knowledge:['연결 통로 활용'],requiresAny:['도서관으로 이어지는 길','대학가 연결 통로']}},
+  schedules:{afternoon:{yeogyeong:'hall',seoyeon:'hall',soyul:'library'},evening:{yeogyeong:'hall',seoyeon:'hall',soyul:'hall'}}}
+};
+const locations={hall:'학생회관',library:'도서관',cafe:'대학가 카페'};
+function availableRoutes(s){return Object.entries(days[s.day??1].routes).map(([id,r])=>({id,...r,locked:!!r.requiresAny&&!r.requiresAny.some(k=>s.known.includes(k))}));}
+function presentPeople(s,location){const plan=days[s.day??1].schedules[s.phase];return Object.keys(plan).filter(id=>plan[id]===location);}
+
+const people={
  seoyeon:{name:'한서연',column:1,habit:'서연은 서두르지 않고 말을 고른다.'},
  yeogyeong:{name:'차여경',column:2,habit:'여경은 펼쳐둔 수첩에서 시선을 든다.'},
  soyul:{name:'박소율',column:3,habit:'소율은 눈이 마주치자 손에 든 종이를 가지런히 맞춘다.'}
@@ -27,6 +42,12 @@ function changeRelationship(s,from,to,delta){
 }
 function groupDialogue(s){
  const friends=relationship(s,'soyul','seoyeon').familiarity>=4;
+ if((s.day??1)>1)return [
+ {person:'seoyeon',text:s.day===2?'여경이랑 사진 골랐다며? 전시 구성도 정했어?':'오늘 사진 설명은 네가 직접 할 거야?'},
+ {person:'soyul',text:s.day===2?(friends?'응. 같이 고르니까 내가 놓친 것도 보이더라. 내일 설명도 같이 정하기로 했어.':'네. 여경 씨랑 같이 골랐어요.'):(friends?'응. 여경이랑 순서도 맞췄어. 떨리긴 하는데, 해보려고.':'제가 고른 사진부터 설명해보려고요.')},
+ {person:'seoyeon',text:friends?'잘됐네. 네가 찍은 거니까 네 이야기가 제일 궁금하지.':'좋네요. 준비한 이야기 들려주세요.'},
+ {person:'soyul',text:relationship(s,'soyul').familiarity>=4?'태이도 볼래? 이 사진, 어제 이야기하던 거야.':'괜찮으시면 같이 보실래요?'}
+ ];
  return [
  {person:'seoyeon',text:s.phase==='afternoon'?'소율아, 지난번 사진 같이 골라볼래? 네가 찍은 게 잘 나왔더라.':'오늘 수고했어. 가기 전에 지난번 사진만 같이 골라볼까?'},
  {person:'soyul',text:friends?'또 나 나온 거부터 고르려고 그러지. 풍경 찍은 것도 좀 봐.':'네… 제가 찍은 사진도 몇 장 있어요.'},
@@ -37,7 +58,7 @@ function groupDialogue(s){
 function respondGroup(state,choice){
  if(!['wait','include','speakFor'].includes(choice))throw new Error('알 수 없는 대답입니다.');
  const s=structuredClone(state),close=relationship(s,'soyul').familiarity>=4;
- const repeated=s.dialogue.history.some(h=>h.person==='group'&&h.phase===s.phase&&h.choice===choice);
+ const repeated=s.dialogue.history.some(h=>h.person==='group'&&(h.day??1)===(s.day??1)&&h.phase===s.phase&&h.choice===choice);
  let lines;
  if(choice==='wait'){
   lines=[{person:'soyul',text:close?'고마워. 내가 먼저 골라볼게. 보고 싶은 거 있으면 말해.':'조금만 기다려주실래요? 제가 먼저 골라볼게요.'},{person:'seoyeon',text:'천천히 해. 우리도 급한 건 아니니까.'}];
@@ -49,18 +70,30 @@ function respondGroup(state,choice){
   lines=[{person:'soyul',text:close?'내가 말할게. 서연이가 나보다 말을 잘하는 건 맞는데… 그래도.':'저도… 제 생각은 말씀드릴 수 있어요.'},{person:'seoyeon',text:'소율이한테 직접 물어봐주면 좋겠어요. 제가 대신 정할 일은 아니니까.'}];
   if(!repeated){changeRelationship(s,'soyul','taei',{tension:1});changeRelationship(s,'seoyeon','taei',{trust:-1});}
  }
- s.dialogue.history.push({person:'group',choice,phase:s.phase,lines});
+ s.dialogue.history.push({person:'group',choice,day:s.day??1,phase:s.phase,lines});
  return {state:s,lines};
 }
 function dialogue(s,id){
  if(!people[id])throw new Error('알 수 없는 인물입니다.');
  const r=relationship(s,id),close=r.familiarity>=4,warm=r.affection>=3,trusted=r.trust>=3;
  const d=s.dialogue??{history:[],promises:{}};
- const history=d.history.filter(h=>h.person===id);
+ const history=d.history.filter(h=>h.person===id&&(h.day??1)===(s.day??1));
  const latest=history.at(-1);
  const evening=s.phase==='evening';
  let opening;
- if(evening&&d.promises[id]==='broken') opening={seoyeon:'오늘 온다고 했었죠. 못 올 수도 있는데, 연락은 해줄 수 있었잖아요.',yeogyeong:'아까 온다고 해서 인원에 넣었어요. 다음에는 못 오면 먼저 알려주세요.',soyul:'기다렸어요. …못 오게 됐으면 말해주지.'}[id];
+ const yesterday=s.dayHistory?.at(-1);
+ const old=d.history.filter(h=>h.person===id&&(h.day??1)<(s.day??1));
+ const appointment=s.appointments?.find(a=>a.person===id&&a.day===s.day&&['pending','broken','kept'].includes(a.status));
+ if((s.day??1)>1&&!latest){
+  if(appointment?.status==='broken') opening={seoyeon:'리허설에 오기로 했었죠. 못 온 것보다 연락이 없었던 게 마음에 걸려요.',yeogyeong:'전시 준비 인원에 넣어뒀었어요. 다음에는 바뀌면 먼저 알려주세요.',soyul:'오늘 온다고 해서… 기다렸어. 다음에는 먼저 말해줘.'}[id];
+  else if(appointment?.status==='kept') opening={seoyeon:'약속대로 와줬네요. 같이 준비하니까 훨씬 낫더라고요.',yeogyeong:'오늘 약속 지켜줘서 고마워요. 덕분에 무리 없이 끝냈어요.',soyul:'와줬네. …내가 고른 사진, 같이 봐줘서 좋았어.'}[id];
+  else if(appointment?.status==='pending') opening=`오늘 ${appointment.label}, 같이 하기로 한 거 기억하고 있어요. 일정 바뀌면 알려줘요.`;
+  else if(yesterday?.promises[id]==='broken')opening={seoyeon:'어제 오기로 했던 거요. 못 올 수도 있지만, 다음에는 먼저 알려줬으면 해요.',yeogyeong:'어제 기다렸어요. 오늘은 일정부터 확인하고 이야기해요.',soyul:'어제는… 기다렸어요. 오늘은 무리해서 약속하지 않아도 돼요.'}[id];
+  else if(yesterday?.promises[id]==='kept')opening={seoyeon:'어제 약속대로 와줘서 고마웠어요. 오늘은 좀 여유 있어요?',yeogyeong:'어제 같이 마무리해줘서 든든했어요. 오늘도 얼굴 보네요.',soyul:'어제 고마웠어요. 오늘은… 제가 먼저 인사하려고 했는데.'}[id];
+  else if(old.length||close)opening={seoyeon:'지난번에 나눈 이야기 생각났어요. 오늘은 잘 지냈어요?',yeogyeong:'또 보네요. 하던 일은 잘 끝났어요?',soyul:close?'왔네. 지난번 이야기하던 거… 조금 더 해도 돼?':'안녕하세요. 지난번에 뵀죠? 오늘은 사진 고르고 있었어요.'}[id];
+  else opening={seoyeon:'안녕하세요. 봉사단에서 이름은 봤어요. 이렇게 이야기하는 건 처음이죠?',yeogyeong:'안녕하세요. 저는 재무 맡고 있는 차여경이에요. 오늘은 무슨 일로 오셨어요?',soyul:'아… 안녕하세요. 박소율이에요. 봉사단 분 맞으시죠?'}[id];
+ }
+ else if(evening&&d.promises[id]==='broken') opening={seoyeon:'오늘 온다고 했었죠. 못 올 수도 있는데, 연락은 해줄 수 있었잖아요.',yeogyeong:'아까 온다고 해서 인원에 넣었어요. 다음에는 못 오면 먼저 알려주세요.',soyul:'기다렸어요. …못 오게 됐으면 말해주지.'}[id];
  else if(evening&&s.choice==='volunteer') opening={seoyeon:trusted?'아까 같이 확인해줘서 마음이 좀 놓였어요. 나 혼자 괜찮다고 넘겼을지도 몰라요.':'오늘 고생했어요. 수량 다시 확인해줘서 도움이 됐어요.',yeogyeong:'아까 같이 세준 거, 고마워요. 정산이 안 맞는 줄 알고 식겁했네.',soyul:close?'아까… 같이 확인해줘서 고마워. 내가 말을 너무 늦게 했지?':'아까 도와주셔서 감사했어요. 제가 먼저 말씀드렸어야 했는데.'}[id];
  else if(evening) opening={seoyeon:'오늘 일정은 잘 끝났어요? 우리는 조금 늦게 마쳤어요.',yeogyeong:'이제 정리 끝났어요. 다른 일정은 잘 마쳤어요?',soyul:'아… 아직 학교에 계셨네요. 저는 이제 가려고요.'}[id];
  else if(r.tension>=4) opening={seoyeon:'지금은 조금 혼자 있고 싶어요. 꼭 해야 할 이야기예요?',yeogyeong:'잠깐만요. 아까 이야기부터 정리하고 넘어가고 싶어요.',soyul:'지금은… 길게 이야기하기가 어려워요.'}[id];
@@ -71,11 +104,12 @@ function dialogue(s,id){
  const topic={seoyeon:close?'지난번에 말했던 카페, 정말 가봤어요?':'활동 없을 때는 보통 뭐 해요?',yeogyeong:close?'오늘도 수첩이 꽉 찼네. 쉴 틈은 있어?':'재무 일은 혼자 다 맡는 거예요?',soyul:close?'사진 찍는 거 좋아한다며. 요즘 찍은 거 있어?':'들고 있는 건 활동 사진이에요?'}[id];
  return {opening,stage:people[id].habit,options:[
  ...(['listen','personal'].includes(latest?.choice)?[{id:'deepen',label:'그때 어떤 기분이었어요?'},{id:'share',label:'나도 내 이야기를 조금 꺼내본다.'}]:[]),
- ...(latest&&r.tension>0?[{id:'repair',label:'아까는 내 말이 앞섰어요. 미안해요.'}]:[]),
+ ...((latest||old.length)&&r.tension>0?[{id:'repair',label:latest?'아까는 내 말이 앞섰어요. 미안해요.':'지난번에는 내 말이 앞섰어요. 미안해요.'}]:[]),
+ ...(s.day===2&&r.familiarity>=2&&r.tension<3?[{id:'invite',label:'내일은 어떤 일정이에요?'}]:[]),
  {id:'listen',label:evening?'오늘 어땠는지 좀 더 들어도 돼요?':'지금 무슨 일 하고 있었어요?'},
  {id:'personal',label:topic},
  {id:'joke',label:close?'조금 장난스럽게 말을 건넨다.':'가벼운 농담으로 어색함을 풀어본다.'},
- ...(!evening?[{id:'promise',label:'오늘 봉사 활동에 갈게요.'}]:[]),
+ ...(!evening&&(s.day??1)===1?[{id:'promise',label:'오늘 봉사 활동에 갈게요.'}]:[]),
  {id:'push',label:evening?'다음부터는 그냥 내 말대로 하면 되잖아요.':'내가 도와줄 테니까, 다른 일정은 미뤄요.'}
  ]};
 }
@@ -84,12 +118,22 @@ function respond(state,id,choice){
  if(!current.options.some(o=>o.id===choice))throw new Error('지금 할 수 없는 대답입니다.');
  const s=structuredClone(state),r=relationship(s,id),close=r.familiarity>=4,warm=r.affection>=3;
  s.dialogue??={history:[],promises:{}};
- const repeated=s.dialogue.history.some(h=>h.person===id&&h.choice===choice&&h.phase===s.phase);
+ const repeated=s.dialogue.history.some(h=>h.person===id&&h.choice===choice&&(h.day??1)===(s.day??1)&&h.phase===s.phase);
  let text,stage,followup;
  const delta={familiarity:1};
  if(repeated){
   text={seoyeon:'그 이야기는 아까 했죠. 이번에는 선배 이야기도 듣고 싶은데요.',yeogyeong:'아까랑 같은 질문인데요? 제 대답도 같아요.',soyul:'아까… 말씀드렸던 것 같아요.'}[id];
   stage='상대는 앞서 나눈 이야기를 기억하고 있다.';
+ }else if(choice==='invite'){
+  text={seoyeon:'내일 리허설 때 입구 안내를 도와주기로 했어요. 같이 준비할래요? 봉사단 사진 전시랑은 시간이 겹친대요.',yeogyeong:'내일 학생회관에서 사진 전시 준비해요. 도와줄 수 있어요? 공연 리허설이랑 시간이 같아서 확인은 해줘야 해요.',soyul:close?'내일 전시 준비… 같이 할래? 리허설도 있다던데, 시간 괜찮으면.':'내일 사진 전시 준비해요. 시간 괜찮으시면 같이 해주실래요? 리허설이랑 겹친다고는 들었어요.'}[id];
+  stage='초대에 응할지는 직접 결정할 수 있다. 질문만으로 약속이 잡히지는 않는다.';
+ }else if(choice==='listen'&&(s.day??1)>1){
+  Object.assign(delta,{trust:1});
+  if(s.day===2){
+   text=s.phase==='evening'?{seoyeon:'소율이 여경이랑 사진 정리했대요. 둘이 내일 전시 구성을 같이 정했더라고요.',yeogyeong:'소율이가 사진을 보내줘서 같이 골랐어요. 다음에는 설명 문구도 같이 정하기로 했고요.',soyul:close?'여경이랑 사진 골랐어. 처음에는 어렵게 느꼈는데, 같이 보니까 이야기 잘 되더라.':'여경이랑 사진 정리했어요. 제가 고른 것도 전시에 쓰기로 했대요.'}[id]:{seoyeon:'오전에 수업 끝내고 잠깐 쉬는 중이에요. 소율이는 도서관에서 사진 고른다고 했고요.',yeogyeong:'어제 활동 자료 정리하고 있어요. 소율이가 사진 골라서 보내주기로 했어요.',soyul:'여기서 사진 고르고 있어요. 다 고르면 여경이한테 보내려고요.'}[id];
+   if(s.phase==='evening'&&!s.known.includes('소율과 여경의 사진 협업')){s.known.push('소율과 여경의 사진 협업');s.memory.push(`[2일차] ${people[id].name}에게 소율과 여경이 함께 전시 구성을 정했다는 이야기를 전해 들었다.`);}
+  }else text={seoyeon:'리허설 안내랑 전시 준비가 겹쳤어요. 저는 정한 일정대로 움직이려고요.',yeogyeong:'전시 준비 중이에요. 어제 소율이랑 정한 순서가 있어서 생각보다 수월하네요.',soyul:'어제 고른 파일 챙기고 있어요. 이번에는 제가 설명할 사진도 직접 골랐어요.'}[id];
+  stage=people[id].habit;
  }else if(choice==='listen'){
   Object.assign(delta,{trust:1});
   if(s.phase==='evening'&&s.choice!=='volunteer'){
@@ -134,118 +178,169 @@ function respond(state,id,choice){
   stage='선의로 건넨 말이어도 상대가 원하는 방식은 아닐 수 있다.';
  }
  if(!repeated)changeRelationship(s,id,'taei',delta);
- const result={person:id,choice,phase:s.phase,text,stage,followup:followup??'',repeated};
+ const result={person:id,choice,day:s.day??1,phase:s.phase,text,stage,followup:followup??'',repeated};
  s.dialogue.history.push(result);
  return {state:s,result};
 }
 
 function newGame(profile='acquaintance') {
-  const s={version:2, phase:'afternoon', choice:null, minutes:0, location:'campus',
-    known:[], messages:[], events:[], relations:{}, npcs:{
-      yeogyeong:{name:'차여경',location:'봉사 준비실'},
-      seoyeon:{name:'한서연',location:'봉사 준비실'},
-      soyul:{name:'박소율',location:'봉사 준비실'}}, memory:[], dialogue:{history:[],promises:{}}};
-  changeRelationship(s,'seoyeon','soyul',{familiarity:20,trust:12,affection:8});
-  changeRelationship(s,'soyul','seoyeon',{familiarity:20,trust:12,affection:8});
-  if(profile!=='acquaintance')for(const id of ['seoyeon','yeogyeong','soyul'])
-    changeRelationship(s,id,'taei',profile==='close'?{familiarity:8,trust:5,affection:5}:{familiarity:6,trust:4,affection:0});
-  return s;
+ const s={version:3,day:1,phase:'afternoon',choice:null,minutes:0,location:'campus',
+  known:[],messages:[],events:[],relations:{},npcs:{yeogyeong:{name:'차여경',location:'hall'},seoyeon:{name:'한서연',location:'hall'},soyul:{name:'박소율',location:'hall'}},
+  memory:[],dayHistory:[],appointments:[],lastResult:'',dialogue:{history:[],promises:{}}};
+ changeRelationship(s,'seoyeon','soyul',{familiarity:20,trust:12,affection:8});
+ changeRelationship(s,'soyul','seoyeon',{familiarity:20,trust:12,affection:8});
+ if(profile!=='acquaintance')for(const id of Object.keys(s.npcs))changeRelationship(s,id,'taei',profile==='close'?{familiarity:8,trust:5,affection:5}:{familiarity:6,trust:4,affection:0});
+ return s;
 }
-
-function act(state, choice) {
-  if(state.phase !== 'afternoon') throw new Error('오늘의 오후 활동은 이미 완료했습니다.');
-  if(!['rehearsal','volunteer','explore'].includes(choice)) throw new Error('알 수 없는 활동입니다.');
-  const s=structuredClone(state);
-  s.choice=choice; s.minutes={rehearsal:120,volunteer:180,explore:60}[choice];
-  s.phase='evening';
-  // The event resolves for its participants regardless of the player's route.
-  s.events.push({id:'supplies',participants:['yeogyeong','seoyeon','soyul'],
-    result:'포장 누락을 확인하고 남은 물품에 맞춰 진행 순서를 조정했다.'});
-  changeRelationship(s,'yeogyeong','soyul',{trust:1});
-  changeRelationship(s,'soyul','yeogyeong',{trust:1});
-  changeRelationship(s,'seoyeon','soyul',{trust:1});
-  for(const npc of Object.values(s.npcs)) npc.location='귀가 중';
-  if(choice==='volunteer'){
-    s.known.push('봉사 준비실','물품 수량 불일치 사건');
-    s.memory.push('물품을 다시 세는 일을 도와 포장 누락을 확인했다.');
-    changeRelationship(s,'yeogyeong','taei',{trust:1});
-    s.messages.push({from:'봉사단 단체방',text:'오늘 정리까지 도와주셔서 감사합니다.'});
-  } else {
-    s.messages.push({from:'봉사단 단체방',text:'오늘 활동 마쳤습니다. 참여하신 분들 수고하셨어요.'});
-    if(choice==='rehearsal'){
-      s.known.push('연습실','장비 보관 위치');
-      s.memory.push('합주를 마쳤다. 연습실 장비 보관 위치를 확인했다.');
-    } else {
-      s.known.push('학생회관','도서관으로 이어지는 길');
-      s.memory.push('학생회관 주변을 걸으며 도서관으로 이어지는 길을 확인했다.');
-    }
-  }
-  for(const [id,status] of Object.entries(s.dialogue.promises)){
-    if(status!=='pending')continue;
-    const kept=choice==='volunteer';
-    s.dialogue.promises[id]=kept?'kept':'broken';
-    changeRelationship(s,id,'taei',kept?{trust:2}:{trust:-2,tension:2});
-    s.memory.push(`${s.npcs[id].name}에게 한 참석 약속을 ${kept?'지켰다.':'지키지 못했다.'}`);
-  }
-  return s;
+function remember(s,text){s.memory.push(`[${s.day}일차] ${text}`);}
+function know(s,...facts){for(const fact of facts)if(!s.known.includes(fact))s.known.push(fact);}
+function act(state,choice){
+ if(state.phase!=='afternoon')throw new Error('오늘의 오후 활동은 이미 완료했습니다.');
+ const route=availableRoutes(state).find(r=>r.id===choice);
+ if(!route||route.locked)throw new Error('지금 선택할 수 없는 활동입니다.');
+ const s=structuredClone(state),day=s.day;
+ s.choice=choice;s.minutes=route.duration;s.phase='evening';s.lastResult=route.memory;
+ remember(s,route.memory);know(s,...route.knowledge);
+ const participants=day===2?['yeogyeong','soyul']:['yeogyeong','seoyeon','soyul'];
+ const result={1:'포장 누락을 확인하고 남은 물품에 맞춰 진행 순서를 조정했다.',2:'소율이 정리한 사진을 여경에게 전달하고 둘이 전시 구성을 의논했다.',3:'봉사단이 사진 전시 준비를 마쳤다.'}[day];
+ s.events.push({id:days[day].event,day,participants,result});
+ // Independent outcomes are applied even when Tae-i chose another activity.
+ changeRelationship(s,'yeogyeong','soyul',{trust:1,familiarity:1});
+ changeRelationship(s,'soyul','yeogyeong',{trust:1,familiarity:1});
+ if(day!==2)changeRelationship(s,'seoyeon','soyul',{trust:1});
+ if(day===1&&choice==='volunteer'){
+  changeRelationship(s,'yeogyeong','taei',{trust:1});
+  s.messages.push({day,from:'봉사단 단체방',text:'오늘 정리까지 도와주셔서 감사합니다.'});
+ }else if(day===2&&choice==='review'){
+  changeRelationship(s,'soyul','taei',{familiarity:2,trust:1});
+  changeRelationship(s,'yeogyeong','taei',{trust:1});
+  s.messages.push({day,from:'박소율',text:relationship(s,'soyul').familiarity>=4?'아까 같이 골라줘서 고마워. 여경이한테 파일 보냈어.':'오늘 사진 같이 봐주셔서 감사해요. 파일은 여경이한테 보냈어요.'});
+ }else if(day===3&&choice==='exhibit'){
+  for(const id of Object.keys(s.npcs))changeRelationship(s,id,'taei',{familiarity:1,trust:1});
+  s.messages.push({day,from:'봉사단 단체방',text:'사진 전시 준비를 마쳤습니다. 도와주셔서 감사합니다.'});
+ }else s.messages.push({day,from:'봉사단 단체방',text:day===1?'오늘 활동 마쳤습니다. 참여하신 분들 수고하셨어요.':'오늘 일정 마쳤습니다. 모두 수고하셨어요.'});
+ if(day===2&&choice==='work'&&s.dayHistory.some(h=>h.choice==='rehearsal')){
+  s.lastResult+=' 어제 합주에서 확인한 부분을 수정해 데모를 녹음했다.';remember(s,'어제의 합주를 바탕으로 데모를 녹음했다.');
+ }
+ for(const [id,status] of Object.entries(s.dialogue.promises)){
+  if(status!=='pending')continue;
+  const kept=choice==='volunteer';s.dialogue.promises[id]=kept?'kept':'broken';
+  changeRelationship(s,id,'taei',kept?{trust:2}:{trust:-2,tension:2});
+  remember(s,`${s.npcs[id].name}에게 한 참석 약속을 ${kept?'지켰다.':'지키지 못했다.'}`);
+ }
+ for(const appointment of s.appointments.filter(a=>a.day===day&&a.status==='pending')){
+  const kept=appointment.activity===choice;appointment.status=kept?'kept':'broken';
+  changeRelationship(s,appointment.person,'taei',kept?{trust:2}:{trust:-1,tension:1});
+  remember(s,`${s.npcs[appointment.person].name}과 한 ${appointment.label} 약속을 ${kept?'지켰다.':'지키지 못했다.'}`);
+ }
+ for(const [id,npc] of Object.entries(s.npcs))npc.location=days[day].schedules.evening[id];
+ return s;
 }
-
+function nextDay(state){
+ if(state.phase!=='evening')throw new Error('오후 활동을 마친 뒤 하루를 마무리할 수 있습니다.');
+ if(state.day>=3)throw new Error('3일간의 시제품을 모두 마쳤습니다.');
+ const s=structuredClone(state);
+ s.dayHistory.push({day:s.day,choice:s.choice,promises:structuredClone(s.dialogue.promises)});
+ s.day++;s.phase='afternoon';s.choice=null;s.minutes=0;s.lastResult='';s.location='campus';s.dialogue.promises={};
+ for(const [id,npc] of Object.entries(s.npcs))npc.location=days[s.day].schedules.afternoon[id];
+ if(s.day===2){
+  s.messages.push({day:2,from:'봉사단 단체방',text:'오늘 여경은 학생회관에서 정리하고, 소율은 도서관에서 사진을 고릅니다. 서연은 오후에 대학가 카페에 있어요.'});
+  for(const id of Object.keys(s.npcs))if(relationship(s,id).familiarity>=2&&relationship(s,id).tension<3)
+   s.messages.push({day:2,from:s.npcs[id].name,text:{seoyeon:'어제 이야기하다 보니 시간이 금방 갔네요. 오늘은 카페에서 잠깐 쉬려고요.',yeogyeong:'어제 고마웠어요. 저는 오늘도 학생회관에 있어요. 시간 되면 들러요.',soyul:'어제 이야기… 고마웠어요. 오늘은 도서관에서 사진 고르려고요.'}[id]});
+ }else s.messages.push({day:3,from:'봉사단 단체방',text:'오늘 사진 전시 준비는 학생회관에서 진행합니다. 소율은 먼저 도서관에서 파일을 챙깁니다. 공연 리허설도 같은 오후에 있어요.'});
+ return s;
+}
+function acceptAppointment(state,person){
+ if(state.day!==2||!state.npcs[person])throw new Error('지금은 다음 날 약속을 잡을 수 없습니다.');
+ if(relationship(state,person).familiarity<2||relationship(state,person).tension>=3)throw new Error('아직 함께 일정을 잡을 만큼 이야기하지 않았습니다.');
+ const s=structuredClone(state),activity=person==='seoyeon'?'backstage':'exhibit';
+ if(s.appointments.some(a=>a.person===person&&a.status==='pending'))throw new Error('이미 수락한 약속입니다.');
+ s.appointments.push({person,day:3,activity,label:activity==='backstage'?'리허설':'전시 준비',status:'pending'});
+ remember(s,`${s.npcs[person].name}과 내일 ${activity==='backstage'?'리허설':'전시 준비'}에 참여하기로 했다.`);
+ return s;
+}
+function cancelAppointment(state,person){
+ const s=structuredClone(state),a=s.appointments.find(a=>a.person===person&&a.status==='pending');
+ if(!a||(s.day===3&&s.phase==='evening'))throw new Error('취소할 수 있는 약속이 없습니다.');
+ a.status='cancelled';remember(s,`${s.npcs[person].name}에게 미리 연락해 ${a.label} 약속을 취소했다.`);
+ s.messages.push({day:s.day,from:s.npcs[person].name,text:'미리 알려줘서 고마워요. 그럼 이번 일정은 다른 사람들과 진행할게요.'});
+ return s;
+}
 function save(state){return JSON.stringify(state);}
 function restore(raw){
-  const s=JSON.parse(raw);
-  if(s?.version===1){s.version=2;s.dialogue={history:[],promises:{}};}
-  if(s?.version!==2 || !['afternoon','evening'].includes(s.phase) ||
-    !Array.isArray(s.memory)||!Array.isArray(s.known)||!Array.isArray(s.messages)||
-    !Array.isArray(s.events)||!s.npcs||!s.relations||!Array.isArray(s.dialogue?.history)||!s.dialogue?.promises) throw new Error('지원하지 않는 저장 파일입니다.');
-  return s;
+ const s=JSON.parse(raw);
+ if(s?.version===1){s.version=2;s.dialogue={history:[],promises:{}};}
+ if(s?.version===2){s.version=3;s.day=1;s.dayHistory=[];s.appointments=[];s.lastResult=s.memory?.at(-1)??'';for(const h of s.dialogue?.history??[])h.day=1;for(const npc of Object.values(s.npcs??{}))npc.location='hall';}
+ if(s?.version!==3||!Number.isInteger(s.day)||s.day<1||s.day>3||!['afternoon','evening'].includes(s.phase)||!Array.isArray(s.memory)||!Array.isArray(s.known)||!Array.isArray(s.messages)||!Array.isArray(s.events)||!Array.isArray(s.dayHistory)||!Array.isArray(s.appointments)||!s.npcs||!s.relations||!Array.isArray(s.dialogue?.history)||!s.dialogue?.promises)throw new Error('지원하지 않는 저장 파일입니다.');
+ return s;
 }
 
 let state=newGame(),screen='campus',selected=null,note='',returnTo='campus',speaker='seoyeon',reply=null,groupLines=[],groupIndex=0,groupAnswered=false;
 const app=document.querySelector('#app');
-const activities={rehearsal:['','합주','2시간','연습실에서 합주하고 장비 위치를 익힙니다.'],volunteer:['','봉사 활동','3시간','물품 준비를 도우며 참여한 사람들과 시간을 보냅니다.'],explore:['','자유 탐색','1시간','학생회관 주변과 도서관으로 이어지는 길을 살펴봅니다.']};
 const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const btn=(text,action,value='')=>`<button data-action="${action}" data-value="${value}">${text}</button>`;
+const duration=n=>n%60?`${n}분`:`${n/60}시간`;
 function portrait(column){return `<div class="portrait" style="--column:${column}" role="img" aria-label="${column===0?'김태이':Object.values(people).find(p=>p.column===column)?.name} 정면 초상화"></div>`;}
-function page(title,body,back='campus'){return `<section class="page"><header>${btn('← 뒤로','go',back)}<h1>${title}</h1></header>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}${body}<p class="footnote">흐름 검증용 시제품 · 사건과 일정은 예시입니다.</p></section>`;}
+function page(title,body,back='campus'){return `<section class="page"><header>${btn('← 뒤로','go',back)}<h1>${title}</h1></header>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}${body}<p class="footnote">대학생활 3일 시제품 · 사건·요일·일정은 검증용 예시입니다.</p></section>`;}
+function timeLabel(){return `${state.day}일차 · ${days[state.day].weekday} · ${state.phase==='evening'?'저녁':'오후'}`;}
+function pending(){return state.appointments.filter(a=>a.status==='pending');}
+function commitments(){return pending().map(a=>`<article class="list">${esc(state.npcs[a.person].name)} · ${a.day}일차 오후 · ${a.label} ${btn('미리 연락해 취소','cancelAppointment',a.person)}</article>`).join('')||'<p class="muted">예정된 약속이 없습니다.</p>';}
+function atPlace(){return locations[state.location]?state.location:'hall';}
 function render(){
-  const evening=state.phase==='evening';
-  if(screen==='campus') app.innerHTML=`<section class="explore"><div class="top"><span class="badge">목요일 · ${evening?'저녁':'오후'}</span><nav>${btn('휴대폰','phone')}${btn('메뉴','go','menu')}</nav></div>${portrait(0)}<div class="prompt"><span>캠퍼스 · 김태이</span>${btn('학생회관 들어가기','go','hall')}<small>이미지를 배경으로 사용한 화면 전환 시제품</small></div></section>`;
-  if(screen==='hall') app.innerHTML=page('학생회관',`<p class="lead">${evening?'활동을 마친 사람들이 귀가를 준비하고 있다.':'봉사 준비실 쪽에서 학생들이 물품을 정리하고 있다.'}</p><div class="grid">${Object.entries(people).map(([id,p])=>`<button class="card person-card" data-action="talk" data-value="${id}"><strong>${p.name}</strong>이야기하기</button>`).join('')}</div><div class="actions">${btn('서연과 소율의 대화에 다가간다','group')}${evening?btn('오늘의 기록','go','journal'):btn('오후 활동 고르기','go','activities')}</div>`);
-  if(screen==='dialogue'){
-    const d=dialogue(state,speaker),p=people[speaker];
-    app.innerHTML=`<section class="conversation"><header class="top">${btn('← 대화 마치기','go','hall')}<span class="badge">학생회관 · ${evening?'저녁':'오후'}</span></header><div class="conversation-body">${portrait(p.column)}<article class="dialogue-panel"><p class="eyebrow">${p.name}</p><p class="muted">${esc(reply?.stage??d.stage)}</p><blockquote>${esc(reply?.text??d.opening)}</blockquote>${reply?.followup?`<p class="inner-line">${esc(reply.followup)}</p>`:''}<div class="dialogue-options">${reply?btn('이야기를 이어간다','continue'):d.options.map(o=>btn(esc(o.label),'answer',o.id)).join('')}</div><div class="actions">${btn('활동 살펴보기','go','activities')}</div></article></div></section>`;
-  }
-  if(screen==='group'){
-    const line=groupLines[groupIndex],p=people[line.person];
-    const end=groupIndex===groupLines.length-1;
-    app.innerHTML=`<section class="conversation"><header class="top">${btn('← 대화 마치기','go','hall')}<span class="badge">학생회관 · 함께 나누는 대화</span></header><div class="conversation-body">${portrait(p.column)}<article class="dialogue-panel"><p class="eyebrow">${p.name}</p><p class="muted">서연과 소율이 휴대폰의 사진을 함께 보고 있다.</p><blockquote>${esc(line.text)}</blockquote><div class="dialogue-options">${!end?btn('다음 대화','groupNext'):groupAnswered?btn('대화 마치기','go','hall'):[btn('소율이 고를 때까지 기다린다.','groupAnswer','wait'),btn('나도 같이 봐도 돼요?','groupAnswer','include'),btn('서연이가 대신 설명해주면 되겠네.','groupAnswer','speakFor')].join('')}</div></article></div></section>`;
-  }
-  if(screen==='activities') app.innerHTML=page('오후 활동',evening?'<p>이미 오후 활동을 완료했습니다.</p>':`<p class="muted">${Object.values(state.dialogue.promises).includes('pending')?'봉사 참석을 약속한 상태입니다. 다른 활동을 택하면 약속을 지키지 못합니다.':'현재 참석 약속은 없습니다.'} 선택하지 않은 장소에서도 일정은 진행됩니다.</p><div class="grid">${Object.entries(activities).map(([id,a])=>`<button class="card" data-action="select" data-value="${id}"><strong>${a[1]}</strong>${a[2]}</button>`).join('')}</div>`,'hall');
-  if(screen==='detail'&&selected){const a=activities[selected];app.innerHTML=page(a[1],`<p class="lead">${a[3]}</p><p>소요 시간: ${a[2]}</p><p class="muted">실행하면 저녁으로 이동합니다. 다른 활동에 직접 참여할 수 없습니다.${selected!=='volunteer'&&Object.values(state.dialogue.promises).includes('pending')?' 봉사 참석 약속을 지키지 못하게 됩니다.':''}</p><div class="actions">${btn('이 활동 진행','act',selected)}${btn('취소','go','activities')}</div>`,'activities');}
-  if(screen==='result') app.innerHTML=page('활동 완료',`<p class="lead">${esc(state.memory.at(-1))}</p><p class="muted">${state.minutes}분이 지났습니다. 새 메시지가 도착했습니다.</p>${btn('캠퍼스로 돌아가기','go','campus')}`);
-  if(screen==='phone') app.innerHTML=page('휴대폰',`<div class="grid">${[['일정','schedule'],['메시지','messages'],['지도','map'],['일지','journal']].map(([t,id])=>`<button class="card" data-action="go" data-value="${id}"><strong>${t}</strong></button>`).join('')}</div>`,returnTo);
-  if(screen==='schedule') app.innerHTML=page('오늘의 일정',`<p class="muted">오후의 세 활동 중 하나를 선택합니다. 시제품은 오후부터 시작합니다.</p>${Object.entries(activities).map(([id,a])=>`<div class="list">${a[1]} · ${a[2]} ${state.choice===id?'— 완료':''}</div>`).join('')}`,'phone');
-  if(screen==='messages') app.innerHTML=page('메시지',state.messages.length?state.messages.map(m=>`<article class="list"><strong>${esc(m.from)}</strong><p>${esc(m.text)}</p></article>`).join(''):'<p class="muted">새 메시지가 없습니다.</p>','phone');
-  if(screen==='map') app.innerHTML=page('알고 있는 장소',`<p class="muted">이번 활동에서 직접 확인한 장소와 정보입니다.</p>${state.known.map(x=>`<div class="list">${esc(x)}</div>`).join('')||'<p>아직 기록된 장소가 없습니다.</p>'}`,'phone');
-  if(screen==='journal') app.innerHTML=page('오늘의 기록',state.memory.map(x=>`<div class="list">${esc(x)}</div>`).join('')||'<p class="muted">아직 기록이 없습니다.</p>','phone');
-  if(screen==='menu') app.innerHTML=page('메뉴',`<p>김태이 · ${evening?'저녁':'오후'}</p><div class="grid">${[1,2,3].map(i=>`<article class="list"><strong>저장 슬롯 ${i}</strong><div class="actions">${btn('저장','save',i)}${btn('불러오기','load',i)}</div></article>`).join('')}</div>${btn('새 하루 시작','go','reset')}<hr><p class="muted">관계별 대화 비교 · 아래 버튼은 새 예시를 시작합니다. 현재 진행은 초기화되며 저장 슬롯은 유지됩니다.</p><div class="actions">${btn('서먹한 사이','scenario','acquaintance')}${btn('친한 동료','scenario','friend')}${btn('호감이 쌓인 사이','scenario','close')}</div>`);
-  if(screen==='reset') app.innerHTML=page('새 하루 시작',`<p>현재 진행을 초기화합니다. 기존 저장 슬롯은 유지합니다.</p>${btn('새로 시작','reset')}`,'menu');
+ const evening=state.phase==='evening',day=days[state.day],routes=availableRoutes(state);
+ if(screen==='campus')app.innerHTML=`<section class="explore"><div class="top"><span class="badge">${timeLabel()}</span><nav>${btn('휴대폰','phone')}${btn('메뉴','go','menu')}</nav></div>${portrait(0)}<div class="prompt"><span>${day.title}</span>${btn('학생회관 들어가기','visit','hall')}${btn('다른 장소로 이동','go','travel')}${evening?btn(state.day<3?'하루 마무리하기':'3일의 기록 보기','go','dayEnd'):''}</div></section>`;
+ if(screen==='travel')app.innerHTML=page('캠퍼스 이동',`<p class="muted">인물은 각자의 일정에 따라 장소를 옮깁니다. 메뉴와 장소 확인은 시간을 소모하지 않으며, 오후 활동 실행 시 시간이 진행됩니다.</p><div class="grid">${Object.entries(locations).map(([id,label])=>`<button class="card" data-action="visit" data-value="${id}"><strong>${label}</strong>찾아가기</button>`).join('')}</div>`);
+ if(screen==='place'){
+  const here=atPlace(),present=presentPeople(state,here);
+  app.innerHTML=page(locations[here],`<p class="lead">${timeLabel()}</p><p class="muted">${{hall:'봉사단의 물품과 활동 자료가 놓여 있다.',library:'책장을 넘기는 소리와 낮은 대화가 들린다.',cafe:'창가에 오후 햇빛이 들어온다.'}[here]}</p><div class="grid">${present.map(id=>`<button class="card person-card" data-action="talk" data-value="${id}"><strong>${people[id].name}</strong>이야기하기</button>`).join('')||'<p>지금은 아는 사람이 보이지 않는다.</p>'}</div><div class="actions">${present.includes('seoyeon')&&present.includes('soyul')?btn('서연과 소율의 대화에 다가간다','group'):''}${!evening?btn('오후 활동 고르기','go','activities'):btn(state.day<3?'하루 마무리하기':'3일의 기록 보기','go','dayEnd')}${btn('다른 장소로 이동','go','travel')}</div>`);
+ }
+ if(screen==='dialogue'){
+  const d=dialogue(state,speaker),p=people[speaker];
+  const invitation=reply?.choice==='invite'&&!state.appointments.some(a=>a.person===speaker&&a.status==='pending');
+  app.innerHTML=`<section class="conversation"><header class="top">${btn('← 대화 마치기','go','place')}<span class="badge">${timeLabel()} · ${locations[atPlace()]}</span></header><div class="conversation-body">${portrait(p.column)}<article class="dialogue-panel"><p class="eyebrow">${p.name}</p>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}<p class="muted">${esc(reply?.stage??d.stage)}</p><blockquote>${esc(reply?.text??d.opening)}</blockquote>${reply?.followup?`<p class="inner-line">${esc(reply.followup)}</p>`:''}<div class="dialogue-options">${invitation?btn('내일 같이 하기로 약속한다','acceptAppointment',speaker):''}${reply?btn('이야기를 이어간다','continue'):d.options.map(o=>btn(esc(o.label),'answer',o.id)).join('')}</div><div class="actions">${btn('활동 살펴보기','go','activities')}</div></article></div></section>`;
+ }
+ if(screen==='group'){
+  const line=groupLines[groupIndex],p=people[line.person],end=groupIndex===groupLines.length-1;
+  app.innerHTML=`<section class="conversation"><header class="top">${btn('← 대화 마치기','go','place')}<span class="badge">${timeLabel()} · 함께 나누는 대화</span></header><div class="conversation-body">${portrait(p.column)}<article class="dialogue-panel"><p class="eyebrow">${p.name}</p><p class="muted">서연과 소율이 휴대폰의 사진을 함께 보고 있다.</p><blockquote>${esc(line.text)}</blockquote><div class="dialogue-options">${!end?btn('다음 대화','groupNext'):groupAnswered?btn('대화 마치기','go','place'):[btn('소율이 고를 때까지 기다린다.','groupAnswer','wait'),btn('나도 같이 봐도 돼요?','groupAnswer','include'),btn('서연이가 대신 설명해주면 되겠네.','groupAnswer','speakFor')].join('')}</div></article></div></section>`;
+ }
+ if(screen==='activities')app.innerHTML=page(`${state.day}일차 오후 활동`,evening?'<p>이미 오후 활동을 완료했습니다.</p>':`<p class="muted">${Object.values(state.dialogue.promises).includes('pending')?'봉사 참석을 약속한 상태입니다. 다른 활동을 택하면 약속을 지키지 못합니다.':'활동 하나를 선택하면 저녁으로 이동합니다.'} 선택하지 않은 장소에서도 일정은 진행됩니다.</p>${pending().filter(a=>a.day===state.day).map(a=>`<p class="notice">${state.npcs[a.person].name}과 ${a.label} 약속이 있습니다.</p>`).join('')}<div class="grid">${routes.map(r=>`<button class="card" data-action="select" data-value="${r.id}" ${r.locked?'disabled':''}><strong>${r.name}</strong>${duration(r.duration)}${r.locked?'<p>이전 탐색으로 연결 통로를 알아야 합니다.</p>':''}</button>`).join('')}</div>`,'place');
+ if(screen==='detail'&&selected){const r=routes.find(r=>r.id===selected);if(r)app.innerHTML=page(r.name,`<p class="lead">${r.description}</p><p>소요 시간: ${duration(r.duration)}</p><p class="muted">실행하면 저녁으로 이동합니다. 다른 활동에 직접 참여할 수 없습니다.${selected!=='volunteer'&&Object.values(state.dialogue.promises).includes('pending')?' 봉사 참석 약속을 지키지 못하게 됩니다.':''}</p>${pending().filter(a=>a.day===state.day&&a.activity!==selected).map(a=>`<p class="notice">${state.npcs[a.person].name}과 한 ${a.label} 약속을 지키지 못하게 됩니다. 일정 화면에서 먼저 연락해 취소할 수 있습니다.</p>`).join('')}<div class="actions">${btn('이 활동 진행','act',selected)}${btn('취소','go','activities')}</div>`,'activities');}
+ if(screen==='result')app.innerHTML=page('활동 완료',`<p class="lead">${esc(state.lastResult)}</p><p class="muted">${state.minutes}분이 지났습니다. 새 메시지가 도착했습니다.</p><div class="actions">${btn('캠퍼스로 돌아가기','go','campus')}${btn('활동 후 사람들 만나기','visit','hall')}${btn(state.day<3?'하루 마무리하기':'3일의 기록 보기','go','dayEnd')}</div>`);
+ if(screen==='phone')app.innerHTML=page('휴대폰',`<div class="grid">${[['일정','schedule'],['메시지','messages'],['지도','map'],['일지','journal']].map(([t,id])=>`<button class="card" data-action="go" data-value="${id}"><strong>${t}</strong></button>`).join('')}</div>`,returnTo);
+ if(screen==='schedule')app.innerHTML=page('오늘의 일정',`<p>${timeLabel()} · ${day.title}</p>${routes.map(r=>`<div class="list">${r.name} · ${duration(r.duration)} ${state.choice===r.id?'— 완료':''}${r.locked?' — 경로 미확인':''}</div>`).join('')}<h2>잡아둔 약속</h2>${commitments()}`,'phone');
+ if(screen==='messages')app.innerHTML=page('메시지',state.messages.length?state.messages.map(m=>`<article class="list"><strong>${esc(m.from)} · ${m.day??1}일차</strong><p>${esc(m.text)}</p></article>`).join(''):'<p class="muted">새 메시지가 없습니다.</p>','phone');
+ if(screen==='map')app.innerHTML=page('알고 있는 정보',`<p class="muted">활동과 대화에서 확인한 장소와 정보입니다. 직접 본 것과 전해 들은 경위는 일지에 남습니다.</p>${state.known.map(x=>`<div class="list">${esc(x)}</div>`).join('')||'<p>아직 기록된 장소가 없습니다.</p>'}`,'phone');
+ if(screen==='journal')app.innerHTML=page('지금까지의 기록',state.memory.map(x=>`<div class="list">${esc(x)}</div>`).join('')||'<p class="muted">아직 기록이 없습니다.</p>','phone');
+ if(screen==='dayEnd'){
+  const history=[...state.dayHistory,{day:state.day,choice:state.choice}];
+  app.innerHTML=page(state.day===3?'3일간의 대학생활':`${state.day}일차 마무리`,!evening?'<p>오후 활동을 먼저 마쳐주세요.</p>':`<p class="lead">${state.day===3?'같은 시간을 보내도, 남은 관계와 기억은 다르다.':'오늘을 마치고 다음 날로 넘어갈까요?'}</p>${history.map(h=>`<div class="list">${h.day}일차 · ${days[h.day].routes[h.choice]?.name??'미완료'}</div>`).join('')}<p class="muted">관계·대화 기억·약속·알게 된 정보는 다음 날에도 유지됩니다. 보지 못한 사건의 내부 기록은 이 화면에 공개하지 않습니다.</p>${state.day<3?btn(`${state.day+1}일차 시작하기`,'nextDay'):btn('일지 돌아보기','go','journal')}`);
+ }
+ if(screen==='menu')app.innerHTML=page('메뉴',`<p>김태이 · ${timeLabel()}</p><div class="grid">${[1,2,3].map(i=>`<article class="list"><strong>저장 슬롯 ${i}</strong><div class="actions">${btn('저장','save',i)}${btn('불러오기','load',i)}</div></article>`).join('')}</div>${btn('새 하루 시작','go','reset')}<hr><p class="muted">관계별 대화 비교 · 아래 버튼은 1일차부터 새 예시를 시작합니다. 현재 진행은 초기화되며 저장 슬롯은 유지됩니다.</p><div class="actions">${btn('서먹한 사이','scenario','acquaintance')}${btn('친한 동료','scenario','friend')}${btn('호감이 쌓인 사이','scenario','close')}</div>`);
+ if(screen==='reset')app.innerHTML=page('새로 시작',`<p>진행을 1일차로 초기화합니다. 기존 저장 슬롯은 유지합니다.</p>${btn('새로 시작','reset')}`,'menu');
 }
 app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.action,v=b.dataset.value;note='';try{
-  if(a==='go'){screen=v;reply=null;}
-  if(a==='talk'){speaker=v;reply=null;screen='dialogue';}
-  if(a==='answer'){const next=respond(state,speaker,v);state=next.state;reply=next.result;}
-  if(a==='continue')reply=null;
-  if(a==='group'){groupLines=groupDialogue(state);groupIndex=0;groupAnswered=false;screen='group';}
-  if(a==='groupNext')groupIndex++;
-  if(a==='groupAnswer'){const next=respondGroup(state,v);state=next.state;groupLines=next.lines;groupIndex=0;groupAnswered=true;}
-  if(a==='scenario'){state=newGame(v);reply=null;screen='hall';}
-  if(a==='phone'){returnTo=screen;screen='phone';}
-  if(a==='select'){selected=v;screen='detail';}
-  if(a==='act'){state=act(state,v);screen='result';}
-  if(a==='save'){localStorage.setItem('campus.slot.'+v,save(state));note=`슬롯 ${v}에 저장했습니다.`;}
-  if(a==='load'){const raw=localStorage.getItem('campus.slot.'+v);if(!raw)throw new Error('비어 있는 슬롯입니다.');state=restore(raw);note=`슬롯 ${v}을 불러왔습니다.`;}
-  if(a==='reset'){state=newGame();screen='campus';selected=null;returnTo='campus';}
+ if(a==='go'){screen=v;reply=null;}
+ if(a==='visit'){if(!locations[v])throw new Error('알 수 없는 장소입니다.');state.location=v;screen='place';reply=null;}
+ if(a==='talk'){if(!presentPeople(state,atPlace()).includes(v))throw new Error('지금 이 장소에 없는 사람입니다.');speaker=v;reply=null;screen='dialogue';}
+ if(a==='answer'){const next=respond(state,speaker,v);state=next.state;reply=next.result;}
+ if(a==='continue')reply=null;
+ if(a==='group'){
+  const present=presentPeople(state,atPlace());if(!present.includes('seoyeon')||!present.includes('soyul'))throw new Error('지금은 두 사람이 함께 있지 않습니다.');
+  groupLines=groupDialogue(state);groupIndex=0;groupAnswered=false;screen='group';
+  if(state.day>=2&&!state.known.includes('소율과 여경의 사진 협업')){state.known.push('소율과 여경의 사진 협업');state.memory.push(`[${state.day}일차] 서연과 소율의 대화에서 여경과의 사진 협업 이야기를 들었다.`);}
+ }
+ if(a==='groupNext')groupIndex++;
+ if(a==='groupAnswer'){const next=respondGroup(state,v);state=next.state;groupLines=next.lines;groupIndex=0;groupAnswered=true;}
+ if(a==='acceptAppointment'){state=acceptAppointment(state,v);note='내일 약속을 잡았습니다. 겹치는 약속은 휴대폰 일정에서 확인하고 미리 취소할 수 있습니다.';}
+ if(a==='cancelAppointment'){state=cancelAppointment(state,v);note='미리 연락해 약속을 취소했습니다.';}
+ if(a==='nextDay'){state=nextDay(state);screen='campus';reply=null;selected=null;returnTo='campus';}
+ if(a==='scenario'){state=newGame(v);state.location='hall';reply=null;screen='place';}
+ if(a==='phone'){returnTo=screen;screen='phone';}
+ if(a==='select'){selected=v;screen='detail';}
+ if(a==='act'){state=act(state,v);screen='result';}
+ if(a==='save'){localStorage.setItem('campus.slot.'+v,save(state));note=`슬롯 ${v}에 저장했습니다.`;}
+ if(a==='load'){const raw=localStorage.getItem('campus.slot.'+v);if(!raw)throw new Error('비어 있는 슬롯입니다.');state=restore(raw);reply=null;selected=null;note=`슬롯 ${v}을 불러왔습니다.`;}
+ if(a==='reset'){state=newGame();screen='campus';selected=null;reply=null;returnTo='campus';}
 }catch(err){note=err.message;}render();});
 render();
 </script></body></html>
