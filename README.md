@@ -26,7 +26,9 @@ python3 prototype/build_standalone.py /tmp/campus-demo.html
 
 생성한 파일을 다운로드하여 데스크톱 브라우저로 열면 됩니다. 저장 기능은 브라우저의 로컬 파일 저장소 허용 여부에 영향을 받습니다.
 미리 생성한 파일은 [demo/campus-demo.html](demo/campus-demo.html)입니다. GitHub에서는 파일 다운로드 기능으로 저장한 뒤 여세요.
+압축 배포본 [campus-demo.zip](https://github.com/rlaxodl0310/-/raw/refs/heads/main/demo/campus-demo.zip)을 다운로드하고 압축을 푼 뒤 `campus-demo.html`을 Chrome 또는 Edge에서 열 수도 있습니다. GitHub의 코드 보기 화면 자체에서는 게임 UI가 실행되지 않습니다.
 단일 HTML의 화면·활동·저장은 HTTP로 검증했습니다. 클라우드 Chromium 정책이 file URL을 차단해 로컬 파일 직접 열기는 이 환경에서 검증하지 못했습니다.
+다운로드판 이미지 포장은 큰 데이터 URL을 CSS 변수에 넣지 않고 직접 참조하도록 수정했습니다. 브라우저 검증은 버튼 표시뿐 아니라 배경·초상화 이미지의 실제 로딩도 검사합니다.
 
 ## 플레이 범위
 

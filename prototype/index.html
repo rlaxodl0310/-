@@ -1,2 +1,12 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>캠퍼스의 하루 · 흐름 시제품</title><link rel="stylesheet" href="style.css"></head><body><main id="app"></main><script type="module" src="app.js"></script></body></html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>캠퍼스의 하루 · 흐름 시제품</title><link rel="stylesheet" href="style.css"></head><body><main id="app"><section style="padding:32px;font-family:system-ui;line-height:1.8"><h1>캠퍼스의 하루</h1><p>게임 화면을 준비하고 있습니다.</p><p>이 안내가 계속 보이면 파일 미리보기 대신 다운로드한 HTML을 Chrome 또는 Edge에서 직접 열어주세요. GitHub 파일 보기 화면에서는 게임이 실행되지 않습니다.</p></section></main><noscript>게임 실행에는 JavaScript가 필요합니다. JavaScript를 허용하는 브라우저에서 열어주세요.</noscript><script>
+window.addEventListener('error', function(event) {
+  var app = document.getElementById('app');
+  if (!app) return;
+  var notice = document.createElement('p');
+  notice.setAttribute('role', 'alert');
+  notice.style.cssText = 'padding:20px;background:#602d35;color:white';
+  notice.textContent = '게임 화면을 불러오지 못했습니다: ' + (event.message || '파일 로딩 실패') + '. 이 문구를 알려주세요.';
+  app.prepend(notice);
+});
+</script><script type="module" src="app.js"></script></body></html>

@@ -9,6 +9,17 @@ with sync_playwright() as p:
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.goto('http://127.0.0.1:8000' + path)
         assert page.get_by_role('img', name='김태이 정면 초상화').is_visible()
+        for selector in ['.explore', '.portrait']:
+            loaded = page.locator(selector).evaluate('''async element => {
+                const value = getComputedStyle(element).backgroundImage;
+                const match = value.match(/url\\("?([^"\\)]+)"?\\)/);
+                if (!match) return false;
+                const image = new Image();
+                image.src = match[1];
+                try { await image.decode(); return image.naturalWidth > 0; }
+                catch { return false; }
+            }''')
+            assert loaded, path + ': image missing for ' + selector
         page.get_by_role('button', name='학생회관 들어가기').click()
         page.get_by_role('button', name='박소율 이야기하기').click()
         page.get_by_role('button', name='가벼운 농담으로 어색함을 풀어본다.').click()

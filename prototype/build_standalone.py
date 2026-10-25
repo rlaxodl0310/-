@@ -3,17 +3,16 @@ from pathlib import Path
 import base64
 import sys
 import re
+import zipfile
 
 root = Path(__file__).resolve().parent
 destination = Path(sys.argv[1]) if len(sys.argv) > 1 else Path('/tmp/campus-demo.html')
 css = (root / 'style.css').read_text()
-asset_variables = []
-for index, filename in enumerate(['campus-front-background.png', 'dialogue-portraits.png']):
+# Large data URLs exceed browser limits for CSS custom-property values.
+# Inline the URL directly into each image declaration instead.
+for filename in ['campus-front-background.png', 'dialogue-portraits.png']:
     image = base64.b64encode((root.parent / 'docs/assets' / filename).read_bytes()).decode()
-    variable = '--asset-' + str(index)
-    asset_variables.append(variable + ':url("data:image/png;base64,' + image + '")')
-    css = css.replace("url('../docs/assets/" + filename + "')", 'var(' + variable + ')')
-css = ':root{' + ';'.join(asset_variables) + '}' + css
+    css = css.replace('../docs/assets/' + filename, 'data:image/png;base64,' + image)
 def inline_module(filename):
     source = (root / filename).read_text()
     source = re.sub(r'^import .*?;\n', '', source, flags=re.MULTILINE)
@@ -25,3 +24,8 @@ html = html.replace('<link rel="stylesheet" href="style.css">', '<style>' + css 
 html = html.replace('<script type="module" src="app.js"></script>', '<script>' + simulation + '\n' + app + '</script>')
 destination.write_text(html)
 print('Built:', destination)
+archive = destination.with_suffix('.zip')
+with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED) as bundle:
+    bundle.write(destination, 'campus-demo.html')
+    bundle.writestr('START-HERE.txt', '1. Extract this ZIP.\n2. Open campus-demo.html in Chrome or Edge.\nNo server or installation required.\nGitHub file viewer and chat previews do not run this game.\n')
+print('Built:', archive)
