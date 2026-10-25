@@ -1,3 +1,4 @@
+import {libraryGreeting} from './library-life.js';
 import {beginWarningSite} from './warnings.js';
 import {wetWeather,weatherAtmosphere} from './weather.js';
 import {socialNews} from './social-memory.js';
@@ -80,6 +81,7 @@ export function arrive(state,location,spot='entry'){
  if(meeting){encounter.text+=' 오늘 이곳에서 잠깐 이야기하기로 했던 약속이 떠오른다.';encounter.action='하던 일을 방해하지 않게 가까이 가 인사한다. “오늘 잠깐 보기로 했죠. 지금 괜찮아요?”';encounter.prefix='네, 잠깐 괜찮아요. ';}
  if(resuming){encounter.text=`${content.text} 아까 나누던 이야기가 잠깐 떠오른다.`;encounter.action='아까 멈춘 이야기의 뒷부분을 조심스럽게 꺼낸다.';encounter.prefix='';}
  if(regrouped){encounter.text='학생회관 창가 쪽을 지나는데 박소율이 정리한 출력물을 가방에 넣고 있다. 도서관에서 하던 일을 마치고 이쪽으로 옮겨온 모양이다.';encounter.action='걸음을 늦춘다. “아까 하던 건 마무리했어요?”';encounter.prefix='네, 일단 정리했어요. ';}
+ if(location==='library'&&person)encounter.text+=libraryGreeting(s,person);
  s.encounters[key]??={day:s.day,phase:s.phase,location:s.location,person,group,resolved:false};
  observeSituation(s,encounter);return {state:s,encounter};
 }

@@ -1,3 +1,4 @@
+import {libraryActivities,libraryActivity,libraryAtmosphere} from './library-life.js';
 import {freeActivity,goHome} from './free-roam.js';
 import {advanceCommunity,communityState} from './community-simulation.js';
 import {visibleCommunityPosts,readCommunityPost} from './community.js';
@@ -53,7 +54,7 @@ function render(){
  if(screen==='travel')app.innerHTML=page('캠퍼스 이동',`<p class="muted">인물은 각자의 일정에 따라 장소를 옮깁니다. 1일차에는 여러 이동·탐색·대화를 묶어 시간이 한 번에 흐릅니다. 보통 약 30분이며, 비 오는 날의 야외 이동과 우산 준비에 따라 달라집니다. 짧은 대답마다 시간이 차감되지는 않습니다. 머물 곳과 할 일은 직접 정할 수 있습니다. 휴대폰과 메뉴를 확인하는 동안에는 시간이 들지 않습니다.</p><div class="grid">${Object.entries(locations).map(([id,label])=>`<button class="card" aria-label="${label} 찾아가기" data-action="visit" data-value="${id}" ${!canSpendTime(state,timeCost(state,'visit',id))?'disabled':''}><strong>${label}</strong>찾아가기</button>`).join('')}</div>`);
  if(screen==='place'){
   const here=atPlace();
-  app.innerHTML=page(locations[here],`<p class="lead">${timeLabel()}</p><p class="muted">${placeAtmosphere(state,here)||{hall:'복도에는 물품 상자와 활동 안내문이 놓여 있다. 안쪽에서 종이를 넘기는 소리가 들린다.',library:'책장을 넘기는 소리와 낮은 대화가 들린다. 사람들은 각자 하던 일을 이어간다.',cafe:'주문을 부르는 목소리가 들린다. 창가의 햇빛이 조금 길어졌다.'}[here]}</p><p class="weather-scene">${weatherAtmosphere(state,here)}</p>${riskScene(state,here)?`<p class="muted">${narrative(riskScene(state,here))}</p>`:''}<div class="actions">${visibleSpatialActions(state,placeActions[here]).map(a=>btn(a.label,'walk',a.id)).join('')}</div><div class="actions">${placeContinuations(state,here).map(c=>btn(narrative(c.label),c.action,c.value)).join('')}${evening?btn(state.day<3?'자취방으로 돌아가 하루를 마친다.':'지난 며칠의 기록을 떠올린다.','go','dayEnd'):''}${state.clock.minute<1320?btn('잠시 쉬며 시간을 보낸다','wait'):''}</div>`);
+  app.innerHTML=page(locations[here],`<p class="lead">${timeLabel()}</p><p class="muted">${narrative((here==='library'?libraryAtmosphere(state):placeAtmosphere(state,here))||{hall:'복도에는 물품 상자와 활동 안내문이 놓여 있다. 안쪽에서 종이를 넘기는 소리가 들린다.',library:'책장을 넘기는 소리와 낮은 대화가 들린다. 사람들은 각자 하던 일을 이어간다.',cafe:'주문을 부르는 목소리가 들린다. 창가의 햇빛이 조금 길어졌다.'}[here])}</p><p class="weather-scene">${weatherAtmosphere(state,here)}</p>${riskScene(state,here)?`<p class="muted">${narrative(riskScene(state,here))}</p>`:''}<div class="actions">${here==='library'&&state.clock.minute<1320?libraryActivities.map(a=>btn(a.label,'libraryActivity',a.id)).join(''):''}</div><div class="actions">${visibleSpatialActions(state,placeActions[here]).map(a=>btn(a.label,'walk',a.id)).join('')}</div><div class="actions">${placeContinuations(state,here).map(c=>btn(narrative(c.label),c.action,c.value)).join('')}${evening?btn(state.day<3?'자취방으로 돌아가 하루를 마친다.':'지난 며칠의 기록을 떠올린다.','go','dayEnd'):''}${state.clock.minute<1320?btn('잠시 쉬며 시간을 보낸다','wait'):''}</div>`);
  }
  if(screen==='encounter'&&encounter){
   app.innerHTML=page(locations[atPlace()],`<p class="muted">${timeLabel()}</p><p class="lead">${narrative(encounter.text)}</p><div class="dialogue-options">${btn(narrative(encounter.action),'encounter','engage')}${btn('하던 일을 계속하며 지나간다.','encounter','pass')}</div>`);
@@ -114,6 +115,7 @@ app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return
   state=markFlow(state,'visit',destination);
   const arrived=arrive(state,destination,a==='walk'?v:'entry');state=arrived.state;encounter=arrived.encounter;warningScene=arrived.warning??null;screen=warningScene?'warningScene':encounter?'encounter':'place';reply=null;note=arrived.observation??'';
  }
+ if(a==='libraryActivity'){const result=libraryActivity(state,v);state=result.state;note=result.text;screen='place';}
  if(a==='warningChoice'){const result=finishWarningSite(state,warningScene,v==='inspect');state=result.state;note=result.text;warningScene=null;screen='place';}
  if(a==='resumeConversation')reply=null;
  if(a==='warningTalk'){speaker=v;screen='warningShare';}
