@@ -5,7 +5,7 @@ import {personalMessage} from './social-reasoning.js';
 import {changeRelationship,relationship} from './dialogue.js';
 import {days,availableRoutes} from './days.js';
 export function newGame(profile='acquaintance') {
- const s={version:6,clock:{minute:780},world:{stage:'campus'},eventState:{flags:{},plans:{},knowledge:{}},contacts:{},encounters:{},day:1,phase:'afternoon',choice:null,minutes:0,location:'campus',
+ const s={version:6,clock:{minute:780},pace:{count:0,seen:{}},world:{stage:'campus'},eventState:{flags:{},plans:{},knowledge:{}},contacts:{},encounters:{},day:1,phase:'afternoon',choice:null,minutes:0,location:'campus',
   known:[],inventory:[],discoveries:[],messages:[],events:[],relations:{},npcs:{yeogyeong:{name:'차여경',location:'hall'},seoyeon:{name:'한서연',location:'hall'},soyul:{name:'박소율',location:'hall'}},
   memory:[],dayHistory:[],appointments:[],lastResult:'',dialogue:{history:[],promises:{}}};
  for(const id of clubRoster){learnIdentity(s,id,'club-roster');s.contacts[id].playerNameKnown=true;}
@@ -60,7 +60,7 @@ export function nextDay(state){
  if(state.day>=3)throw new Error('3일간의 시제품을 모두 마쳤습니다.');
  let s=structuredClone(state);
  s.dayHistory.push({day:s.day,choice:s.choice,promises:structuredClone(s.dialogue.promises)});
- s.clock={minute:780};s.day++;s.phase='afternoon';s.choice=null;s.minutes=0;s.lastResult='';s.location='campus';s.dialogue.promises={};
+ s.clock={minute:780};s.pace={count:0,seen:{}};s.day++;s.phase='afternoon';s.choice=null;s.minutes=0;s.lastResult='';s.location='campus';s.dialogue.promises={};
  for(const [id,npc] of Object.entries(s.npcs))npc.location=days[s.day].schedules.afternoon[id];
  if(s.day===2){
   s.messages.push({day:2,from:'봉사단 단체방',text:'오늘 여경은 학생회관에서 정리하고, 소율은 도서관에서 사진을 고릅니다. 서연은 오후에 대학가 카페에 있어요.'});
@@ -103,6 +103,7 @@ export function restore(raw){
  }
  if(s?.version!==6||!s.world||!s.eventState||!s.encounters||!s.contacts||!Number.isInteger(s.day)||s.day<1||s.day>3||!['afternoon','evening'].includes(s.phase)||!Array.isArray(s.memory)||!Array.isArray(s.known)||!Array.isArray(s.messages)||!Array.isArray(s.events)||!Array.isArray(s.dayHistory)||!Array.isArray(s.appointments)||!s.npcs||!s.relations||!Array.isArray(s.dialogue?.history)||!s.dialogue?.promises)throw new Error('지원하지 않는 저장 파일입니다.');
  s.clock??={minute:s.phase==='evening'?1140:780};
+ s.pace??={count:0,seen:{}};
  s.inventory??=[];s.discoveries??=[];
  return s;
 }

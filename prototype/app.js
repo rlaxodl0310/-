@@ -1,4 +1,4 @@
-import {timeCost,canSpendTime,spendTime,clockLabel,placeAtmosphere} from './campus-time.js';
+import {timeCost,canSpendTime,clockLabel,placeAtmosphere,paceAction,paceSummary} from './campus-time.js';
 import {recordDiscoveries} from './discoveries.js';
 import {eventApproaches,planEvent} from './event-engine.js';
 import {readMessages} from './event-view.js';
@@ -8,7 +8,7 @@ import {people,dialogue,respond,groupDialogue,respondGroup,endTopic,openConversa
 import {newGame,act,nextDay,acceptAppointment,cancelAppointment,save,restore} from './simulation.js';
 import {days,locations,availableRoutes,presentPeople} from './days.js';
 let state=newGame(),screen='campus',selected=null,note='',returnTo='campus',speaker='seoyeon',reply=null,groupLines=[],groupIndex=0,groupAnswered=false,encounter=null;
-let gains=[];
+let gains=[],paceNotice='';
 const app=document.querySelector('#app');
 const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const nameOf=id=>displayName(state,id);
@@ -21,10 +21,10 @@ const narrative=text=>{
  for(const match of value.matchAll(pattern)){html+=esc(value.slice(start,match.index));const item=(state.inventory??[]).some(i=>i.name===match[0]);html+=`<strong class="${item?'item-text':'information-text'}">${esc(match[0])}</strong>`;start=match.index+match[0].length;}
  return html+esc(value.slice(start));
 };
-const btn=(text,action,value='')=>{const cost=action==='encounter'&&value==='pass'?0:timeCost(state,action,value);return `<button aria-label="${text}" aria-description="${cost?cost+'분 소요':'시간 소모 없음'}" data-action="${action}" data-value="${value}" ${!canSpendTime(state,cost)?'disabled':''}>${text}${cost?`<small class="time-cost">${cost}분</small>`:''}</button>`;};
+const btn=(text,action,value='')=>{const cost=action==='encounter'&&value==='pass'?0:timeCost(state,action,value);return `<button aria-label="${text}" aria-description="${cost?cost+'분 소요':'여러 활동을 마친 뒤 시간을 묶어서 진행'}" data-action="${action}" data-value="${value}" ${action==='wait'&&state.day===1&&state.phase==='afternoon'&&state.clock.minute>=960?'disabled':''}>${text}${cost?`<small class="time-cost">${cost}분</small>`:''}</button>`;};
 const duration=n=>n%60?`${n}분`:`${n/60}시간`;
 function portrait(column){return `<div class="portrait" style="--column:${column}" role="img" aria-label="${column===0?'김태이':nameOf(Object.entries(people).find(([,p])=>p.column===column)?.[0])} 정면 초상화"></div>`;}
-function page(title,body,back='campus'){return `<section class="page"><header>${btn('← 뒤로','go',back)}<h1>${title}</h1></header>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}${body}<p class="footnote">대학생활 3일 시제품 · 사건·요일·일정은 검증용 예시입니다.</p></section>`;}
+function page(title,body,back='campus'){return `<section class="page"><header>${btn('← 뒤로','go',back)}<h1>${title}</h1></header>${note?`<p class="notice" role="status">${esc(note)}</p>`:''}${state.day===1&&state.phase==='afternoon'?`<p class="pace-summary">${paceSummary(state)}</p>`:''}${body}<p class="footnote">대학생활 3일 시제품 · 사건·요일·일정은 검증용 예시입니다.</p></section>`;}
 function timeLabel(){return `${state.day}일차 · ${days[state.day].weekday} · ${state.day===1?clockLabel(state)+' · ':''} ${state.phase==='evening'?'저녁':'오후'}`;}
 function pending(){return state.appointments.filter(a=>a.status==='pending');}
 function commitments(){return pending().map(a=>`<article class="list">${esc(nameOf(a.person))} · ${a.day}일차 오후 · ${a.label} ${btn('미리 연락해 취소','cancelAppointment',a.person)}</article>`).join('')||'<p class="muted">예정된 약속이 없습니다.</p>';}
@@ -32,7 +32,7 @@ function atPlace(){return locations[state.location]?state.location:'hall';}
 function render(){
  const evening=state.phase==='evening',day=days[state.day],routes=availableRoutes(state);
  if(screen==='campus')app.innerHTML=`<section class="explore"><div class="top"><span class="badge">${timeLabel()}</span><nav>${btn('휴대폰','phone')}${btn('메뉴','go','menu')}</nav></div>${portrait(0)}<div class="prompt"><span>${day.title}</span>${btn('학생회관 들어가기','visit','hall')}${state.day===1&&!evening?btn('오후 활동 고르기','go','activities'):''}${btn('다른 장소로 이동','go','travel')}${evening?btn(state.day<3?'하루 마무리하기':'3일의 기록 보기','go','dayEnd'):''}</div></section>`;
- if(screen==='travel')app.innerHTML=page('캠퍼스 이동',`<p class="muted">인물은 각자의 일정에 따라 장소를 옮깁니다. 1일차에는 이동·탐색·대화에 시간이 듭니다. 버튼에 소요 시간을 표시합니다. 16:00부터 오후 활동을 시작하며, 메뉴 확인에는 시간이 들지 않습니다. 2~3일차는 기존 오후·저녁 단위로 진행합니다.</p><div class="grid">${Object.entries(locations).map(([id,label])=>`<button class="card" aria-label="${label} 찾아가기" data-action="visit" data-value="${id}" ${!canSpendTime(state,timeCost(state,'visit',id))?'disabled':''}><strong>${label}</strong>찾아가기<small class="time-cost">${timeCost(state,'visit',id)}분</small></button>`).join('')}</div>`);
+ if(screen==='travel')app.innerHTML=page('캠퍼스 이동',`<p class="muted">인물은 각자의 일정에 따라 장소를 옮깁니다. 1일차에는 여러 이동·탐색·대화를 묶어 약 30분이 한 번에 흐릅니다. 짧은 대답마다 시간이 차감되지는 않습니다. 16:00부터 오후 활동을 시작하며, 메뉴 확인에는 시간이 들지 않습니다. 2~3일차는 기존 오후·저녁 단위로 진행합니다.</p><div class="grid">${Object.entries(locations).map(([id,label])=>`<button class="card" aria-label="${label} 찾아가기" data-action="visit" data-value="${id}" ${!canSpendTime(state,timeCost(state,'visit',id))?'disabled':''}><strong>${label}</strong>찾아가기</button>`).join('')}</div>`);
  if(screen==='place'){
   const here=atPlace();
   app.innerHTML=page(locations[here],`<p class="lead">${timeLabel()}</p><p class="muted">${placeAtmosphere(state,here)||{hall:'복도에는 물품 상자와 활동 안내문이 놓여 있다. 안쪽에서 종이를 넘기는 소리가 들린다.',library:'책장을 넘기는 소리와 낮은 대화가 들린다. 사람들은 각자 하던 일을 이어간다.',cafe:'주문을 부르는 목소리가 들린다. 창가의 햇빛이 조금 길어졌다.'}[here]}</p><div class="actions">${placeActions[here].map(a=>btn(a.label,'walk',a.id)).join('')}</div><div class="actions">${!evening?btn('오후 활동 고르기','go','activities'):btn(state.day<3?'하루 마무리하기':'3일의 기록 보기','go','dayEnd')}${btn('다른 장소로 이동','go','travel')}${state.day===1&&!evening?btn('잠시 쉬며 시간을 보낸다','wait'):''}</div>`);
@@ -64,11 +64,10 @@ function render(){
  }
  if(screen==='menu')app.innerHTML=page('메뉴',`<p>김태이 · ${timeLabel()}</p><div class="grid">${[1,2,3].map(i=>`<article class="list"><strong>저장 슬롯 ${i}</strong><div class="actions">${btn('저장','save',i)}${btn('불러오기','load',i)}</div></article>`).join('')}</div>${btn('새 하루 시작','go','reset')}<hr><p class="muted">관계별 대화 비교 · 아래 버튼은 1일차부터 새 예시를 시작합니다. 현재 진행은 초기화되며 저장 슬롯은 유지됩니다.</p><div class="actions">${btn('서먹한 사이','scenario','acquaintance')}${btn('친한 동료','scenario','friend')}${btn('호감이 쌓인 사이','scenario','close')}</div>`);
  if(screen==='reset')app.innerHTML=page('새로 시작',`<p>진행을 1일차로 초기화합니다. 기존 저장 슬롯은 유지합니다.</p>${btn('새로 시작','reset')}`,'menu');
+ if(paceNotice)app.insertAdjacentHTML('afterbegin',`<section class="time-summary" role="status">${esc(paceNotice)}</section>`);
  if(gains.length)app.insertAdjacentHTML('afterbegin',`<section class="discovery-notice" aria-label="새로 얻은 정보와 아이템"><div role="status" aria-live="polite">${gains.map(g=>`<p class="${g.kind==='item'?'item-text':'information-text'}"><strong>${g.kind==='item'?'▣ 아이템 획득':'◇ 새 정보'}</strong> · ${esc(g.name)}${g.quantity?` × ${g.quantity}`:''}</p>`).join('')}</div><div class="actions">${btn('정보 · 소지품 확인','go','discoveries')}${btn('확인','dismissDiscoveries')}</div></section>`);
 }
-app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.action,v=b.dataset.value;note='';const before=structuredClone(state);let elapsed=0;try{
- elapsed=(a==='encounter'&&v==='pass')?0:timeCost(state,a,v);
- if(!canSpendTime(state,elapsed))throw new Error('16:00 활동 준비 시간입니다. 오후 활동을 선택해 주세요.');
+app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.action,v=b.dataset.value;note='';const before=structuredClone(state);const fromScreen=screen;paceNotice='';try{
  if(a==='go'){
   if(screen==='encounter'&&encounter){state=resolveEncounter(state,encounter,false).state;encounter=null;}
   if(v==='discoveries'&&screen!=='phone'&&screen!=='discoveries')returnTo=screen;
@@ -77,7 +76,6 @@ app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return
  if(a==='visit'||a==='walk'){
   const destination=a==='walk'?atPlace():v;
   if(!locations[destination])throw new Error('알 수 없는 장소입니다.');
-  state=spendTime(state,elapsed,{travelling:a==='visit'&&state.location!==destination});elapsed=0;
   const arrived=arrive(state,destination,a==='walk'?v:'entry');state=arrived.state;encounter=arrived.encounter;screen=encounter?'encounter':'place';reply=null;note=arrived.observation??'';
  }
  if(a==='encounter'){
@@ -103,7 +101,10 @@ app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return
  if(a==='save'){localStorage.setItem('campus.slot.'+v,save(state));note=`슬롯 ${v}에 저장했습니다.`;}
  if(a==='load'){const raw=localStorage.getItem('campus.slot.'+v);if(!raw)throw new Error('비어 있는 슬롯입니다.');state=restore(raw);reply=null;selected=null;encounter=null;note=`슬롯 ${v}을 불러왔습니다.`;}
  if(a==='reset'){state=newGame();screen='campus';selected=null;reply=null;encounter=null;returnTo='campus';}
- if(elapsed){state=spendTime(state,elapsed);if((screen==='dialogue'&&!presentPeople(state,state.location).includes(speaker))||(screen==='group'&&!['seoyeon','soyul'].every(id=>presentPeople(state,state.location).includes(id)))){screen='place';reply=null;note='이야기를 나눈 뒤, 상대는 다음 일을 보러 자리를 옮겼다. 방금 나눈 이야기는 기억에 남았다.';}}
+ if(!['load','reset','scenario','nextDay','act'].includes(a)){
+  const paced=paceAction(before,state,{action:a,value:v,from:fromScreen,to:screen,person:fromScreen==='group'?'group':speaker});state=paced.state;
+  if(paced.minutes)paceNotice=`${a==='wait'?'잠시 쉬고 나니':'여러 일을 마치고 나니'} 어느새 ${clockLabel(state)}. 약 ${paced.minutes}분이 지났다.`;
+ }
  if(a==='dismissDiscoveries')gains=[];
  if(['load','reset','scenario'].includes(a))gains=[];else {const found=recordDiscoveries(before,state,b.textContent.trim());if(found.length)gains=found;}
 }catch(err){note=err.message;}render();});
