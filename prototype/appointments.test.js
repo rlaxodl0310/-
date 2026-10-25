@@ -24,7 +24,7 @@ test('accepted club activities can be kept, missed, or cancelled without an NPC 
 });
 test('football joining produces a playable next-day activity appointment',()=>{
  let s=joinClub(newGame(),'football');s=replyOffer(s,s.appointments[0].id,true);
- s=nextDay(act(s,'rehearsal'));s=act(s,'football');assert.equal(s.appointments[0].status,'kept');assert.ok(s.known.includes('운동장'));
+ s=nextDay(act(s,'rehearsal'));s=act(s,'football');assert.equal(s.appointments[0].status,'kept');assert.ok(s.known.includes('축구 동아리 실내 운동 공간'));assert.ok(!s.known.includes('운동장'));
 });
 test('NPC initiative uses personality, trust and acquaintance; affection cannot bypass distrust',()=>{
  assert.equal(evaluateInvitations(newGame()).appointments.length,0);

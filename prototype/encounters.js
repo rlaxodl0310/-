@@ -1,3 +1,4 @@
+import {wetWeather,weatherAtmosphere} from './weather.js';
 import {socialNews} from './social-memory.js';
 import {meetAppointments} from './appointments.js';
 import {observeSituation,finishSituation} from './event-engine.js';
@@ -64,6 +65,7 @@ export function arrive(state,location,spot='entry'){
  if(!person&&!group){s.encounters[key]={day:s.day,phase:s.phase,resolved:true,outcome:'quiet'};return {state:s,encounter:null,observation:observePlace(s,location,spot)};}
  const content=group?{text:'휴게공간을 지나는데 낮은 웃음소리가 들린다. 한서연과 박소율이 같은 휴대폰을 들여다보고 있다. 두 사람은 이쪽을 보지 못한 채 사진 이야기를 이어간다.',action:'걸음을 늦추고 잠깐 이야기를 듣는다.',prefix:''}:encounterContent(s,person);
  const encounter={key,day:s.day,phase:s.phase,person,group,...content};
+ if(wetWeather(s))encounter.text=weatherAtmosphere(s,s.location)+' '+encounter.text;
  if(s.day===1&&s.location==='cafe'&&person==='seoyeon')Object.assign(encounter,{text:'커피를 받아 자리를 찾는데 창가에서 책을 펼친 한서연이 보인다. 서연은 컵을 내려놓고 맞은편 의자의 가방을 당긴다.',action:'맞은편 의자를 가리킨다. “잠깐 앉아도 돼요?”',prefix:'네, 비었어요. '});
  if(s.day===1&&s.location==='library'&&person==='yeogyeong')Object.assign(encounter,{text:'자료실 앞에서 출력물을 세던 차여경이 종이를 떨어뜨린다. 여경은 다른 손에 든 계산기를 내려놓고 허리를 숙인다.',action:'종이를 주워 건넨다. “여기서도 계산 중이에요?”',prefix:'아, 고마워요. '});
  const request=s.events.find(e=>e.id==='caption-request');

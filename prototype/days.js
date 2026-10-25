@@ -1,3 +1,4 @@
+import {weatherRoute,adaptWeatherSchedule} from './weather.js';
 export const days={
  1:{title:'서로의 시간을 알아가는 날',weekday:'목요일',event:'supplies',
   routes:{rehearsal:{name:'합주',duration:120,description:'연습실에서 합주하고 장비 위치를 익힙니다.',memory:'합주를 마쳤다. 연습실 장비 보관 위치를 확인했다.',knowledge:['연습실','장비 보관 위치']},volunteer:{name:'봉사 활동',duration:180,description:'물품 준비를 함께 합니다.',memory:'물품을 다시 세는 일을 도와 포장 누락을 확인했다.',knowledge:['봉사 준비실','물품 수량 불일치 사건']},explore:{name:'자유 탐색',duration:60,description:'학생회관에서 도서관까지 걸으며 길을 알아봅니다.',memory:'학생회관 주변을 걸으며 도서관으로 이어지는 길을 확인했다.',knowledge:['학생회관','도서관으로 이어지는 길']}},
@@ -10,8 +11,8 @@ export const days={
   schedules:{afternoon:{yeogyeong:'hall',seoyeon:'hall',soyul:'library'},evening:{yeogyeong:'hall',seoyeon:'hall',soyul:'hall'}}}
 };
 export const locations={hall:'학생회관',library:'도서관',cafe:'대학가 카페'};
-export function availableRoutes(s){return Object.entries(days[s.day??1].routes).map(([id,r])=>({id,...r,locked:!!r.requiresAny&&!r.requiresAny.some(k=>s.known.includes(k))}));}
-export function currentSchedule(s){
+export function availableRoutes(s){return Object.entries(days[s.day??1].routes).map(([id,r])=>weatherRoute(s,id,{id,...r,locked:!!r.requiresAny&&!r.requiresAny.some(k=>s.known.includes(k)),lockReason:r.requiresAny&&!r.requiresAny.some(k=>s.known.includes(k))?'이전 탐색으로 연결 통로를 알아야 합니다.':null}));}
+function baseSchedule(s){
  if(s.day!==1||s.phase!=='afternoon'||!s.clock)return days[s.day??1].schedules[s.phase];
  const m=s.clock.minute;
  if(m<840)return {yeogyeong:'hall',seoyeon:'hall',soyul:'hall'};
@@ -19,4 +20,5 @@ export function currentSchedule(s){
  if(m<960)return {yeogyeong:(s.relations['yeogyeong>soyul']?.tension??0)>=3?'hall':'library',seoyeon:'hall',soyul:'library'};
  return {yeogyeong:'hall',seoyeon:'hall',soyul:'hall'};
 }
+export function currentSchedule(s){return adaptWeatherSchedule(s,baseSchedule(s));}
 export function presentPeople(s,location){const plan=currentSchedule(s);return Object.keys(plan).filter(id=>plan[id]===location);}

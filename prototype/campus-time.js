@@ -1,3 +1,4 @@
+import {weatherBlockMinutes} from './weather.js';
 import {learnEvent} from './event-view.js';
 import {currentSchedule} from './days.js';
 import {changeRelationship} from './dialogue.js';
@@ -22,7 +23,7 @@ export function spendTime(state,minutes,{travelling=false}={}){
   const r=recordEvent(s,{id:'day1-peer-message',kind:'scheduled',participants:['seoyeon','soyul'],status:'resolved',visibility:'private',result:'서연이 소율에게 사진에 대한 의견을 메시지로 전했다.'});
   if(r.created){changeRelationship(s,'soyul','seoyeon',{familiarity:1,trust:1});s.eventState.flags.day1Encouraged=true;}
  }
- if(before<900&&campusMinute(s)>=900&&(s.relations['yeogyeong>soyul']?.tension??0)<3){
+ if(before<900&&campusMinute(s)>=900&&currentSchedule({...s,clock:{minute:900}}).yeogyeong==='library'){
   const r=recordEvent(s,{id:'day1-library-check',kind:'conditional',participants:['yeogyeong','soyul'],status:'resolved',visibility:'participants',result:'여경과 소율이 도서관에서 출력할 사진의 수량을 맞춰봤다.'});
   if(r.created){changeRelationship(s,'yeogyeong','soyul',{familiarity:1});changeRelationship(s,'soyul','yeogyeong',{familiarity:1});
    if(!travelling&&s.location==='library'){learnEvent(s,r.event,'observed');s.memory.push('[1일차 · 15:00] 자료실에서 여경과 소율이 출력 수량을 맞춰보는 이야기를 들었다.');if(!s.known.includes('사진 출력 수량 협의'))s.known.push('사진 출력 수량 협의');}
@@ -43,7 +44,7 @@ export function placeAtmosphere(s,location){
 export function paceSummary(s){
  if(s.day!==1||s.phase!=='afternoon')return '';
  if(campusMinute(s)>=960)return '오후 활동을 준비할 시간입니다.';
- return (s.pace?.count??0)>=2?'다음 활동을 마치면 한 구간의 시간이 지나갑니다. 대화는 끝까지 나눌 수 있어요.':'몇 가지 활동을 마친 뒤 약 30분이 한 번에 흐릅니다. 대답마다 시간이 들지는 않습니다.';
+ return (s.pace?.count??0)>=2?'다음 활동을 마치면 한 구간의 시간이 지나갑니다. 대화는 끝까지 나눌 수 있어요.':`몇 가지 활동을 마친 뒤 약 ${(s.pace?.blockMinutes??30)}분이 한 번에 흐릅니다. 대답마다 시간이 들지는 않습니다.`;
 }
 export function paceAction(before,after,{action,value,from,to,person}={}){
  let s=structuredClone(after);
@@ -59,10 +60,10 @@ export function paceAction(before,after,{action,value,from,to,person}={}){
  if(action==='walk')key=`${stamp}:walk:${s.location}:${value}`;
  const leavingConversation=['dialogue','group'].includes(from)&&['place','campus','activities','travel','result'].includes(to);
  if(leavingConversation)key=`${stamp}:conversation:${person??'group'}`;
- if(key&&!s.pace.seen[key]){s.pace.seen[key]=true;s.pace.count++;}
+ if(key&&!s.pace.seen[key]){s.pace.seen[key]=true;s.pace.count++;if(action==='visit'){s.pace.outdoor=true;s.pace.blockMinutes=Math.max(s.pace.blockMinutes??30,weatherBlockMinutes(s,true));}}
  const safe=['place','campus','activities','travel'].includes(to);
  if(s.pace.count<3||!safe)return {state:s,minutes:0};
- const minutes=Math.min(30,960-campusMinute(s));
+ const minutes=Math.min(s.pace.blockMinutes??30,960-campusMinute(s));
  s=spendTime(s,minutes,{travelling:action==='visit'});s.pace={count:0,seen:{}};
  return {state:s,minutes};
 }
