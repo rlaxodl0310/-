@@ -59,7 +59,7 @@ export function warningActivity(state,choice){
   for(const id of companions){rememberRisk(s,id,{topic:'gate',kind:'direct',source:'self',label:'출입구 통제 안내'});rememberRisk(s,id,{topic:'library',kind:'direct',source:'self',label:'자료실 운영 변경'});s.risk.actions.push({id:`escort:${id}:3`,day:3,actor:id,kind:'accompanied-check'});}
   s.location='library';s.lastResult='학생회관과 도서관의 현장 안내를 확인했다. 응급 차량 동선 확보와 자료실 운영 단축은 알게 됐지만, 같은 원인인지 확인할 근거는 없었다.';
   if(companions.length)s.lastResult+=' '+companions.map(id=>identities[id].name).join(', ')+'과 함께 안내를 확인하고 각자의 정리 일정으로 돌아갔다.';
-  s.memory.push('[3일차] 확인에 시간을 썼고 공연·전시 준비에는 참여하지 못했다.');
+  s.memory.push('[3일차] 현장 안내를 확인했다. 남은 시간에는 다른 일을 이어갈 수 있다.');
  }
  return s;
 }

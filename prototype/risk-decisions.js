@@ -36,7 +36,7 @@ function riskObligation(s,id){
  const promise=s.appointments.find(a=>a.person===id&&a.day===s.day&&a.status==='pending'&&(a.phase??'afternoon')===s.phase&&a.activity!=='checkCampus');
  if(promise)return {blocked:true,reason:`이미 ${promise.label} 약속이 있어요. 먼저 그 일정부터 정리해야 해요.`};
  if(s.phase!=='afternoon')return {blocked:true,reason:'오늘 준비는 마쳤어요. 지금은 각자 돌아갈 일정을 먼저 확인하려고요.'};
- if(id==='yeogyeong')return {blocked:true,reason:'지금은 남은 물품과 참석 인원을 제가 확인해야 해요. 여기 비우고 같이 나가기는 어려워요. 확인한 내용은 연락해줄래요?'};
+ if(id==='yeogyeong'&&!s.freeDay?.completed?.some(x=>x.id==='exhibit'))return {blocked:true,reason:'지금은 남은 물품과 참석 인원을 제가 확인해야 해요. 여기 비우고 같이 나가기는 어려워요. 확인한 내용은 연락해줄래요?'};
  if(id==='soyul'&&!s.eventState?.flags?.captionReviewed)return {blocked:true,reason:'인쇄한 설명부터 마무리해야 해요. 이대로 두고 같이 나가기는 어려워요. 먼저 정리하고 생각해볼게요.'};
  return {blocked:false};
 }
@@ -60,14 +60,14 @@ export function evolveRisk(state,{allowMove=false}={}){
  }
  for(const id of Object.keys(s.npcs)){
   const a=riskAssessment(s,id),duty=riskObligation(s,id);
-  const mode=s.phase==='evening'?'wrap-up':id==='yeogyeong'?'coordinate':id==='soyul'?(a.score>=3&&!duty.blocked?'regroup':'finish-and-verify'):(a.score>=2?'verify-route':'check-sources');
+  const mode=s.phase==='evening'?'wrap-up':id==='yeogyeong'?(duty.blocked?'coordinate':'ready-to-check'):id==='soyul'?(a.score>=3&&!duty.blocked?'regroup':'finish-and-verify'):(a.score>=2?'verify-route':'check-sources');
   r.decisions[id]={mode,obligation:duty.blocked,topics:a.topics};
   const actionId=`decision:${id}:${mode}`;if(!r.actions.some(a=>a.id===actionId))r.actions.push({id:actionId,day:s.day,phase:s.phase,actor:id,kind:mode});
   const meeting=s.appointments.some(x=>x.person===id&&x.day===s.day&&x.status==='pending'&&x.kind==='meeting');
   if(allowMove&&s.phase==='afternoon'&&!meeting){const old=r.positions[id];if(id==='soyul'&&mode==='regroup')r.positions[id]='hall';else delete r.positions[id];if(old!==r.positions[id])r.revision=(r.revision??0)+1;}
   const key=`risk-contact:${id}:${mode}`;
   if(!r.sent[key]&&s.phase==='afternoon'&&contact(s,id).introduced&&socialIntent(s,id).feelsSafe){
-   const text=id==='yeogyeong'?'저는 남은 물품이랑 참석 인원부터 다시 확인할게요. 다른 곳 확인하러 가면 일정 바뀐 것만 먼저 알려주세요.':id==='soyul'?(mode==='regroup'?'설명 정리했어요. 혼자 확인하러 다니기보다는 학생회관에서 같이 이야기해요.':(r.sent['friend:soyul:seoyeon:ambulance']?'서연이한테도 직접 본 게 있는지 물어봤어요. 저는 일단 출력물 마무리하고 있을게요. 확인 안 된 내용은 따로 올리지 않으려고요.':'저는 직접 본 것부터 확인하고 출력물을 마무리할게요. 확인 안 된 내용은 따로 올리지 않으려고요.')):(mode==='verify-route'?'전해 들은 내용이 몇 개 있어서 동선부터 확인하려고요. 이동할 거면 도착한 뒤에 한 번 연락해줄래요?':'저는 직접 본 게 없어서 다른 사람한테 확인부터 해볼게요. 급하게 결론내리지는 말아요.');
+   const text=id==='yeogyeong'?(duty.blocked?'저는 남은 물품이랑 참석 인원부터 다시 확인할게요. 다른 곳 확인하러 가면 일정 바뀐 것만 먼저 알려주세요.':'맡은 전시 준비는 마쳤어요. 더 확인할 일이 있으면 지금은 같이 움직일 수 있어요.'):id==='soyul'?(mode==='regroup'?'설명 정리했어요. 혼자 확인하러 다니기보다는 학생회관에서 같이 이야기해요.':(r.sent['friend:soyul:seoyeon:ambulance']?'서연이한테도 직접 본 게 있는지 물어봤어요. 저는 일단 출력물 마무리하고 있을게요. 확인 안 된 내용은 따로 올리지 않으려고요.':'저는 직접 본 것부터 확인하고 출력물을 마무리할게요. 확인 안 된 내용은 따로 올리지 않으려고요.')):(mode==='verify-route'?'전해 들은 내용이 몇 개 있어서 동선부터 확인하려고요. 이동할 거면 도착한 뒤에 한 번 연락해줄래요?':'저는 직접 본 게 없어서 다른 사람한테 확인부터 해볼게요. 급하게 결론내리지는 말아요.');
    s.messages.push({day:s.day,from:s.npcs[id].name,text});r.sent[key]=true;
   }
   const opinion=escortOpinion(s,id),offerId=`risk-escort:${id}`;

@@ -1,13 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newGame,act,save,restore} from './simulation.js';
+import {newGame as makeGame,act,save,restore} from './simulation.js';
 import {timeCost,spendTime,clockLabel,placeAtmosphere,paceAction} from './campus-time.js';
+function newGame(...args){const s=makeGame(...args);s.playMode='legacy';return s;}
 import {presentPeople} from './days.js';
 import {arrive} from './encounters.js';
 import {relationship} from './dialogue.js';
 test('short choices have no individual time cost; clock and saves remain stable',()=>{
  const s=newGame();assert.equal(clockLabel(s),'13:00');assert.equal(timeCost(s,'visit','hall'),0);assert.equal(timeCost(s,'go','menu'),0);
- const n=spendTime(s,15);assert.equal(clockLabel(n),'13:15');assert.equal(clockLabel(s),'13:00');assert.deepEqual(restore(save(n)),n);
+ const n=spendTime(s,15);assert.equal(clockLabel(n),'13:15');assert.equal(clockLabel(s),'13:00');assert.deepEqual(restore(save(n)),{...n,playMode:'free'});
 });
 test('an unoccupied location gains an encounter later; schedules and atmosphere change',()=>{
  let s=arrive(newGame(),'library').state;assert.deepEqual(presentPeople(s,'library'),[]);
@@ -59,5 +60,5 @@ test('partial batches survive loading and menus; rest clears the batch and stops
  let s=newGame();s.pace.count=2;s=restore(save(s));
  assert.equal(paceAction(s,s,{action:'go',value:'menu',from:'place',to:'menu'}).state.pace.count,2);
  let r=paceAction(s,s,{action:'wait',from:'place',to:'place'});assert.equal(r.state.pace.count,0);assert.equal(r.minutes,30);
- r.state.clock.minute=950;r=paceAction(r.state,r.state,{action:'wait',from:'place',to:'place'});assert.equal(clockLabel(r.state),'16:00');assert.equal(r.minutes,10);
+ r.state.clock.minute=950;r=paceAction(r.state,r.state,{action:'wait',from:'place',to:'place'});assert.equal(clockLabel(r.state),'16:20');assert.equal(r.minutes,30);
 });

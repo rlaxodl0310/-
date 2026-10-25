@@ -5,13 +5,13 @@ import {campusScene,markFlow,placeContinuations,knownSceneRoutes} from './scene-
 import {arrive} from './encounters.js';
 import {readMessages} from './event-view.js';
 test('opening starts with observable situations rather than feature categories',()=>{
- const s=newGame(),scene=campusScene(s);assert.equal(scene.choices.length,2);assert.match(scene.text,/커뮤니티/);
+ const s=newGame(),scene=campusScene(s);assert.equal(scene.choices.length,4);assert.match(scene.text,/학교에 도착/);assert.ok(scene.choices.every(c=>c.action!=='openCommunity'&&c.action!=='select'));
  assert.ok(scene.choices.every(c=>!['activities','travel','clubs'].includes(c.value)));
- assert.deepEqual(knownSceneRoutes(s).map(r=>r.id),['rehearsal']);
+ assert.ok(knownSceneRoutes(s).some(r=>r.id==='rehearsal'));assert.ok(!knownSceneRoutes(s).some(r=>r.id==='volunteer'||r.id==='football'));
 });
 test('reading and entering change the continuation without enrolling or advancing time',()=>{
- const s=newGame(),read=markFlow(s,'community');assert.notDeepEqual(campusScene(read).choices,campusScene(s).choices);
- assert.ok(campusScene(read).choices.some(c=>c.value==='rehearsal'));assert.deepEqual(read.memberships,{});assert.equal(read.clock.minute,s.clock.minute);
+ const s=newGame(),read=markFlow(s,'community');assert.deepEqual(campusScene(read).choices,campusScene(s).choices);
+ assert.ok(campusScene(read).choices.some(c=>c.value==='library'));assert.deepEqual(read.memberships,{});assert.equal(read.clock.minute,s.clock.minute);
  const entered=markFlow(s,'visit','hall');assert.ok(knownSceneRoutes(entered).some(r=>r.id==='volunteer'));assert.ok(!knownSceneRoutes(entered).some(r=>r.id==='explore'));
 });
 test('tasks belong to their current locations and preserve warning and route conditions',()=>{
@@ -24,5 +24,5 @@ test('tasks belong to their current locations and preserve warning and route con
 test('save migration preserves actual visited context without inventing notices',()=>{
  const old=arrive(newGame(),'hall').state;delete old.flow;
  const loaded=restore(save(old));assert.equal(loaded.flow.seen['visit:hall'],true);assert.ok(!loaded.flow.seen.board);
- assert.ok(campusScene(loaded).choices.some(c=>c.value==='rehearsal'));assert.deepEqual(restore(save(loaded)),loaded);
+ assert.ok(campusScene(loaded).choices.some(c=>c.value==='hall'));assert.deepEqual(restore(save(loaded)),loaded);
 });

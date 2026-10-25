@@ -1,5 +1,5 @@
 """Check sustained character conversations reached through incidental encounters."""
-from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_recruitment, end_day, go_campus
+from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_recruitment, end_day, go_campus, finish_afternoon
 from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
@@ -54,9 +54,10 @@ with sync_playwright() as p:
         page.get_by_role('button', name='다른 이야기로 넘어가기').click()
         page.get_by_role('button', name='오늘 봉사 활동에 갈게요.').click()
         choose_activity(page, 'rehearsal')
-        assert page.get_by_text('봉사 참석 약속을 지키지 못하게 됩니다.', exact=False).is_visible()
+        assert page.get_by_text('봉사 참석 약속이 남아 있습니다.', exact=False).is_visible()
         page.get_by_role('button', name='이 활동 진행').click()
-        page.get_by_role('button', name='정리 중인 학생회관 쪽으로 돌아간다.').click()
+        finish_afternoon(page)
+        visit_place(page,'hall')
         page.get_by_role('button', name='하던 일을 계속하며 지나간다.').click()
         page.get_by_role('button', name='게시판 쪽으로 걸어간다').click()
         page.locator('[data-action="encounter"][data-value="engage"]').click()

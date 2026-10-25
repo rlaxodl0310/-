@@ -33,10 +33,8 @@ with sync_playwright() as p:
         assert page.locator('body').get_attribute('data-weather')=='rain'
         visit_place(page, 'hall')
         page.get_by_role('button',name='하던 일을 계속하며 지나간다.').click()
-        open_schedule(page)
-        assert '실내 체력 훈련으로 대체' in page.locator('[data-routine="football"]').inner_text()
-        assert '우산 준비' in page.locator('[data-routine="walk"]').inner_text()
-        page.locator('[data-routine="football"] [data-action="select"]').click()
+        choose_activity(page,'football')
+        assert '실내' in page.locator('.page .weather-note').inner_text()
         page.get_by_role('button',name='이 활동 진행',exact=True).click()
         assert '실내 기본 체력' in page.locator('.lead').inner_text()
         page.get_by_role('button',name='건물 밖으로 나와 주변을 둘러본다.',exact=True).click()
@@ -54,8 +52,9 @@ with sync_playwright() as p:
         page.get_by_role('button',name='← 뒤로',exact=True).click()
         assert page.locator('body').get_attribute('data-weather')=='storm'
         if path=='/prototype/':page.screenshot(path='/tmp/campus-weather-storm.png',full_page=True)
-        open_schedule(page)
-        assert page.locator('[data-action="select"][data-value="explore"]').is_disabled()
+        visit_place(page,'library')
+        assert not page.locator('[data-action="select"][data-value="explore"]').count()
+        visit_place(page,'hall')
         assert page.locator('[data-action="select"][data-value="rehearsal"]').is_enabled()
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
         assert not errors,errors

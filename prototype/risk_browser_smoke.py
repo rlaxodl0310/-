@@ -17,8 +17,7 @@ with sync_playwright() as p:
             if day==2:
                 visit_place(page, 'hall')
                 page.get_by_role('button',name='하던 일을 계속하며 지나간다.').click()
-            open_schedule(page)
-            page.locator(f'[data-routine="{"rehearsal" if day==1 else "work"}"] [data-action="select"]').click()
+            choose_activity(page,'rehearsal' if day==1 else 'work')
             page.get_by_role('button',name='이 활동 진행',exact=True).click()
             end_day(page)
             page.get_by_role('button',name=f'{day+1}일차 시작하기',exact=True).click()

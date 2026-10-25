@@ -1,5 +1,5 @@
 """Validate scheduled choices -> private condition -> incidental scene -> later outcome."""
-from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_recruitment, end_day, go_campus
+from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_recruitment, end_day, go_campus, finish_afternoon
 from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
@@ -46,7 +46,8 @@ with sync_playwright() as p:
         choose_activity(page, 'backstage')
         page.get_by_role('button', name='이 활동 진행').click()
         # The player did not attend the exhibit; learn its changed result from an actual conversation.
-        page.get_by_role('button', name='정리 중인 학생회관 쪽으로 돌아간다.').click()
+        finish_afternoon(page)
+        visit_place(page,'hall')
         page.locator('[data-action="encounter"][data-value="engage"]').click()
         page.get_by_role('button', name='다른 이야기로 넘어가기').click()
         page.get_by_role('button', name='오늘은 어땠어요? 아까 좀 바빠 보이던데.').click()

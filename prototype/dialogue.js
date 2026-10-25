@@ -80,7 +80,7 @@ export function dialogue(s,id){
   else opening={seoyeon:'안녕하세요. 봉사단에서 이름은 봤어요. 이렇게 이야기하는 건 처음이죠?',yeogyeong:'안녕하세요. 저는 재무 맡고 있는 차여경이에요. 오늘은 무슨 일로 오셨어요?',soyul:'아… 안녕하세요. 박소율이에요. 봉사단 분 맞으시죠?'}[id];
  }
  else if(evening&&d.promises[id]==='broken') opening={seoyeon:'오늘 온다고 했었죠. 못 올 수도 있는데, 연락은 해줄 수 있었잖아요.',yeogyeong:'아까 온다고 해서 인원에 넣었어요. 다음에는 못 오면 먼저 알려주세요.',soyul:'기다렸어요. …못 오게 됐으면 말해주지.'}[id];
- else if(evening&&s.choice==='volunteer') opening={seoyeon:trusted?'아까 같이 확인해줘서 마음이 좀 놓였어요. 나 혼자 괜찮다고 넘겼을지도 몰라요.':'오늘 고생했어요. 수량 다시 확인해줘서 도움이 됐어요.',yeogyeong:'아까 같이 세준 거, 고마워요. 정산이 안 맞는 줄 알고 식겁했네.',soyul:close?'아까… 같이 확인해줘서 고마워. 내가 말을 너무 늦게 했지?':'아까 도와주셔서 감사했어요. 제가 먼저 말씀드렸어야 했는데.'}[id];
+ else if(evening&&(s.choice==='volunteer'||s.freeDay?.completed?.some(a=>a.id==='volunteer'))) opening={seoyeon:trusted?'아까 같이 확인해줘서 마음이 좀 놓였어요. 나 혼자 괜찮다고 넘겼을지도 몰라요.':'오늘 고생했어요. 수량 다시 확인해줘서 도움이 됐어요.',yeogyeong:'아까 같이 세준 거, 고마워요. 정산이 안 맞는 줄 알고 식겁했네.',soyul:close?'아까… 같이 확인해줘서 고마워. 내가 말을 너무 늦게 했지?':'아까 도와주셔서 감사했어요. 제가 먼저 말씀드렸어야 했는데.'}[id];
  else if(evening) opening={seoyeon:'오늘 일정은 잘 끝났어요? 우리는 조금 늦게 마쳤어요.',yeogyeong:'이제 정리 끝났어요. 다른 일정은 잘 마쳤어요?',soyul:'아… 아직 학교에 계셨네요. 저는 이제 가려고요.'}[id];
  else if(r.tension>=4) opening={seoyeon:'지금은 조금 혼자 있고 싶어요. 꼭 해야 할 이야기예요?',yeogyeong:'잠깐만요. 아까 이야기부터 정리하고 넘어가고 싶어요.',soyul:'지금은… 길게 이야기하기가 어려워요.'}[id];
  else if(latest?.choice==='push') opening={seoyeon:'아까 이야기요. 제 일정은 제가 정하고 싶어요. 그건 알아줬으면 해요.',yeogyeong:'확인하는 건 괜찮은데, 제가 숨기는 것처럼 말하지는 말아주세요.',soyul:'아까는… 대답하기가 좀 어려웠어요. 지금은 조금 천천히 말해주면 안 돼요?'}[id];
@@ -131,12 +131,12 @@ export function respond(state,id,choice){
    if(s.phase==='evening')text=photoReport(s,id)??text;
    if(s.phase==='evening'&&!s.known.includes('소율과 여경의 사진 협업')){const event=scheduledEvent(s,'photo-selection');if(event)learnEvent(s,event,'heard-from:'+id);s.known.push('소율과 여경의 사진 협업');s.memory.push(`[2일차] ${people[id].name}에게 소율과 여경이 함께 전시 구성을 정했다는 이야기를 전해 들었다.`);}
   }else text={seoyeon:'리허설 안내랑 전시 준비가 겹쳤어요. 저는 정한 일정대로 움직이려고요.',yeogyeong:'전시 준비 중이에요. 어제 소율이랑 정한 순서가 있어서 생각보다 수월하네요.',soyul:'어제 고른 파일 챙기고 있어요. 이번에는 제가 설명할 사진도 직접 골랐어요.'}[id];
-  if(s.day===3&&s.phase==='evening'){const event=scheduledEvent(s,'campus-showcase');text=showcaseReport(s,id)??text;if(event){const seen=!!s.eventState?.knowledge?.[`campus:${event.day}:${event.id}`];learnEvent(s,event,'heard-from:'+id);if(!seen)s.memory.push(`[3일차] ${people[id].name}에게 전해 들음: ${event.result}`);}}
+  if(s.day===3&&s.phase==='evening'){const event=scheduledEvent(s,'campus-showcase');text=showcaseReport(s,id)??text;if(event){const seen=!!s.eventState?.knowledge?.[`campus:${event.day}:${event.id}`];if(!seen)learnEvent(s,event,'heard-from:'+id);if(!seen)s.memory.push(`[3일차] ${people[id].name}에게 전해 들음: ${event.result}`);}}
   else if(s.day===3)text=photoReport(s,id)??text;
   stage=people[id].habit;
  }else if(choice==='listen'){
   Object.assign(delta,{trust:1});
-  if(s.phase==='evening'&&s.choice!=='volunteer'){
+  if(s.phase==='evening'&&s.choice!=='volunteer'&&!s.freeDay?.completed?.some(a=>a.id==='volunteer')){
    text={seoyeon:'물품이 신청한 만큼 안 와서 순서를 조금 바꿨어요. 소율이가 다시 세어보고 알려줬고요.',yeogyeong:'포장 하나가 누락됐더라고요. 소율이가 찾아줘서 정산 문제는 아닌 걸 확인했어요.',soyul:'물품이 모자랐어요. 제가 다시 세어봤는데… 여경이가 확인해줘서 해결됐어요.'}[id];
    if(!s.known.includes('물품 수량 불일치 사건'))s.known.push('물품 수량 불일치 사건');
    s.memory.push(`${people[id].name}에게 봉사 물품 포장 누락에 관한 이야기를 전해 들었다.`);

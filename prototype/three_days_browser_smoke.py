@@ -1,5 +1,5 @@
 """Complete three days while people are encountered through their own activities."""
-from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_recruitment, end_day, go_campus
+from flow_browser_helpers import open_map, visit_place, open_schedule, choose_activity, open_recruitment, end_day, go_campus, finish_afternoon
 from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
@@ -33,7 +33,8 @@ with sync_playwright() as p:
         page.get_by_role('button', name='내일 같이 하기로 약속한다').click()
         choose_activity(page, 'work')
         page.get_by_role('button', name='이 활동 진행').click()
-        page.get_by_role('button', name='정리 중인 학생회관 쪽으로 돌아간다.').click()
+        finish_afternoon(page)
+        visit_place(page,'hall')
         page.locator('[data-action="encounter"][data-value="engage"]').click()
         page.get_by_role('button', name='다른 이야기로 넘어가기').click()
         page.get_by_role('button', name='오늘은 어땠어요? 아까 좀 바빠 보이던데.').click()
@@ -46,12 +47,12 @@ with sync_playwright() as p:
         page.get_by_role('button', name='← 뒤로').click()
         visit_place(page, 'hall')
         page.get_by_role('button', name='하던 일을 계속하며 지나간다.').click()
-        open_schedule(page)
-        assert page.locator('[data-routine="shortcut"] [data-action="select"]').is_enabled()
-        page.locator('[data-routine="backstage"] [data-action="select"]').click()
-        assert page.get_by_text('차여경과 한 전시 준비 약속을 지키지 못하게 됩니다.', exact=False).is_visible()
+        assert page.locator('[data-action="select"][data-value="shortcut"]').is_enabled()
+        choose_activity(page,'backstage')
+        assert page.get_by_text('차여경과 한 전시 준비 약속도 남아 있습니다.', exact=False).is_visible()
         page.get_by_role('button', name='이 활동 진행').click()
-        page.get_by_role('button', name='정리 중인 학생회관 쪽으로 돌아간다.').click()
+        finish_afternoon(page)
+        visit_place(page,'hall')
         page.locator('[data-action="encounter"][data-value="engage"]').click()
         assert '인원에 넣어' in page.locator('blockquote').inner_text()
         page.get_by_role('button', name='← 대화 마치기').click()
@@ -61,7 +62,7 @@ with sync_playwright() as p:
         page.get_by_role('button', name='← 뒤로').click()
         page.get_by_role('button', name='메뉴', exact=True).click()
         page.locator('[data-action="load"][data-value="2"]').click()
-        assert page.get_by_text('김태이 · 3일차 · 토요일 · 오후', exact=True).is_visible()
+        assert '김태이 · 3일차' in page.locator('.page').inner_text() and '오후' in page.locator('.page').inner_text()
         assert not errors, errors
         print(path + ': three-day incidental encounters, invitations, route unlock, conflict and save/load passed.')
         page.close()

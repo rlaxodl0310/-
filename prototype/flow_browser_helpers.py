@@ -13,12 +13,16 @@ def open_schedule(page):
     page.get_by_role('button', name='일정', exact=True).click()
 
 def choose_activity(page, route):
-    if route=='explore':
-        visit_place(page,'library')
-        if page.locator('[data-action="encounter"][data-value="pass"]').count():
-            page.locator('[data-action="encounter"][data-value="pass"]').click()
-    open_schedule(page)
-    page.locator(f'[data-routine="{route}"] [data-action="select"]').click()
+    if route=='football':
+        open_recruitment(page)
+        page.locator('[data-action="readPost"][data-value="football-recruit"]').click()
+        page.locator('[data-action="select"][data-value="football"]').click()
+        return
+    place='library' if route in ['explore','review','work'] else 'hall'
+    visit_place(page,place)
+    if page.locator('[data-action="encounter"][data-value="pass"]').count():
+        page.locator('[data-action="encounter"][data-value="pass"]').click()
+    page.locator(f'[data-action="select"][data-value="{route}"]').click()
 
 def open_recruitment(page):
     page.get_by_role('button',name='휴대폰',exact=True).click()
@@ -27,7 +31,9 @@ def open_recruitment(page):
 
 
 def end_day(page):
+    if not page.locator('[data-action="go"][data-value="dayEnd"]').count():go_campus(page)
     page.locator('[data-action="go"][data-value="dayEnd"]').click()
+    if page.locator('[data-action="freeHome"]').count():page.locator('[data-action="freeHome"]').click()
 
 def go_campus(page):
     for _ in range(8):
@@ -36,3 +42,11 @@ def go_campus(page):
         if back.count():back.click()
         else:page.get_by_role('button',name='← 대화 마치기',exact=True).click()
     raise AssertionError('Could not return from records to the campus scene')
+
+def finish_afternoon(page):
+    visit_place(page,'library')
+    if page.locator('[data-action="encounter"][data-value="pass"]').count():page.locator('[data-action="encounter"][data-value="pass"]').click()
+    for _ in range(12):
+        if '저녁' in page.locator('.lead').inner_text():return
+        page.get_by_role('button',name='잠시 쉬며 시간을 보낸다',exact=True).click()
+    raise AssertionError('Afternoon did not finish')

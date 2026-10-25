@@ -17,8 +17,7 @@ with sync_playwright() as p:
             if day==2:
                 visit_place(page, 'hall')
                 page.get_by_role('button',name='하던 일을 계속하며 지나간다.').click()
-            open_schedule(page)
-            page.locator(f'[data-routine="{"rehearsal" if day==1 else "work"}"] [data-action="select"]').click()
+            choose_activity(page,'rehearsal' if day==1 else 'work')
             page.get_by_role('button',name='이 활동 진행',exact=True).click()
             end_day(page)
             page.get_by_role('button',name=f'{day+1}일차 시작하기',exact=True).click()
@@ -48,7 +47,7 @@ with sync_playwright() as p:
         if path=='/prototype/':page.screenshot(path='/tmp/campus-warning-gate.png',full_page=True)
         page.locator('[data-action="warningChoice"][data-value="inspect"]').click()
         choose_activity(page, 'checkCampus')
-        assert '공연과 전시 준비에는 참여하지 못합니다' in page.locator('.lead').inner_text()
+        assert '확인하는 동안 다른 약속과 겹치지 않는지' in page.locator('.lead').inner_text()
         page.get_by_role('button',name='이 활동 진행',exact=True).click()
         assert '같은 원인인지 확인할 근거는 없었다' in page.locator('.lead').inner_text()
         page.get_by_role('button',name='건물 밖으로 나와 주변을 둘러본다.',exact=True).click()

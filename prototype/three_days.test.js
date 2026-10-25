@@ -93,7 +93,7 @@ test('all reachable three-day routes preserve state across save and restore',()=
    }
   }
  }
- assert.equal(count,30);
+ assert.equal(count,198);
 });
 test('version-two saves migrate to day one and retain relationships',()=>{
  const old=newGame('friend');old.version=2;

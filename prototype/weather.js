@@ -15,7 +15,7 @@ export function weatherAtmosphere(s,place='campus'){
  return kind==='storm'?'창을 두드리는 빗소리가 커졌다. 밖으로 나가기보다 안에서 시간을 보내는 사람이 많다.':'출입문 옆에 접힌 우산들이 놓여 있다. 창밖으로 비가 내린다.';
 }
 export function weatherRoute(s,id,route){
- const kind=weatherNow(s,s.day,'afternoon').kind;if(!['rain','storm'].includes(kind))return route;
+ const kind=weatherNow(s,s.day,s.phase).kind;if(!['rain','storm'].includes(kind))return route;
  if(id==='football')return {...route,description:'비로 운동장 사용을 쉬고 실내 기본 체력·스트레칭 체험으로 대체합니다. 동아리에서 안내한 같은 활동이므로 참석 약속은 정상 이행됩니다.',memory:'비로 축구 동아리 체험을 실내 기본 체력·스트레칭으로 대체했다. 실내 운동 공간을 확인했다.',knowledge:['축구 동아리 실내 운동 공간'],weatherNote:'우천 시 실내 체력 훈련으로 대체 · 참석 약속 유지'};
  if(['explore','walk','shortcut'].includes(id)){
   if(kind==='storm')return {...route,locked:true,weatherBlocked:true,lockReason:'강한 비로 야외 이동 활동을 쉬고 있습니다. 실내 활동을 선택해 주세요.',weatherNote:'강한 비 · 야외 활동 제한'};
