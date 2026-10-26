@@ -1,3 +1,4 @@
+import {npcNow,conversationExperience} from './npc-state.js';
 import {followupCandidate,rememberConversation} from './conversation-continuity.js';
 import {photoReport,showcaseReport,scheduledEvent,learnEvent} from './event-view.js';
 import {contact,firstContact,respondIntroduction} from './identity.js';
@@ -93,7 +94,7 @@ export function dialogue(s,id){
  const joke={seoyeon:'커피랑 눈싸움 중이에요? 아까부터 보고만 있네.',yeogyeong:'계산기가 잘못했네. 여경 씨 표정이 아까부터 심각해.',soyul:'사진 고르는 게 찍는 것보다 오래 걸리네.'}[id];
  return {opening,stage:people[id].habit,options:[
  ...((latest||old.length)&&r.tension>0?[{id:'repair',label:latest?'아까는 내 말이 앞섰어요. 미안해요.':'지난번에는 내 말이 앞섰어요. 미안해요.'}]:[]),
- ...(s.day===2&&r.familiarity>=2&&r.tension<3?[{id:'invite',label:'내일은 어떤 일정이에요?'}]:[]),
+ ...(s.day===2&&r.familiarity>=2&&r.tension<3&&npcNow(s,id).bandwidth==='open'?[{id:'invite',label:'내일은 어떤 일정이에요?'}]:[]),
  ...(evening||(s.day??1)>1?[{id:'listen',label:evening?'오늘은 어땠어요? 아까 좀 바빠 보이던데.':'아까부터 바빠 보이던데, 뭐 하고 있었어요?'}]:[]),
  ...(!active?.finished||followupCandidate(s,id)?[{id:'personal',label:followupCandidate(s,id)?'아까 이야기한 뒤에는 좀 어땠어요?':topic}]:[]),
  ...(comfortable&&s.dialogue?.facts?.[id]?.speech!=='casual'?[{id:'speech',label:'우리 조금 편하게 말할까요? 불편하면 지금처럼 해도 되고.'}]:[]),
@@ -180,6 +181,7 @@ export function respond(state,id,choice){
   stage='선의로 건넨 말이어도 상대가 원하는 방식은 아닐 수 있다.';
  }
  if(!repeated)changeRelationship(s,id,'taei',delta);
+ if(!repeated)conversationExperience(s,id,choice,`${s.phase}:ordinary:${choice}`);
  const result={person:id,choice,day:s.day??1,phase:s.phase,text,stage,playerLine:current.options.find(o=>o.id===choice)?.label??'',followup:'',repeated};
  s.dialogue.history.push(result);
  return {state:s,result};
@@ -190,7 +192,7 @@ function ensureConversations(s){
 }
 export function endTopic(state,id){
  const s=structuredClone(state);ensureConversations(s);
- const session=s.dialogue.sessions[sceneKey(s,id)];if(session){const n=sceneNodes(s,id,session)[session.node];const finished=n?.options.every(o=>o.next==='_close')??false;if(finished&&!session.closed)rememberConversation(s,id,session);session.closed=true;session.finished=finished;}
+ const session=s.dialogue.sessions[sceneKey(s,id)];if(session){const n=sceneNodes(s,id,session)[session.node];const finished=n?.options.every(o=>o.next==='_close')??false;if(finished&&!session.closed&&!session.node.startsWith('ctx'))rememberConversation(s,id,session);session.closed=true;session.finished=finished&&!session.node.startsWith('ctx');}
  return s;
 }
 function beginScene(state,id,choice,initiated=false){
@@ -202,6 +204,8 @@ function beginScene(state,id,choice,initiated=false){
  const session={...(continuation?{episode:continuation.episode}:{}),node:continuation?'start':prior?.lastNode??'start',closed:false,casual:s.dialogue.facts?.[id]?.speech==='casual',variant:continuation?'followup':intent.mode==='guarded'?'guarded':'normal'};
  if(choice==='joke'&&!prior&&(s.day??1)===1)session.node={seoyeon:'ice',yeogyeong:'joke',soyul:'start'}[id];
  if(session.variant==='guarded')session.node='start';
+ const status=npcNow(s,id);
+ if(session.variant!=='guarded'&&(status.bandwidth!=='open'||s.academics?.enabled&&['resting','focused','bright'].includes(status.mood))){session.topicEntry=session.node;session.context={mood:status.mood,bandwidth:status.bandwidth,next:status.next};session.node='ctxStart';}
  s.dialogue.sessions[key]=session;
  const n=sceneNodes(s,id,session)[session.node]??sceneNodes(s,id,session).start;
  const award=key+':entry';
@@ -218,10 +222,11 @@ function advanceScene(state,id,choice){
  if(!session||session.closed)throw new Error('진행 중인 대화가 없습니다.');
  const nodes=sceneNodes(s,id,session),current=nodes[session.node];
  const selected=current?.options.find(o=>o.id===choice);
+ if(selected&&choice.startsWith('ctx')&&!session.context){const now=npcNow(s,id);session.context={mood:now.mood,bandwidth:now.bandwidth,next:now.next};session.topicEntry=session.node;}
  if(!selected)throw new Error('현재 이야기와 맞지 않는 대답입니다.');
  const award=key+(session.variant==='followup'?':followup:'+session.episode:'')+':'+choice;
  if(!s.dialogue.sceneAwards[award]){
-  changeRelationship(s,id,'taei',selected.delta);s.dialogue.sceneAwards[award]=true;
+  changeRelationship(s,id,'taei',selected.delta);conversationExperience(s,id,choice,award);s.dialogue.sceneAwards[award]=true;
  }
  if(choice==='apologize'&&s.dialogue.observations[id])s.dialogue.observations[id].boundary='acknowledged';
  if(id==='soyul'&&s.day===3&&s.eventState?.flags?.captionEncountered&&socialIntent(s,id).feelsSafe&&['specific','honest','soft'].includes(choice)&&!s.eventState.flags.captionReviewed){s.eventState.flags.captionReviewed=true;s.memory.push('[3일차] 소율의 설명 문구를 함께 읽고 구체적인 의견을 나눴다.');}
@@ -230,7 +235,7 @@ function advanceScene(state,id,choice){
   s.dialogue.observations[id]??={};s.dialogue.observations[id][name]=value;
  }
  const leaving=selected.next==='_close';
- if(leaving){rememberConversation(s,id,session);session.closed=true;session.finished=true;session.lastNode=session.node;}
+ if(leaving){if(!session.node.startsWith('ctx'))rememberConversation(s,id,session);session.closed=true;session.finished=!session.node.startsWith('ctx');session.lastNode=session.node.startsWith('ctx')?(session.topicEntry??'start'):session.node;}
  else {session.node=selected.next;session.lastNode=selected.next;}
  const next=leaving?current:sceneNodes(s,id,session)[session.node];
  if(!next)throw new Error('대화의 다음 장면이 없습니다.');

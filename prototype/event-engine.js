@@ -1,3 +1,4 @@
+import {noteNpcExperience} from './npc-state.js';
 import {changeRelationship,relationship} from './dialogue.js';
 import {contact} from './identity.js';
 import {socialIntent} from './social-reasoning.js';
@@ -27,6 +28,9 @@ export function evaluateEvents(state,context,rules){
   const registered=recordEvent(s,{id,kind:rule.kind,participants:typeof rule.participants==='function'?rule.participants(s,context):rule.participants??[],status:'resolved'});
   if(!registered.created)continue;
   Object.assign(registered.event,rule.effect(s,context,registered.event)??{});
+  const outcome=registered.event.outcome;
+  const emotion=['separate','unspoken','separate-display','unfinished-caption'].includes(outcome)?{stress:18,warmth:-4}:['joint','reconciled','joint-display','cross-checked','sorted-first'].includes(outcome)?{stress:-12,warmth:10}:null;
+  if(emotion)for(const person of registered.event.participants)if(s.npcs[person])noteNpcExperience(s,person,'event:'+outcome,emotion,`world:${id}`);
  }
  return s;
 }

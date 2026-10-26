@@ -1,6 +1,8 @@
+import {npcNow} from './npc-state.js';
 import {contact} from './identity.js';
 // A transparent decision model for authored NPC behavior, not a language model.
 export function socialIntent(s,id){
+ const state=npcNow(s,id);
  const r={familiarity:0,affection:0,trust:0,tension:0,...s.relations[`${id}>taei`]};
  const memories=s.dialogue?.observations?.[id]??{};
  const history=s.dialogue?.history??[];
@@ -11,14 +13,14 @@ export function socialIntent(s,id){
  const brokenDay=brokenDays.length?Math.max(...brokenDays):0;
  const apology=history.findLast(h=>h.person===id&&(h.choice==='repair'||h.choice==='scene:apologize')&&((h.day??1)>brokenDay||((h.day??1)===brokenDay&&h.phase==='evening')));
  const unresolved=!!brokenDay&&!apology;
- const feelsSafe=r.trust>=3&&r.tension<3&&!unresolved&&memories.boundary!=='ignored';
+ const feelsSafe=r.trust>=3&&r.tension<3&&!unresolved&&memories.boundary!=='ignored'&&state.disclosure;
  const personallyInterested=r.affection>=3;
  const comfortable=r.familiarity>=4;
- const workPressure=(s.day??1)===3&&s.phase==='afternoon';
+ const workPressure=(s.day??1)===3&&s.phase==='afternoon'||state.rushed;
  const mode=r.tension>=4||unresolved?'guarded':workPressure?'task':feelsSafe&&personallyInterested?'seek-company':personallyInterested?'cautious-interest':comfortable?'casual':'polite';
- return {mode,feelsSafe,personallyInterested,comfortable,unresolved,workPressure,
-  willingToJoke:comfortable&&r.tension<3&&!unresolved,
-  invite:comfortable&&r.trust>=2&&r.tension<3&&!unresolved,
+ return {state,mode,feelsSafe,personallyInterested,comfortable,unresolved,workPressure,
+  willingToJoke:comfortable&&r.tension<3&&!unresolved&&state.bandwidth==='open',
+  invite:comfortable&&r.trust>=2&&r.tension<3&&!unresolved&&state.bandwidth==='open',
   disclosure:feelsSafe?(comfortable?'personal':'limited'):'surface',
   // Kept inside simulation state/tests; numerical reasoning is not shown as mind-reading UI.
   motives:{finishTask:workPressure?4:1,shareTime:personallyInterested?3:1,protectPrivacy:feelsSafe?0:3}};

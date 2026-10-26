@@ -1,9 +1,11 @@
+import {situationNodes} from './situational-dialogue.js';
+import {npcNow} from './npc-state.js';
 import {continuityNodes} from './conversation-continuity.js';
 import {socialIntent} from './social-reasoning.js';
 // Authored exchanges: the other person has something to do and can disagree.
 // Each node preserves its topic; choices are Tae-i's spoken words, not score labels.
 export function sceneKey(s,id){return `${s.day??1}:${s.phase}:${id}`;}
-export function sceneNodes(s,id,session){
+function authoredSceneNodes(s,id,session){
  if(session.variant==='followup')return continuityNodes(s,id,session);
  const intent=socialIntent(s,id);
  const close=session.casual??false,warm=intent.personallyInterested&&intent.feelsSafe;
@@ -183,4 +185,17 @@ export function scenePrompt(s,id){
  const day=s.day??1;
  if(s.phase==='evening')return {seoyeon:'이제 끝났어요? 가방 챙기던데.',yeogyeong:'가방 무거워 보여요. 뭐 그렇게 많이 넣었어요?',soyul:'아직 사진 보고 있어요?'}[id];
  return {1:{seoyeon:'그 커피 맛있어요? 아까부터 계속 젓던데.',yeogyeong:'계산기를 두 개나 써요?',soyul:'사진 고르는 중이에요?'},2:{seoyeon:'여기 앉아도 돼요? 뭐 읽고 있었어요?',yeogyeong:'뭐 쓰고 있어요? 표정이 심각한데.',soyul:'아까부터 같은 줄만 보고 있는 것 같은데.'},3:{seoyeon:'그 안내문, 내가 한번 볼까요?',yeogyeong:'잠깐만, 손에 테이프 다 붙었는데.',soyul:'그게 오늘 붙일 설명이에요?'}}[day][id];
+}
+
+export function sceneNodes(s,id,session){
+ const nodes=authoredSceneNodes(s,id,session);
+ const status=npcNow(s,id);
+ // The topic stays intact; posture and capacity reflect the present moment.
+ if(status.mood!=='steady')for(const node of Object.values(nodes))node.stage=status.cue+' '+node.stage;
+ if(session.context)Object.assign(nodes,situationNodes(s,id,session));
+ else if(session.variant!=='guarded'&&status.bandwidth!=='open'){
+  Object.assign(nodes,situationNodes(s,id,{...session,context:status,topicEntry:session.node}));
+  if(nodes[session.node])nodes[session.node]=nodes.ctxStart;
+ }
+ return nodes;
 }

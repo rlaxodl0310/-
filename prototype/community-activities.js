@@ -1,3 +1,4 @@
+import {noteNpcExperience} from './npc-state.js';
 import {availableRoutes} from './days.js';
 import {advanceFreeTime,finishFreeActivity} from './free-roam.js';
 import {planEvent} from './event-engine.js';
@@ -93,7 +94,9 @@ export function progressCommunityActivity(state,choice){
  r=currentCommunityActivity(s);r.choices.push({stage:r.step,id:choice});r.spent+=minutes;r.step++;r.last={player:selected.label,speaker:def.club==='volunteer'?'차여경':'현장의 부원',text:(firstExchange?'“차여경이에요. 같이 봐주셔서 고마워요.” ':'')+selected.reply};r.segments.push({start,end:start+minutes});
  if(!s.known.includes(selected.fact))s.known.push(selected.fact);
  s.memory.push(`[${s.day}일차] ${def.title}: ${selected.label} ${selected.reply}`);
- s=advanceFreeTime(s,minutes,{activeChoice:r.step===def.stages.length?r.routeId:null});s.pace={count:0,seen:{}};r=currentCommunityActivity(s);
+ s=advanceFreeTime(s,minutes,{activeChoice:r.step===def.stages.length?r.routeId:null});
+ if(def.club==='volunteer')noteNpcExperience(s,'yeogyeong','shared-work-step',{fatigue:minutes/8,stress:-3,warmth:4},`community:${r.key}:${r.step}`);
+ s.pace={count:0,seen:{}};r=currentCommunityActivity(s);
  if(r.step===def.stages.length){
   s=finishFreeActivity(s,r.routeId,r.route,{start:r.startedAt,activeMinutes:r.spent});r=currentCommunityActivity(s);r.status='completed';r.finishedAt=s.clock.minute;
   s.lastResult+=' '+communityActivityOutcome(r);
