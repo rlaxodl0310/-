@@ -1,3 +1,4 @@
+import {usesGeneratedDialogue,generateDialogueTurn,advanceGeneratedDialogue} from './dialogue-generator.js';
 import {npcNow,conversationExperience} from './npc-state.js';
 import {followupCandidate,rememberConversation} from './conversation-continuity.js';
 import {photoReport,showcaseReport,scheduledEvent,learnEvent} from './event-view.js';
@@ -58,6 +59,7 @@ export function respondGroup(state,choice){
 export function dialogue(s,id){
  if(!contact(s,id).introduced)return firstContact(s,id);
  const active=s.dialogue?.sessions?.[sceneKey(s,id)];
+ if(active?.generated&&!active.closed)return {opening:active.response.text,stage:active.response.stage,scene:true,generated:true,options:active.response.options.map(o=>({id:'gen:'+o.id,label:o.label}))};
  if(active&&!active.closed){
   const n=sceneNodes(s,id,active)[active.node];
   if(n)return {opening:n.text,stage:n.stage,scene:true,options:n.options.map(o=>({id:'scene:'+o.id,label:o.label}))};
@@ -96,7 +98,7 @@ export function dialogue(s,id){
  ...((latest||old.length)&&r.tension>0?[{id:'repair',label:latest?'아까는 내 말이 앞섰어요. 미안해요.':'지난번에는 내 말이 앞섰어요. 미안해요.'}]:[]),
  ...(s.day===2&&r.familiarity>=2&&r.tension<3&&npcNow(s,id).bandwidth==='open'?[{id:'invite',label:'내일은 어떤 일정이에요?'}]:[]),
  ...(evening||(s.day??1)>1?[{id:'listen',label:evening?'오늘은 어땠어요? 아까 좀 바빠 보이던데.':'아까부터 바빠 보이던데, 뭐 하고 있었어요?'}]:[]),
- ...(!active?.finished||followupCandidate(s,id)?[{id:'personal',label:followupCandidate(s,id)?'아까 이야기한 뒤에는 좀 어땠어요?':topic}]:[]),
+ ...(usesGeneratedDialogue(s)||!active?.finished||followupCandidate(s,id)?[{id:'personal',label:usesGeneratedDialogue(s)?'조금 더 이야기해도 괜찮아요?':followupCandidate(s,id)?'아까 이야기한 뒤에는 좀 어땠어요?':topic}]:[]),
  ...(comfortable&&s.dialogue?.facts?.[id]?.speech!=='casual'?[{id:'speech',label:'우리 조금 편하게 말할까요? 불편하면 지금처럼 해도 되고.'}]:[]),
  ...(!evening&&(s.day??1)===1&&!active?.finished?[{id:'joke',label:joke}]:[]),
  ...(!evening&&(s.day??1)===1?[{id:'promise',label:'오늘 봉사 활동에 갈게요.'}]:[]),
@@ -106,6 +108,7 @@ export function dialogue(s,id){
 export function respond(state,id,choice){
  if(choice.startsWith('intro:'))return respondIntroduction(state,id,choice);
  if(!contact(state,id).introduced)throw new Error('먼저 인사를 나누거나 상황에 맞게 만나야 합니다.');
+ if(choice.startsWith('gen:')){const s=structuredClone(state);const next=advanceGeneratedDialogue(s,id,choice.slice(4));changeRelationship(s,id,'taei',next.delta);return {state:s,result:next.result};}
  if(choice.startsWith('scene:'))return advanceScene(state,id,choice.slice(6));
  if(['personal','joke'].includes(choice)||(choice==='listen'&&state.phase==='afternoon'&&(state.day??1)===1))return beginScene(state,id,choice);
  const current=dialogue(state,id);
@@ -192,13 +195,14 @@ function ensureConversations(s){
 }
 export function endTopic(state,id){
  const s=structuredClone(state);ensureConversations(s);
- const session=s.dialogue.sessions[sceneKey(s,id)];if(session){const n=sceneNodes(s,id,session)[session.node];const finished=n?.options.every(o=>o.next==='_close')??false;if(finished&&!session.closed&&!session.node.startsWith('ctx'))rememberConversation(s,id,session);session.closed=true;session.finished=finished&&!session.node.startsWith('ctx');}
+ const session=s.dialogue.sessions[sceneKey(s,id)];if(session?.generated){session.closed=true;session.finished=false;return s;}if(session){const n=sceneNodes(s,id,session)[session.node];const finished=n?.options.every(o=>o.next==='_close')??false;if(finished&&!session.closed&&!session.node.startsWith('ctx'))rememberConversation(s,id,session);session.closed=true;session.finished=finished&&!session.node.startsWith('ctx');}
  return s;
 }
-function beginScene(state,id,choice,initiated=false){
+function beginScene(state,id,choice,initiated=false,context=null){
  const current=dialogue(state,id);
  if(current.scene||!current.options.some(o=>o.id===choice))throw new Error('지금 나누던 이야기에 먼저 답해주세요.');
  const s=structuredClone(state);ensureConversations(s);
+ if(usesGeneratedDialogue(s)){const result=generateDialogueTurn(s,id,{action:'greet',prompt:context?.encounter??'',playerLine:initiated?'':current.options.find(o=>o.id===choice).label});return {state:s,result};}
  const key=sceneKey(s,id),intent=socialIntent(s,id),prior=s.dialogue.sessions[key];
  const continuation=followupCandidate(s,id);
  const session={...(continuation?{episode:continuation.episode}:{}),node:continuation?'start':prior?.lastNode??'start',closed:false,casual:s.dialogue.facts?.[id]?.speech==='casual',variant:continuation?'followup':intent.mode==='guarded'?'guarded':'normal'};
@@ -243,13 +247,13 @@ function advanceScene(state,id,choice){
  s.dialogue.history.push(result);return {state:s,result};
 }
 
-export function openConversation(state,id){
+export function openConversation(state,id,context=null){
  if(!contact(state,id).introduced){const s=structuredClone(state);s.contacts??={};s.contacts[id]={...contact(s,id),seen:true,approaches:contact(s,id).approaches+1};return {state:s,result:null};}
  const current=dialogue(state,id),intent=socialIntent(state,id);
  if(current.scene)return {state,result:null};
  const key=sceneKey(state,id);
  // A person can initiate a topic once per encounter period, not every menu visit.
- if((!state.dialogue?.sessions?.[key]||followupCandidate(state,id))&&['seek-company','cautious-interest','guarded','task'].includes(intent.mode))
-  return beginScene(state,id,'personal',true);
+ if(usesGeneratedDialogue(state)||(!state.dialogue?.sessions?.[key]||followupCandidate(state,id))&&['seek-company','cautious-interest','guarded','task'].includes(intent.mode))
+  return beginScene(state,id,'personal',true,context);
  return {state,result:null};
 }

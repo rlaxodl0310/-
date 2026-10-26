@@ -1,4 +1,4 @@
-"""Load simulation snapshots, then exercise real encounters and capacity-dependent VN choices."""
+"""Authored-mode snapshots: exercise encounters and capacity-dependent VN choices."""
 import os
 from playwright.sync_api import sync_playwright
 from vn_browser_helpers import choose,open_tool,read_to_choices
@@ -13,7 +13,7 @@ with sync_playwright() as p:
    page.evaluate('''async ({minute,mood})=>{
     const {newGame,save}=await import('/prototype/simulation.js');
     const {noteNpcExperience}=await import('/prototype/npc-state.js');
-    const s=newGame('friend');s.clock.minute=minute;s.phase=minute>=1080?'evening':'afternoon';
+    const s=newGame('friend');s.dialogue.engine='authored';s.clock.minute=minute;s.phase=minute>=1080?'evening':'afternoon';
     if(mood==='overwhelmed')noteNpcExperience(s,'yeogyeong','test-pressure',{stress:60},'test-pressure');
     localStorage.setItem('campus.slot.1',save(s));
    }''',{'minute':minute,'mood':mood})

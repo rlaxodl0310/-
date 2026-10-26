@@ -241,6 +241,7 @@ app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b){if(e.
  if(a==='openWeather'){if(screen!=='weather')weatherReturn=screen;screen='weather';}
  if(a==='closeWeather')screen=weatherReturn;
  if(a==='go'){
+  if(screen==='dialogue'&&v==='place'&&state.dialogue?.sessions?.[`${state.day}:${state.phase}:${speaker}`]?.generated)state=endTopic(state,speaker);
   if(v==='weather')weatherReturn=screen;
   if(v==='community'){if(state.community)state.community.focusPostId=null;if(screen!=='communityPost'&&!(screen==='phone'&&['community','communityPost'].includes(returnTo))){communityReturn=screen;communityPhoneReturn=returnTo;}state=advanceCommunity(markFlow(state,'community'));feedIds=visibleCommunityPosts(state).map(p=>p.id);}
   const records=['timetable','schedule','messages','map','journal','observations','discoveries'];if(records.includes(v)&&screen!=='phone'&&!records.includes(screen))returnTo=screen;

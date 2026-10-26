@@ -1,3 +1,4 @@
+// Authored-mode state regressions; normal generated play is covered by dialogue-generator.test.js.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {newGame,save,restore} from './simulation.js';
@@ -8,7 +9,7 @@ import {respond,dialogue} from './dialogue.js';
 import {socialIntent} from './social-reasoning.js';
 import {evaluateEvents} from './event-engine.js';
 function at(minute,id='soyul',profile='friend'){
- const s=newGame(profile);introduce(s,id,'test-setup');s.clock.minute=minute;s.location=id==='soyul'?'library':'hall';return s;
+ const s=newGame(profile);s.dialogue.engine='authored';introduce(s,id,'test-setup');s.clock.minute=minute;s.location=id==='soyul'?'library':'hall';return s;
 }
 test('same relationship and question produce different conversations before class, resting, and late evening',()=>{
  const openings=[560,790,1170].map(m=>respond(at(m),'soyul','personal'));
@@ -89,7 +90,7 @@ test('all situational branches terminate or rejoin a valid original topic and ca
 });
 test('pre-class state is reachable at the actual preparation building, without revealing unknown names',async()=>{
  const {arrive,resolveEncounter}=await import('./encounters.js');
- const s=newGame();s.clock.minute=560;
+ const s=newGame();s.dialogue.engine='authored';s.clock.minute=560;
  assert.equal(arrive(s,'hall').encounter,null);
  const arrived=arrive(s,'creative');assert.equal(arrived.encounter.person,'yeogyeong');
  assert.doesNotMatch(arrived.encounter.text,/차여경/);

@@ -1,3 +1,4 @@
+import {canGenerateReencounter} from './dialogue-generator.js';
 import {npcNow} from './npc-state.js';
 import {followupCandidate} from './conversation-continuity.js';
 import {campusBuildings} from './campus-buildings.js';
@@ -58,7 +59,7 @@ export function arrive(state,location,spot='entry'){
  const warning=beginWarningSite(s,location,spot);if(warning)return {state:warning.state,encounter:null,warning:warning.scene,observation:warning.observation};
  const present=presentPeople(s,location);seePeople(s,present);
  const key=encounterKey(s,spot);
- if(s.encounters[key]?.resolved&&!followupCandidate(s,s.encounters[key].person))return {state:s,encounter:null,observation:observePlace(s,location,spot,true)};
+ if(s.encounters[key]?.resolved&&!followupCandidate(s,s.encounters[key].person)&&!canGenerateReencounter(s,s.encounters[key].person))return {state:s,encounter:null,observation:observePlace(s,location,spot,true)};
  let person=null,group=false;
  if(location==='hall'&&spot==='lounge')group=present.includes('seoyeon')&&present.includes('soyul');
  else if(location==='hall')person=spot==='noticeboard'?'seoyeon':spot==='window'?'soyul':'yeogyeong';
@@ -71,7 +72,7 @@ export function arrive(state,location,spot='entry'){
  const resuming=!!session&&!session.closed;
  const regrouped=person==='soyul'&&s.location==='hall'&&s.risk?.positions?.soyul==='hall'&&!Object.values(s.encounters).some(e=>e.day===s.day&&e.phase===s.phase&&e.person==='soyul'&&e.location==='hall');
  const continuation=person?followupCandidate(s,person):null;
- if(person&&!resuming&&!regrouped&&!continuation&&Object.values(s.encounters).some(e=>e.day===s.day&&e.phase===s.phase&&e.person===person&&['engaged','passed'].includes(e.outcome)))person=null;
+ if(person&&!resuming&&!regrouped&&!continuation&&!canGenerateReencounter(s,person)&&Object.values(s.encounters).some(e=>e.day===s.day&&e.phase===s.phase&&e.person===person&&['engaged','passed'].includes(e.outcome)))person=null;
  if(!person&&!group){s.encounters[key]={day:s.day,phase:s.phase,resolved:true,outcome:'quiet'};return {state:s,encounter:null,observation:observePlace(s,location,spot)};}
  const content=group?{text:'휴게공간을 지나는데 낮은 웃음소리가 들린다. 한서연과 박소율이 같은 휴대폰을 들여다보고 있다. 두 사람은 이쪽을 보지 못한 채 사진 이야기를 이어간다.',action:'걸음을 늦추고 잠깐 이야기를 듣는다.',prefix:''}:encounterContent(s,person);
  const encounter={key,day:s.day,phase:s.phase,person,group,...content};
@@ -86,6 +87,7 @@ export function arrive(state,location,spot='entry'){
  }
  const meeting=s.appointments.find(a=>a.kind==='meeting'&&a.status==='pending'&&a.person===person&&a.day===s.day&&a.phase===s.phase&&a.location===s.location);
  if(meeting){encounter.text+=' 오늘 이곳에서 잠깐 이야기하기로 했던 약속이 떠오른다.';encounter.action='하던 일을 방해하지 않게 가까이 가 인사한다. “오늘 잠깐 보기로 했죠. 지금 괜찮아요?”';encounter.prefix='네, 잠깐 괜찮아요. ';}
+ if(canGenerateReencounter(s,person)){encounter.text='조금 뒤 다시 같은 공간을 지나다 눈이 마주친다. 상대는 자기 일을 하다 잠깐 고개를 든다.';encounter.action='가볍게 인사한다. “지금은 잠깐 이야기해도 괜찮아요?”';encounter.prefix='';}
  if(continuation){encounter.text={yeogyeong:'공용 공간에서 차여경이 수첩을 덮고 가방을 정리하다 태이를 알아본다. 아까와 달리 계산기는 가방 안에 들어가 있다.',seoyeon:'한서연이 휴대폰 시계를 확인하다 태이를 보고 고개를 든다. 아까 마시던 컵은 치워져 있고, 이제 자기 가방을 챙기는 중이다.',soyul:'박소율이 메모를 쓰다 잠깐 손을 멈춘다. 아까 보던 화면 대신 자신이 고른 사진과 짧은 문장이 나란히 떠 있다.'}[person];encounter.action='눈이 마주쳐 인사한다. “아까 이야기한 뒤에는 좀 어땠어요?”';encounter.prefix='';}
  if(resuming){encounter.text=`${content.text} 아까 나누던 이야기가 잠깐 떠오른다.`;encounter.action='아까 멈춘 이야기의 뒷부분을 조심스럽게 꺼낸다.';encounter.prefix='';}
  if(regrouped){encounter.text='자유관 창가 쪽을 지나는데 박소율이 정리한 출력물을 가방에 넣고 있다. 도서관에서 하던 일을 마치고 이쪽으로 옮겨온 모양이다.';encounter.action='걸음을 늦춘다. “아까 하던 건 마무리했어요?”';encounter.prefix='네, 일단 정리했어요. ';}
@@ -105,7 +107,7 @@ export function resolveEncounter(state,encounter,engage){
  const firstExchange=!contact(s,encounter.person).introduced;
  introduce(s,encounter.person,'incidental-exchange');
  // The interaction comes from the encountered action, not a character-selection menu.
- const opened=openConversation(s,encounter.person);
+ const opened=openConversation(s,encounter.person,{encounter:encounter.action});
  const next=dialogue(opened.state,encounter.person);
  const response=opened.result?opened:next.scene?{state:opened.state,result:{text:next.opening,stage:next.stage}}:next.options.some(o=>o.id==='personal')?respond(opened.state,encounter.person,'personal'):{state:opened.state,result:{text:next.opening,stage:next.stage}};
  response.result={...response.result,playerLine:encounter.action+(firstExchange?' “아, 저는 김태이예요. 이번에 복학했어요.”':''),text:(firstExchange?`저는 ${s.npcs[encounter.person].name}이에요. `:'')+(socialIntent(s,encounter.person).mode==='guarded'?'':encounter.prefix??'')+response.result.text};
