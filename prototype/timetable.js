@@ -10,7 +10,7 @@ const chapel=()=>lesson('chapel','채플',570,630,'baekseok','chapel','여러 �
 const clinical=(id,name,location,area,start=570,end=660)=>lesson(id,name,start,end,location,area,'전공 수업',[]);
 export const characterTimetables={
  taei:{
-  1:[lesson('ensemble','보컬 앙상블',570,660,'arts','band','예술동 4층 구석 합주실. 반주가 시작되자 보컬이 들어갈 자리를 맞춰본다. 혼자 부를 때와는 호흡을 쓰는 방법이 조금 다르다.',[
+  1:[lesson('ensemble','보컬 앙상블',570,660,'arts','band','예술동 4층 구석 409호 합주실. 반주가 시작되자 보컬이 들어갈 자리를 맞춰본다. 혼자 부를 때와는 호흡을 쓰는 방법이 조금 다르다.',[
    {id:'blend',label:'다른 파트의 소리를 듣고 내 음량과 호흡을 맞춘다.',text:'힘을 더 주는 대신 반주의 빈 곳을 들었다. 후렴을 다시 맞추자 혼자 부를 때보다 소리가 자연스럽게 이어진다.'},
    {id:'phrase',label:'가사의 의미를 생각하며 프레이징을 바꿔본다.',text:'같은 음을 내더라도 문장이 끝나는 곳에서 호흡을 다르게 써봤다. 다음 반복에서는 반주와 어긋난 부분을 함께 짚는다.'}]),
    lesson('theory','응용 화성학',690,780,'arts','classes','강의실에서 짧은 코드 진행을 듣고 악보 옆에 메모한다. 익숙한 노래의 흐름과 연결되는 부분이 있다.',[
@@ -27,6 +27,19 @@ export const characterTimetables={
  seoyeon:{1:[clinical('dental','치위생학 전공 수업','sculpture','classes'),clinical('liberal','생활과 소통','academic','classes',690,780)],2:[general(),clinical('dental2','치위생학 전공 수업','sculpture','classes',690,780)],3:[chapel(),clinical('dental3','치위생학 전공 수업','sculpture','classes',660,750)]},
  soyul:{1:[clinical('dental','치위생학 전공 수업','sculpture','classes'),clinical('liberal','생활과 소통','academic','classes',690,780)],2:[general(),clinical('dental2','치위생학 전공 수업','sculpture','classes',690,780)],3:[chapel(),clinical('dental3','치위생학 전공 수업','sculpture','classes',660,750)]}
 };
+// Concrete room assignments for the prototype semester; legacy primary IDs remain valid.
+for(const c of characterTimetables.yeogyeong[1])if(c.id==='liberal')c.area='room401';
+characterTimetables.yeogyeong[2].find(c=>c.id==='nursing2').area='room504';
+for(const id of ['seoyeon','soyul']){
+ characterTimetables[id][1].find(c=>c.id==='liberal').area='room401';
+ characterTimetables[id][2].find(c=>c.id==='dental2').area='room302';
+ characterTimetables[id][3].find(c=>c.id==='dental3').area='room401';
+}
+export function schoolArea(s,person){return timetable(s,person).find(c=>s.clock.minute>=c.start-30&&s.clock.minute<c.end)?.area??null;}
+export function roomUseLabel(s,location,area){
+ const classes=['taei','yeogyeong','seoyeon','soyul'].flatMap(id=>timetable(s,id)).filter(c=>c.location===location&&c.area===area);
+ return classes.some(c=>s.clock.minute>=c.start&&s.clock.minute<c.end)?'수업 중':classes.some(c=>s.clock.minute<c.start&&c.start-s.clock.minute<=15)?'수업 준비 중':'사용 상태 미확인';
+}
 export function schoolEnabled(s){return s.academics?.enabled===true;}
 export function timetable(s,person='taei',day=s.day){return schoolEnabled(s)?(characterTimetables[person]?.[day]??[]).map(c=>({...c,key:`${day}:${person}:${c.id}`,day})):[];}
 export function lessonStatus(s,c){const record=s.academics?.records?.[c.key];if(record)return record.status;const m=s.clock.minute;return m>=c.end?'absent':m>=c.start?'in-progress':'upcoming';}

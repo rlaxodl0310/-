@@ -1,3 +1,4 @@
+import {currentSchedule} from './days.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {newGame,save,restore} from './simulation.js';
@@ -78,7 +79,7 @@ test('ended generated conversations reopen after actual elapsed time without rep
  let s=sample(673);s=openConversation(s,'yeogyeong').state;s=endTopic(s,'yeogyeong');
  assert.equal(canGenerateReencounter(s,'yeogyeong'),false);s.clock.minute+=30;
  assert.equal(canGenerateReencounter(s,'yeogyeong'),true);
- const a=arrive(s,'hall');assert.ok(a.encounter);const r=resolveEncounter(a.state,a.encounter,true);
+ const place=currentSchedule(s).yeogyeong;const a=arrive(s,place,place==='library'?'shelves':'entry');assert.ok(a.encounter);const r=resolveEncounter(a.state,a.encounter,true);
  assert.equal(r.result.generated,true);
  assert.equal(r.state.dialogue.generation.sequence,2);
 });

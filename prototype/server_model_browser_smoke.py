@@ -71,7 +71,9 @@ try:
      if mode in ['ok','intro']:
       assert response['source']=='server-model'
       assert '붙잡았네요' in response['text']
-      if mode=='intro':assert response['text'].startswith('저는 차여경이에요.')
+      if mode=='intro':
+       assert response['text'].startswith('저는 차여경이에요.')
+       assert '선배' not in response['text']
      else:assert response.get('source')!='server-model'
      assert data['clock']['minute']==820
      assert len(Model.calls)==before+1

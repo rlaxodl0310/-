@@ -1,3 +1,4 @@
+import {gameRoomLayouts} from './campus-rooms.js';
 // User-confirmed building uses/floors. Paths and service rules remain prototype assumptions.
 export const campusBuildings={
  cafeteria:{name:'외식관',description:'요리 관련 학과 · 학식당 · 카페 · 편의점 · 조리실습실',entry:'식당 입구에서 식판 부딪히는 소리가 들린다. 메뉴 안내 옆으로 배식대와 퇴식구가 보인다.',fact:'학식당 위치',day:'식탁에 가방을 놓고 식사하거나 이야기를 나누는 학생들이 보인다.',night:'배식 시간이 지나면 직원들이 테이블을 닦는다. 입구 쪽 휴게 좌석에는 아직 사람이 있다.',actions:[
@@ -282,6 +283,19 @@ for(const [id,definition] of Object.entries(confirmedCampusLayout)){
  campusBuildings[id].fact=campusBuildings[id].name+' 위치';
  campusBuildings[id].areas=definition.areas.map(([id,floor,name,text])=>({id,floor,name,text}));
 }
+for(const [id,areas] of Object.entries(gameRoomLayouts))campusBuildings[id].areas=areas;
+const observedBuildingEntries={
+ headquarters:'자동문이 열리자 넓은 로비가 나온다. 엘리베이터 앞에는 몇 사람이 서 있고, 안내대 옆으로 학생들이 빠르게 지나간다.',
+ arts:'문을 여니 복도 안쪽에서 발성을 맞추는 소리가 들린다. 계단 쪽으로 악기 케이스를 멘 학생이 올라가고, 무대 출입문 앞에는 가방 몇 개가 놓여 있다.',
+ creative:'출입문 앞에서 사람들이 양쪽으로 비켜 지나간다. 안쪽 복도에는 출력물을 든 학생들이 서 있고, 엘리베이터 도착음이 들린다.',
+ sculpture:'로비 안쪽에서 문이 닫히는 소리가 난다. 강의실 쪽으로 걷는 사람들 사이로 빈 의자와 계단이 보인다.',
+ music:'방음문이 열릴 때 낮은 베이스 소리가 잠깐 새어 나온다. 복도 벽에 기대 둔 악기 케이스 옆으로 학생이 비켜 지나간다.',
+ gym:'운동화가 바닥을 스치는 소리와 짧은 연주 소리가 서로 다른 쪽에서 들린다. 입구에서 가방을 내려놓던 학생이 길을 비켜준다.',
+ academic:'복도에서 다음 방을 찾는 학생들이 문 옆 호실을 번갈아 본다. 열려 있는 창문으로 바람이 들어와 안내 종이 끝이 들린다.',
+ baekseok:'넓은 출입문 너머로 좌석들이 길게 이어진다. 안쪽에서 마이크를 확인하는 목소리가 잠깐 울리고 다시 조용해진다.'
+};
+for(const [id,text] of Object.entries(observedBuildingEntries)){campusBuildings[id].entry=text;campusBuildings[id].day=text;campusBuildings[id].night='복도의 불빛 아래서 몇 사람이 짐을 챙긴다. 문이 닫힌 방은 조용하고 출입문 쪽에서 발소리가 들린다.';}
+
 export function enterBuildingArea(state,id){
  const place=state.location,b=campusBuildings[place],area=b?.areas?.find(a=>a.id===id);
  if(!area)throw new Error('이 건물에 없는 공간입니다.');

@@ -2,14 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {newAfternoonScenario as newGame,act,nextDay,save,restore,cancelAppointment} from './simulation.js';
 import {knownGame} from './fixtures.js';
-import {clubs,joinClub,evaluateInvitations,replyOffer,suggestMeeting,meetAppointments,appointmentConflicts} from './appointments.js';
+import {clubs,joinClub as confirmMembership,evaluateInvitations,replyOffer,suggestMeeting,meetAppointments,appointmentConflicts} from './appointments.js';
 import {contact} from './identity.js';
 import {arrive,resolveEncounter} from './encounters.js';
+
+function joinClub(state,id){const s=structuredClone(state);s.clubApplications={[id]:{status:'offered'}};return confirmMembership(s,id);}
 
 test('joining a club is voluntary and its activity offer is separate from membership',()=>{
  const initial=newGame();assert.deepEqual(initial.memberships,{});assert.equal(contact(initial,'soyul').nameLevel,'unknown');
  let s=joinClub(initial,'volunteer');assert.equal(Object.keys(clubs).length,3);assert.ok(s.memberships.volunteer);
- assert.equal(s.appointments[0].status,'offered');assert.equal(contact(s,'soyul').nameLevel,'full');assert.equal(contact(s,'soyul').introduced,false);
+ assert.equal(s.appointments[0].status,'offered');assert.equal(contact(s,'soyul').nameLevel,'unknown');assert.equal(contact(s,'soyul').introduced,false);
  assert.equal(s.relations['soyul>taei'],undefined);assert.throws(()=>joinClub(s,'volunteer'));
  s=replyOffer(s,s.appointments[0].id,false);assert.ok(s.memberships.volunteer);assert.equal(s.appointments[0].status,'declined');
  assert.equal(act(s,'rehearsal').appointments[0].status,'declined');assert.deepEqual(restore(save(s)),s);
@@ -58,6 +60,6 @@ test('player suggestions can be refused, accepted, conflict, and respect NPC ava
 test('older slots preserve learned identities without fabricating club enrollment or proposals',()=>{
  const old=joinClub(newGame(),'volunteer');delete old.memberships;delete old.invitationDecisions;old.appointments=[];
  const s=restore(save(old));assert.deepEqual(s.memberships,{});assert.deepEqual(s.invitationDecisions,{});
- assert.equal(contact(s,'soyul').nameLevel,'full');assert.equal(contact(s,'soyul').introduced,false);
+ assert.equal(contact(s,'soyul').nameLevel,'unknown');assert.equal(contact(s,'soyul').introduced,false);
  assert.equal(evaluateInvitations(s).appointments.length,0);
 });

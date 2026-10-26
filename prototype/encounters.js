@@ -1,3 +1,4 @@
+import {campusDetour} from './campus-variation.js';
 import {canGenerateReencounter} from './dialogue-generator.js';
 import {npcNow} from './npc-state.js';
 import {followupCandidate} from './conversation-continuity.js';
@@ -65,7 +66,8 @@ export function arrive(state,location,spot='entry'){
  else if(location==='hall')person=spot==='noticeboard'?'seoyeon':spot==='window'?'soyul':'yeogyeong';
  else if(location==='library'&&['entry','shelves'].includes(spot))person=spot==='shelves'&&present.includes('yeogyeong')?'yeogyeong':'soyul';
  else if(location==='cafe'&&['entry','counter'].includes(spot))person='seoyeon';
- if(!person&&!group&&campusBuildings[location])person=present.find(id=>npcNow(s,id).rushed)??null;
+ if(!person&&!group&&campusBuildings[location])person=present.find(id=>npcNow(s,id).rushed||campusDetour(s,id)?.location===location)??null;
+ if(!person&&!group&&s.campusVariation&&s.academics?.enabled&&present.length)person=present[0];
  if(person&&!present.includes(person))person=null;
  // Someone already spoken to keeps doing their own work; don't respawn a waiting dialogue target.
  const session=person?s.dialogue?.sessions?.[`${s.day}:${s.phase}:${person}`]:null;
@@ -76,6 +78,7 @@ export function arrive(state,location,spot='entry'){
  if(!person&&!group){s.encounters[key]={day:s.day,phase:s.phase,resolved:true,outcome:'quiet'};return {state:s,encounter:null,observation:observePlace(s,location,spot)};}
  const content=group?{text:'휴게공간을 지나는데 낮은 웃음소리가 들린다. 한서연과 박소율이 같은 휴대폰을 들여다보고 있다. 두 사람은 이쪽을 보지 못한 채 사진 이야기를 이어간다.',action:'걸음을 늦추고 잠깐 이야기를 듣는다.',prefix:''}:encounterContent(s,person);
  const encounter={key,day:s.day,phase:s.phase,person,group,...content};
+ if(person&&campusDetour(s,person)&&!npcNow(s,person).rushed){encounter.text={break:'창가 쪽에 앉아 쉬던 학생이 발소리를 듣고 고개를 든다. 손에 들고 있던 휴대폰은 화면이 꺼져 있다.',errand:'출입문 안쪽에서 가방을 고쳐 메던 학생과 시선이 마주친다. 막 다른 곳으로 움직이려던 모양이다.','own-work':'한쪽에 펼쳐놓은 메모를 정리하던 학생이 고개를 든다. 다음 장으로 넘기던 손이 잠깐 멈춘다.'}[campusDetour(s,person).reason];encounter.action='하던 일을 방해하지 않게 인사한다. “지금 잠깐 이야기해도 괜찮아요?”';encounter.prefix='';}
  if(person&&npcNow(s,person).rushed){encounter.text='강의실 쪽으로 사람들이 들어가는 사이, 가방을 고쳐 멘 학생과 눈이 마주친다. 휴대폰 시간을 확인하고 다시 출입문을 보는 모습이다.';encounter.action='길을 막지 않게 옆으로 비켜서며 인사한다. “곧 수업이에요?”';encounter.prefix='';}
  if(wetWeather(s))encounter.text=weatherAtmosphere(s,s.location)+' '+encounter.text;
  if(s.day===1&&s.location==='cafe'&&person==='seoyeon')Object.assign(encounter,{text:'커피를 받아 자리를 찾는데 창가에서 책을 펼친 한서연이 보인다. 서연은 컵을 내려놓고 맞은편 의자의 가방을 당긴다.',action:'맞은편 의자를 가리킨다. “잠깐 앉아도 돼요?”',prefix:'네, 비었어요. '});

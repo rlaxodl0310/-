@@ -41,14 +41,14 @@ test('ten confirmed main buildings retain their own departments, capacity and fl
  const main=Object.values(campusBuildings).filter(b=>b.primary);assert.equal(main.length,10);
  assert.deepEqual(main.map(b=>b.name).sort(),['본부동','예술동','음악관','체육관','외식관','창조관','은혜관','자유관','조형관','백석홀'].sort());
  assert.equal(campusBuildings.headquarters.maxFloor,10);assert.equal(campusBuildings.arts.maxFloor,8);
- const arts=campusBuildings.arts.areas;assert.equal(arts.find(a=>a.id==='classes').floor,'2~7층');assert.equal(arts.find(a=>a.id==='small7').floor,'7층');assert.equal(arts.find(a=>a.id==='small8').floor,'8층');assert.equal(arts.find(a=>a.id==='band').floor,'4층 구석');
+ const arts=campusBuildings.arts.areas;assert.equal(arts.find(a=>a.id==='classes').floor,'4층');assert.equal(arts.find(a=>a.id==='small7').floor,'7층');assert.equal(arts.find(a=>a.id==='small8').floor,'8층');assert.equal(arts.find(a=>a.id==='band').floor,'4층 구석');
  assert.match(campusBuildings.gym.description,/체대·실용음악과/);assert.match(campusBuildings.baekseok.description,/여러 학과.*채플/);
- assert.equal(campusBuildings.creative.areas.find(a=>a.id==='nursing').floor,'층 미확정');
+ assert.equal(campusBuildings.creative.areas.find(a=>a.id==='nursing').floor,'5층');
 });
 test('interior visits reveal only the selected facility, persist and do not grant supplies',()=>{
  let s=arrive(newGame(),'arts').state;const original=structuredClone(s.inventory);
  assert.ok(!s.known.some(k=>k.includes('4층 구석')));const r=enterBuildingArea(s,'band');s=r.state;
- assert.ok(s.known.includes('예술동 4층 구석 대형 합주실'));assert.ok(!s.known.some(k=>k.includes('8층 좁은')));
+ assert.ok(s.known.includes('예술동 4층 구석 409호 대형 합주실'));assert.ok(!s.known.some(k=>k.includes('8층 좁은')));
  assert.equal(enterBuildingArea(s,'band').state.memory.length,s.memory.length);assert.deepEqual(s.inventory,original);
  s=restore(save(s));assert.equal(selectedBuildingArea(s).id,'band');assert.match(buildingAtmosphere(s,'arts'),/4층 구석/);
  assert.throws(()=>enterBuildingArea(s,'nursing'));

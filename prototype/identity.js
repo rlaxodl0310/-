@@ -5,7 +5,7 @@ export const identities={
  yeogyeong:{name:'차여경',given:'여경',description:'수첩을 정리하는 학생'},
  soyul:{name:'박소율',given:'소율',description:'사진을 살펴보는 학생'}
 };
-export function contact(s,id){return {seen:false,nameLevel:'unknown',introduced:false,playerNameKnown:false,asked:false,approaches:0,sources:[],...s.contacts?.[id]};}
+export function contact(s,id){return {seen:false,nameLevel:'unknown',introduced:false,playerNameKnown:false,playerSeniorityKnown:false,asked:false,approaches:0,sources:[],...s.contacts?.[id]};}
 export function displayName(s,id){
  const p=identities[id];if(!p)return id==='taei'?'김태이':'학생';
  const c=contact(s,id);return c.nameLevel==='full'?p.name:c.nameLevel==='given'?p.given:p.description;
@@ -18,9 +18,9 @@ export function learnIdentity(s,id,source,level='full'){
  s.contacts[id]=c;return s;
 }
 export function introduce(s,id,source='self-introduction'){
- learnIdentity(s,id,source);s.contacts[id].introduced=true;s.contacts[id].playerNameKnown=true;s.contacts[id].seen=true;return s;
+ learnIdentity(s,id,source);s.contacts[id].introduced=true;s.contacts[id].playerNameKnown=true;if(source==='relationship-demo')s.contacts[id].playerSeniorityKnown=true;s.contacts[id].seen=true;return s;
 }
-export function seePeople(s,ids){s.contacts??={};for(const id of ids)s.contacts[id]={...contact(s,id),seen:true};return s;}
+export function seePeople(s,ids){s.contacts??={};for(const id of ids)s.contacts[id]={...contact(s,id),seen:true,lastSeen:{day:s.day,minute:s.clock?.minute??780,location:s.location}};return s;}
 export function presentationText(s,text){
  let result=String(text??'').replaceAll('학생회관','자유관').replaceAll('음악 연습동','음악관').replaceAll('강의동','은혜관');
  for(const [id,p] of Object.entries(identities)){
@@ -48,7 +48,7 @@ export function respondIntroduction(state,id,choice){
   s.memory.push(`[${s.day??1}일차] ${identities[id].name}과 서로 이름을 소개했다.`);
  }else text='짧게 고개를 끄덕이고 자리를 비켜준다.';
  const result={person:id,day:s.day??1,phase:s.phase,choice,playerLine:d.options.find(o=>o.id===choice).label,text,stage:choice==='intro:greet'?'이름을 직접 들었다.':choice==='intro:introduce'?'서로 이름을 알게 됐다.':'아직 더 묻지는 않기로 했다.',leave:choice==='intro:leave'};
- s.dialogue.history.push(result);return {state:s,result};
+ result.text=normalizeNpcAddress(s,id,result.text);s.dialogue.history.push(result);return {state:s,result};
 }
 export function hearGroupLine(s,line){
  // Only a name audibly addressed to the other visible speaker is linked to a face.
@@ -56,3 +56,5 @@ export function hearGroupLine(s,line){
  if(line.person==='soyul'&&/서연아/.test(line.text))learnIdentity(s,'seoyeon','overheard-address','given');
  return s;
 }
+
+export function normalizeNpcAddress(s,id,text){if(contact(s,id).playerSeniorityKnown)return String(text??'');const address=contact(s,id).playerNameKnown?'태이 씨':'그쪽';return String(text??'').replace(/(?:김태이|태이)\s*선배(?:님)?/g,address).replace(/선배(?:님)?/g,address);}

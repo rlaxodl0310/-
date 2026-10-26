@@ -5,7 +5,7 @@ import {planEvent} from './event-engine.js';
 import {introduce,contact,seePeople} from './identity.js';
 import {wetWeather} from './weather.js';
 export const communityActivityDefinitions={
- 'volunteer-recruit':{title:'봉사 물품 준비',club:'volunteer',day:1,route:'volunteer',venue:{location:'hall',area:'clubs',label:'자유관 · 봉사 준비 공간'},intro:'공용 테이블에서 학생들이 물품을 나누고 있다. 수첩을 펴놓은 학생이 빈 상자 하나를 옆으로 밀어준다. “처음 오셨으면 이 목록부터 같이 볼까요?”',stages:[
+ 'volunteer-recruit':{title:'봉사 물품 준비',club:'volunteer',day:1,route:'volunteer',venue:{location:'hall',area:'clubs',label:'자유관 2층 202호 · 봉사 준비실'},intro:'공용 테이블에서 학생들이 물품을 나누고 있다. 수첩을 펴놓은 학생이 빈 상자 하나를 옆으로 밀어준다. “처음 오셨으면 이 목록부터 같이 볼까요?”',stages:[
   {name:'목록과 실제 물품 확인',prompt:'목록의 수량과 쌓인 상자를 번갈아 본다. 지금 무엇부터 맞춰볼까?',choices:[
    {id:'audit',label:'목록을 읽으며 다른 사람이 센 수량과 대조한다.',approach:'listen',fact:'봉사 물품 수량 대조 방법',reply:'“아, 제가 센 건 봉투 수였네요.” 세는 단위가 달랐던 부분을 찾아 목록 옆에 적는다. 물품을 다시 꺼내기 전에 기준부터 맞췄다.'},
    {id:'sort',label:'같은 종류의 물품을 모아 놓고 빠진 묶음을 찾는다.',approach:'organize',fact:'봉사 준비 물품 분류표',reply:'상자에서 물품을 꺼내 종류별로 놓는다. “이렇게 나누면 다음 사람이 세기도 편하겠어요.” 아직 포장하지 않은 묶음이 눈에 들어온다.'}]},

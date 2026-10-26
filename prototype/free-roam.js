@@ -51,9 +51,9 @@ export function finishFreeActivity(state,id,route,{start,activeMinutes=null}={})
  s.choice=id;s.minutes=activeMinutes??route.duration;s.lastResult=route.memory;
  freeDay(s).completed.push({id,start,end:s.clock.minute,...(activeMinutes===null?{}:{activeMinutes})});
  for(const fact of route.knowledge)if(!s.known.includes(fact))s.known.push(fact);
- const participants=['volunteer','exhibit'].includes(id)?Object.keys(s.npcs):id==='review'?['soyul']:id==='backstage'?['seoyeon']:[];
+ const participants=['volunteer','exhibit'].includes(id)?(activeMinutes!==null&&id==='volunteer'?['yeogyeong']:Object.keys(s.npcs).filter(person=>!s.academics?.enabled||currentSchedule(s)[person]==='hall')):id==='review'?['soyul']:id==='backstage'?['seoyeon']:[];
  for(const person of participants)noteNpcExperience(s,person,'shared-work',{fatigue:activeMinutes===null?route.duration/8:0,stress:-8,warmth:8},`activity:${id}`);
- for(const person of participants)if(!contact(s,person).introduced){introduce(s,person,'shared-activity');s.memory.push(`[${s.day}일차] ${identities[person].name}과 준비를 함께하며 인사를 나눴다.`);}
+ for(const person of participants)if(!contact(s,person).introduced){introduce(s,person,'shared-activity');if(s.academics?.enabled)s.lastResult+=` 함께 준비하던 학생과 인사를 나눈다. “저는 ${identities[person].name}이에요.”`;s.memory.push(`[${s.day}일차] ${identities[person].name}과 준비를 함께하며 인사를 나눴다.`);}
  if(['volunteer','exhibit','review'].includes(id)){for(const person of participants)changeRelationship(s,person,'taei',{familiarity:1,trust:1});s=activityEvents(s,id);}
  if(id==='volunteer')for(const [person,status] of Object.entries(s.dialogue.promises))if(status==='pending'){s.dialogue.promises[person]='kept';changeRelationship(s,person,'taei',{trust:2});}
  for(const a of s.appointments)if(a.day===s.day&&a.status==='pending'&&a.activity===id){a.status='kept';if(a.person)changeRelationship(s,a.person,'taei',{trust:2});}

@@ -1,5 +1,5 @@
 import {socialOpinion} from './social-memory.js';
-import {contact,learnIdentity,clubRoster} from './identity.js';
+import {contact} from './identity.js';
 import {socialIntent} from './social-reasoning.js';
 import {changeRelationship} from './dialogue.js';
 import {days} from './days.js';
@@ -13,9 +13,10 @@ export function joinClub(state,id){
  if(!clubs[id])throw new Error('알 수 없는 동아리입니다.');
  const s=structuredClone(state);s.memberships??={};
  if(s.memberships[id])throw new Error('이미 가입한 동아리입니다.');
+ if(s.clubApplications?.[id]?.status!=='offered')throw new Error('신청과 현장 면접을 마치고 가입 안내를 받아야 합니다.');
  s.memberships[id]={joinedDay:s.day};s.memory.push(`[${s.day}일차] ${clubs[id].name}에 가입했다.`);
- if(id==='volunteer')for(const person of clubRoster)learnIdentity(s,person,'joined-club-notice');
- const event=clubs[id].events.find(e=>e.day>s.day||(e.day===s.day&&s.phase==='afternoon'));
+ if(s.clubApplications[id])s.clubApplications[id].status='accepted';
+ const event=clubs[id].events.find(e=>e.day>s.day||(e.day===s.day&&s.phase==='afternoon'&&!s.freeDay?.completed?.some(a=>a.id===e.activity)&&s.clock.minute+(days[e.day].routes[e.activity]?.duration??0)<=1080));
  if(event)s.appointments.push({id:`club:${id}:${event.day}`,kind:'club',proposer:'club',club:id,day:event.day,phase:'afternoon',activity:event.activity,label:event.label,status:'offered'});
  return s;
 }
@@ -44,7 +45,7 @@ export function evaluateInvitations(state){
   const location=days[day].schedules.afternoon[id];
   const label=practical?(day===2?'사진 정리 함께하기':'사진 전시 준비'):id==='seoyeon'?'잠깐 쉬며 이야기하기':'사진 이야기 이어가기';
   const text=id==='yeogyeong'?'내일 준비할 게 좀 남았는데, 같이 해볼래요? 일정 괜찮을 때만요.':id==='seoyeon'?(r.affection>=3?'내일 잠깐 같이 있을래요? 바쁜 일이 있으면 다음에 봐도 되고요.':'내일 쉬는 시간에 이야기 좀 더 할래요? 시간 괜찮으면요.'):'아까 이야기, 내일 조금 더 해도 될까요? 사진도 같이 보고 싶어서요.';
-  const offer={id:key,kind:practical?'activity':'meeting',proposer:'npc',person:id,day,phase:'afternoon',activity,location,label,status:'offered',text};
+  const offer={id:key,minute:900,kind:practical?'activity':'meeting',proposer:'npc',person:id,day,phase:'afternoon',activity,location,label,status:'offered',text};
   s.appointments.push(offer);s.invitationDecisions[key]='offered';
   s.messages.push({day:s.day,from:s.npcs[id].name,text,appointmentId:key});
  }

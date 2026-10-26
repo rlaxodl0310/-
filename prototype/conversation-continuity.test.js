@@ -16,7 +16,7 @@ test('finished conversation becomes a later encounter with consequences, not a r
  s=respond(s,'yeogyeong','scene:together').state;
  assert.match(dialogue(s,'yeogyeong').opening,/역할만/);
  s=respond(s,'yeogyeong','scene:mutual').state;
- assert.match(dialogue(s,'yeogyeong').opening,/선배 작업/);
+ assert.match(dialogue(s,'yeogyeong').opening,/태이 씨 작업/);
  s=respond(s,'yeogyeong','scene:bye').state;
  assert.equal(s.dialogue.threads.yeogyeong.episode,1);
  assert.equal(followupCandidate(s,'yeogyeong'),null);

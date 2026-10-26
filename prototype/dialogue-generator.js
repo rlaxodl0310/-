@@ -1,3 +1,4 @@
+import {normalizeNpcAddress} from './identity.js';
 import {socialIntent} from './social-reasoning.js';
 import {npcNow,conversationExperience} from './npc-state.js';
 // A semantic planner + small Korean clause grammar. No complete response lookup table.
@@ -55,6 +56,8 @@ export function generateDialogueTurn(s,id,{action='greet',topic=null,playerLine=
   suggest:['그렇게 해볼 수도 있겠네요.','그 말은 조금 생각해보고 싶어요.','바로 그러겠다고는 못 하겠는데, 무슨 뜻인지는 알겠어요.'],
   share:['그런 마음으로 작업하는 거군요.','선배 얘기 들으니까 조금 연결되는 게 있네요.','처음부터 잘 들려줘야 한다고 생각하면 힘들겠네요.'],
   switch:['다른 얘기 해도 좋아요.','잠깐 화제를 바꿔볼까요.','그럼 이 얘기는 잠깐 내려놓고요.'],
+  about:['아, 전공이요?','아직 그 얘기를 안 했네요.','저는요,'],
+  introduce:['아, 이제 알겠어요.','그렇군요. 알려줘서 고마워요.','이름만 듣고는 몰랐어요.'],
   leave:['네, 나중에 봬요.','오늘은 여기까지 얘기해요.','들어줘서 고마워요.']
  };
  let chosen;
@@ -80,9 +83,11 @@ export function generateDialogueTurn(s,id,{action='greet',topic=null,playerLine=
    else clauses.push(selectDialoguePart(store,['지금은 가벼운 얘기면 좋겠어요.','조금 정리하고 다시 이야기하면 안 될까요?']));
   }
   if(id==='soyul'&&dialogueRandom(store)<0.6)clauses[0]='…'+clauses[0];
-  const text=clauses.join(' ');
+  const ownMajor={yeogyeong:'간호학과',seoyeon:'치위생과',soyul:'치위생과'}[id];
+  const requiredPrefix=action==='about'?`저는 ${ownMajor} 다녀요. `:'';
+  const text=requiredPrefix+normalizeNpcAddress(s,id,clauses.join(' '));
   const signature=[intent,subject.id,detail,want,question,memory?.id??'',acknowledgment].join('|');
-  chosen={text,intent,topic:subject.id,topicName:subject.name,detail,memoryIds:memory?[memory.id]:[],signature};
+  chosen={text,requiredPrefix,intent,topic:subject.id,topicName:subject.name,detail,memoryIds:memory?[memory.id]:[],signature};
   if(!previous.some(p=>p.text===text||p.signature===signature))break;
  }
  const closed=action==='leave';
@@ -96,11 +101,13 @@ export function generateDialogueTurn(s,id,{action='greet',topic=null,playerLine=
   {id:'share',kind:'share',label:'나도 내 이야기를 곡으로 남기려는데, 어떻게 전할지 고민해요.'},
   {id:'switch',kind:'switch',label:'그 얘기는 잠깐 두고, 다른 이야기도 해볼까요?'}
  ];
+ if(!s.contacts[id]?.playerSeniorityKnown&&!limited)available.push({id:'introduce',kind:'introduce',label:'저는 스물셋이고 보컬 전공 2학년이에요. 군대 다녀와서 복학했어요.'});
+ if(!s.contacts[id]?.details?.major&&!limited)available.push({id:'about',kind:'about',label:'그러고 보니 어느 과 다녀요? 아직 못 물어봤네요.'});
  const options=[];
  const pool=[...available];while(pool.length&&options.length<(limited?1:2)){const index=Math.floor(dialogueRandom(store)*pool.length);options.push(pool.splice(index,1)[0]);}
  options.push({id:'leave',kind:'leave',label:'그럼 다음에 또 이야기해요.'});
  store.sequence++;store.recent[id]=[...previous,{text:chosen.text,signature:chosen.signature}].slice(-16);
- const response={person:id,day:s.day,phase:s.phase,minute:status.minute,choice:'gen:'+action,playerLine,text:chosen.text,stage:status.cue,scene:true,leave:closed,generated:true,plan:chosen,options:closed?[]:options,turnId:store.sequence};
+ const response={person:id,day:s.day,phase:s.phase,minute:status.minute,choice:'gen:'+action,playerLine,text:chosen.text,stage:status.cue,scene:true,leave:closed,generated:true,requiredPrefix:chosen.requiredPrefix,plan:chosen,options:closed?[]:options,turnId:store.sequence};
  const session={generated:true,closed,finished:false,node:'generated',turn:turn+1,topic:chosen.topic,response};
  s.dialogue.sessions??={};s.dialogue.sessions[`${s.day}:${s.phase}:${id}`]=session;
  s.dialogue.generatedVisits??={};s.dialogue.generatedVisits[id]={day:s.day,minute:status.minute};
@@ -112,6 +119,8 @@ export function advanceGeneratedDialogue(s,id,choice){
  const option=session?.response.options.find(o=>o.id===choice);
  if(!session?.generated||session.closed||!option)throw new Error('현재 대화에서 고를 수 없는 말입니다.');
  const store=generationStore(s);
+ if(option.kind==='about'){s.contacts[id].details??={};s.contacts[id].details.major={yeogyeong:'간호학과',seoyeon:'치위생과',soyul:'치위생과'}[id];}
+ if(option.kind==='introduce')s.contacts[id].playerSeniorityKnown=true;
  if(option.kind==='share'){store.sharedWork??=[];if(!store.sharedWork.includes(id))store.sharedWork.push(id);}
  // Semantics govern effects; random wording never changes rewards or creates facts.
  const award=`generated:${s.day}:${id}:${option.kind}`;s.dialogue.generatedAwards??={};

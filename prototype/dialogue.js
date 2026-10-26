@@ -2,7 +2,7 @@ import {usesGeneratedDialogue,generateDialogueTurn,advanceGeneratedDialogue} fro
 import {npcNow,conversationExperience} from './npc-state.js';
 import {followupCandidate,rememberConversation} from './conversation-continuity.js';
 import {photoReport,showcaseReport,scheduledEvent,learnEvent} from './event-view.js';
-import {contact,firstContact,respondIntroduction} from './identity.js';
+import {contact,firstContact,respondIntroduction,normalizeNpcAddress} from './identity.js';
 import {sceneKey,sceneNodes,scenePrompt} from './conversation-scenes.js';
 import {socialIntent} from './social-reasoning.js';
 export const people={
@@ -18,7 +18,7 @@ export function changeRelationship(s,from,to,delta){
  for(const [key,value] of Object.entries(delta)) r[key]=Math.max(0,Math.min(100,r[key]+value));
  s.relations[`${from}>${to}`]=r;
 }
-export function groupDialogue(s){
+function rawGroupDialogue(s){
  const friends=relationship(s,'soyul','seoyeon').familiarity>=4;
  const exhibition=scheduledEvent(s,'campus-showcase');
  if(s.day===3&&s.phase==='evening'&&exhibition){const joint=exhibition.outcome==='joint-display';return [{person:'seoyeon',text:'사진은 다 붙였어? 아까 비어 있던 칸이 있던데.'},{person:'soyul',text:joint?'응. 고른 이유를 쓰고 나니까 순서도 정해지더라.':exhibition.outcome==='separate-display'?'응. 각자 고른 건 각자 붙였어. 다음에는 기준부터 이야기해야겠어.':'사진은 붙였어. 설명은 다음 활동 때 조금 더 보완하려고.'},{person:'seoyeon',text:joint?'이제 사진 옆에 네 이야기도 있네. 그냥 사진만 볼 때랑 또 다르다.':'오늘 다 해결하려고 하지는 마. 각자 뭘 남기고 싶은지부터 이야기해봐.'},{person:'soyul',text:'응. 일단 오늘은 집에 가서 다시 고르지는 말아야겠다.'}];}
@@ -53,10 +53,11 @@ export function respondGroup(state,choice){
   lines=[{person:'soyul',text:close?'잠깐, 내 사진인데 왜 서연이가 골라. 내가 말할게.':'잠깐만요. 제가 고르던 거라… 저도 말씀드릴 수 있어요.'},{person:'seoyeon',text:'저한테 맡기면 또 소율이 눈 감은 걸로 골라요. 본인한테 물어봐줘요.'}];
   if(!repeated){changeRelationship(s,'soyul','taei',{tension:1});changeRelationship(s,'seoyeon','taei',{trust:-1});}
  }
+ lines=lines.map(line=>({...line,text:normalizeNpcAddress(s,line.person,line.text)}));
  s.dialogue.history.push({person:'group',choice,day:s.day??1,phase:s.phase,lines});
  return {state:s,lines};
 }
-export function dialogue(s,id){
+function rawDialogue(s,id){
  if(!contact(s,id).introduced)return firstContact(s,id);
  const active=s.dialogue?.sessions?.[sceneKey(s,id)];
  if(active?.generated&&!active.closed)return {opening:active.response.text,stage:active.response.stage,scene:true,generated:true,options:active.response.options.map(o=>({id:'gen:'+o.id,label:o.label}))};
@@ -186,7 +187,7 @@ export function respond(state,id,choice){
  if(!repeated)changeRelationship(s,id,'taei',delta);
  if(!repeated)conversationExperience(s,id,choice,`${s.phase}:ordinary:${choice}`);
  const result={person:id,choice,day:s.day??1,phase:s.phase,text,stage,playerLine:current.options.find(o=>o.id===choice)?.label??'',followup:'',repeated};
- s.dialogue.history.push(result);
+ result.text=normalizeNpcAddress(s,id,result.text);s.dialogue.history.push(result);
  return {state:s,result};
 }
 
@@ -218,7 +219,7 @@ function beginScene(state,id,choice,initiated=false,context=null){
   s.dialogue.sceneAwards[award]=true;
  }
  const result={person:id,day:s.day??1,phase:s.phase,choice:initiated?'npc:personal':choice,initiated,playerLine:initiated?'':current.options.find(o=>o.id===choice).label,text:n.text,stage:n.stage,scene:true,repeated:!!prior};
- s.dialogue.history.push(result);return {state:s,result};
+ result.text=normalizeNpcAddress(s,id,result.text);s.dialogue.history.push(result);return {state:s,result};
 }
 function advanceScene(state,id,choice){
  const s=structuredClone(state);ensureConversations(s);
@@ -244,7 +245,7 @@ function advanceScene(state,id,choice){
  const next=leaving?current:sceneNodes(s,id,session)[session.node];
  if(!next)throw new Error('대화의 다음 장면이 없습니다.');
  const result={person:id,day:s.day??1,phase:s.phase,choice:'scene:'+choice,playerLine:selected.label,text:next.text,stage:next.stage,scene:true,leave:leaving};
- s.dialogue.history.push(result);return {state:s,result};
+ result.text=normalizeNpcAddress(s,id,result.text);s.dialogue.history.push(result);return {state:s,result};
 }
 
 export function openConversation(state,id,context=null){
@@ -257,3 +258,7 @@ export function openConversation(state,id,context=null){
   return beginScene(state,id,'personal',true,context);
  return {state,result:null};
 }
+
+export function dialogue(s,id){const view=rawDialogue(s,id);return {...view,opening:normalizeNpcAddress(s,id,view.opening)};}
+
+export function groupDialogue(s){return rawGroupDialogue(s).map(line=>({...line,text:normalizeNpcAddress(s,line.person,line.text)}));}
