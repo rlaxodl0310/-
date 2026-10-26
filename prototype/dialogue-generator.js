@@ -30,6 +30,8 @@ function generatedMemory(s,id){
  if(facts.coffee)candidates.push({id:'coffee',text:facts.coffee==='black'?'안 단 커피가 좋다고 했죠.':'단 걸 좋아한다고 했죠.'});
  if(facts.photo)candidates.push({id:'photo',text:'전에 같이 사진을 본 적도 있으니까요.'});
  if(s.dialogue.generation?.sharedWork?.includes(id))candidates.push({id:'shared-work-story',text:'선배도 자기 이야기를 곡으로 남기고 싶다고 했잖아요.'});
+ const lunch=Object.values(s.rainLunch?.episodes??{}).findLast(r=>r.person===id&&r.status==='completed'&&r.walked);
+ if(lunch)candidates.push({id:'rain-lunch',text:lunch.ate?'비 오던 날 식당까지 같이 가서 밥 먹었잖아요.':'비 오던 날 식당까지 같이 걸었던 것도 생각나네요.'});
  const work=Object.values(s.activitySessions?.records??{}).findLast(r=>r.status==='completed'&&r.routeId==='volunteer');
  if(id==='yeogyeong'&&work)candidates.push({id:'volunteer',text:work.choices.some(c=>c.id==='carry')?'같이 상자 옮기면서 통로부터 비웠잖아요.':'같이 물품 수량을 맞춰봤잖아요.'});
  return candidates;
@@ -38,8 +40,10 @@ export function generateDialogueTurn(s,id,{action='greet',topic=null,playerLine=
  const store=generationStore(s),status=npcNow(s,id);
  const intentState=socialIntent(s,id),safe=intentState.feelsSafe;
  const guarded=intentState.mode==='guarded';
- const previous=store.recent[id]??[],subjects=dialogueSubjects[id];
- const groundedTopic=action==='greet'&&prompt?(/계산|영수증|수량/.test(prompt)?'checking':/사진|문구|인쇄/.test(prompt)?'photo':/커피|맛|컵/.test(prompt)?'taste':null):null;
+ const previous=store.recent[id]??[],subjects=[...dialogueSubjects[id]];
+ const sharedLunch=Object.values(s.rainLunch?.episodes??{}).findLast(r=>r.person===id&&r.status==='completed'&&r.walked);
+ if(sharedLunch)subjects.push({id:'shared-lunch',name:'비 오는 점심시간에 함께한 일',subject:'아까 함께 걸을 때는',detail:[sharedLunch.choices.includes('rush')?'같이 가는 속도를 먼저 맞추는 것':'말이 없어도 같이 걸어보는 것',sharedLunch.ate?'앉을 자리를 서로 물어보는 것':'시간이 짧아도 잠깐 인사하는 것','각자 할 일로 돌아갈 시간을 존중하는 것'],want:['다음에도 부담 없이 인사할 수 있으면 좋겠','같이 있다고 계속 말해야 한다고 생각하지 않았으면 좋겠','바쁜 날에는 짧게 봐도 괜찮았으면 좋겠'],question:['평소에도 점심 먹고 바로 하던 일로 돌아가요?','잠깐 걷는 동안에도 좀 쉬어진 느낌 들지 않았어요?','다음 수업까지 시간은 괜찮아요?']});
+ const groundedTopic=action==='greet'&&prompt?(/식당|점심|밥/.test(prompt)&&sharedLunch?'shared-lunch':/계산|영수증|수량/.test(prompt)?'checking':/사진|문구|인쇄/.test(prompt)?'photo':/커피|맛|컵/.test(prompt)?'taste':null):null;
  const subject=subjects.find(t=>t.id===(groundedTopic??topic))??selectDialoguePart(store,subjects);
  const memories=generatedMemory(s,id);
  // Sample a speech act first, then a proposition/detail/question; never an entire answer.

@@ -7,10 +7,11 @@ const serviceProfiles={
 export function dialogueServiceContext(s,id,result){
  const status=npcNow(s,id),facts=s.dialogue?.facts?.[id]??{};
  const heardWork=s.dialogue?.generation?.sharedWork?.includes(id)??false;
+ const ownLunch=Object.values(s.rainLunch?.episodes??{}).findLast(r=>r.person===id&&r.status==='completed'&&r.walked);
  const history=(s.dialogue?.history??[]).filter(h=>h.person===id&&h.generated&&h.turnId!==result.turnId).slice(-6).map(h=>({player:String(h.playerLine??'').slice(0,250),npc:String(h.text??'').slice(0,500)}));
  return {character:serviceProfiles[id],name:s.npcs[id].name,day:s.day,time:s.clock.minute,place:s.location,
   state:{mood:status.mood,bandwidth:status.bandwidth},relationship:{...s.relations[`${id}>taei`]},
-  known:{playerIntroduced:!!s.contacts[id]?.introduced,playerSeniorityKnown:!!s.contacts[id]?.playerSeniorityKnown,playerWork:heardWork?'본인의 이야기를 곡으로 남기려는 보컬 전공 복학생':null,preferences:{...facts}},
+  known:{playerIntroduced:!!s.contacts[id]?.introduced,playerSeniorityKnown:!!s.contacts[id]?.playerSeniorityKnown,playerWork:heardWork?'본인의 이야기를 곡으로 남기려는 보컬 전공 복학생':null,preferences:{...facts},sharedLunch:ownLunch?{day:ownLunch.day,walked:ownLunch.walked,ate:ownLunch.ate,actions:ownLunch.choices}:null},
   history,playerLine:String(result.playerLine??'').slice(0,300),
   constraints:{intent:result.plan.intent,topic:result.plan.topicName,detail:result.plan.detail,closing:!!result.leave},
   draft:result.text};

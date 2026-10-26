@@ -1,3 +1,4 @@
+import {rainLunchOffer,beginRainLunch,passRainLunch} from './rain-lunch.js';
 import {campusDetour} from './campus-variation.js';
 import {canGenerateReencounter} from './dialogue-generator.js';
 import {npcNow} from './npc-state.js';
@@ -59,6 +60,7 @@ export function arrive(state,location,spot='entry'){
  const s=structuredClone(state);s.location=location;s.encounters??={};
  const warning=beginWarningSite(s,location,spot);if(warning)return {state:warning.state,encounter:null,warning:warning.scene,observation:warning.observation};
  const present=presentPeople(s,location);seePeople(s,present);
+ const lunch=rainLunchOffer(s,location,spot);if(lunch){s.encounters[lunch.key]??={day:s.day,phase:s.phase,location,person:lunch.person,resolved:false};observeSituation(s,lunch);return {state:s,encounter:lunch};}
  const key=encounterKey(s,spot);
  if(s.encounters[key]?.resolved&&!followupCandidate(s,s.encounters[key].person)&&!canGenerateReencounter(s,s.encounters[key].person))return {state:s,encounter:null,observation:observePlace(s,location,spot,true)};
  let person=null,group=false;
@@ -94,6 +96,11 @@ export function arrive(state,location,spot='entry'){
  if(continuation){encounter.text={yeogyeong:'공용 공간에서 차여경이 수첩을 덮고 가방을 정리하다 태이를 알아본다. 아까와 달리 계산기는 가방 안에 들어가 있다.',seoyeon:'한서연이 휴대폰 시계를 확인하다 태이를 보고 고개를 든다. 아까 마시던 컵은 치워져 있고, 이제 자기 가방을 챙기는 중이다.',soyul:'박소율이 메모를 쓰다 잠깐 손을 멈춘다. 아까 보던 화면 대신 자신이 고른 사진과 짧은 문장이 나란히 떠 있다.'}[person];encounter.action='눈이 마주쳐 인사한다. “아까 이야기한 뒤에는 좀 어땠어요?”';encounter.prefix='';}
  if(resuming){encounter.text=`${content.text} 아까 나누던 이야기가 잠깐 떠오른다.`;encounter.action='아까 멈춘 이야기의 뒷부분을 조심스럽게 꺼낸다.';encounter.prefix='';}
  if(regrouped){encounter.text='자유관 창가 쪽을 지나는데 박소율이 정리한 출력물을 가방에 넣고 있다. 도서관에서 하던 일을 마치고 이쪽으로 옮겨온 모양이다.';encounter.action='걸음을 늦춘다. “아까 하던 건 마무리했어요?”';encounter.prefix='네, 일단 정리했어요. ';}
+ const sharedLunch=person?Object.values(s.rainLunch?.episodes??{}).findLast(r=>r.person===person&&r.status==='completed'&&r.walked):null;
+ if(sharedLunch&&canGenerateReencounter(s,person)){
+  encounter.text='복도를 지나가다 아까 같이 걸었던 사람과 다시 눈이 마주친다. 이번에는 서로 얼굴을 알아보고 가볍게 인사한다.';
+  encounter.action=sharedLunch.ate?'걸음을 늦춘다. “아까 식당에서 헤어지고 나서는 좀 어땠어요?”':'인사한다. “아까 식당 쪽까지 같이 갔었죠. 일정은 괜찮았어요?”';encounter.prefix='';
+ }
  if(location==='library'&&person)encounter.text+=libraryGreeting(s,person);
  if(person){const now=npcNow(s,person);if(now.mood!=='steady')encounter.text+=' '+now.cue;}
  if(s.encounters[key]?.resolved)s.encounters[key]=null;
@@ -106,6 +113,7 @@ export function resolveEncounter(state,encounter,engage){
  const present=presentPeople(s,s.location);
  if(encounter.group?!(present.includes('seoyeon')&&present.includes('soyul')):!present.includes(encounter.person))throw new Error('지금 그 장소에서 일어나는 장면이 아닙니다.');
  record.resolved=true;record.outcome=engage?'engaged':'passed';finishSituation(s,encounter,engage);
+ if(encounter.kind==='rain-lunch')return {state:engage?beginRainLunch(s,encounter.person):passRainLunch(s,encounter.person),result:null,rainLunch:engage};
  if(!engage||encounter.group)return {state:s,result:null,group:engage&&encounter.group};
  const firstExchange=!contact(s,encounter.person).introduced;
  introduce(s,encounter.person,'incidental-exchange');
