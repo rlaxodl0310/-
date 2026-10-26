@@ -56,6 +56,7 @@ export function finishFreeActivity(state,id,route,{start,activeMinutes=null}={})
  if(id==='volunteer')for(const [person,status] of Object.entries(s.dialogue.promises))if(status==='pending'){s.dialogue.promises[person]='kept';changeRelationship(s,person,'taei',{trust:2});}
  for(const a of s.appointments)if(a.day===s.day&&a.status==='pending'&&a.activity===id){a.status='kept';if(a.person)changeRelationship(s,a.person,'taei',{trust:2});}
  if(id==='work'&&s.dayHistory.some(h=>h.choice==='rehearsal'||h.activities?.some(a=>a.id==='rehearsal')))s.lastResult+=' 이전에 합주에서 확인한 부분을 데모에 반영했다.';
+ if(id==='volunteer'&&s.contacts?.yeogyeong?.introduced){s.dialogue.threads??={};s.dialogue.threads.yeogyeong??={episode:0,day:s.day,minute:s.clock.minute,origin:'volunteer'};}
  s=warningActivity(s,id);s.memory.push(`[${s.day}일차] ${s.lastResult}`);return s;
 }
 export function goHome(state){

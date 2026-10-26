@@ -1,3 +1,4 @@
+import {followupCandidate} from './conversation-continuity.js';
 import {campusBuildings} from './campus-buildings.js';
 import {libraryGreeting} from './library-life.js';
 import {beginWarningSite} from './warnings.js';
@@ -16,7 +17,7 @@ export const placeActions={
  library:[{id:'shelves',label:'반납대와 자료실을 둘러본다'},{id:'entrance',label:'로비의 출입 안내를 살펴본다',fromDay:3}],
  cafe:[{id:'counter',label:'주문대 쪽으로 간다'},{id:'street',label:'창밖의 정류장 쪽을 살펴본다',fromDay:3}]
 };
-export function encounterKey(s,spot='entry'){return `${s.day}:${s.phase}:${s.location}:${spot}${s.day===1&&s.phase==='afternoon'&&s.clock?':'+Math.floor(s.clock.minute/60):''}${s.day===3&&s.risk?.revision?':risk'+s.risk.revision:''}`;}
+export function encounterKey(s,spot='entry'){return `${s.day}:${s.phase}:${s.location}:${spot}${s.clock?':'+Math.floor(s.clock.minute/60):''}${s.day===3&&s.risk?.revision?':risk'+s.risk.revision:''}`;}
 function encounterContent(s,id){
  const day=s.day,evening=s.phase==='evening';
  if(evening)return {
@@ -56,7 +57,7 @@ export function arrive(state,location,spot='entry'){
  const warning=beginWarningSite(s,location,spot);if(warning)return {state:warning.state,encounter:null,warning:warning.scene,observation:warning.observation};
  const present=presentPeople(s,location);seePeople(s,present);
  const key=encounterKey(s,spot);
- if(s.encounters[key]?.resolved)return {state:s,encounter:null,observation:observePlace(s,location,spot,true)};
+ if(s.encounters[key]?.resolved&&!followupCandidate(s,s.encounters[key].person))return {state:s,encounter:null,observation:observePlace(s,location,spot,true)};
  let person=null,group=false;
  if(location==='hall'&&spot==='lounge')group=present.includes('seoyeon')&&present.includes('soyul');
  else if(location==='hall')person=spot==='noticeboard'?'seoyeon':spot==='window'?'soyul':'yeogyeong';
@@ -67,7 +68,8 @@ export function arrive(state,location,spot='entry'){
  const session=person?s.dialogue?.sessions?.[`${s.day}:${s.phase}:${person}`]:null;
  const resuming=!!session&&!session.closed;
  const regrouped=person==='soyul'&&s.location==='hall'&&s.risk?.positions?.soyul==='hall'&&!Object.values(s.encounters).some(e=>e.day===s.day&&e.phase===s.phase&&e.person==='soyul'&&e.location==='hall');
- if(person&&!resuming&&!regrouped&&Object.values(s.encounters).some(e=>e.day===s.day&&e.phase===s.phase&&e.person===person&&['engaged','passed'].includes(e.outcome)))person=null;
+ const continuation=person?followupCandidate(s,person):null;
+ if(person&&!resuming&&!regrouped&&!continuation&&Object.values(s.encounters).some(e=>e.day===s.day&&e.phase===s.phase&&e.person===person&&['engaged','passed'].includes(e.outcome)))person=null;
  if(!person&&!group){s.encounters[key]={day:s.day,phase:s.phase,resolved:true,outcome:'quiet'};return {state:s,encounter:null,observation:observePlace(s,location,spot)};}
  const content=group?{text:'휴게공간을 지나는데 낮은 웃음소리가 들린다. 한서연과 박소율이 같은 휴대폰을 들여다보고 있다. 두 사람은 이쪽을 보지 못한 채 사진 이야기를 이어간다.',action:'걸음을 늦추고 잠깐 이야기를 듣는다.',prefix:''}:encounterContent(s,person);
  const encounter={key,day:s.day,phase:s.phase,person,group,...content};
@@ -81,9 +83,11 @@ export function arrive(state,location,spot='entry'){
  }
  const meeting=s.appointments.find(a=>a.kind==='meeting'&&a.status==='pending'&&a.person===person&&a.day===s.day&&a.phase===s.phase&&a.location===s.location);
  if(meeting){encounter.text+=' 오늘 이곳에서 잠깐 이야기하기로 했던 약속이 떠오른다.';encounter.action='하던 일을 방해하지 않게 가까이 가 인사한다. “오늘 잠깐 보기로 했죠. 지금 괜찮아요?”';encounter.prefix='네, 잠깐 괜찮아요. ';}
+ if(continuation){encounter.text={yeogyeong:'공용 공간에서 차여경이 수첩을 덮고 가방을 정리하다 태이를 알아본다. 아까와 달리 계산기는 가방 안에 들어가 있다.',seoyeon:'한서연이 휴대폰 시계를 확인하다 태이를 보고 고개를 든다. 아까 마시던 컵은 치워져 있고, 이제 자기 가방을 챙기는 중이다.',soyul:'박소율이 메모를 쓰다 잠깐 손을 멈춘다. 아까 보던 화면 대신 자신이 고른 사진과 짧은 문장이 나란히 떠 있다.'}[person];encounter.action='눈이 마주쳐 인사한다. “아까 이야기한 뒤에는 좀 어땠어요?”';encounter.prefix='';}
  if(resuming){encounter.text=`${content.text} 아까 나누던 이야기가 잠깐 떠오른다.`;encounter.action='아까 멈춘 이야기의 뒷부분을 조심스럽게 꺼낸다.';encounter.prefix='';}
  if(regrouped){encounter.text='자유관 창가 쪽을 지나는데 박소율이 정리한 출력물을 가방에 넣고 있다. 도서관에서 하던 일을 마치고 이쪽으로 옮겨온 모양이다.';encounter.action='걸음을 늦춘다. “아까 하던 건 마무리했어요?”';encounter.prefix='네, 일단 정리했어요. ';}
  if(location==='library'&&person)encounter.text+=libraryGreeting(s,person);
+ if(s.encounters[key]?.resolved)s.encounters[key]=null;
  s.encounters[key]??={day:s.day,phase:s.phase,location:s.location,person,group,resolved:false};
  observeSituation(s,encounter);return {state:s,encounter};
 }

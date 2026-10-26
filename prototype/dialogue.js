@@ -1,3 +1,4 @@
+import {followupCandidate,rememberConversation} from './conversation-continuity.js';
 import {photoReport,showcaseReport,scheduledEvent,learnEvent} from './event-view.js';
 import {contact,firstContact,respondIntroduction} from './identity.js';
 import {sceneKey,sceneNodes,scenePrompt} from './conversation-scenes.js';
@@ -94,7 +95,7 @@ export function dialogue(s,id){
  ...((latest||old.length)&&r.tension>0?[{id:'repair',label:latest?'아까는 내 말이 앞섰어요. 미안해요.':'지난번에는 내 말이 앞섰어요. 미안해요.'}]:[]),
  ...(s.day===2&&r.familiarity>=2&&r.tension<3?[{id:'invite',label:'내일은 어떤 일정이에요?'}]:[]),
  ...(evening||(s.day??1)>1?[{id:'listen',label:evening?'오늘은 어땠어요? 아까 좀 바빠 보이던데.':'아까부터 바빠 보이던데, 뭐 하고 있었어요?'}]:[]),
- ...(!active?.finished?[{id:'personal',label:topic}]:[]),
+ ...(!active?.finished||followupCandidate(s,id)?[{id:'personal',label:followupCandidate(s,id)?'아까 이야기한 뒤에는 좀 어땠어요?':topic}]:[]),
  ...(comfortable&&s.dialogue?.facts?.[id]?.speech!=='casual'?[{id:'speech',label:'우리 조금 편하게 말할까요? 불편하면 지금처럼 해도 되고.'}]:[]),
  ...(!evening&&(s.day??1)===1&&!active?.finished?[{id:'joke',label:joke}]:[]),
  ...(!evening&&(s.day??1)===1?[{id:'promise',label:'오늘 봉사 활동에 갈게요.'}]:[]),
@@ -189,7 +190,7 @@ function ensureConversations(s){
 }
 export function endTopic(state,id){
  const s=structuredClone(state);ensureConversations(s);
- const session=s.dialogue.sessions[sceneKey(s,id)];if(session){const n=sceneNodes(s,id,session)[session.node];session.closed=true;session.finished=n?.options.every(o=>o.next==='_close')??false;}
+ const session=s.dialogue.sessions[sceneKey(s,id)];if(session){const n=sceneNodes(s,id,session)[session.node];const finished=n?.options.every(o=>o.next==='_close')??false;if(finished&&!session.closed)rememberConversation(s,id,session);session.closed=true;session.finished=finished;}
  return s;
 }
 function beginScene(state,id,choice,initiated=false){
@@ -197,7 +198,8 @@ function beginScene(state,id,choice,initiated=false){
  if(current.scene||!current.options.some(o=>o.id===choice))throw new Error('지금 나누던 이야기에 먼저 답해주세요.');
  const s=structuredClone(state);ensureConversations(s);
  const key=sceneKey(s,id),intent=socialIntent(s,id),prior=s.dialogue.sessions[key];
- const session={node:prior?.lastNode??'start',closed:false,casual:s.dialogue.facts?.[id]?.speech==='casual',variant:intent.mode==='guarded'?'guarded':'normal'};
+ const continuation=followupCandidate(s,id);
+ const session={...(continuation?{episode:continuation.episode}:{}),node:continuation?'start':prior?.lastNode??'start',closed:false,casual:s.dialogue.facts?.[id]?.speech==='casual',variant:continuation?'followup':intent.mode==='guarded'?'guarded':'normal'};
  if(choice==='joke'&&!prior&&(s.day??1)===1)session.node={seoyeon:'ice',yeogyeong:'joke',soyul:'start'}[id];
  if(session.variant==='guarded')session.node='start';
  s.dialogue.sessions[key]=session;
@@ -217,7 +219,7 @@ function advanceScene(state,id,choice){
  const nodes=sceneNodes(s,id,session),current=nodes[session.node];
  const selected=current?.options.find(o=>o.id===choice);
  if(!selected)throw new Error('현재 이야기와 맞지 않는 대답입니다.');
- const award=key+':'+choice;
+ const award=key+(session.variant==='followup'?':followup:'+session.episode:'')+':'+choice;
  if(!s.dialogue.sceneAwards[award]){
   changeRelationship(s,id,'taei',selected.delta);s.dialogue.sceneAwards[award]=true;
  }
@@ -228,7 +230,7 @@ function advanceScene(state,id,choice){
   s.dialogue.observations[id]??={};s.dialogue.observations[id][name]=value;
  }
  const leaving=selected.next==='_close';
- if(leaving){session.closed=true;session.finished=true;session.lastNode=session.node;}
+ if(leaving){rememberConversation(s,id,session);session.closed=true;session.finished=true;session.lastNode=session.node;}
  else {session.node=selected.next;session.lastNode=selected.next;}
  const next=leaving?current:sceneNodes(s,id,session)[session.node];
  if(!next)throw new Error('대화의 다음 장면이 없습니다.');
@@ -242,7 +244,7 @@ export function openConversation(state,id){
  if(current.scene)return {state,result:null};
  const key=sceneKey(state,id);
  // A person can initiate a topic once per encounter period, not every menu visit.
- if(!state.dialogue?.sessions?.[key]&&['seek-company','cautious-interest','guarded','task'].includes(intent.mode))
+ if((!state.dialogue?.sessions?.[key]||followupCandidate(state,id))&&['seek-company','cautious-interest','guarded','task'].includes(intent.mode))
   return beginScene(state,id,'personal',true);
  return {state,result:null};
 }

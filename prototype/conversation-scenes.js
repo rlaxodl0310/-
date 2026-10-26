@@ -1,8 +1,10 @@
+import {continuityNodes} from './conversation-continuity.js';
 import {socialIntent} from './social-reasoning.js';
 // Authored exchanges: the other person has something to do and can disagree.
 // Each node preserves its topic; choices are Tae-i's spoken words, not score labels.
 export function sceneKey(s,id){return `${s.day??1}:${s.phase}:${id}`;}
 export function sceneNodes(s,id,session){
+ if(session.variant==='followup')return continuityNodes(s,id,session);
  const intent=socialIntent(s,id);
  const close=session.casual??false,warm=intent.personallyInterested&&intent.feelsSafe;
  const facts=s.dialogue.facts?.[id]??{};
