@@ -38,8 +38,17 @@ export function freeActivity(state,id){
  const d=freeDay(structuredClone(state));if(d.completed.some(x=>x.id===id)&&!['rehearsal','work','explore','walk'].includes(id))throw new Error('오늘 이미 마친 일입니다. 다른 자유행동을 할 수 있습니다.');
  const route=availableRoutes(state).find(r=>r.id===id);if(!route||route.locked)throw new Error(route?.lockReason??'지금 할 수 없는 일입니다.');
  let s=weatherAdjustAppointments(state,availableRoutes(state));const start=s.clock.minute;
- s=advanceFreeTime(s,route.duration,{activeChoice:id,travelling:['explore','walk','shortcut','checkCampus'].includes(id)});s.choice=id;s.minutes=route.duration;s.lastResult=route.memory;
- freeDay(s).completed.push({id,start,end:s.clock.minute});
+ s=advanceFreeTime(s,route.duration,{activeChoice:id,travelling:['explore','walk','shortcut','checkCampus'].includes(id)});
+ return finishFreeActivity(s,id,route,{start});
+}
+// Shared completion effects for ordinary activities and timed, multi-step community events.
+export function finishFreeActivity(state,id,route,{start,activeMinutes=null}={}){
+ let s=structuredClone(state);
+ if(!availableRoutes(s).some(r=>r.id===id)||route.id!==id)throw new Error('올바른 활동이 아닙니다.');
+ if(!['rehearsal','work','explore','walk'].includes(id)&&freeDay(s).completed.some(x=>x.id===id))throw new Error('이미 완료한 활동입니다.');
+ if(!Number.isInteger(start)||start>s.clock.minute)throw new Error('활동 시작 시각을 확인해 주세요.');
+ s.choice=id;s.minutes=activeMinutes??route.duration;s.lastResult=route.memory;
+ freeDay(s).completed.push({id,start,end:s.clock.minute,...(activeMinutes===null?{}:{activeMinutes})});
  for(const fact of route.knowledge)if(!s.known.includes(fact))s.known.push(fact);
  const participants=['volunteer','exhibit'].includes(id)?Object.keys(s.npcs):id==='review'?['soyul']:id==='backstage'?['seoyeon']:[];
  for(const person of participants)if(!contact(s,person).introduced){introduce(s,person,'shared-activity');s.memory.push(`[${s.day}일차] ${identities[person].name}과 준비를 함께하며 인사를 나눴다.`);}

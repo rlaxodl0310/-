@@ -24,5 +24,5 @@ function baseSchedule(s){
  if(m<960)return {yeogyeong:(s.relations['yeogyeong>soyul']?.tension??0)>=3?'hall':'library',seoyeon:'hall',soyul:'library'};
  return {yeogyeong:'hall',seoyeon:'hall',soyul:'hall'};
 }
-export function currentSchedule(s){const plan=adaptWeatherSchedule(s,baseSchedule(s));if(s.day===3&&s.phase==='afternoon'&&(s.world?.stage??'campus')==='campus')Object.assign(plan,s.risk?.positions??{});if(schoolEnabled(s))for(const id of Object.keys(plan)){const classroom=schoolLocation(s,id)??preparationLocation(s,id);if(classroom)plan[id]=classroom;}return plan;}
+export function currentSchedule(s){const plan=adaptWeatherSchedule(s,baseSchedule(s));if(s.day===3&&s.phase==='afternoon'&&(s.world?.stage??'campus')==='campus')Object.assign(plan,s.risk?.positions??{});const session=s.activitySessions?.records?.[s.activitySessions?.active];if(session?.day===s.day&&session.status==='active'&&session.postId==='volunteer-recruit'&&s.clock.minute<1080)plan.yeogyeong='hall';if(schoolEnabled(s))for(const id of Object.keys(plan)){const classroom=schoolLocation(s,id)??preparationLocation(s,id);if(classroom)plan[id]=classroom;}return plan;}
 export function presentPeople(s,location){const plan=currentSchedule(s);return Object.keys(plan).filter(id=>plan[id]===location&&!studyingNow(s,id));}
