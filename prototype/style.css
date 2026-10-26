@@ -81,3 +81,43 @@ body{background-color:#e8e3da}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
 .scene-time{display:inline-block;background:#183238ed;padding:5px 8px;border-radius:6px}
+
+/* One scene, one line of narration, then a small set of answers. */
+.vn-stage{position:relative;height:100dvh;min-height:620px;overflow:hidden;background:#163039;color:#263331}
+.vn-stage .scene-visual{position:absolute;inset:0;width:100%;height:100%;min-height:0;max-height:none;border-radius:0;box-shadow:none;background-position:center;background-attachment:scroll}
+.vn-stage .scene-visual .portrait{top:90px;right:18%;width:min(28vw,300px);max-width:none;mask-image:linear-gradient(#000 80%,transparent)}
+.vn-stage .scene-context{padding:24px 30px;max-width:540px;min-height:150px;background:linear-gradient(90deg,#142d31e6,#142d3170,transparent)}
+.vn-stage .scene-person{display:none}
+.vn-toolbar{position:absolute;right:24px;top:22px;display:flex;gap:10px;z-index:4;padding:5px;border-radius:12px;background:#183238dd}
+.vn-toolbar button{font-size:14px;padding:10px 18px;border:1px solid #ffffff50;background:#244449;color:#fffaf0;min-height:44px}
+.vn-toolbar button:hover,.vn-toolbar button:focus-visible{background:#3d5e57;outline:2px solid #e5cc93;outline-offset:2px}
+.vn-panel{position:absolute;z-index:2;bottom:24px;left:50%;transform:translateX(-50%);width:min(940px,calc(100% - 64px));max-height:68vh;overflow:auto;background:#faf5eaf5;border:1px solid #dfd2b5;border-top:3px solid #af8c52;border-radius:14px;padding:20px 28px;box-shadow:0 10px 38px #10202855;scrollbar-width:thin;scrollbar-color:#a7ae9c #f5efdf}
+.vn-panel:focus{outline:none}.vn-panel:focus-visible{outline:2px solid #c9ae79;outline-offset:3px}
+.vn-speaker{font-weight:700;font-size:15px;letter-spacing:.04em;color:#74502b;margin:0 0 12px}
+.vn-line{font-size:20px;line-height:1.85;word-break:keep-all;overflow-wrap:anywhere;min-height:3.7em;margin:0;color:#263331}
+.vn-line.vn-player{color:#3f5544}.vn-panel .information-text{color:#076178}.vn-panel .item-text{color:#895000}
+.vn-controls{margin-top:16px}.vn-reading-controls{display:flex;justify-content:flex-end;gap:12px}.vn-reading-controls button{min-height:42px;padding:9px 23px;background:#fdfaf2;color:#53624c;border-color:#abb8a2;font-size:14px}.vn-reading-controls button:last-child{background:#3c5446;color:#fffaf0;border-color:#3c5446;min-width:120px}
+.vn-choice-caption{font-size:12px;color:#6c735f;margin:0 0 8px;letter-spacing:.04em}.vn-choices{display:grid;gap:8px}
+.vn-choices button{background:#fffdf6;border:1px solid #aab69f;border-left:3px solid #8e9e7b;border-radius:9px;text-align:left;color:#293d32;min-height:48px;padding:11px 18px;line-height:1.65;font-size:16px;box-shadow:0 2px 0 #26333108}
+.vn-choices button:hover,.vn-choices button:focus-visible{background:#e8efdf;border-color:#768f66;outline:2px solid #b39150;outline-offset:2px}
+.vn-choices button[data-action="vnCycle"],.vn-choices button[data-action="vnBranch"]{background:transparent;box-shadow:none;border:1px dashed #aab69f;color:#626f58;font-size:14px;min-height:40px;padding:8px 18px}
+.vn-choices button[aria-pressed="true"]{background:#e1ead4;border-color:#6c855a;box-shadow:inset 3px 0 #7a9368}
+.vn-choices .time-cost{color:#5a6f53;font-size:11px;margin-top:3px}
+.vn-acquisition{position:absolute;right:24px;top:84px;max-width:min(430px,50%);display:flex;gap:10px;align-items:center;background:#edf2e5ec;color:#285b4c;padding:8px 12px;border:1px solid #a4bc97;border-radius:10px;font-size:12px;z-index:3}
+.vn-acquisition span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.vn-acquisition button{padding:5px 9px;background:#fffdf4;color:#38553c;border-color:#aab99a;font-size:12px;min-height:32px;white-space:nowrap}
+.menu-tabs{display:flex;gap:8px;border-bottom:1px solid #b8c3af;padding-bottom:12px;margin-bottom:20px}.menu-tabs button{padding:10px 20px;border-radius:8px}.utility-page .grid>button{padding:18px;min-height:64px}
+@media(max-width:650px){
+ .vn-stage{height:100dvh;min-height:580px}
+ .vn-stage .scene-visual .portrait{top:108px;right:5%;width:190px;max-width:55%;mask-image:linear-gradient(#000 70%,transparent)}
+ .vn-stage .scene-context{padding:17px 16px;max-width:64%;min-height:130px;background:linear-gradient(90deg,#142d31ed,#142d31aa,transparent)}
+ .vn-stage .scene-location{font-size:19px;margin-bottom:8px}.vn-stage .scene-location small{font-size:12px;line-height:1.6;margin-top:6px}.vn-stage .scene-time{font-size:11px;padding:4px 6px}.vn-stage .scene-kicker{font-size:10px;margin-bottom:8px}
+ .vn-toolbar{top:12px;right:10px;gap:5px;padding:3px}.vn-toolbar button{padding:8px 10px;min-height:40px;font-size:12px}
+ .vn-panel{bottom:12px;width:calc(100% - 20px);padding:16px 17px;max-height:62vh;border-radius:12px;border-top-width:2px}
+ .vn-speaker{font-size:13px;margin-bottom:9px}.vn-line{font-size:17px;line-height:1.85;min-height:3.7em}.vn-controls{margin-top:13px}.vn-choices{gap:7px}.vn-choices button{font-size:14px;min-height:44px;padding:10px 13px}.vn-choices button[data-action="vnCycle"],.vn-choices button[data-action="vnBranch"]{font-size:12px;padding:7px 13px;min-height:36px}.vn-reading-controls button{font-size:12px;padding:8px 16px;min-height:38px}.vn-reading-controls button:last-child{min-width:110px}.vn-choice-caption{font-size:11px;margin-bottom:6px}
+ .vn-acquisition{top:67px;right:10px;max-width:45%;font-size:10px;padding:6px 7px;gap:5px}.vn-acquisition button{font-size:10px;padding:4px 6px;min-height:28px}
+}
+@media(max-height:640px) and (min-width:651px){.vn-panel{bottom:10px;max-height:72vh;padding:13px 22px}.vn-line{font-size:17px;min-height:2em}.vn-controls{margin-top:10px}.vn-stage .scene-visual .portrait{top:45px}.vn-choices button{padding:8px 14px;min-height:40px}}
+.scene-weather{display:block;margin-top:3px;font-size:11px;color:#e6eadc}.vn-stage .scene-visual::before{content:'';position:absolute;inset:0;pointer-events:none;background:transparent}
+body[data-weather="cloudy"] .vn-stage .scene-visual::before{background:#40526638}
+body[data-weather="rain"] .vn-stage .scene-visual::before,body[data-weather="storm"] .vn-stage .scene-visual::before{background:repeating-linear-gradient(110deg,transparent 0 42px,#b9dfee35 43px 44px,transparent 45px 85px),linear-gradient(#263e5766,#19364b66)}
+body[data-weather="storm"] .vn-stage .scene-visual::before{background-color:#152e4870}

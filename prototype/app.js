@@ -1,3 +1,4 @@
+import {splitNovelText,novelChoicePage,advanceNovel} from './vn-flow.js';
 import {timetable,nextLesson,lessonStatus,classPlace,schoolTime,schoolEnabled,classConflicts} from './timetable.js';
 import {attendLesson} from './classes.js';
 import {campusBuildings,buildingActions,buildingActivity,buildingAtmosphere,enterBuildingArea,selectedBuildingArea} from './campus-buildings.js';
@@ -35,10 +36,10 @@ const narrative=text=>{
  return html+esc(value.slice(start));
 };
 const buttonLabel=text=>{const node=document.createElement('span');node.innerHTML=text;return esc(node.textContent);};
-const btn=(text,action,value='')=>{const cost=action==='encounter'&&value==='pass'?0:timeCost(state,action,value);return `<button aria-label="${buttonLabel(text)}" aria-description="${cost?cost+'분 소요':'여러 활동을 마친 뒤 시간을 묶어서 진행'}" data-action="${action}" data-value="${esc(value)}" ${action==='wait'&&state.clock.minute>=1320?'disabled':''}>${text}${cost?`<small class="time-cost">${cost}분</small>`:''}</button>`;};
+const btn=(text,action,value='')=>{const cost=action==='encounter'&&value==='pass'?0:timeCost(state,action,value);return `<button aria-label="${buttonLabel(text)}" aria-description="${action.startsWith('vn')||['openQuick','closeQuick','quickTab'].includes(action)?'화면만 바뀌며 게임 시간은 흐르지 않습니다.':cost?cost+'분 소요':'여러 활동을 마친 뒤 시간을 묶어서 진행'}" data-action="${action}" data-value="${esc(value)}" ${action==='wait'&&state.clock.minute>=1320?'disabled':''}>${text}${cost?`<small class="time-cost">${cost}분</small>`:''}</button>`;};
 const duration=n=>n%60?`${n}분`:`${n/60}시간`;
 function portrait(column){return `<div class="portrait" style="--column:${column}" role="img" aria-label="${column===0?'김태이':nameOf(Object.entries(people).find(([,p])=>p.column===column)?.[0])} 정면 초상화"></div>`;}
-const storyScreens=new Set(['place','encounter','warningScene','classLesson','detail','result','buildingDirectory','dayEnd','clubDetail']);
+const storyScreens=new Set(['place','encounter','warningScene','classLesson','detail','result','buildingDirectory','dayEnd','clubDetail','warningShare']);
 function readableText(text){
  const value=String(text??'');if(value.length<110)return esc(value);
  const sentences=value.split(/(?<=[.!?])\s+/),chunks=[];
@@ -46,16 +47,18 @@ function readableText(text){
  return chunks.join('');
 }
 function sceneVisual(){
- const person=screen==='encounter'&&encounter?.person?encounter.person:'taei';
+ const person=['dialogue','warningShare'].includes(screen)?speaker:screen==='group'?groupLines[groupIndex].person:screen==='encounter'&&encounter?.person?encounter.person:'taei';
  const column=person==='taei'?0:people[person]?.column??0;
  const atHome=screen==='dayEnd'&&state.freeDay?.home;
  const area=atHome?null:selectedBuildingArea(state);
  const caption={classLesson:'수업',encounter:'우연한 만남',warningScene:'눈앞의 상황',detail:'활동 준비',result:'활동을 마친 뒤',buildingDirectory:'건물 안에서',dayEnd:'하루의 끝'}[screen]??'캠퍼스의 일상';
- return `<aside class="scene-visual" aria-label="현재 장면"><div class="scene-context"><span class="scene-kicker">${caption}</span><p class="scene-location">${esc(atHome?'자취방':locations[state.location]??'캠퍼스')}${area?`<small>${esc((area.floor==='층 미확정'?'':area.floor+' · ')+area.name)}</small>`:''}</p><p class="scene-time">${esc(timeLabel())}</p></div>${portrait(column)}<p class="scene-person">${esc(person==='taei'?'김태이':nameOf(person))}</p></aside>`;
+ return `<aside class="scene-visual" aria-label="현재 장면"><div class="scene-context"><span class="scene-kicker">${caption}</span><p class="scene-location">${esc(atHome?'자취방':screen==='campus'?'캠퍼스':locations[state.location]??'캠퍼스')}${area?`<small>${esc((area.floor==='층 미확정'?'':area.floor+' · ')+area.name)}</small>`:''}</p><p class="scene-time">${esc(timeLabel())}<span class="scene-weather">${weatherNow(state).icon} ${weatherNow(state).name} · ${weatherNow(state).temperature}°C</span></p></div>${portrait(column)}<p class="scene-person">${esc(person==='taei'?'김태이':nameOf(person))}</p></aside>`;
 }
 function page(title,body,back='campus',backAction='go'){
+ if(['quickMenu','menu'].includes(screen)){if(quickReturn){back='';backAction='closeQuick';}body=menuTabs()+body;}
+ if(screen===quickTool&&quickReturn){back='quickMenu';backAction='go';}
  const scenic=storyScreens.has(screen);
- const content=`<header>${btn('← 뒤로',backAction,back)}<h1 tabindex="-1">${title}</h1>${btn('휴대폰','phone')}</header>${scenic?'<div class="scene-feedback"></div>':''}${note?`<p class="notice" role="status" tabindex="-1">${scenic?'<span class="note-label">지금의 이야기</span>':''}${scenic?readableText(note):esc(note)}</p>`:''}${state.day===1&&state.phase==='afternoon'&&['place','encounter'].includes(screen)?`<p class="pace-summary">${paceSummary(state)}</p>`:''}${screen==='place'?schoolPanel():''}<div class="${scenic?'story-reading':'page-reading'}">${body}</div><p class="footnote">대학생활 3일 시제품 · 사건·요일·일정은 검증용 예시입니다.</p>`;
+ const content=`<header>${btn(backAction==='closeQuick'?'장면으로':'← 뒤로',backAction,back)}<h1 tabindex="-1">${title}</h1>${btn('휴대폰','phone')}${!['quickMenu','menu'].includes(screen)?btn('메뉴','openQuick'):''}</header>${scenic?'<div class="scene-feedback"></div>':''}${note?`<p class="notice" role="status" tabindex="-1">${scenic?'<span class="note-label">지금의 이야기</span>':''}${scenic?readableText(note):esc(note)}</p>`:''}${state.day===1&&state.phase==='afternoon'&&['place','encounter'].includes(screen)?`<p class="pace-summary">${paceSummary(state)}</p>`:''}${screen==='place'?schoolPanel():''}<div class="${scenic?'story-reading':'page-reading'}">${body}</div><p class="footnote">대학생활 3일 시제품 · 사건·요일·일정은 검증용 예시입니다.</p>`;
  return scenic?`<section class="page story-page" data-scene="${screen}">${sceneVisual()}<div class="story-content">${content}</div></section>`:`<section class="page utility-page">${content}</section>`;
 }
 function timeLabel(){return `${state.day}일차 · ${days[state.day].weekday} · ${clockLabel(state)} ·  ${state.phase==='evening'?'저녁':state.clock.minute<720?'오전':'오후'}`;}
@@ -74,9 +77,94 @@ function appointmentCard(a){
 }
 function commitments(){return state.appointments.map(appointmentCard).join('')||'<p class="muted">아직 약속이나 제안이 없습니다.</p>';}
 function atPlace(){return locations[state.location]?state.location:'hall';}
+let vnView={key:'',beat:0,choosing:false,page:0,branch:'main'},vnModel=null,vnResumeView=null;
+const vnCursors=new Map();
+let quickReturn=null,quickSnapshot=null,quickTool='';
+const readingSnapshots=new Map();
+const utilityScreens=new Set(['phone','timetable','schedule','messages','map','journal','discoveries','observations','weather','community','communityPost','clubs','travel','menu','quickMenu','reset']);
+function rememberReading(){if(vnModel&&!utilityScreens.has(screen))readingSnapshots.set(screen,{screen,note,reply,paceNotice,view:{...vnView}});}
+function plainNode(node){const copy=node.cloneNode(true);if(copy.classList.contains('player-line'))copy.querySelector('span')?.remove();copy.querySelectorAll('.note-label,.time-cost,button').forEach(n=>n.remove());return copy.textContent.replace(/\s+/g,' ').trim();}
+function novelPresentation(){
+ const raw=app.querySelector('.story-page,.explore,.conversation');
+ if(!raw||utilityScreens.has(screen)){vnModel=null;return;}
+ const beats=[],push=(text,kind='narrator',who='')=>{for(const part of splitNovelText(text))beats.push({text:part,kind,who});};
+ let primary=[],aux=[],plans=[];
+ const nodeButtons=nodes=>Array.from(nodes).map(n=>n.cloneNode(true));
+ if(screen==='campus'){
+  push(raw.querySelector('.prompt>p')?.textContent??'');primary=nodeButtons(raw.querySelectorAll('.prompt button'));
+ }else if(screen==='dialogue'||screen==='group'){
+  const panel=raw.querySelector('.dialogue-panel');
+  if(panel.querySelector('.player-line'))push(plainNode(panel.querySelector('.player-line')),'player','김태이');
+  const stage=panel.querySelector(':scope>.muted');if(stage)push(plainNode(stage));
+  const heard=panel.querySelector('.heard-report');if(heard)push(plainNode(heard),'speech',nameOf(speaker));
+  const quote=panel.querySelector('blockquote');if(quote)push(quote.textContent,'speech',screen==='group'?nameOf(groupLines[groupIndex].person):nameOf(speaker));
+  const follow=panel.querySelector('.inner-line');if(follow)push(plainNode(follow));
+  primary=nodeButtons(panel.querySelectorAll('.dialogue-options button'));aux=nodeButtons(panel.querySelectorAll(':scope>.actions button'));
+ }else{
+  const content=raw.querySelector('.story-content'),reading=content.querySelector('.story-reading');
+  const outcome=content.querySelector(':scope>.notice');if(outcome)push(plainNode(outcome),'outcome');
+  for(const node of reading.children){
+   if(node.matches('p,.story-prose,.list')){
+    if(screen==='place'){const observedRisk=node.matches('.muted')&&node.previousElementSibling?.matches('.weather-scene');if((outcome&&!observedRisk)||node.matches('.lead,.weather-scene'))continue;}
+    if(screen==='classLesson'&&node.matches('.lead'))continue;
+    if(screen==='detail'&&node.matches('.muted'))continue;
+    if(node.matches('.scene-caption'))continue;
+    push(plainNode(node),node.matches('.notice')?'warning':'narrator');
+   }
+  }
+  primary=nodeButtons(reading.querySelectorAll('button'));
+  if(screen==='place'){
+   primary=primary.filter(n=>n.dataset.action!=='visit'&&!(n.dataset.action==='go'&&['timetable','schedule','map','phone'].includes(n.dataset.value)));
+   const course=content.querySelector('.school-summary [data-action="classPrepare"],.school-summary [data-action="classTravel"]');
+   if(course)primary.unshift(course.cloneNode(true));
+   const exit=document.createElement('button');exit.dataset.action='go';exit.dataset.value='campus';exit.textContent='건물 밖으로 나와 잠깐 주변을 본다.';primary.push(exit);
+  }
+  if(screen==='detail'){plans=primary.filter(n=>n.dataset.action==='plan');primary=primary.filter(n=>n.dataset.action!=='plan');}
+ }
+ if(paceNotice)push(paceNotice);
+ // Utility commands are always available in the upper menu instead of the answer list.
+ primary=primary.filter(n=>!(n.dataset.action==='go'&&['timetable','schedule','map','phone','discoveries'].includes(n.dataset.value)));
+ if(!beats.length)push(screen==='buildingDirectory'?'안내를 보며 어느 공간으로 갈지 생각한다.':'잠깐 생각을 정리한다.');
+ const branchButton=(text,value)=>{const n=document.createElement('button');n.dataset.action='vnBranch';n.dataset.value=value;n.textContent=text;return n;};
+ if(['clubDetail','buildingDirectory','classLesson'].includes(screen)){const back=raw.querySelector('.story-content>header button');if(back){const n=back.cloneNode(true);n.textContent=screen==='clubDetail'?'안내를 덮고 돌아간다.':screen==='buildingDirectory'?'일단 복도로 돌아간다.':'아직 수업에 들어가지 않고 돌아간다.';n.setAttribute('aria-label',n.textContent);primary.push(n);}}
+ if(!primary.length&&!aux.length){const back=raw.querySelector('.story-content>header button');if(back){const n=back.cloneNode(true);n.textContent='하던 곳으로 돌아간다.';n.setAttribute('aria-label','하던 곳으로 돌아간다.');primary.push(n);}}
+ if(aux.length)primary.push(branchButton('조금 다른 이야기를 꺼낸다.','conversation'));
+ if(plans.length)primary.push(branchButton('어떻게 참여할지 조금 더 생각한다.','plans'));
+ const key=JSON.stringify([screen,state.day,state.clock.minute,state.location,selected,beats,primary.map(n=>[n.dataset.action,n.dataset.value,n.textContent])]);
+ if(vnResumeView){vnView={...vnResumeView,key,beat:Math.min(vnResumeView.beat,beats.length-1)};vnResumeView=null;}
+ else if(vnView.key!==key)vnView=vnCursors.get(key)??{key,beat:0,choosing:false,page:0,branch:'main'};
+ vnModel={beats,primary,aux,plans,title:raw.querySelector('h1')?.textContent??(screen==='dialogue'?nameOf(speaker):'캠퍼스')};
+ const notices=Array.from(raw.querySelectorAll('.discovery-notice p')).map(n=>n.textContent.trim());
+ app.innerHTML=`<section class="vn-stage" data-vn-screen="${screen}">${sceneVisual()}<nav class="vn-toolbar" aria-label="상단 메뉴">${btn('휴대폰','phone')}${btn('메뉴'+(state.appointments.some(a=>a.status==='offered')?' · 새 제안':''),'openQuick')}</nav>${notices.length?`<div class="vn-acquisition"><span>${esc(notices[0])}${notices.length>1?' 외 '+(notices.length-1)+'개':''}</span>${btn('정보 보기','go','discoveries')}</div>`:''}<article class="vn-panel" aria-label="이야기와 선택" tabindex="0"><div class="vn-copy"></div><div class="vn-controls"></div></article></section>`;
+ drawNovelBeat();
+}
+function drawNovelBeat(){
+ if(!vnModel)return;
+ vnCursors.set(vnView.key,{...vnView});
+ const current=vnModel.beats[Math.min(vnView.beat,vnModel.beats.length-1)],copy=app.querySelector('.vn-copy'),controls=app.querySelector('.vn-controls');if(!copy||!controls)return;
+ const label=current.who||(current.kind==='outcome'?'그 뒤의 이야기':current.kind==='warning'?'잠깐, 확인할 일':'이야기');
+ copy.innerHTML=`<p class="vn-speaker">${esc(label)}</p><p class="vn-line ${current.kind==='player'?'vn-player':''}">${narrative(current.text)}</p>`;
+ if(!vnView.choosing){controls.innerHTML=`<div class="vn-reading-controls">${vnView.beat>0?btn('이전 문장','vnPrevious'):''}${btn(vnView.beat+1<vnModel.beats.length?'다음':'선택지 보기','vnNext')}</div>`;return;}
+ let choices=vnView.branch==='conversation'?vnModel.aux:vnView.branch==='plans'?vnModel.plans:vnModel.primary;
+ if(vnView.branch!=='main'){
+  const back=document.createElement('button');back.dataset.action='vnBranch';back.dataset.value='main';back.textContent='앞의 이야기로 돌아간다.';choices=[...choices,back];
+ }
+ const group=novelChoicePage(choices,vnView.page);vnView.page=group.page;
+ controls.innerHTML=`<p class="vn-choice-caption">${vnView.branch==='conversation'?'어떤 이야기를 꺼낼까?':vnView.branch==='plans'?'어떻게 참여할까?':'어떻게 할까?'}${group.more?' · '+(group.page+1)+'/'+group.pages:''}</p><div class="vn-choices"></div>`;
+ const container=controls.querySelector('.vn-choices');for(const n of group.items)container.append(n.cloneNode(true));
+ if(group.more)container.insertAdjacentHTML('beforeend',btn('다른 선택을 생각해본다.','vnCycle'));
+}
+function quickMenuBody(){
+ const options=[['이동','travel'],['휴대폰','phone'],...(schoolEnabled(state)?[['시간표 · 출석','timetable']]:[]),['약속','schedule'],['지도','map'],['정보 · 소지품','discoveries'],['메시지','messages'],['일지','journal']];
+ return `<p class="muted">${esc(timeLabel())} · ${esc(locations[state.location]??'캠퍼스')}</p><div class="grid">${options.map(([label,value])=>btn(label+(value==='schedule'&&state.appointments.some(a=>a.status==='offered')?' · 새 제안':''),'go',value)).join('')}${btn('날씨 · 예보','openWeather')}</div>`;
+}
+function menuTabs(){return `<nav class="menu-tabs" aria-label="메뉴 탭"><button data-action="quickTab" data-value="tools" aria-pressed="${screen==='quickMenu'}">기능</button><button data-action="quickTab" data-value="save" aria-pressed="${screen==='menu'}">저장 · 설정</button></nav>`;}
+function resumeQuick(){if(!quickReturn){screen='campus';note='';reply=null;render();return;}screen=quickReturn;note=quickSnapshot?.note??'';reply=quickSnapshot?.reply??null;paceNotice=quickSnapshot?.paceNotice??'';vnResumeView=quickSnapshot?.view??null;quickReturn=null;quickSnapshot=null;quickTool='';if(!utilityScreens.has(screen))readingSnapshots.delete(screen);render();(app.querySelector('.vn-panel')??app.querySelector('h1'))?.focus({preventScroll:true});}
+
 function render(){
  const evening=state.phase==='evening',day=days[state.day],routes=availableRoutes(state);
  if(screen==='campus'){const scene=campusScene(state);app.innerHTML=`<section class="explore"><div class="top"><span class="badge">${timeLabel()}</span><nav>${btn('휴대폰','phone')}${btn('메뉴','go','menu')}</nav></div>${portrait(0)}<div class="prompt scene-prompt"><p>${narrative(scene.text)}</p>${scene.choices.map(c=>btn(narrative(c.label),c.action,c.value)).join('')}</div></section>`;}
+ if(screen==='quickMenu')app.innerHTML=page('메뉴',quickMenuBody(),'','closeQuick');
  if(screen==='community')app.innerHTML=page('캠퍼스톡',`<p class="community-intro">학내 커뮤니티 · 모집글과 공지, 익명 이야기가 함께 올라옵니다.</p><nav class="community-tabs">${[['all','전체'],['anonymous','자유'],['club','모집'],['notice','공지']].map(([id,label])=>`<button data-action="communityFilter" data-value="${id}" aria-pressed="${communityFilter===id}">${label}</button>`).join('')}</nav><div class="community-live" aria-live="polite"></div><div class="community-feed">${visibleCommunityPosts(state).filter(p=>(!feedIds||feedIds.includes(p.id))&&(communityFilter==='all'||p.kind===communityFilter)).map(p=>`<button class="community-post" data-action="readPost" data-value="${p.id}"><span class="post-meta">${esc(p.board)} · ${p.kind==='anonymous'?'익명글':p.kind==='notice'?'교내 공지':'동아리 운영진'} · ${p.day===state.day?'오늘':p.day+'일차'}${p.generated?' · '+(communityState(state).beat-p.createdBeat<4?'방금':'조금 전'):''}</span><strong>${esc(p.title)}</strong><span class="post-preview">${esc(p.body)}</span><span class="post-meta">댓글 ${p.comments.length}${p.likes?' · 공감 '+p.likes:''}${state.flow.postsRead?.[p.id]?' · 읽음':''}</span></button>`).join('')}</div>`,communityReturn,'closeCommunity');
  if(screen==='communityPost'&&selectedPost){const p=visibleCommunityPosts(state).find(p=>p.id===selectedPost);if(p)app.innerHTML=page(p.board,`<article class="community-detail"><p class="post-meta">${esc(p.author)} · ${p.day===state.day?'오늘':p.day+'일차'}${p.kind==='anonymous'?' · 작성자·내용 미확인':''}</p><h2>${esc(p.title)}</h2><p>${esc(p.body)}</p>${p.kind==='anonymous'?'<p class="source-note">익명 작성자의 글입니다. 직접 본 일이나 공식 안내와 구분해 기억합니다.</p>':''}</article><div class="dialogue-options">${p.club?btn('이 글의 모집 안내를 자세히 읽는다.','clubDetail',p.club):''}${p.club==='volunteer'?btn('글에서 말한 자유관 쪽으로 가본다.','visit','hall'):''}${p.club==='music'&&state.day===1&&state.phase==='afternoon'?btn('휴대폰을 넣고 연습실 소리가 나는 쪽으로 간다.','select','rehearsal'):''}${p.club==='football'&&state.day===2&&state.phase==='afternoon'?btn('안내받은 공개 체험 장소로 향한다.','select','football'):''}${p.id==='ambulance-post'?btn('지나갈 일이 있는 카페 쪽에서 직접 확인해본다.','visit','cafe'):''}</div><div class="community-live" aria-live="polite"></div>${` <h3>댓글 ${p.comments.length}</h3>${p.comments.map(c=>`<p class="community-comment ${c.reply?'reply':''}"><strong>${typeof c==='string'?'익명':esc(c.author)}</strong>${esc(typeof c==='string'?c:c.text)}</p>`).join('')}`}`, 'community');}
  if(screen==='travel')app.innerHTML=page('캠퍼스 이동',`<p class="muted">인물은 각자의 일정에 따라 장소를 옮깁니다. 1일차에는 여러 이동·탐색·대화를 묶어 시간이 한 번에 흐릅니다. 보통 약 30분이며, 비 오는 날의 야외 이동과 우산 준비에 따라 달라집니다. 짧은 대답마다 시간이 차감되지는 않습니다. 머물 곳과 할 일은 직접 정할 수 있습니다. 휴대폰과 메뉴를 확인하는 동안에는 시간이 들지 않습니다.</p><div class="grid">${Object.entries(locations).map(([id,label])=>`<button class="card" aria-label="${label} 찾아가기" data-action="visit" data-value="${id}" ${!canSpendTime(state,timeCost(state,'visit',id))?'disabled':''}><strong>${label}</strong>찾아가기</button>`).join('')}</div>`);
@@ -126,8 +214,24 @@ function render(){
  const offers=state.appointments.filter(a=>a.status==='offered');if(offers.length&&!['schedule','community','communityPost'].includes(screen))feedback.insertAdjacentHTML('afterbegin',`<section class="invitation-alert">${btn(`약속 제안 ${offers.length}개 확인`,'go','schedule')}<span>수락하기 전에는 참석 약속이 아닙니다.</span></section>`);
  if(paceNotice)feedback.insertAdjacentHTML('afterbegin',`<section class="time-summary" role="status">${esc(paceNotice)}</section>`);
  if(gains.length)feedback.insertAdjacentHTML('afterbegin',`<section class="discovery-notice" aria-label="새로 얻은 정보와 아이템"><div role="status" aria-live="polite">${gains.map(g=>`<p class="${g.kind==='item'?'item-text':'information-text'}"><strong>${g.kind==='item'?'▣ 아이템 획득':'◇ 새 정보'}</strong> · ${esc(g.name)}${g.quantity?` × ${g.quantity}`:''}</p>`).join('')}</div><div class="actions">${btn('정보 · 소지품 확인','go','discoveries')}${btn('확인','dismissDiscoveries')}</div></section>`);
+ novelPresentation();
 }
-app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.action,v=b.dataset.value;note='';const before=structuredClone(state);const fromScreen=screen;paceNotice='';try{
+app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b){if(e.target.closest('.vn-copy')&&vnModel&&!vnView.choosing){vnView=advanceNovel(vnView,vnModel.beats.length);drawNovelBeat();}return;}const a=b.dataset.action,v=b.dataset.value;
+ if(['vnNext','vnPrevious','vnCycle','vnBranch'].includes(a)){
+  if(a==='vnNext')vnView=advanceNovel(vnView,vnModel.beats.length);
+  if(a==='vnPrevious'){vnView.beat=Math.max(0,vnView.beat-1);vnView.choosing=false;}
+  if(a==='vnCycle')vnView.page++;
+  if(a==='vnBranch'){vnView.branch=v;vnView.page=0;}
+  drawNovelBeat();app.querySelector('.vn-panel')?.focus({preventScroll:true});return;
+ }
+ if(a==='openQuick'){rememberReading();quickReturn=screen;quickSnapshot={note,reply,paceNotice,view:utilityScreens.has(screen)?null:{...vnView}};screen='quickMenu';note='';render();window.scrollTo(0,0);return;}
+ if(a==='closeQuick'){resumeQuick();return;}
+ if(a==='quickTab'){screen=v==='save'?'menu':'quickMenu';note='';render();return;}
+ if(a==='phone'||(a==='go'&&utilityScreens.has(v)))rememberReading();
+ if(screen==='quickMenu'&&a==='go'){quickTool=v;if(v==='phone')returnTo='quickMenu';}
+ if(['visit','walk','classTravel','act','answer','nextDay','scenario','reset','load','buildingArea','libraryActivity','buildingActivity','classChoice','encounter','freeHome','groupAnswer'].includes(a)){quickReturn=null;quickSnapshot=null;readingSnapshots.clear();quickTool='';}
+ if(!['phone','go','openWeather','closeWeather','save','load','dismissDiscoveries','plan','closeCommunity','communityFilter','readPost','applyCommunityUpdates','clubDetail'].includes(a)){vnCursors.clear();vnView.key='';}
+ note='';const before=structuredClone(state);const fromScreen=screen;paceNotice='';try{
  if(a==='openWeather'){if(screen!=='weather')weatherReturn=screen;screen='weather';}
  if(a==='closeWeather')screen=weatherReturn;
  if(a==='go'){
@@ -137,7 +241,7 @@ app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return
   if(screen==='warningScene'&&warningScene&&!records.includes(v)){state=finishWarningSite(state,warningScene,false).state;warningScene=null;}
   if(screen==='encounter'&&encounter&&!records.includes(v)){state=resolveEncounter(state,encounter,false).state;encounter=null;}
   if(v==='discoveries'&&screen!=='phone'&&screen!=='discoveries')returnTo=screen;
-  screen=v;reply=null;if(v==='messages')state=readMessages(state);
+  screen=v;reply=null;if(readingSnapshots.has(v)){const snapshot=readingSnapshots.get(v);note=snapshot.note;reply=snapshot.reply;paceNotice=snapshot.paceNotice??'';vnResumeView=snapshot.view;readingSnapshots.delete(v);}if(v==='messages')state=readMessages(state);
  }
  if(a==='visit'||a==='walk'){
   const destination=a==='walk'?atPlace():v;
@@ -196,7 +300,7 @@ app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return
  if(a==='readPost'){state=readCommunityPost(state,v);selectedPost=v;visibleCommentCount=visibleCommunityPosts(state).find(p=>p.id===v).comments.length;screen='communityPost';}
  if(a==='cancelActivity')screen=activityReturn;
  if(a==='select'){if(!availableRoutes(state).some(r=>r.id===v&&!r.locked))throw new Error('지금 진행할 수 없는 일입니다.');if(screen!=='detail')activityReturn=screen;selected=v;screen='detail';}
- if(a==='plan')state=planEvent(state,selected,v);
+ if(a==='plan'){state=planEvent(state,selected,v);vnView.branch='main';vnView.page=0;}
  if(a==='act'){if(encounter){state=resolveEncounter(state,encounter,false).state;encounter=null;}if(warningScene){state=finishWarningSite(state,warningScene,false).state;warningScene=null;}state=freeActivity(state,v);screen='result';}
  if(a==='save'){localStorage.setItem('campus.slot.'+v,save(state));note=`슬롯 ${v}에 저장했습니다.`;}
  if(a==='load'){const raw=localStorage.getItem('campus.slot.'+v);if(!raw)throw new Error('비어 있는 슬롯입니다.');state=warningPhase(restore(raw));warningScene=null;reply=null;selected=null;encounter=null;note=`슬롯 ${v}을 불러왔습니다.`;}
@@ -212,14 +316,16 @@ app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return
  if(!['load','save','reset','scenario'].includes(a))state=advanceCommunity(state);
  if(a==='dismissDiscoveries')gains=[];
  if(['load','reset','scenario'].includes(a))gains=[];else {const found=recordDiscoveries(before,state,b.textContent.trim());if(found.length)gains=found;}
-}catch(err){note=err.message;}render();if(screen!==fromScreen||(note&&storyScreens.has(screen))){window.scrollTo(0,0);const focus=app.querySelector('.story-content > .notice')??app.querySelector('h1');focus?.focus({preventScroll:true});}});
+}catch(err){note=err.message;}render();if(screen!==fromScreen||(note&&storyScreens.has(screen))){window.scrollTo(0,0);const focus=app.querySelector('.vn-panel')??app.querySelector('.story-content > .notice')??app.querySelector('h1');focus?.focus({preventScroll:true});}});
 render();
 
 // Background residents continue writing while the game is open. This does not advance Tae-i's clock.
 setInterval(()=>{
- if(document.hidden||['menu','reset'].includes(screen))return;
+ if(document.hidden||['menu','quickMenu','reset'].includes(screen))return;
  state=advanceCommunity(state,{ambient:true});
  const live=app.querySelector('.community-live');if(!live)return;
  const count=screen==='community'?visibleCommunityPosts(state).filter(p=>!feedIds?.includes(p.id)&&(communityFilter==='all'||p.kind===communityFilter)).length:Math.max(0,(visibleCommunityPosts(state).find(p=>p.id===selectedPost)?.comments.length??0)-visibleCommentCount);
  live.innerHTML=count?btn(screen==='community'?`새 글 ${count}개 도착 · 확인하기`:`새 댓글 ${count}개 · 확인하기`,'applyCommunityUpdates'):'';
 },15000);
+
+app.addEventListener('keydown',e=>{if(e.code!=='Space'||e.target.closest('button,input,textarea,select')||!vnModel||vnView.choosing)return;e.preventDefault();vnView=advanceNovel(vnView,vnModel.beats.length);drawNovelBeat();});
