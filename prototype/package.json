@@ -1,1 +1,8 @@
-{"private":true,"type":"module","scripts":{"test":"node --test","start":"python3 -m http.server 8000 --bind 0.0.0.0 --directory .."}}
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "start": "python3 server.py --host 0.0.0.0 --port ${PORT:-8000}"
+  }
+}

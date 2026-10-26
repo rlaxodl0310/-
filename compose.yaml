@@ -1,0 +1,33 @@
+name: campus-game
+services:
+  model:
+    image: ollama/ollama:0.6.8
+    volumes:
+      - campus-models:/root/.ollama
+    restart: unless-stopped
+  model-prepare:
+    image: ollama/ollama:0.6.8
+    environment:
+      OLLAMA_HOST: http://model:11434
+      CAMPUS_MODEL: ${CAMPUS_MODEL:-qwen2.5:1.5b}
+    entrypoint: /bin/sh
+    command: ['-c', 'until ollama list >/dev/null 2>&1; do sleep 2; done; ollama pull "$$CAMPUS_MODEL"']
+    volumes:
+      - campus-models:/root/.ollama
+    depends_on:
+      - model
+  game:
+    build:
+      context: .
+      dockerfile: deployment/Dockerfile
+    environment:
+      CAMPUS_MODEL: ${CAMPUS_MODEL:-qwen2.5:1.5b}
+      CAMPUS_MODEL_URL: http://model:11434/api/chat
+    ports:
+      - '8000:8000'
+    depends_on:
+      model-prepare:
+        condition: service_completed_successfully
+    restart: unless-stopped
+volumes:
+  campus-models:

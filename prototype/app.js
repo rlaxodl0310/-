@@ -1,3 +1,4 @@
+import {createDialogueService,dialogueServiceContext,applyServiceDialogue} from './dialogue-service.js';
 import {communityActivityDefinitions,activityAvailability,currentCommunityActivity,communityActivityStage,beginCommunityActivity,progressCommunityActivity,pauseCommunityActivity,resumeCommunityActivity} from './community-activities.js';
 import {splitNovelText,novelChoicePage,advanceNovel} from './vn-flow.js';
 import {timetable,nextLesson,lessonStatus,classPlace,schoolTime,schoolEnabled,classConflicts} from './timetable.js';
@@ -25,6 +26,8 @@ import {days,locations,availableRoutes,presentPeople,currentSchedule} from './da
 let state=newGame(),screen='campus',selected=null,note='',returnTo='campus',speaker='seoyeon',reply=null,groupLines=[],groupIndex=0,groupAnswered=false,encounter=null;
 let gains=[],paceNotice='',weatherReturn='campus',warningScene=null,activityReturn='campus',clubReturn='communityPost',selectedClub=null,communityReturn='campus',communityPhoneReturn='campus',selectedPost=null,feedIds=null,visibleCommentCount=0,communityFilter='all';
 const app=document.querySelector('#app');
+const dialogueService=createDialogueService();dialogueService.probe();
+let modelPending=false,modelAbort=null;
 const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const nameOf=id=>displayName(state,id);
 const narrative=text=>{
@@ -220,8 +223,11 @@ function render(){
  if(paceNotice)feedback.insertAdjacentHTML('afterbegin',`<section class="time-summary" role="status">${esc(paceNotice)}</section>`);
  if(gains.length)feedback.insertAdjacentHTML('afterbegin',`<section class="discovery-notice" aria-label="새로 얻은 정보와 아이템"><div role="status" aria-live="polite">${gains.map(g=>`<p class="${g.kind==='item'?'item-text':'information-text'}"><strong>${g.kind==='item'?'▣ 아이템 획득':'◇ 새 정보'}</strong> · ${esc(g.name)}${g.quantity?` × ${g.quantity}`:''}</p>`).join('')}</div><div class="actions">${btn('정보 · 소지품 확인','go','discoveries')}${btn('확인','dismissDiscoveries')}</div></section>`);
  novelPresentation();
+ if(modelPending){const panel=app.querySelector('.vn-panel');if(panel)panel.innerHTML=`<p role="status" aria-live="polite">잠시 말을 고르고 있다…</p><div class="vn-controls">${btn('기다리지 않고 이어가기','skipModel')}</div>`;}
 }
-app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b){if(e.target.closest('.vn-copy')&&vnModel&&!vnView.choosing){vnView=advanceNovel(vnView,vnModel.beats.length);drawNovelBeat();}return;}const a=b.dataset.action,v=b.dataset.value;
+app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b){if(modelPending)return;if(e.target.closest('.vn-copy')&&vnModel&&!vnView.choosing){vnView=advanceNovel(vnView,vnModel.beats.length);drawNovelBeat();}return;}const a=b.dataset.action,v=b.dataset.value;
+ if(a==='skipModel'){modelAbort?.abort();return;}
+ if(modelPending)return;
  if(['vnNext','vnPrevious','vnCycle','vnBranch'].includes(a)){
   if(a==='vnNext')vnView=advanceNovel(vnView,vnModel.beats.length);
   if(a==='vnPrevious'){vnView.beat=Math.max(0,vnView.beat-1);vnView.choosing=false;}
@@ -331,7 +337,20 @@ app.addEventListener('click',e=>{const b=e.target.closest('button');if(!b){if(e.
  if(!['load','save','reset','scenario'].includes(a))state=advanceCommunity(state);
  if(a==='dismissDiscoveries')gains=[];
  if(['load','reset','scenario'].includes(a))gains=[];else {const found=recordDiscoveries(before,state,b.textContent.trim());if(found.length)gains=found;}
-}catch(err){note=err.message;}render();if(screen!==fromScreen||(note&&storyScreens.has(screen))){window.scrollTo(0,0);const focus=app.querySelector('.vn-panel')??app.querySelector('.story-content > .notice')??app.querySelector('h1');focus?.focus({preventScroll:true});}});
+}catch(err){note=err.message;}
+ if(dialogueService.enabled&&screen==='dialogue'&&reply?.generated&&!reply.leave){
+  const turnId=reply.turnId,id=speaker;
+  const isNew=!before.dialogue?.history?.some(h=>h.generated&&h.person===id&&h.turnId===turnId);
+  if(isNew){
+   modelPending=true;modelAbort=new AbortController();render();
+   try{
+    const generatedText=await dialogueService.reply(dialogueServiceContext(state,id,reply),{signal:modelAbort.signal});
+    const text=generatedText?(reply.requiredPrefix&&!generatedText.startsWith(reply.requiredPrefix)?reply.requiredPrefix+generatedText:generatedText):null;
+    if(text&&applyServiceDialogue(state,id,turnId,text)){reply={...reply,text,source:'server-model'};}
+   }finally{modelPending=false;modelAbort=null;}
+  }
+ }
+ render();if(screen!==fromScreen||(note&&storyScreens.has(screen))){window.scrollTo(0,0);const focus=app.querySelector('.vn-panel')??app.querySelector('.story-content > .notice')??app.querySelector('h1');focus?.focus({preventScroll:true});}});
 render();
 
 // Background residents continue writing while the game is open. This does not advance Tae-i's clock.
@@ -343,4 +362,4 @@ setInterval(()=>{
  live.innerHTML=count?btn(screen==='community'?`새 글 ${count}개 도착 · 확인하기`:`새 댓글 ${count}개 · 확인하기`,'applyCommunityUpdates'):'';
 },15000);
 
-app.addEventListener('keydown',e=>{if(e.code!=='Space'||e.target.closest('button,input,textarea,select')||!vnModel||vnView.choosing)return;e.preventDefault();vnView=advanceNovel(vnView,vnModel.beats.length);drawNovelBeat();});
+app.addEventListener('keydown',e=>{if(modelPending||e.code!=='Space'||e.target.closest('button,input,textarea,select')||!vnModel||vnView.choosing)return;e.preventDefault();vnView=advanceNovel(vnView,vnModel.beats.length);drawNovelBeat();});
