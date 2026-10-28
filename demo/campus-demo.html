@@ -158,6 +158,9 @@ body[data-utility-screen="phone"]{background:radial-gradient(ellipse at top,#d9e
 @keyframes stage-breathe{50%{transform:rotate(1deg) translateY(-3px)}}
 @media(max-width:650px){.activity-tableau svg{height:64%;margin-top:55px}.tableau-note{top:12px}.scene-visual:has(.activity-tableau) .scene-context{max-width:210px;padding:7px}.activity-tableau{background:linear-gradient(#263c4c,#172432)}}
 @media(prefers-reduced-motion:reduce){.activity-tableau .activity-taei{animation:none!important}}
+.physical-tableau[data-kind="cooking"] .activity-steam{animation:activity-steam 2.5s ease-in-out infinite}
+@keyframes activity-steam{50%{opacity:.25;transform:translateY(-5px)}}
+@media(prefers-reduced-motion:reduce){.physical-tableau .activity-steam{animation:none}}
 </style></head><body><main id="app"><section style="padding:32px;font-family:system-ui;line-height:1.8"><h1>캠퍼스의 하루</h1><p>게임 화면을 준비하고 있습니다.</p><p>이 안내가 계속 보이면 파일 미리보기 대신 다운로드한 HTML을 Chrome 또는 Edge에서 직접 열어주세요. GitHub 파일 보기 화면에서는 게임이 실행되지 않습니다.</p></section></main><noscript>게임 실행에는 JavaScript가 필요합니다. JavaScript를 허용하는 브라우저에서 열어주세요.</noscript><script>
 window.addEventListener('error', function(event) {
   var app = document.getElementById('app');
@@ -2466,6 +2469,7 @@ function musicSceneState(record){
  return {role:['vocal','bass','guitar'].includes(role)?role:'vocal',phase:performed?'performance':record.step===0?'setup':record.step===1?'practice':record.step===2?'together':'wrap',performed};
 }
 function activityScene(record){
+ if(record.postId!=='music-recruit')return physicalActivityScene(record);
  const {role,phase,performed}=musicSceneState(record);
  const label={setup:'마이크와 악기를 준비하는 합주실',practice:'파트를 연습하는 김태이와 부원들',together:'서로 신호를 보며 합주하는 부원들',performance:'노래와 연주를 이어가는 짧은 공연',wrap:'연습을 마무리하는 합주실'}[phase];
  const guitar=role!=='vocal';
@@ -2479,6 +2483,36 @@ function activityScene(record){
  <g class="activity-taei"><ellipse cx="447" cy="527" rx="82" ry="12" fill="#111824" opacity=".5"/><path d="m425 414-12 105m57-105 18 105" stroke="#26303c" stroke-width="25" stroke-linecap="round"/><path d="m401 518 22 1m55 0 24 1" stroke="#cdd3cf" stroke-width="14" stroke-linecap="round"/><path d="M407 301q40-22 80 0l15 119q-50 16-108 0z" fill="#344d5b" stroke="#99b8bb" stroke-width="2"/><path d="M420 303l24 35 29-35m-29 35v79" stroke="#bec6b7" fill="none" stroke-width="3"/><path d="M436 277v26q10 12 22 0v-26" fill="#dcbda5"/><ellipse cx="447" cy="253" rx="32" ry="39" fill="#e5c8b1"/><path d="M414 257q-15-53 27-54l35 10 12 34-23-19-8 21-10-20-25 34-1-21z" fill="#202733"/><path d="M429 257h9m18 0h9" stroke="#2b3037" stroke-width="3"/><circle cx="429" cy="265" r="1.6" fill="#3d3936"/><path d="M441 278q7 ${performed?'7':'2'} 15 0" fill="none" stroke="#9b6d65" stroke-width="2"/>
  ${guitar?`<path d="M413 313l80 93" stroke="#c1a16c" stroke-width="6"/><path d="M410 382q-30 16-7 44 17 16 36-4 20 2 23-20-7-25-28-15z" fill="${role==='bass'?'#b88c53':'#a65a47'}" stroke="#e1b88b" stroke-width="3"/><path d="m433 393 72-78" stroke="#d1b185" stroke-width="12"/><path d="m429 406 77-89" stroke="#ede4ca" stroke-width="2"/><path d="m405 326-23 45 38 24m66-68 7 21-13 11" fill="none" stroke="#dcbda5" stroke-width="13" stroke-linecap="round"/>`:`<path d="m407 325-15 53 29 12m65-64 19-29-20-19" fill="none" stroke="#dcbda5" stroke-width="14" stroke-linecap="round"/><path d="m483 280-17-14" stroke="#182637" stroke-width="9" stroke-linecap="round"/><ellipse cx="462" cy="263" rx="9" ry="7" fill="#c0c6bf"/><path d="M481 296q45 84 1 184t75 43" fill="none" stroke="#14202b" stroke-width="3"/>`}</g>
  <g fill="#efe4cd" font-family="sans-serif" font-size="15"><text x="44" y="42">예술동 · 대형 합주실</text><text x="44" y="610">${{setup:'준비',practice:'파트 연습',together:'호흡 맞추기',performance:'짧은 공연',wrap:'마무리'}[phase]} · ${{vocal:'VOCAL',bass:'BASS',guitar:'GUITAR'}[role]}</text></g></svg><span class="tableau-note">2D 활동 장면 시제품</span></div>`;
+}
+
+function activityFigure(x,y,{taei=false,color='#6f8894',arms='down',apron=false,box=false}={}){
+ const skin=taei?'#e5c8b1':'#cfaa91';
+ const gesture={down:'M-28 78l-15 66m71-66 15 66',reach:'M-28 78l-22 35 42 6m36-41 21 28-39 15',high:'M-28 78l-16-32 23-23m49 55 18-32-23-23',carry:'M-28 78l-10 30 18 12m48-42 10 30-18 12'}[arms];
+ return `<g class="physical-actor ${taei?'physical-taei':''}" transform="translate(${x} ${y})"><ellipse cy="225" rx="55" ry="8" fill="#0e1d2b" opacity=".24"/><path d="M-17 144l-8 73m42-73 12 73" stroke="#293644" stroke-width="19" stroke-linecap="round"/><path d="M-31 220h18m30 0h20" stroke="#e4e5d6" stroke-width="10" stroke-linecap="round"/><path d="M-29 67q29-13 58 0l10 86h-78z" fill="${color}" stroke="#bdd1ce" stroke-width="2"/>${apron?'<path d="M-17 71h34l10 78h-54z" fill="#d6c3a3"/><path d="M-14 112h28v20h-28z" fill="none" stroke="#8b816f"/>':''}<path d="M-8 45v20q8 9 16 0V45" fill="${skin}"/><ellipse cy="30" rx="23" ry="29" fill="${skin}"/><path d="M-24 34q-12-40 23-39l23 9 10 27-22-16-8 15-6-17-17 23-3-17z" fill="#202a35"/><path d="M-13 31h6m14 0h6" stroke="#273440" stroke-width="2"/>${taei?'<circle cx="-13" cy="37" r="1.3" fill="#453c38"/>':''}<path d="M-5 47q6 4 12 0" fill="none" stroke="#a27264" stroke-width="2"/><path d="${gesture}" fill="none" stroke="${skin}" stroke-width="11" stroke-linecap="round"/>${box?'<path d="M-39 94h78v51h-78z" fill="#bf9b6d" stroke="#e2ca9d" stroke-width="2"/><path d="M-5 94h10v51H-5z" fill="#e2d3ab"/><path d="M-26 117h14m-14 8h20" stroke="#69584a" stroke-width="2"/>':''}</g>`;
+}
+function physicalActivityScene(record){
+ const kind=record.postId==='basketball-open'?'basketball':record.postId==='cooking-open'?'cooking':'carry';
+ const phase=record.step===0?'setup':record.step===1?'action':record.step===2?'finish':'wrap';
+ const a=record.actionState??{},last=record.choices?.at(-1)?.id;
+ let scene='',label='';
+ if(kind==='basketball'){
+  label='실내 코트에서 공을 주고받는 학생들';
+  scene=`<path fill="#526d75" d="M0 0h900v650H0z"/><path d="M0 340h900v310H0z" fill="#bc9669"/><g fill="none" stroke="#f5e3bd" stroke-width="4"><path d="M0 390h900M450 340v310"/><ellipse cx="450" cy="505" rx="100" ry="62"/><path d="M650 650V440h200v210M650 470q-110 80 0 150"/></g><path d="M730 100h105v70H730z" fill="#d5dfd5" stroke="#29404d" stroke-width="7"/><path d="M761 127h43v29h-43zM792 171v140" fill="none" stroke="#526d75" stroke-width="4"/><ellipse cx="781" cy="178" rx="27" ry="7" fill="none" stroke="#dd7448" stroke-width="5"/><path d="m756 181 8 28h34l9-28m-43 0 8 28m16-28-8 28" fill="none" stroke="#eee7d5" stroke-width="2"/>
+  ${activityFigure(360,230,{taei:true,color:'#355567',arms:last==='shoot'?'high':last==='pass'?'reach':'down'})}${activityFigure(540,235,{color:'#99877d',arms:'reach'})}${activityFigure(150,270,{color:'#607d74',arms:'reach'})}
+  <g class="activity-ball" transform="translate(${last==='shoot'?680:last==='pass'?210:310} ${last==='shoot'?185:385})"><circle r="20" fill="#d88e4b" stroke="#754e34" stroke-width="2"/><path d="M-20 0h40M0-20v40M-15-14q25 10 29 28" fill="none" stroke="#754e34" stroke-width="2"/></g><rect x="42" y="225" width="175" height="40" rx="8" fill="#173541"/><text x="56" y="251" fill="#f1e6cf" font-size="18">공격 ${a.round??0}/3 · 득점 ${a.scored??0}</text>`;
+ }else if(kind==='cooking'){
+  label='앞치마를 두르고 냄비를 함께 살피는 조리 체험';
+  scene=`<path fill="#adbdb5" d="M0 0h900v650H0z"/><path d="M0 400h900v250H0z" fill="#788f8d"/><g stroke="#d6e0d6" opacity=".5">${[60,140,220,300,380].map(y=>`<path d="M0 ${y}h900"/>`).join('')}${[80,180,280,380,480,580,680,780].map(x=>`<path d="M${x} 0v400"/>`).join('')}</g><path d="M430 80h240l40 70H390z" fill="#5a7378"/><path d="M470 0h160v80H470z" fill="#6f8789"/>
+  ${activityFigure(350,215,{taei:true,color:'#355567',apron:true,arms:phase==='setup'?'down':'reach'})}${activityFigure(610,215,{color:'#947b72',apron:true,arms:'reach'})}
+  <path d="M170 405h590v135H170z" fill="#536c71" stroke="#cad1c5" stroke-width="7"/><path d="M190 540v65m550-65v65" stroke="#435c63" stroke-width="12"/><path d="M220 416h140v55H220z" fill="#c3a277"/><path d="m237 433 50 0m-46 15 35 0m35-15 15 18" stroke="#a6b96a" stroke-width="9"/><path d="M410 421h180v53H410z" fill="#243b46"/><path d="M455 386h90v53q-45 17-90 0z" fill="#bec9bf" stroke="#384f59" stroke-width="4"/><path d="M454 404h-17m109 0h17" stroke="#bec9bf" stroke-width="8"/><ellipse cx="500" cy="387" rx="43" ry="8" fill="#d3b580"/>${phase!=='setup'?'<g class="activity-steam" fill="none" stroke="#f1eee0" stroke-width="5" opacity=".7"><path d="M476 369q-15-16 0-31t0-29m25 60q-15-16 0-31t0-29m25 60q-15-16 0-31t0-29"/></g>':''}<ellipse cx="648" cy="440" rx="31" ry="14" fill="#dfdbca"/><path d="m360 394 48-33" stroke="#d3d6cb" stroke-width="7"/>`;
+ }else{
+  label='상자를 함께 들고 통로를 지나 물품을 정리하는 운반 조';
+  scene=`<path fill="#8b9d9f" d="M0 0h900v650H0z"/><path d="M0 390h900v260H0z" fill="#b9ac91"/><path d="M80 145h160v250H80z" fill="#425e69"/><path d="M100 170h120v170H100z" fill="#829b9a"/><path d="M680 180v330m150-330v330M680 260h150m-150 100h150m-150 100h150" fill="none" stroke="#405964" stroke-width="13"/>
+  ${activityFigure(400,235,{taei:true,color:'#355567',arms:phase==='wrap'?'down':'carry',box:phase!=='wrap'})}${activityFigure(550,230,{color:'#8d7c86',arms:phase==='wrap'?'down':'carry',box:a.method==='solo'&&phase!=='wrap'})}
+  ${[0,1,2].map(i=>`<g transform="translate(${phase==='wrap'?700:210+i*70} ${phase==='wrap'?408-i*73:440})"><path d="M0 0h65v55H0z" fill="#bf9b6d" stroke="#e2ca9d" stroke-width="2"/><path d="M28 0h9v55h-9z" fill="#e2d3ab"/><path d="M8 27h13m-13 8h23" stroke="#69584a" stroke-width="2"/></g>`).join('')}
+  ${a.obstacle==='chair'&&a.route!=='clear'&&phase!=='wrap'?'<path d="M105 450v-60h55v60m-60 0h70m-62 0v55m52-55v55" fill="none" stroke="#5d7077" stroke-width="10"/>':''}<path d="M280 555h360m-18-12 18 12-18 12" fill="none" stroke="#f0e4c8" stroke-width="5"/>`;
+ }
+ return `<div class="activity-tableau physical-tableau" data-kind="${kind}" data-phase="${phase}"><svg viewBox="0 0 900 650" role="img" aria-label="${label}" preserveAspectRatio="xMidYMid meet">${scene}</svg><span class="tableau-note">2D 활동 장면 시제품</span></div>`;
 }
 
 // Presentation-only pacing: these functions never advance the world or choose an answer.
@@ -2661,6 +2695,9 @@ function advanceCommunity(state,{ambient=false}={}){
 }
 
 const communityPosts=[
+ {id:'basketball-open',day:1,board:'공개 체험',author:'실내 코트 체험 진행자',kind:'activity',title:'실내 농구 같이 해요 · 세 번씩 공격해보기',body:'시제품 1~3일차 13:00~18:00 체육관 2층 201호 코트에서 진행합니다. 몸풀기와 세 차례 공격, 마무리까지 약 60분. 수비를 보고 돌파·패스·슛을 선택해봐요. 동아리 가입과 무관한 공개 연습입니다.',comments:['운동복 입고 가면 되나요?','진행자: 실내 운동화와 물을 챙겨주세요.']},
+ {id:'cooking-open',day:1,board:'공개 체험',author:'조리 공개 체험 담당',kind:'activity',title:'외식관 한 냄비 체험 · 짝과 직접 만들어보기',body:'시제품 1~3일차 13:00~18:00 외식관 2층 201호 조리실습실에서 공개 체험을 진행합니다. 제공된 채소와 육수로 손질·불 조절·맛 조절·공동 정리까지 약 45분. 현장 안전 안내 뒤 참여합니다.',comments:['전공 아니어도 되나요?','담당자: 네, 공개 체험용 실습대에서 안내받으세요.']},
+ {id:'carry-open',day:1,board:'공개 체험',author:'물품 운반 조',kind:'activity',title:'물품 운반 릴레이 · 함께 몸 쓰고 정리할 사람',body:'시제품 1~3일차 13:00~18:00 자유관 2층 204호 공용 회의실에서 봉사 준비 물품을 안쪽 보관대로 옮깁니다. 짐 나누기·동선 확보·운반·적재 확인까지 약 60분. 당일 공개 도움이며 봉사단 가입 신청과는 별개입니다.',comments:['혼자 무거운 거 드는 건가요?','운반 조: 큰 상자는 둘이 들고, 한 개씩 옮겨도 됩니다.']},
  {id:'volunteer-recruit',day:1,board:'동아리 모집',author:'봉사단 운영진',kind:'club',club:'volunteer',title:'오늘 물품 준비 같이 해볼 사람? 가입 전 체험도 가능해요',body:'오늘 13:00~18:00 자유관에서 봉사 물품을 준비하고 있어요. 동아리 가입부터 결정하지 않아도 됩니다. 잠깐 와서 어떤 활동인지 보고 가셔도 돼요.',comments:['시간 맞으면 잠깐 가봐도 되나요?','운영진: 네, 안내 읽고 편하게 들러주세요.']},
  {id:'football-recruit',day:1,board:'동아리 모집',author:'축구 동아리 운영진',kind:'club',club:'football',title:'내일 공개 훈련 모집합니다 · 처음 와도 괜찮아요',body:'내일 13:00~18:00 운동장에서 공개 체험 훈련을 진행합니다. 선수는 남학생, 여성 부원은 매니저로 참여합니다. 비가 오면 실내 기본 체력 훈련으로 대체해요. 가입 여부는 체험한 뒤 정해도 됩니다.',comments:['비 와도 취소 아닌가요?','운영진: 실내 대체로 진행할 예정입니다.']},
  {id:'music-recruit',day:1,board:'동아리 모집',author:'음악 동아리 운영진',kind:'club',club:'music',title:'같이 합주하고 공연 준비할 부원 구해요',body:'오늘 13:00~18:00 예술동 4층 대형 합주실에서 공개 합주를 진행해요. 보컬이나 악기 파트에 관심 있으면 모집 안내를 읽어주세요. 이번 주 공연 리허설을 돕는 일정도 있습니다. 전공 합주에 참여하는 것과 동아리 가입은 별개예요.',comments:['공연 준비만 도와봐도 되나요?','운영진: 공개 체험 일정에서 먼저 만나봐요.']},
@@ -2681,7 +2718,73 @@ function readCommunityPost(state,id){
  return s;
 }
 
+// Optional public activities: real action state, saved randomness and no mandatory cast.
+const physicalChoice=(id,label,fact,reply)=>({id,label,fact,reply});
+const physicalActivityDefinitions={
+ 'basketball-open':{title:'농구 3회 공격 챌린지',days:[1,2,3],day:1,physical:true,route:'basketball',duration:60,venue:{location:'gym',area:'court',label:'체육관 2층 201호 · 실내 코트'},onsite:'코트에서 부족한 인원을 찾는다. 준비 운동을 하고 끼어볼까?',intro:'공이 바닥에 튀는 소리가 울린다. 연습 중인 학생들이 코트 한쪽을 내준다. “같이 해요? 공격 세 번씩 번갈아 해보려고요.” 공을 건네받고 먼저 몸을 푼다.',stages:[
+ {name:'몸풀기와 역할',prompt:'코트 가장자리에 가방을 놓는다. 준비 운동 뒤 어떤 움직임을 먼저 맞춰볼까?',choices:[physicalChoice('footwork','발목을 풀고 짧은 방향 전환부터 해본다.','농구 방향 전환 연습','발끝으로 바닥을 밀며 방향을 바꾼다. 수비를 앞에 두고도 급히 몸을 틀지 않도록 간격을 잡았다.'),physicalChoice('passing','짝과 패스를 주고받으며 움직임을 맞춘다.','농구 짝 패스 연습','바운드 패스를 보내고 빈자리로 옮겨본다. 처음에는 엇갈리던 손과 공이 조금씩 같은 지점에서 만난다.')]},
+ {name:'세 번의 공격',prompt:'수비의 위치를 보고 공격 방법을 고른다.',choices:[physicalChoice('drive','수비의 옆 공간으로 드리블해 들어간다.','농구 돌파 시도',''),physicalChoice('pass','빈자리로 움직이는 짝에게 패스를 보낸다.','농구 협력 공격',''),physicalChoice('shoot','발을 멈추고 중거리 슛을 던진다.','농구 중거리 슛 시도','')]},
+ {name:'마지막 연습과 정리',prompt:'세 번의 공격을 마쳤다. 바로 흩어지기 전에 무엇을 해볼까?',choices:[physicalChoice('retry','잘 안 맞았던 동작을 천천히 다시 해본다.','농구 동작 재연습','속도를 낮춰 같은 움직임을 반복한다. 골을 넣는 것보다 공을 받을 위치와 발을 멈추는 지점을 확인했다.'),physicalChoice('cool','공을 정리하고 함께 스트레칭한다.','실내 코트 공 반납 위치','공을 바구니로 돌려놓고 종아리와 어깨를 푼다. 땀이 식기 전에 겉옷을 챙긴다.')]}
+ ]},
+ 'cooking-open':{title:'한 냄비 조리 체험',days:[1,2,3],day:1,physical:true,route:'cooking',duration:45,venue:{location:'cafeteria',area:'kitchen',label:'외식관 2층 201호 · 조리실습실'},onsite:'실습대에서 빈 앞치마를 건넨다. 한 냄비 조리에 참여해볼까?',intro:'환풍기 소리 사이로 도마 두드리는 소리가 들린다. 공개 체험 담당자가 손 씻는 곳과 빈 실습대를 가리킨다. 제공된 채소와 육수로 짝과 함께 작은 냄비 하나를 완성하는 시간이다.',stages:[
+ {name:'손질과 분담',prompt:'손을 씻고 앞치마를 맨다. 짝과 도구를 나눈 뒤 채소부터 손질한다.',choices:[physicalChoice('even','천천히 크기를 맞춰 썰고 짝에게 육수 계량을 맡긴다.','조리 체험 균일한 채소 손질','채소를 비슷한 크기로 맞춘다. 짝이 계량한 육수를 실습대 끝에 놓아 손질한 재료와 섞이지 않게 했다.'),physicalChoice('batch','먼저 익힐 단단한 채소와 나중에 넣을 채소를 나눈다.','조리 체험 재료 투입 순서','감자와 잎채소를 서로 다른 그릇에 나눈다. 짝과 먼저 넣을 재료를 확인한 뒤 도마를 치웠다.')]},
+ {name:'냄비 앞에서',prompt:'육수가 끓기 시작한다. 옆에서 다른 조의 냄비도 보글거린다. 불과 재료를 어떻게 다룰까?',choices:[physicalChoice('gentle','불을 낮추고 채소를 순서대로 넣어 저어준다.','조리 체험 약불 조절',''),physicalChoice('quick','단단한 채소부터 넣고 잠깐 불을 올린 뒤 다시 낮춘다.','조리 체험 끓는점 확인','')]},
+ {name:'맛을 보고 마무리',prompt:'담당자와 충분히 익었는지 확인한다. 작은 접시에 덜어 맛을 본 뒤 마지막으로 손본다.',choices:[physicalChoice('dilute','육수를 조금 보태 간을 부드럽게 맞춘다.','조리 체험 간 조절',''),physicalChoice('reduce','약불에서 조금 더 졸여 맛을 모은다.','조리 체험 농도 조절',''),physicalChoice('serve','지금 맛을 살려 담고 조리대를 함께 닦는다.','조리실습실 공동 정리 순서','')]}
+ ]},
+ 'carry-open':{title:'봉사 물품 운반 릴레이',days:[1,2,3],day:1,physical:true,route:'carryRelay',duration:60,venue:{location:'hall',area:'meeting',label:'자유관 2층 204호 · 공용 회의실'},onsite:'문 앞에 전달할 상자가 쌓여 있다. 운반 조에 합류해볼까?',intro:'공용 회의실 한쪽에 봉사 준비용 종이컵과 수건 상자가 쌓여 있다. 운반 조가 회의실 안쪽 보관대로 옮길 차례다. “가벼워 보여도 높이 쌓으면 앞이 안 보여요.” 먼저 통로와 상자 크기를 확인한다.',stages:[
+ {name:'짐과 손 나누기',prompt:'상자마다 부피가 다르다. 같이 옮길 학생과 역할을 정한다.',choices:[physicalChoice('pair','큰 상자는 둘이 들고 발을 맞춘다.','상자 공동 운반 신호','상자 양옆을 잡고 들기 전에 셋을 센다. 한쪽이 먼저 움직이지 않도록 내려놓을 신호도 맞췄다.'),physicalChoice('solo','시야를 가리지 않게 한 상자씩 여러 번 나른다.','상자 단독 운반 시야 확보','상자를 겹치지 않고 한 개만 들었다. 횟수는 늘어도 발밑을 볼 수 있는 높이를 유지한다.')]},
+ {name:'통로 지나기',prompt:'회의실 안쪽 보관대로 이동한다. 어느 쪽으로 돌까?',choices:[physicalChoice('clear','잠시 내려놓고 먼저 통로의 의자와 빈 상자를 치운다.','물품 운반 통로 확보',''),physicalChoice('edge','벽 쪽 빈 공간을 따라 천천히 돌아간다.','물품 운반 벽면 동선','')]},
+ {name:'적재와 인수 확인',prompt:'운반한 상자를 보관대 앞에 내려놓았다. 쌓는 방식과 수량을 확인한다.',choices:[physicalChoice('stack','무거운 상자를 아래에 놓고 라벨이 보이게 쌓는다.','물품 보관 적재 순서','무거운 묶음을 아래로 옮긴 뒤 상자 모서리를 맞춘다. 위를 가볍게 눌러 흔들리지 않는지 함께 확인했다.'),physicalChoice('count','상자를 낮게 펼쳐놓고 수량과 전달 목록을 대조한다.','물품 운반 인수 수량 대조','통로를 막지 않는 선에서 상자를 낮게 나눈다. 전달한 사람이 읽는 수량을 받는 사람이 목록에 표시했다.')]}
+ ]}
+};
+function physicalRoll(record){record.actionState.rng=(Math.imul(record.actionState.rng,1664525)+1013904223)>>>0;return record.actionState.rng/4294967296;}
+function preparePhysicalActivity(record,seed){
+ record.actionState={rng:seed>>>0,round:0,scored:0,stamina:3,teamwork:0,plays:[]};
+ if(record.postId==='cooking-open'){record.actionState.salt=physicalRoll(record)<.5?'light':'strong';record.actionState.texture='firm';}
+ if(record.postId==='carry-open')record.actionState.obstacle=physicalRoll(record)<.5?'chair':'passing';
+}
+function physicalActivityStage(record,stage){
+ if(!record.actionState||record.step!==1)return stage;
+ const a=record.actionState;
+ if(record.postId==='basketball-open')return {...stage,prompt:`${a.round+1}/3번째 공격 · 성공 ${a.scored}회 · 여력 ${a.stamina}/3. ${{close:'수비가 가까이 붙어 슛 공간이 좁다. 짝은 옆으로 빠지고 있다.',lane:'수비가 골밑으로 들어갈 길을 막고 있다. 앞쪽에 잠깐 슛 공간이 난다.',help:'수비가 패스 길목 쪽으로 몸을 틀었다. 반대편에 빈 공간이 보인다.'}[a.defense]}`};
+ if(record.postId==='cooking-open')return {...stage,prompt:`육수가 끓기 시작한다. 짝이 계량 스푼을 내려놓는다. “아까 한 숟갈 떠봤는데 ${a.salt==='strong'?'간이 좀 센 것':'간은 약한 것'} 같아요.” 불과 재료를 어떻게 다룰까?`};
+ return {...stage,prompt:a.obstacle==='chair'?'옮길 길 중간에 빈 의자가 튀어나와 있다. 짐을 든 채 바로 지나기에는 폭이 좁다.':'다른 조가 빈 상자를 들고 마주 온다. 함께 통로를 쓸 수 있도록 움직임을 정해야 한다.'};
+}
+function newDefense(record){return ['close','lane','help'][Math.floor(physicalRoll(record)*3)];}
+function performPhysicalAction(record,choice){
+ const a=record.actionState,step=record.step,id=record.postId;
+ let text=null,minutes=step===0?10:step===1?(id==='cooking-open'?25:id==='carry-open'?35:30):id==='cooking-open'?10:id==='carry-open'?15:20,advance=true;
+ if(id==='basketball-open'){
+  if(step===0){a.preparation=choice;a.defense=newDefense(record);}
+  if(step===1){
+   const advantage=(choice==='pass'&&a.defense==='close')||(choice==='shoot'&&a.defense==='lane')||(choice==='drive'&&a.defense==='help');
+   const chance=Math.max(.15,Math.min(.92,.35+(advantage ? .35 : 0)+(a.preparation==='passing'&&choice==='pass' ? .16 : 0)+(a.preparation==='footwork'&&choice==='drive' ? .13 : 0)-(3-a.stamina)*.06));
+   const success=physicalRoll(record)<chance;a.round++;a.scored+=success?1:0;if(choice==='drive')a.stamina=Math.max(0,a.stamina-1);if(choice==='pass')a.teamwork++;
+   a.plays.push({choice,defense:a.defense,success});text=({drive:'공을 낮게 튀기며 수비 옆을 파고든다.',pass:'짝이 움직이는 쪽으로 공을 밀어 보내고 옆 공간으로 빠진다.',shoot:'발을 멈추고 팔을 뻗어 공을 던진다.'}[choice])+' '+(success?(choice==='pass'?'짝이 공을 받아 골밑에서 마무리한다. 돌아오는 길에 손바닥을 가볍게 마주친다.':'공이 림 안으로 떨어진다. 짝이 공을 받아 다시 건네준다.'):(choice==='pass'?'공을 받는 타이밍이 어긋나 바깥으로 튄다. 손을 들어 자기 신호가 늦었다고 알린다.':'공이 림을 맞고 튕겨 나온다. 숨을 고르고 다음 공격 위치로 돌아간다.'));
+   advance=a.round===3;minutes=advance?30:0;if(!advance)a.defense=newDefense(record);
+  }
+ }
+ if(id==='cooking-open'){
+  if(step===0)a.preparation=choice;
+  if(step===1){a.texture=choice==='gentle'?'soft':a.preparation==='batch'?'soft':'uneven';text=choice==='gentle'?'불을 낮추고 냄비 바닥을 따라 천천히 젓는다. 끓어 넘치던 기포가 작아지고 채소가 고르게 부드러워진다.':a.texture==='soft'?'단단한 채소가 먼저 익은 뒤 잎채소를 넣는다. 끓는 모습을 보고 불을 낮춰 형태가 무너지지 않게 한다.':'한꺼번에 넣은 채소 중 작은 조각부터 풀어진다. 불을 낮추고 덜 익은 조각을 확인하며 조금 더 기다렸다.';}
+  if(step===2){a.finish=choice;a.balanced=(a.salt==='strong'&&choice==='dilute')||(a.salt==='light'&&choice==='reduce');text=choice==='dilute'?(a.salt==='strong'?'육수를 조금씩 더해 다시 맛본다. 짝도 한 숟갈 떠보고 고개를 끄덕인다. 센 간이 한결 누그러졌다.':'육수를 더하니 맛이 예상보다 연해졌다. 짝과 원래 간을 메모하고 작은 그릇에 나눠 담는다.'):choice==='reduce'?(a.salt==='light'?'뚜껑을 열고 조금 더 졸인다. 싱겁던 국물에 맛이 모인다. 짝이 불을 끄고 그릇을 가져온다.':'조금 더 졸이자 간이 더 또렷해졌다. 다음에는 맛을 먼저 보고 불을 정하자고 이야기하며 나눠 담는다.'):'지금의 맛을 작은 그릇에 나눠 담는다. 손질할 때 나온 껍질을 모으고 도마와 실습대를 씻는다. 서로 맡은 일이 끝났는지 확인했다.';}
+ }
+ if(id==='carry-open'){
+  if(step===0)a.method=choice;
+  if(step===1){a.route=choice;a.stops=choice==='clear'?1:a.obstacle==='chair'?2:1;text=choice==='clear'?'상자를 안전한 곳에 내려놓고 의자와 빈 상자를 옆으로 모은다. 마주 오는 조가 지나간 뒤, 비워진 통로로 다시 들어간다.':a.obstacle==='chair'?'벽 쪽으로 돌았지만 상자 모서리가 의자에 닿을 듯하다. 멈춰서 한 번 내려놓고 의자 위치를 고친 뒤 다시 옮겼다.':'마주 오는 조를 보고 벽 쪽에서 기다린다. 서로 지나갈 순서를 확인한 뒤, 발을 맞춰 천천히 보관대로 들어간다.';if(a.method==='pair')text+=' “지금 내려요.” 처음 맞춘 신호에 둘이 동시에 무릎을 굽힌다.';}
+  if(step===2)a.finish=choice;
+ }
+ return {text,minutes,advance};
+}
+function physicalActivityOutcome(record){
+ const a=record.actionState;
+ if(record.postId==='basketball-open')return `세 번의 공격 중 ${a.scored}회 득점에 성공했다. ${a.teamwork?'패스로 짝과 공격을 이어간 경험이 남았다.':'직접 공을 다루며 수비와의 간격을 익혔다.'} ${record.choices.at(-1)?.id==='retry'?'어긋난 동작을 다시 연습했다.':'공을 반납하고 정리 운동을 마쳤다.'}`;
+ if(record.postId==='cooking-open')return `짝과 한 냄비를 완성하고 조리대를 정리했다. ${a.texture==='soft'?'채소가 고르게 익었다.':'채소 크기와 투입 순서를 다음에 더 맞춰보기로 했다.'} ${a.balanced?'맛을 본 정보에 맞춰 간을 조절했다.':'완성한 맛과 손볼 점을 함께 기록했다.'}`;
+ return `${a.method==='pair'?'둘이 신호를 맞춰':'시야를 확보하며 한 상자씩'} 물품을 보관대로 옮겼다. ${a.route==='clear'?'통로를 먼저 비워 이동했다.':`이동 중 ${a.stops}번 멈춰 통행을 확인했다.`} ${a.finish==='count'?'전달 수량을 목록과 맞췄다.':'무거운 상자부터 안정적으로 쌓았다.'}`;
+}
+
 const communityActivityDefinitions={
+ ...physicalActivityDefinitions,
  'volunteer-recruit':{title:'봉사 물품 준비',club:'volunteer',day:1,route:'volunteer',venue:{location:'hall',area:'clubs',label:'자유관 2층 202호 · 봉사 준비실'},intro:'공용 테이블에서 학생들이 물품을 나누고 있다. 수첩을 펴놓은 학생이 빈 상자 하나를 옆으로 밀어준다. “처음 오셨으면 이 목록부터 같이 볼까요?”',stages:[
   {name:'목록과 실제 물품 확인',prompt:'목록의 수량과 쌓인 상자를 번갈아 본다. 지금 무엇부터 맞춰볼까?',choices:[
    {id:'audit',label:'목록을 읽으며 다른 사람이 센 수량과 대조한다.',approach:'listen',fact:'봉사 물품 수량 대조 방법',reply:'“아, 제가 센 건 봉투 수였네요.” 세는 단위가 달랐던 부분을 찾아 목록 옆에 적는다. 물품을 다시 꺼내기 전에 기준부터 맞췄다.'},
@@ -2722,14 +2825,15 @@ function sessionStore(s){s.activitySessions??={active:null,records:{}};return s.
 function currentCommunityActivity(s,key=s.activitySessions?.active){return s.activitySessions?.records?.[key]??null;}
 function activityAvailability(s,postId,session=null){
  const def=communityActivityDefinitions[postId];if(!def)return {ok:false,reason:'연결된 공개 활동이 없습니다.'};
- if(s.day!==def.day)return {ok:false,reason:`${def.day}일차 13:00부터 진행하는 공개 활동입니다.`};
+ if(!(def.days??[def.day]).includes(s.day))return {ok:false,reason:`${def.day}일차 13:00부터 진행하는 공개 활동입니다.`};
  const stored=session??currentCommunityActivity(s,communityActivityKey(s,postId));
  if(stored?.status==='completed'||(def.route!=='rehearsal'&&(s.freeDay?.completed??[]).some(a=>a.id===def.route)))return {ok:false,reason:'이미 마친 공개 활동입니다.'};
- const route=stored?.route??availableRoutes(s).find(r=>r.id===def.route);
+ const route=stored?.route??(def.physical?{id:def.route,name:def.title,duration:def.duration,knowledge:[],memory:''}:availableRoutes(s).find(r=>r.id===def.route));
  if(!route||route.locked)return {ok:false,reason:route?.lockReason??'지금은 참여할 수 없습니다.'};
  if(s.clock.minute<780)return {ok:false,reason:'현장 공개 활동은 13:00부터 시작합니다. 수업과 공강 시간을 확인해 주세요.'};
  const remaining=(stored?.duration??route.duration)-(stored?.spent??0);
  if(s.freeDay?.home||s.clock.minute+remaining>1080)return {ok:false,reason:'18:00 준비 마감까지 남은 활동을 끝내기 어렵습니다. 오늘은 안내만 확인할 수 있습니다.'};
+ if(def.physical&&classConflicts(s,remaining).length)return {ok:false,reason:'남은 활동 시간이 수업과 겹칩니다. 수업 뒤에 참여할 수 있습니다.'};
  return {ok:true,route,remaining};
 }
 function pauseCommunityActivity(state){
@@ -2739,12 +2843,13 @@ function pauseCommunityActivity(state){
 }
 function beginCommunityActivity(state,postId){
  const availability=activityAvailability(state,postId);if(!availability.ok)throw new Error(availability.reason);
- if(!state.flow?.postsRead?.[postId])throw new Error('해당 모집글을 먼저 읽어 주세요.');
+ if(!state.flow?.postsRead?.[postId]&&!state.flow?.activitiesHeard?.[postId])throw new Error('해당 모집글을 먼저 읽어 주세요.');
  const existing=currentCommunityActivity(state,communityActivityKey(state,postId));
  if(existing)return resumeCommunityActivity(state,communityActivityKey(state,postId));
  const s=pauseCommunityActivity(state),store=sessionStore(s),def=communityActivityDefinitions[postId],rain=def.club==='football'&&wetWeather(s);
  const venue=rain?{location:'gym',area:'fitness',label:'체육관 · 체력단련실'}:structuredClone(def.venue);
  const record={key:communityActivityKey(s,postId),postId,day:s.day,route:structuredClone(availability.route),routeId:def.route,duration:availability.route.duration,startedAt:s.clock.minute,spent:0,step:0,choices:[],segments:[],status:'active',rain,venue,last:null};
+ if(def.physical)preparePhysicalActivity(record,Math.floor(Math.random()*4294967296));
  store.records[record.key]=record;store.active=record.key;if(def.club==='volunteer')seePeople(s,['yeogyeong']);s.location=venue.location;s.buildingArea=venue.area?{place:venue.location,id:venue.area}:null;s.pace={count:0,seen:{}};return s;
 }
 function resumeCommunityActivity(state,key){
@@ -2755,7 +2860,7 @@ function resumeCommunityActivity(state,key){
 }
 function communityActivityStage(s){
  const r=currentCommunityActivity(s);if(!r)return null;const def=communityActivityDefinitions[r.postId],stage=def.stages[r.step];
- if(!stage)return null;return {...stage,prompt:r.rain&&stage.rainPrompt?stage.rainPrompt:stage.prompt,choices:r.rain&&stage.rainChoices?stage.rainChoices:stage.choices};
+ if(!stage)return null;return physicalActivityDefinitions[r.postId]?physicalActivityStage(r,stage):{...stage,prompt:r.rain&&stage.rainPrompt?stage.rainPrompt:stage.prompt,choices:r.rain&&stage.rainChoices?stage.rainChoices:stage.choices};
 }
 function progressCommunityActivity(state,choice){
  const record=currentCommunityActivity(state),stage=communityActivityStage(state);
@@ -2765,19 +2870,22 @@ function progressCommunityActivity(state,choice){
  const availability=activityAvailability(state,record.postId,record);if(!availability.ok)throw new Error(availability.reason);
  let s=structuredClone(state),r=currentCommunityActivity(s),def=communityActivityDefinitions[r.postId];
  const chunks=[Math.round(r.duration/6),Math.round(r.duration/2),r.duration-Math.round(r.duration/6)-Math.round(r.duration/2)];
- const minutes=chunks[r.step],start=s.clock.minute;
+ const action=def.physical?performPhysicalAction(r,choice):null;
+ const minutes=action?.minutes??chunks[r.step],start=s.clock.minute;
  if(selected.approach)s=planEvent(s,r.routeId,selected.approach);
  const performance=record.postId==='music-recruit'&&choice==='perform'?musicPerformance(record):null;
  const firstExchange=def.club==='volunteer'&&!contact(s,'yeogyeong').introduced;
  if(firstExchange){introduce(s,'yeogyeong','community-activity-exchange');s.memory.push(`[${s.day}일차] 봉사 물품을 확인하며 차여경과 인사를 나눴다.`);}
- r=currentCommunityActivity(s);r.choices.push({stage:r.step,id:choice});r.spent+=minutes;r.step++;r.last={player:selected.label,speaker:def.club==='volunteer'?'차여경':'현장의 부원',text:(firstExchange?'“차여경이에요. 같이 봐주셔서 고마워요.” ':'')+(performance?.text??selected.reply)};if(performance)r.performance=performance;r.segments.push({start,end:start+minutes});
+ r=currentCommunityActivity(s);r.choices.push({stage:r.step,id:choice});r.spent+=minutes;if(action?.advance!==false)r.step++;r.last={player:selected.label,speaker:def.club==='volunteer'?'차여경':def.physical?'함께 활동하며':'현장의 부원',text:(firstExchange?'“차여경이에요. 같이 봐주셔서 고마워요.” ':'')+(action?.text??performance?.text??selected.reply)};if(performance)r.performance=performance;r.segments.push({start,end:start+minutes});
  if(!s.known.includes(selected.fact))s.known.push(selected.fact);
- s.memory.push(`[${s.day}일차] ${def.title}: ${selected.label} ${selected.reply}`);
+ s.memory.push(`[${s.day}일차] ${def.title}: ${selected.label} ${r.last.text}`);
  s=advanceFreeTime(s,minutes,{activeChoice:r.step===def.stages.length?r.routeId:null});
  if(def.club==='volunteer')noteNpcExperience(s,'yeogyeong','shared-work-step',{fatigue:minutes/8,stress:-3,warmth:4},`community:${r.key}:${r.step}`);
  s.pace={count:0,seen:{}};r=currentCommunityActivity(s);
  if(r.step===def.stages.length){
-  s=finishFreeActivity(s,r.routeId,r.route,{start:r.startedAt,activeMinutes:r.spent});r=currentCommunityActivity(s);r.status='completed';r.finishedAt=s.clock.minute;
+  if(def.physical){
+   s.freeDay??={completed:[],settled:false};s.freeDay.completed.push({id:r.routeId,start:r.startedAt,end:s.clock.minute,activeMinutes:r.spent});s.lastResult='';
+  }else s=finishFreeActivity(s,r.routeId,r.route,{start:r.startedAt,activeMinutes:r.spent});r=currentCommunityActivity(s);r.status='completed';r.finishedAt=s.clock.minute;
   s.lastResult+=' '+communityActivityOutcome(r);
   r.result=s.lastResult;s.memory.push(`[${s.day}일차] ${def.title} 공개 체험을 마쳤다. 가입 여부는 아직 별개다.`);
  }
@@ -2785,6 +2893,7 @@ function progressCommunityActivity(state,choice){
 }
 
 function communityActivityOutcome(record){
+ if(physicalActivityDefinitions[record.postId])return physicalActivityOutcome(record);
  const ids=record.choices.map(c=>c.id);
  if(record.postId==='volunteer-recruit')return ids[2]==='next'?'남은 일을 넘겨준 뒤 다음 공개 사진 정리 활동에 대한 안내도 들었다.':'다음 사람이 이어받을 수 있도록 완료한 일과 남은 일을 정리했다.';
  if(record.postId==='music-recruit')return `${{vocal:'보컬',bass:'베이스',guitar:'기타'}[ids[0]]} 파트로 들어가 ${ids[1]==='blend'?'다른 파트와 호흡과 음량을 맞췄다.':'전환 신호를 함께 정했다.'} ${ids[2]==='perform'?'짧은 공연으로 마무리하며 함께 맞춘 구간을 기억했다.':ids[2]==='take'?'다음 연습과 곡 작업에 참고할 수정 메모를 남겼다.':'케이블을 함께 정리하고 보관 위치를 확인했다.'}`;
@@ -2796,6 +2905,17 @@ function musicPerformance(record){
  const role=record.choices[0]?.id??'vocal',blend=record.choices[1]?.id==='blend';
  const opening={vocal:'마이크 높이를 맞추고 첫 소절을 시작한다. 연습 때보다 목소리를 조금 열자 드럼이 한 박자 뒤에서 받쳐준다.',bass:'베이스를 메고 드럼을 바라본다. 킥에 맞춰 낮은 음을 짚자 다른 파트가 그 위로 들어온다.',guitar:'기타 줄을 가볍게 눌러 소리를 확인한다. 반주가 들어올 자리를 남기고 첫 코드를 울린다.'}[role];
  return {role,coordination:blend?'listening':'signal',text:opening+' '+(blend?'후렴에서 소리가 겹치자 태이가 잠깐 힘을 뺀다. 건반을 맡은 학생도 음량을 낮춘다. 끝음을 길게 남긴 뒤 서로 눈을 마주친다. “방금은 제 소리가 들렸어요. 아까보다 편했는데요?”':'연습 때 표시한 구간이 다가온다. 태이가 고개로 신호를 보내자 드럼이 전환을 받아준다. 마지막 박자는 조금 어긋나서 누군가 웃는다. “끝만 다시 맞춰볼까요? 들어가는 건 좋았어요.”')};
+}
+
+function onsiteCommunityActivities(s){
+ return Object.entries(physicalActivityDefinitions).filter(([id,def])=>s.location===def.venue.location&&s.buildingArea?.place===s.location&&s.buildingArea?.id===def.venue.area&&activityAvailability(s,id).ok).map(([id,def])=>({id,label:def.onsite}));
+}
+
+function hearOnsiteActivity(state,id){
+ if(!onsiteCommunityActivities(state).some(c=>c.id===id))throw new Error('활동이 진행 중인 호실에서 안내를 들을 수 있습니다.');
+ const s=structuredClone(state);s.flow??={seen:{}};s.flow.activitiesHeard??={};
+ if(!s.flow.activitiesHeard[id]){s.flow.activitiesHeard[id]={day:s.day,minute:s.clock.minute};s.memory.push(`[${s.day}일차] ${physicalActivityDefinitions[id].venue.label}에서 ${physicalActivityDefinitions[id].title} 참여 안내를 직접 들었다.`);}
+ return s;
 }
 
 function flowState(s){s.flow??={seen:{}};return s.flow;}
@@ -3062,7 +3182,7 @@ function sceneVisual(){
  const atHome=screen==='dayEnd'&&state.freeDay?.home;
  const area=atHome?null:selectedBuildingArea(state);
  const caption=lunch?'비 오는 점심시간':session?communityActivityDefinitions[session.postId].title+' · '+Math.min(session.step+1,3)+'/3':{classLesson:'수업',encounter:'우연한 만남',warningScene:'눈앞의 상황',detail:'활동 준비',result:'활동을 마친 뒤',buildingDirectory:'건물 안에서',dayEnd:'하루의 끝'}[screen]??'캠퍼스의 일상';
- return `<aside class="scene-visual" aria-label="현재 장면"><div class="scene-context"><span class="scene-kicker">${caption}</span><p class="scene-location">${esc(session?session.venue.label:atHome?'자취방':screen==='campus'?'캠퍼스':locations[state.location]??'캠퍼스')}${area?`<small>${esc((area.floor==='층 미확정'?'':area.floor+' · ')+area.name)}</small>`:''}</p><p class="scene-time">${esc(timeLabel())}<span class="scene-weather">${weatherNow(state).icon} ${weatherNow(state).name} · ${weatherNow(state).temperature}°C</span></p></div>${session?.postId==='music-recruit'?activityScene(session):portrait(column)}<p class="scene-person">${esc(person==='taei'?'김태이':nameOf(person))}</p></aside>`;
+ return `<aside class="scene-visual" aria-label="현재 장면"><div class="scene-context"><span class="scene-kicker">${caption}</span><p class="scene-location">${esc(session?session.venue.label:atHome?'자취방':screen==='campus'?'캠퍼스':locations[state.location]??'캠퍼스')}${area?`<small>${esc((area.floor==='층 미확정'?'':area.floor+' · ')+area.name)}</small>`:''}</p><p class="scene-time">${esc(timeLabel())}<span class="scene-weather">${weatherNow(state).icon} ${weatherNow(state).name} · ${weatherNow(state).temperature}°C</span></p></div>${session&&(session.postId==='music-recruit'||communityActivityDefinitions[session.postId]?.physical)?activityScene(session):portrait(column)}<p class="scene-person">${esc(person==='taei'?'김태이':nameOf(person))}</p></aside>`;
 }
 function page(title,body,back='campus',backAction='go'){
  if(['quickMenu','menu'].includes(screen)){if(quickReturn){back='';backAction='closeQuick';}body=menuTabs()+body;}
@@ -3187,13 +3307,13 @@ function render(){
  const evening=state.phase==='evening',day=days[state.day],routes=availableRoutes(state);
  if(screen==='campus'){const scene=campusScene(state);app.innerHTML=`<section class="explore"><div class="top"><span class="badge">${timeLabel()}</span><nav>${btn('휴대폰','phone')}${btn('메뉴','go','menu')}</nav></div>${portrait(0)}<div class="prompt scene-prompt"><p>${narrative(scene.text)}</p>${scene.choices.map(c=>btn(narrative(c.label),c.action,c.value)).join('')}</div></section>`;}
  if(screen==='quickMenu')app.innerHTML=page('메뉴',quickMenuBody(),'','closeQuick');
- if(screen==='community')app.innerHTML=page('캠퍼스톡',`<p class="community-intro">학내 커뮤니티 · 모집글과 공지, 익명 이야기가 함께 올라옵니다.</p><nav class="community-tabs">${[['all','전체'],['anonymous','자유'],['club','모집'],['notice','공지']].map(([id,label])=>`<button data-action="communityFilter" data-value="${id}" aria-pressed="${communityFilter===id}">${label}</button>`).join('')}</nav><div class="community-live" aria-live="polite"></div><div class="community-feed">${visibleCommunityPosts(state).filter(p=>(!feedIds||feedIds.includes(p.id))&&(communityFilter==='all'||p.kind===communityFilter)).map(p=>`<button class="community-post" data-action="readPost" data-value="${p.id}"><span class="post-meta">${esc(p.board)} · ${p.kind==='anonymous'?'익명글':p.kind==='notice'?'교내 공지':'동아리 운영진'} · ${p.day===state.day?'오늘':p.day+'일차'}${p.generated?' · '+(communityState(state).beat-p.createdBeat<4?'방금':'조금 전'):''}</span><strong>${esc(p.title)}</strong><span class="post-preview">${esc(p.body)}</span><span class="post-meta">댓글 ${p.comments.length}${p.likes?' · 공감 '+p.likes:''}${state.flow.postsRead?.[p.id]?' · 읽음':''}</span></button>`).join('')}</div>`,communityReturn,'closeCommunity');
- if(screen==='communityEvent'&&selectedCommunityEvent){const def=communityActivityDefinitions[selectedCommunityEvent],availability=activityAvailability(state,selectedCommunityEvent),record=currentCommunityActivity(state,`${state.day}:${selectedCommunityEvent}`);app.innerHTML=page(def.title,`<p class="lead">모집글에는 ${esc(def.title)} 공개 체험에 참여할 수 있다고 적혀 있다. 현장에서 준비·실제 활동·마무리를 차례로 맡아볼 수 있다.</p><p>${def.day}일차 13:00~18:00 공개 활동 · ${def.venue.label}${def.club==='football'?' (우천 시 체육관 실내 대체)':''}</p><p>준비부터 마무리까지 약 ${availability.route?.duration??record?.duration??days[def.day].routes[def.route].duration}분. 가입하지 않아도 체험할 수 있으며, 읽거나 참여한 것만으로 가입·약속이 생기지는 않습니다.</p>${!availability.ok?`<p class="notice">${esc(availability.reason)}</p>`:''}<div class="actions">${availability.ok?btn(record?'현장으로 돌아가 이어서 한다.':'현장에 가서 공개 활동에 참여한다.','eventBegin',selectedCommunityEvent):''}${btn('아직 결정하지 않고 글로 돌아간다.','go','communityPost')}</div>`,'communityPost');}
+ if(screen==='community')app.innerHTML=page('캠퍼스톡',`<p class="community-intro">학내 커뮤니티 · 모집글과 공지, 익명 이야기가 함께 올라옵니다.</p><nav class="community-tabs">${[['all','전체'],['anonymous','자유'],['club','모집'],['activity','체험'],['notice','공지']].map(([id,label])=>`<button data-action="communityFilter" data-value="${id}" aria-pressed="${communityFilter===id}">${label}</button>`).join('')}</nav><div class="community-live" aria-live="polite"></div><div class="community-feed">${visibleCommunityPosts(state).filter(p=>(!feedIds||feedIds.includes(p.id))&&(communityFilter==='all'||p.kind===communityFilter)).map(p=>`<button class="community-post" data-action="readPost" data-value="${p.id}"><span class="post-meta">${esc(p.board)} · ${p.kind==='anonymous'?'익명글':p.kind==='notice'?'교내 공지':p.kind==='activity'?esc(p.author):'동아리 운영진'} · ${p.day===state.day?'오늘':p.day+'일차'}${p.generated?' · '+(communityState(state).beat-p.createdBeat<4?'방금':'조금 전'):''}</span><strong>${esc(p.title)}</strong><span class="post-preview">${esc(p.body)}</span><span class="post-meta">댓글 ${p.comments.length}${p.likes?' · 공감 '+p.likes:''}${state.flow.postsRead?.[p.id]?' · 읽음':''}</span></button>`).join('')}</div>`,communityReturn,'closeCommunity');
+ if(screen==='communityEvent'&&selectedCommunityEvent){const def=communityActivityDefinitions[selectedCommunityEvent],availability=activityAvailability(state,selectedCommunityEvent),record=currentCommunityActivity(state,`${state.day}:${selectedCommunityEvent}`);app.innerHTML=page(def.title,`<p class="lead">${state.flow?.postsRead?.[selectedCommunityEvent]?'모집글에서':'현장에서'} ${esc(def.title)} 공개 체험에 참여할 수 있다는 안내를 ${state.flow?.postsRead?.[selectedCommunityEvent]?'읽었다':'들었다'}. 현장에서 준비·실제 활동·마무리를 차례로 맡아볼 수 있다.</p><p>${def.days?'1~3일차':def.day+'일차'} 13:00~18:00 공개 활동 · ${def.venue.label}${def.club==='football'?' (우천 시 체육관 실내 대체)':''}</p><p>준비부터 마무리까지 약 ${availability.route?.duration??record?.duration??def.duration??days[def.day].routes[def.route].duration}분. 가입하지 않아도 체험할 수 있으며, 읽거나 참여한 것만으로 가입·약속이 생기지는 않습니다.</p>${!availability.ok?`<p class="notice">${esc(availability.reason)}</p>`:''}<div class="actions">${availability.ok?btn(record?'현장으로 돌아가 이어서 한다.':'현장에 가서 공개 활동에 참여한다.','eventBegin',selectedCommunityEvent):''}${btn('아직 시작하지 않고 돌아간다.','go',state.flow?.postsRead?.[selectedCommunityEvent]?'communityPost':'place')}</div>`,state.flow?.postsRead?.[selectedCommunityEvent]?'communityPost':'place');}
  if(screen==='rainLunch'){
   const scene=rainLunchView(state),last=scene?.last??{};
   app.innerHTML=page('비 오는 점심시간',`${last.player?`<p data-voice="김태이">${esc(last.player)}</p>`:''}${last.text?`<p data-voice="${esc(nameOf(lunchEpisode(state).person))}">${narrative(last.text)}</p>`:''}${last.narration?`<p>${narrative(last.narration)}</p>`:''}<div class="actions">${scene?.options.map(o=>btn(o.label,'lunchAction',o.id)).join('')??''}</div>`,'place');
  }
- if(screen==='communityActivity'){const record=currentCommunityActivity(state),def=record?communityActivityDefinitions[record.postId]:null,stage=communityActivityStage(state);app.innerHTML=page(def?.title??'공개 활동',record?`${record.last?`<p data-voice="김태이">${esc(record.last.player)}</p><p data-voice="${esc(record.last.speaker)}">${narrative(record.last.text)}</p>`:`<p>${narrative(def.intro)}</p>`}${stage?`<p>${narrative(stage.prompt)}</p><div class="actions">${stage.choices.map(c=>btn(narrative(c.label),'eventStep',c.id)).join('')}${btn('여기까지 하고 잠깐 나온다.','eventPause')}</div>`:`<p class="lead">${narrative(record.result??'공개 활동을 마쳤다.')}</p><p>실제로 참여한 시간 ${record.spent}분. 가입 여부와 다음 약속은 직접 결정할 수 있다.</p><div class="actions">${btn('동아리 안내를 읽어본다.','clubDetail',def.club)}${btn('현장을 나와 주변을 둘러본다.','eventLeave')}</div>`}`:'<p>이어갈 활동이 없습니다.</p>','campus');}
+ if(screen==='communityActivity'){const record=currentCommunityActivity(state),def=record?communityActivityDefinitions[record.postId]:null,stage=communityActivityStage(state);app.innerHTML=page(def?.title??'공개 활동',record?`${record.last?`<p data-voice="김태이">${esc(record.last.player)}</p><p ${def.physical?'':`data-voice="${esc(record.last.speaker)}"`}>${narrative(record.last.text)}</p>`:`<p>${narrative(def.intro)}</p>`}${stage?`<p>${narrative(stage.prompt)}</p><div class="actions">${stage.choices.map(c=>btn(narrative(c.label),'eventStep',c.id)).join('')}${btn('여기까지 하고 잠깐 나온다.','eventPause')}</div>`:`<p class="lead">${narrative(record.result??'공개 활동을 마쳤다.')}</p><p>실제로 참여한 시간 ${record.spent}분. 가입 여부와 다음 약속은 직접 결정할 수 있다.</p><div class="actions">${def.club?btn('동아리 안내를 읽어본다.','clubDetail',def.club):''}${btn('현장을 나와 주변을 둘러본다.','eventLeave')}</div>`}`:'<p>이어갈 활동이 없습니다.</p>','campus');}
  if(screen==='communityPost'&&selectedPost){const p=visibleCommunityPosts(state).find(p=>p.id===selectedPost);if(p)app.innerHTML=page(p.board,`<article class="community-detail"><p class="post-meta">${esc(p.author)} · ${p.day===state.day?'오늘':p.day+'일차'}${p.kind==='anonymous'?' · 작성자·내용 미확인':''}</p><h2>${esc(p.title)}</h2><p>${esc(p.body)}</p>${p.kind==='anonymous'?'<p class="source-note">익명 작성자의 글입니다. 직접 본 일이나 공식 안내와 구분해 기억합니다.</p>':''}</article><div class="dialogue-options">${p.club?btn('이 글의 모집 안내를 자세히 읽는다.','clubDetail',p.club):''}${communityActivityDefinitions[p.id]?btn('이 공개 활동을 자세히 살펴본다.','communityEventView',p.id):''}${p.id==='ambulance-post'?btn('지나갈 일이 있는 카페 쪽에서 직접 확인해본다.','visit','cafe'):''}</div><div class="community-live" aria-live="polite"></div>${` <h3>댓글 ${p.comments.length}</h3>${p.comments.map(c=>`<p class="community-comment ${c.reply?'reply':''}"><strong>${typeof c==='string'?'익명':esc(c.author)}</strong>${esc(typeof c==='string'?c:c.text)}</p>`).join('')}`}`, 'community');}
  if(screen==='travel')app.innerHTML=page('캠퍼스 이동',`<p class="muted">인물은 각자의 일정에 따라 장소를 옮깁니다. 1일차에는 여러 이동·탐색·대화를 묶어 시간이 한 번에 흐릅니다. 보통 약 30분이며, 비 오는 날의 야외 이동과 우산 준비에 따라 달라집니다. 짧은 대답마다 시간이 차감되지는 않습니다. 머물 곳과 할 일은 직접 정할 수 있습니다. 휴대폰과 메뉴를 확인하는 동안에는 시간이 들지 않습니다.</p><div class="grid">${Object.entries(locations).map(([id,label])=>`<button class="card" aria-label="${label} 찾아가기" data-action="visit" data-value="${id}" ${!canSpendTime(state,timeCost(state,'visit',id))?'disabled':''}><strong>${label}</strong>찾아가기</button>`).join('')}</div>`);
  if(screen==='timetable')app.innerHTML=page('시간표 · 출석',`<p>${timeLabel()}</p><p class="muted">수업이 없는 시간은 자유행동 시간입니다. 수업 장소에서 실제로 참석해야 출석이 남습니다.</p>${[1,2,3].map(day=>`<h2>${day}일차 · ${days[day].weekday}</h2>${timetable(state,'taei',day).map(c=>`<article class="list"><strong>${esc(c.name)} · ${schoolTime(c.start)}~${schoolTime(c.end)}</strong><p>${esc(classPlace(c))}</p><p>${day<state.day?(classStatuses[state.academics.records[c.key]?.status]??'기록 없음'):day>state.day?'예정':classStatuses[lessonStatus(state,c)]}</p>${day===state.day&&state.clock.minute<c.end&&!state.academics.records[c.key]?btn('수업 장소로 간다.','classTravel',c.key):''}</article>`).join('')}`).join('')}`,'phone');
@@ -3205,7 +3325,7 @@ function render(){
  }
  if(screen==='place'){
   const here=atPlace();
-  app.innerHTML=page(locations[here],`<p class="lead">${timeLabel()}</p><p class="muted">${narrative((buildingAtmosphere(state,here)||(here==='library'?libraryAtmosphere(state):placeAtmosphere(state,here)))||{hall:'복도에는 물품 상자와 활동 안내문이 놓여 있다. 안쪽에서 종이를 넘기는 소리가 들린다.',library:'책장을 넘기는 소리와 낮은 대화가 들린다. 사람들은 각자 하던 일을 이어간다.',cafe:'주문을 부르는 목소리가 들린다. 창가의 햇빛이 조금 길어졌다.'}[here])}</p><p class="weather-scene">${weatherAtmosphere(state,here)}</p>${riskScene(state,here)?`<p class="muted">${narrative(riskScene(state,here))}</p>`:''}<div class="actions">${campusBuildings[here]?.areas?btn('건물 안의 다른 공간으로 간다.','go','buildingDirectory'):''}${here==='hall'?Object.entries(state.clubApplications??{}).filter(([,a])=>a.status==='submitted').map(([id])=>btn(clubs[id].name+' 모집 담당자에게 말을 건다.','openInterview',id)).join(''):''}${state.clock.minute<1320?buildingActions(state,here).map(a=>btn(a.label,'buildingActivity',a.id)).join(''):''}${here==='library'&&state.clock.minute<1320?libraryActivities.map(a=>btn(a.label,'libraryActivity',a.id)).join(''):''}</div><div class="actions">${visibleSpatialActions(state,placeActions[here]??[]).map(a=>btn(a.label,'walk',a.id)).join('')}</div><div class="actions">${placeContinuations(state,here).map(c=>btn(narrative(c.label),c.action,c.value)).join('')}${evening?btn(state.day<3?'자취방으로 돌아가 하루를 마친다.':'지난 며칠의 기록을 떠올린다.','go','dayEnd'):''}${state.clock.minute<1320?btn('잠시 쉬며 시간을 보낸다','wait'):''}</div>`);
+  app.innerHTML=page(locations[here],`<p class="lead">${timeLabel()}</p><p class="muted">${narrative((buildingAtmosphere(state,here)||(here==='library'?libraryAtmosphere(state):placeAtmosphere(state,here)))||{hall:'복도에는 물품 상자와 활동 안내문이 놓여 있다. 안쪽에서 종이를 넘기는 소리가 들린다.',library:'책장을 넘기는 소리와 낮은 대화가 들린다. 사람들은 각자 하던 일을 이어간다.',cafe:'주문을 부르는 목소리가 들린다. 창가의 햇빛이 조금 길어졌다.'}[here])}</p><p class="weather-scene">${weatherAtmosphere(state,here)}</p>${riskScene(state,here)?`<p class="muted">${narrative(riskScene(state,here))}</p>`:''}<div class="actions">${campusBuildings[here]?.areas?btn('건물 안의 다른 공간으로 간다.','go','buildingDirectory'):''}${here==='hall'?Object.entries(state.clubApplications??{}).filter(([,a])=>a.status==='submitted').map(([id])=>btn(clubs[id].name+' 모집 담당자에게 말을 건다.','openInterview',id)).join(''):''}${state.clock.minute<1320?buildingActions(state,here).map(a=>btn(a.label,'buildingActivity',a.id)).join(''):''}${here==='library'&&state.clock.minute<1320?libraryActivities.map(a=>btn(a.label,'libraryActivity',a.id)).join(''):''}</div><div class="actions">${visibleSpatialActions(state,placeActions[here]??[]).map(a=>btn(a.label,'walk',a.id)).join('')}</div><div class="actions">${onsiteCommunityActivities(state).map(c=>btn(narrative(c.label),'onsiteEvent',c.id)).join('')}${placeContinuations(state,here).map(c=>btn(narrative(c.label),c.action,c.value)).join('')}${evening?btn(state.day<3?'자취방으로 돌아가 하루를 마친다.':'지난 며칠의 기록을 떠올린다.','go','dayEnd'):''}${state.clock.minute<1320?btn('잠시 쉬며 시간을 보낸다','wait'):''}</div>`);
  }
  if(screen==='encounter'&&encounter){
   app.innerHTML=page(locations[atPlace()],`<p class="muted">${timeLabel()}</p><p class="lead">${narrative(encounter.text)}</p><div class="dialogue-options">${btn(narrative(encounter.action),'encounter','engage')}${btn('하던 일을 계속하며 지나간다.','encounter','pass')}</div>`);
@@ -3298,6 +3418,7 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
  if(a==='buildingArea'){const result=enterBuildingArea(state,v);state=result.state;note=result.text;screen='place';if(result.destination){state=markFlow(state,'visit',result.destination);const r=arrive(state,result.destination);state=r.state;encounter=r.encounter;note=r.observation??result.text;screen=encounter?'encounter':'place';}}
  if(a==='buildingActivity'){const result=buildingActivity(state,v);state=result.state;note=result.text;screen='place';}
  if(a==='libraryActivity'){const result=libraryActivity(state,v);state=result.state;note=result.text;screen='place';}
+ if(a==='onsiteEvent'){if(!onsiteCommunityActivities(state).some(c=>c.id===v))throw new Error('현재 공간에서는 참여할 수 없습니다.');state=hearOnsiteActivity(state,v);selectedPost=v;selectedCommunityEvent=v;screen='communityEvent';reply=null;}
  if(a==='communityEventView'){if(!communityActivityDefinitions[v]||!state.flow?.postsRead?.[v])throw new Error('해당 모집글을 먼저 읽어 주세요.');selectedCommunityEvent=v;screen='communityEvent';}
  if(a==='eventBegin'||a==='eventResume'){
   state=interruptRainLunch(state);
@@ -3365,7 +3486,7 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
  if(a==='save'){localStorage.setItem('campus.slot.'+v,save(state));note=`슬롯 ${v}에 저장했습니다.`;}
  if(a==='load'){const raw=localStorage.getItem('campus.slot.'+v);if(!raw)throw new Error('비어 있는 슬롯입니다.');state=warningPhase(restore(raw));warningScene=null;reply=null;selected=null;encounter=null;note=`슬롯 ${v}을 불러왔습니다.`;}
  if(a==='reset'){state=newGame();screen='campus';selected=null;reply=null;encounter=null;returnTo='campus';}
- if(!['load','reset','scenario','nextDay','act','classChoice','eventBegin','eventStep','eventResume','eventPause','eventLeave','communityEventView','lunchAction','resumeLunch'].includes(a)){
+ if(!['load','reset','scenario','nextDay','act','classChoice','eventBegin','eventStep','eventResume','eventPause','eventLeave','communityEventView','onsiteEvent','lunchAction','resumeLunch'].includes(a)){
   const paced=paceAction(before,state,{action:a,value:v,from:fromScreen,to:screen,person:fromScreen==='group'?'group':speaker});state=paced.state;
   if(paced.minutes)paceNotice=`${a==='wait'?'잠시 쉬고 나니':'여러 일을 마치고 나니'} 어느새 ${clockLabel(state)}. 약 ${paced.minutes}분이 지났다.`;
  }

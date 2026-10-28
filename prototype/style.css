@@ -157,3 +157,6 @@ body[data-utility-screen="phone"]{background:radial-gradient(ellipse at top,#d9e
 @keyframes stage-breathe{50%{transform:rotate(1deg) translateY(-3px)}}
 @media(max-width:650px){.activity-tableau svg{height:64%;margin-top:55px}.tableau-note{top:12px}.scene-visual:has(.activity-tableau) .scene-context{max-width:210px;padding:7px}.activity-tableau{background:linear-gradient(#263c4c,#172432)}}
 @media(prefers-reduced-motion:reduce){.activity-tableau .activity-taei{animation:none!important}}
+.physical-tableau[data-kind="cooking"] .activity-steam{animation:activity-steam 2.5s ease-in-out infinite}
+@keyframes activity-steam{50%{opacity:.25;transform:translateY(-5px)}}
+@media(prefers-reduced-motion:reduce){.physical-tableau .activity-steam{animation:none}}
