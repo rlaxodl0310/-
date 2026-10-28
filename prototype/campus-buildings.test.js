@@ -6,11 +6,11 @@ import {newAfternoonScenario as newGame,restore,save} from './simulation.js';
 import {arrive} from './encounters.js';
 import {campusScene,placeContinuations} from './scene-flow.js';
 import {paceAction} from './campus-time.js';
-test('all thirteen places are reachable through real scene links with no invalid destination',()=>{
- assert.equal(Object.keys(locations).length,13);
+test('all fifteen places are reachable through real scene links with no invalid destination',()=>{
+ assert.equal(Object.keys(locations).length,15);
  const s=newGame(),visited=new Set(),pending=campusScene(s).choices.filter(c=>c.action==='visit').map(c=>c.value);
  while(pending.length){const place=pending.pop();if(visited.has(place))continue;visited.add(place);for(const c of placeContinuations(s,place).filter(c=>c.action==='visit')){assert.ok(locations[c.value]);pending.push(c.value);}}
- assert.equal(visited.size,13);for(const place of Object.keys(locations))assert.ok(buildingLinks(place).every(c=>locations[c.value]));
+ assert.equal(visited.size,15);for(const place of Object.keys(locations))assert.ok(buildingLinks(place).every(c=>locations[c.value]));
 });
 test('arriving at new buildings observes actual facilities without inventing an NPC or item',()=>{
  for(const [id,b] of Object.entries(campusBuildings).filter(([id])=>id!=='hall')){const s=newGame(),r=arrive(s,id);assert.equal(r.state.location,id);assert.equal(r.encounter,null);assert.match(r.observation,new RegExp(b.entry.slice(0,5)));assert.ok(r.state.known.includes(b.fact));assert.deepEqual(r.state.inventory,s.inventory);assert.deepEqual(r.state.contacts,s.contacts);const again=arrive(r.state,id);assert.equal(again.state.memory.length,r.state.memory.length);}

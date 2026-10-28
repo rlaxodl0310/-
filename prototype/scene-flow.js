@@ -5,8 +5,10 @@ export function flowState(s){s.flow??={seen:{}};return s.flow;}
 export function markFlow(state,kind,value){const s=structuredClone(state);flowState(s).seen[kind+(value?':'+value:'')]=true;return s;}
 export function campusScene(s){
  const c=nextLesson(s);
- if(c&&c.start-s.clock.minute<=45)return {text:`${s.clock.minute<c.start?'곧 수업이 시작된다.':'수업이 진행 중이다.'} ${schoolTime(c.start)}~${schoolTime(c.end)} ${c.name}. ${classPlace(c)}로 가야 한다.`,choices:[{label:'수업 장소로 간다.',action:'classTravel',value:c.key},{label:'오늘 시간표와 출석을 확인한다.',action:'go',value:'timetable'},{label:s.clock.minute<c.start?'수업 전에 다른 곳에 잠깐 들른다.':'수업에 가지 않고 다른 곳으로 간다.',action:'go',value:'travel'},{label:'오늘은 집으로 돌아간다.',action:'go',value:'dayEnd'}]};
+ if(c&&c.start-s.clock.minute<=45)return {text:`${s.clock.minute<c.start?'곧 수업이 시작된다.':'수업이 진행 중이다.'} ${schoolTime(c.start)}~${schoolTime(c.end)} ${c.name}. ${classPlace(c)} 수업에 참석하거나 다른 곳에서 시간을 보낼 수 있다.`,choices:[{label:'수업 장소로 간다.',action:'classTravel',value:c.key},{label:'오늘 시간표와 출석을 확인한다.',action:'go',value:'timetable'},{label:s.clock.minute<c.start?'수업 전에 다른 곳에 잠깐 들른다.':'수업에 가지 않고 다른 곳으로 간다.',action:'go',value:'travel'},{label:'운동장 트랙 쪽으로 걸어간다.',action:'visit',value:'field'},{label:'야외 코트 쪽으로 걸어간다.',action:'visit',value:'outdoorCourt'},{label:'오늘은 집으로 돌아간다.',action:'go',value:'dayEnd'}]};
  return {text:s.phase==='evening'?'캠퍼스에 하나둘 불이 켜진다. 아직 머물며 주변을 둘러볼 수도, 집으로 돌아갈 수도 있다.':schoolEnabled(s)?'지금은 공강이다. 수업 사이 남은 시간에 주변을 둘러보거나 사람들과 이야기할 수 있다.':'학교에 도착했다. 학생들이 각자의 일로 건물 사이를 오간다. 어디로 갈지 천천히 둘러본다.',choices:[
+  {label:'운동장 트랙 쪽으로 걸어간다.',action:'visit',value:'field'},
+  {label:'야외 코트 쪽으로 걸어간다.',action:'visit',value:'outdoorCourt'},
   {label:'자유관 쪽으로 걸어간다.',action:'visit',value:'hall'},
   {label:'도서관으로 이어지는 길을 따라간다.',action:'visit',value:'library'},
   {label:'대학가 카페 쪽으로 발길을 돌린다.',action:'visit',value:'cafe'},

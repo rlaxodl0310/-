@@ -1,6 +1,5 @@
 import {needsActivityMiniGame,createActivityMiniGame} from './activity-minigame.js';
 import {physicalActivityDefinitions,preparePhysicalActivity,physicalActivityStage,performPhysicalAction,physicalActivityOutcome} from './physical-activities.js';
-import {classConflicts} from './timetable.js';
 import {noteNpcExperience} from './npc-state.js';
 import {availableRoutes} from './days.js';
 import {advanceFreeTime,finishFreeActivity} from './free-roam.js';
@@ -54,10 +53,9 @@ export function activityAvailability(s,postId,session=null){
  if(stored?.status==='completed'||(def.route!=='rehearsal'&&(s.freeDay?.completed??[]).some(a=>a.id===def.route)))return {ok:false,reason:'이미 마친 공개 활동입니다.'};
  const route=stored?.route??(def.physical?{id:def.route,name:def.title,duration:def.duration,knowledge:[],memory:''}:availableRoutes(s).find(r=>r.id===def.route));
  if(!route||route.locked)return {ok:false,reason:route?.lockReason??'지금은 참여할 수 없습니다.'};
- if(s.clock.minute<780)return {ok:false,reason:'현장 공개 활동은 13:00부터 시작합니다. 수업과 공강 시간을 확인해 주세요.'};
+ if(s.clock.minute<(def.physical?540:780))return {ok:false,reason:def.physical?'09:00부터 참여할 수 있습니다.':'현장 공개 활동은 13:00부터 시작합니다.'};
  const remaining=(stored?.duration??route.duration)-(stored?.spent??0);
  if(s.freeDay?.home||s.clock.minute+remaining>1080)return {ok:false,reason:'18:00 준비 마감까지 남은 활동을 끝내기 어렵습니다. 오늘은 안내만 확인할 수 있습니다.'};
- if(def.physical&&classConflicts(s,remaining).length)return {ok:false,reason:'남은 활동 시간이 수업과 겹칩니다. 수업 뒤에 참여할 수 있습니다.'};
  return {ok:true,route,remaining};
 }
 export function pauseCommunityActivity(state){

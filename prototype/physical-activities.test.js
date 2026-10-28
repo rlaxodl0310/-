@@ -43,7 +43,7 @@ test('onsite discovery needs the exact room and does not pretend to read a phone
 test('deadlines, class conflicts, real location and paused completion are enforced',()=>{
  let s=begin('cooking-open');s.location='gym';assert.throws(()=>progressCommunityActivity(s,'even'));
  s=step(begin('carry-open'),'pair');s=pauseCommunityActivity(s);assert.equal(s.freeDay.completed.length,0);s=advanceFreeTime(s,260);assert.equal(activityAvailability(s,'carry-open',s.activitySessions.records['1:carry-open']).ok,false);assert.throws(()=>resumeCommunityActivity(s,'1:carry-open'));
- let morning=newGame();assert.equal(activityAvailability(morning,'basketball-open').ok,false);morning.clock.minute=790;assert.equal(activityAvailability(morning,'basketball-open').ok,true);
+ let morning=newGame();assert.equal(activityAvailability(morning,'basketball-open').ok,true);morning.clock.minute=790;assert.equal(activityAvailability(morning,'basketball-open').ok,true);
  const late=newAfternoonScenario();late.clock.minute=1036;assert.equal(activityAvailability(late,'cooking-open').ok,false);
 });
 test('activities are optional on later days; yesterday partials stay closed and fresh records use the new day',()=>{

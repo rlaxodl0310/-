@@ -320,6 +320,10 @@ export function buildingActivity(state,id){
  return {state:s,text:repeated?'방금 확인한 곳이다. 잠깐 더 머물다가 시선을 돌린다.':a.text};
 }
 export function buildingLinks(place){
- const paths={hall:['cafeteria','academic','arts'],library:['creative'],cafe:['dorm','cafeteria'],cafeteria:['headquarters','hall','dorm'],dorm:['cafeteria','cafe'],academic:['headquarters','sculpture','baekseok'],music:['arts','gym'],gym:['music','arts'],headquarters:['academic','cafeteria','creative'],arts:['music','gym','hall'],creative:['library','sculpture','headquarters'],sculpture:['creative','academic'],baekseok:['academic','headquarters']};
+ const paths={hall:['cafeteria','academic','arts','field'],library:['creative'],cafe:['dorm','cafeteria'],cafeteria:['headquarters','hall','dorm'],dorm:['cafeteria','cafe'],academic:['headquarters','sculpture','baekseok'],music:['arts','gym'],gym:['music','arts','field','outdoorCourt'],field:['gym','outdoorCourt','hall'],outdoorCourt:['field','gym'],headquarters:['academic','cafeteria','creative'],arts:['music','gym','hall'],creative:['library','sculpture','headquarters'],sculpture:['creative','academic'],baekseok:['academic','headquarters']};
  return (paths[place]??[]).map(value=>({label:(campusBuildings[value]?.name??{library:'창조관 안 도서관',cafe:'대학가 카페'}[value])+' 쪽으로 걸어간다.',action:'visit',value}));
 }
+
+// Outdoor placement is a game layout proposal, not a surveyed campus map.
+campusBuildings.field={name:'운동장',outdoor:true,description:'야외 운동장과 트랙·그늘 벤치',entry:'트랙을 따라 달리는 학생과 잔디 쪽에서 공을 차는 사람들이 보인다. 관중석 아래 벤치에는 가방이 놓여 있다.',fact:'운동장 트랙 위치',day:'트랙 안쪽에서 공을 주고받는 소리가 들린다. 바깥쪽에는 각자의 속도로 걷고 뛰는 사람들이 있다.',night:'운동장 가장자리 조명 아래로 트랙 선이 이어진다.',actions:[]};
+campusBuildings.outdoorCourt={name:'야외 코트',outdoor:true,description:'야외 농구 코트와 운동장 연결 길',entry:'철망 너머 골대에 공이 부딪힌다. 코트 한쪽에는 자유투를 연습할 수 있는 빈 공간이 있다.',fact:'야외 코트 위치',day:'공을 튀기는 소리와 신발 끄는 소리가 섞인다. 그늘 벤치에 물병 몇 개가 놓여 있다.',night:'가로등 아래 코트 선이 희미하게 보인다.',actions:[]};
