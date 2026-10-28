@@ -1,3 +1,4 @@
+import {activityScene} from './activity-scene.js';
 import {lunchEpisode,rainLunchView,rainLunchAction,interruptRainLunch} from './rain-lunch.js';
 import {utilityIcon,utilityShortcut} from './utility-ui.js';
 import {submitClubApplication,interviewAvailability,clubInterviewView,answerClubInterview,settleClubAdmissions,clubInterviewRooms} from './club-admissions.js';
@@ -62,7 +63,7 @@ function sceneVisual(){
  const atHome=screen==='dayEnd'&&state.freeDay?.home;
  const area=atHome?null:selectedBuildingArea(state);
  const caption=lunch?'비 오는 점심시간':session?communityActivityDefinitions[session.postId].title+' · '+Math.min(session.step+1,3)+'/3':{classLesson:'수업',encounter:'우연한 만남',warningScene:'눈앞의 상황',detail:'활동 준비',result:'활동을 마친 뒤',buildingDirectory:'건물 안에서',dayEnd:'하루의 끝'}[screen]??'캠퍼스의 일상';
- return `<aside class="scene-visual" aria-label="현재 장면"><div class="scene-context"><span class="scene-kicker">${caption}</span><p class="scene-location">${esc(session?session.venue.label:atHome?'자취방':screen==='campus'?'캠퍼스':locations[state.location]??'캠퍼스')}${area?`<small>${esc((area.floor==='층 미확정'?'':area.floor+' · ')+area.name)}</small>`:''}</p><p class="scene-time">${esc(timeLabel())}<span class="scene-weather">${weatherNow(state).icon} ${weatherNow(state).name} · ${weatherNow(state).temperature}°C</span></p></div>${portrait(column)}<p class="scene-person">${esc(person==='taei'?'김태이':nameOf(person))}</p></aside>`;
+ return `<aside class="scene-visual" aria-label="현재 장면"><div class="scene-context"><span class="scene-kicker">${caption}</span><p class="scene-location">${esc(session?session.venue.label:atHome?'자취방':screen==='campus'?'캠퍼스':locations[state.location]??'캠퍼스')}${area?`<small>${esc((area.floor==='층 미확정'?'':area.floor+' · ')+area.name)}</small>`:''}</p><p class="scene-time">${esc(timeLabel())}<span class="scene-weather">${weatherNow(state).icon} ${weatherNow(state).name} · ${weatherNow(state).temperature}°C</span></p></div>${session?.postId==='music-recruit'?activityScene(session):portrait(column)}<p class="scene-person">${esc(person==='taei'?'김태이':nameOf(person))}</p></aside>`;
 }
 function page(title,body,back='campus',backAction='go'){
  if(['quickMenu','menu'].includes(screen)){if(quickReturn){back='';backAction='closeQuick';}body=menuTabs()+body;}

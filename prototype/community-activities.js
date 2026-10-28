@@ -24,6 +24,7 @@ export const communityActivityDefinitions={
    {id:'blend',label:'다른 파트의 소리를 듣고 호흡과 음량을 맞춘다.',fact:'공개 합주 호흡 조율 메모',reply:'서로의 소리가 들릴 만큼만 음량을 줄이고 같은 구간을 반복한다. “이번에는 넘어갈 때 덜 급하네요.” 한 번에 완벽해지지는 않아도 기준이 생겼다.'},
    {id:'mark',label:'전환 구간에 표시하고 누가 신호를 줄지 먼저 정한다.',fact:'공개 합주 전환 신호 메모',reply:'악보의 전환 구간에 표시를 남기고 신호를 정했다. 태이가 맡은 파트만 잘 끝내는 대신 다음 사람이 들어올 자리를 함께 확인한다.'}]},
   {name:'연습 마무리',prompt:'마지막으로 한 번 더 맞춰볼 시간이 남았다. 다음 연습에 무엇을 남길까?',choices:[
+   {id:'perform',label:'마지막 한 번은 악보에서 눈을 떼고 짧게 노래하거나 연주한다.',fact:'공개 합주 짧은 공연 경험',reply:'마지막 구간을 작은 공연처럼 이어가본다.'},
    {id:'take',label:'짧게 맞춰본 내용을 휴대폰에 기록하고 수정할 부분을 적는다.',fact:'공개 합주 수정 메모',reply:'마지막 합주에서 확인한 부분을 기록한다. 지금 잘 들린 부분과 다음에 고칠 부분을 따로 적어 자작곡 작업 때도 참고할 수 있게 했다.'},
    {id:'gear',label:'악기와 케이블을 함께 정리하고 보관 위치를 확인한다.',fact:'예술동 대형 합주실 케이블 보관 위치',reply:'케이블을 밟지 않게 걷어 올리고 함께 정리한다. “이건 이쪽에 두면 돼요.” 보관 위치를 알게 됐지만 공동 장비를 개인 물건처럼 챙기지는 않는다.'}]}]},
  'football-recruit':{title:'축구 동아리 공개 체험',club:'football',day:2,route:'football',venue:{location:'gym',area:null,label:'공개 훈련 운동장'},intro:'선수로 참가한 남학생들이 몸을 풀고, 운영을 맡은 부원은 순서를 안내하고 있다. “바로 뛰지 말고 준비 운동부터 같이 해요.” 가입 여부부터 묻기보다 움직일 자리를 내준다.',stages:[
@@ -89,9 +90,10 @@ export function progressCommunityActivity(state,choice){
  const chunks=[Math.round(r.duration/6),Math.round(r.duration/2),r.duration-Math.round(r.duration/6)-Math.round(r.duration/2)];
  const minutes=chunks[r.step],start=s.clock.minute;
  if(selected.approach)s=planEvent(s,r.routeId,selected.approach);
+ const performance=record.postId==='music-recruit'&&choice==='perform'?musicPerformance(record):null;
  const firstExchange=def.club==='volunteer'&&!contact(s,'yeogyeong').introduced;
  if(firstExchange){introduce(s,'yeogyeong','community-activity-exchange');s.memory.push(`[${s.day}일차] 봉사 물품을 확인하며 차여경과 인사를 나눴다.`);}
- r=currentCommunityActivity(s);r.choices.push({stage:r.step,id:choice});r.spent+=minutes;r.step++;r.last={player:selected.label,speaker:def.club==='volunteer'?'차여경':'현장의 부원',text:(firstExchange?'“차여경이에요. 같이 봐주셔서 고마워요.” ':'')+selected.reply};r.segments.push({start,end:start+minutes});
+ r=currentCommunityActivity(s);r.choices.push({stage:r.step,id:choice});r.spent+=minutes;r.step++;r.last={player:selected.label,speaker:def.club==='volunteer'?'차여경':'현장의 부원',text:(firstExchange?'“차여경이에요. 같이 봐주셔서 고마워요.” ':'')+(performance?.text??selected.reply)};if(performance)r.performance=performance;r.segments.push({start,end:start+minutes});
  if(!s.known.includes(selected.fact))s.known.push(selected.fact);
  s.memory.push(`[${s.day}일차] ${def.title}: ${selected.label} ${selected.reply}`);
  s=advanceFreeTime(s,minutes,{activeChoice:r.step===def.stages.length?r.routeId:null});
@@ -108,6 +110,13 @@ export function progressCommunityActivity(state,choice){
 export function communityActivityOutcome(record){
  const ids=record.choices.map(c=>c.id);
  if(record.postId==='volunteer-recruit')return ids[2]==='next'?'남은 일을 넘겨준 뒤 다음 공개 사진 정리 활동에 대한 안내도 들었다.':'다음 사람이 이어받을 수 있도록 완료한 일과 남은 일을 정리했다.';
- if(record.postId==='music-recruit')return `${{vocal:'보컬',bass:'베이스',guitar:'기타'}[ids[0]]} 파트로 들어가 ${ids[1]==='blend'?'다른 파트와 호흡과 음량을 맞췄다.':'전환 신호를 함께 정했다.'} ${ids[2]==='take'?'다음 연습과 곡 작업에 참고할 수정 메모를 남겼다.':'케이블을 함께 정리하고 보관 위치를 확인했다.'}`;
+ if(record.postId==='music-recruit')return `${{vocal:'보컬',bass:'베이스',guitar:'기타'}[ids[0]]} 파트로 들어가 ${ids[1]==='blend'?'다른 파트와 호흡과 음량을 맞췄다.':'전환 신호를 함께 정했다.'} ${ids[2]==='perform'?'짧은 공연으로 마무리하며 함께 맞춘 구간을 기억했다.':ids[2]==='take'?'다음 연습과 곡 작업에 참고할 수정 메모를 남겼다.':'케이블을 함께 정리하고 보관 위치를 확인했다.'}`;
  return `${record.rain?'실내에서 ':''}${{pass:'짝 패스',press:'방향 전환',mobility:'가동성',balance:'균형과 코어'}[ids[1]]} 훈련을 했다. ${ids[2]==='cool'?'정리 운동과 다음 체험의 준비물 확인까지 마쳤다.':'운영진에게 동작 피드백을 듣고 다시 확인했다.'}`;
+}
+
+// Grounded in the part and rehearsal the player actually chose; no invented listeners.
+export function musicPerformance(record){
+ const role=record.choices[0]?.id??'vocal',blend=record.choices[1]?.id==='blend';
+ const opening={vocal:'마이크 높이를 맞추고 첫 소절을 시작한다. 연습 때보다 목소리를 조금 열자 드럼이 한 박자 뒤에서 받쳐준다.',bass:'베이스를 메고 드럼을 바라본다. 킥에 맞춰 낮은 음을 짚자 다른 파트가 그 위로 들어온다.',guitar:'기타 줄을 가볍게 눌러 소리를 확인한다. 반주가 들어올 자리를 남기고 첫 코드를 울린다.'}[role];
+ return {role,coordination:blend?'listening':'signal',text:opening+' '+(blend?'후렴에서 소리가 겹치자 태이가 잠깐 힘을 뺀다. 건반을 맡은 학생도 음량을 낮춘다. 끝음을 길게 남긴 뒤 서로 눈을 마주친다. “방금은 제 소리가 들렸어요. 아까보다 편했는데요?”':'연습 때 표시한 구간이 다가온다. 태이가 고개로 신호를 보내자 드럼이 전환을 받아준다. 마지막 박자는 조금 어긋나서 누군가 웃는다. “끝만 다시 맞춰볼까요? 들어가는 건 좋았어요.”')};
 }

@@ -146,6 +146,18 @@ body[data-utility-screen="phone"] .weather-strip,body[data-utility-screen="quick
 body[data-utility-screen="phone"]{background:radial-gradient(ellipse at top,#d9e5dc,#d5dcd7 60%,#cbd6d0)}
 .widget-label{color:#52634c}.phone-home .app strong{font-size:12px}.phone-class-widget>small{font-size:11px}
 @media(max-width:650px){.game-menu .shortcut-copy strong{font-size:13px}.game-menu .shortcut-copy small{font-size:11px}.phone-class-widget>small{font-size:11px}}
+
+/* Activity staging occupies the same visual plane as the VN, never a modal. */
+.vn-stage .scene-visual:has(.activity-tableau){background:#172432}
+.activity-tableau{position:absolute;inset:0;overflow:hidden;background:#172432}
+.activity-tableau svg{width:100%;height:100%;display:block}
+.scene-visual:has(.activity-tableau) .scene-context{z-index:2;background:#142331c9;border-radius:12px;padding:10px;max-width:290px}
+.scene-visual:has(.activity-tableau) .scene-person{display:none}
+.tableau-note{position:absolute;right:14px;top:18px;color:#e2d9c5;font-size:11px;background:#142331a8;padding:5px 9px;border-radius:20px}
+.activity-tableau[data-phase="performance"] .activity-taei{animation:stage-breathe 2.8s ease-in-out infinite;transform-origin:450px 520px}
+@keyframes stage-breathe{50%{transform:rotate(1deg) translateY(-3px)}}
+@media(max-width:650px){.activity-tableau svg{height:64%;margin-top:55px}.tableau-note{top:12px}.scene-visual:has(.activity-tableau) .scene-context{max-width:210px;padding:7px}.activity-tableau{background:linear-gradient(#263c4c,#172432)}}
+@media(prefers-reduced-motion:reduce){.activity-tableau .activity-taei{animation:none!important}}
 </style></head><body><main id="app"><section style="padding:32px;font-family:system-ui;line-height:1.8"><h1>캠퍼스의 하루</h1><p>게임 화면을 준비하고 있습니다.</p><p>이 안내가 계속 보이면 파일 미리보기 대신 다운로드한 HTML을 Chrome 또는 Edge에서 직접 열어주세요. GitHub 파일 보기 화면에서는 게임이 실행되지 않습니다.</p></section></main><noscript>게임 실행에는 JavaScript가 필요합니다. JavaScript를 허용하는 브라우저에서 열어주세요.</noscript><script>
 window.addEventListener('error', function(event) {
   var app = document.getElementById('app');
@@ -2447,6 +2459,28 @@ function resolveEncounter(state,encounter,engage){
  response.state=meetAppointments(response.state,encounter.person);const heard=socialNews(response.state,encounter.person);response.state=heard.state;if(heard.news)response.result.socialNews=heard.news.text;return response;
 }
 
+// Original 2D blocking study. Background band members are unnamed, not unlocked cast.
+function musicSceneState(record){
+ const role=record.choices?.[0]?.id??'vocal';
+ const performed=record.choices?.some(c=>c.id==='perform');
+ return {role:['vocal','bass','guitar'].includes(role)?role:'vocal',phase:performed?'performance':record.step===0?'setup':record.step===1?'practice':record.step===2?'together':'wrap',performed};
+}
+function activityScene(record){
+ const {role,phase,performed}=musicSceneState(record);
+ const label={setup:'마이크와 악기를 준비하는 합주실',practice:'파트를 연습하는 김태이와 부원들',together:'서로 신호를 보며 합주하는 부원들',performance:'노래와 연주를 이어가는 짧은 공연',wrap:'연습을 마무리하는 합주실'}[phase];
+ const guitar=role!=='vocal';
+ return `<div class="activity-tableau" data-phase="${phase}" data-role="${role}"><svg viewBox="0 0 900 650" role="img" aria-label="${label}" preserveAspectRatio="xMidYMid slice">
+ <defs><linearGradient id="studio-wall" x2="0" y2="1"><stop stop-color="#263c4c"/><stop offset="1" stop-color="#121b2a"/></linearGradient><radialGradient id="studio-light"><stop stop-color="#f3d29c" stop-opacity=".38"/><stop offset="1" stop-color="#edb67b" stop-opacity="0"/></radialGradient></defs>
+ <path fill="url(#studio-wall)" d="M0 0h900v650H0z"/><path fill="#b48161" opacity=".3" d="M0 425h900v225H0z"/>
+ ${[40,210,380,550,720].map(x=>`<rect x="${x}" y="70" width="130" height="250" rx="6" fill="#152331" stroke="#49505a"/>`).join('')}
+ <ellipse cx="450" cy="230" rx="400" ry="330" fill="url(#studio-light)"/><path d="M0 510l900 0M0 585h900M150 425L40 650M360 425l-25 225M580 425l50 225M790 425l100 225" stroke="#c6a17b" opacity=".2"/>
+ <g class="band-drummer" stroke="#222838" stroke-width="8" stroke-linecap="round"><path d="M655 315v100m-18-35-40 62m74-62 45 62"/><ellipse cx="655" cy="275" rx="25" ry="29" fill="#d9b59a" stroke="none"/><path d="M630 270q0-48 46-18l7 20" fill="#37303a" stroke="none"/><path d="M625 313q30-20 60 0l12 55h-80" fill="#77857c" stroke="none"/><path d="m626 328-35 25m92-25 37 17" stroke="#d9b59a"/><path d="m590 353-25-42m155 34 18-40" stroke="#d6bd8e" stroke-width="4"/><circle cx="657" cy="425" r="58" fill="#364958" stroke="#b6b2a1"/><path d="M565 372h65v35h-65zM688 369h65v35h-65z" fill="#557080" stroke="#b6b2a1" stroke-width="3"/><path d="M555 310v147m190-155v155" stroke="#b6b2a1" stroke-width="3"/><ellipse cx="555" cy="310" rx="42" ry="6" fill="#c4a364" stroke="none"/><ellipse cx="745" cy="302" rx="42" ry="6" fill="#c4a364" stroke="none"/></g>
+ <g class="band-keyboard"><ellipse cx="206" cy="280" rx="26" ry="30" fill="#cfaa91"/><path d="M178 279q-1-55 51-16l5 26-15-24-36 19" fill="#292b35"/><path d="M173 319q32-20 63 0l19 84h-92z" fill="#897b86"/><path d="m180 337-8 44 42 4m17-46 14 40 27 5" stroke="#cfaa91" stroke-width="13" fill="none" stroke-linecap="round"/><path d="M185 401v102m40-102 14 102" stroke="#303746" stroke-width="20"/><path d="M133 385h155v23H133z" fill="#e3dfd0" stroke="#263542" stroke-width="7"/><path d="m150 412 122 94m0-94-122 94" stroke="#a9adb0" stroke-width="6"/>${[150,170,190,210,230,250,270].map(x=>`<path d="M${x} 385v13" stroke="#283240" stroke-width="6"/>`).join('')}</g>
+ <g class="activity-taei"><ellipse cx="447" cy="527" rx="82" ry="12" fill="#111824" opacity=".5"/><path d="m425 414-12 105m57-105 18 105" stroke="#26303c" stroke-width="25" stroke-linecap="round"/><path d="m401 518 22 1m55 0 24 1" stroke="#cdd3cf" stroke-width="14" stroke-linecap="round"/><path d="M407 301q40-22 80 0l15 119q-50 16-108 0z" fill="#344d5b" stroke="#99b8bb" stroke-width="2"/><path d="M420 303l24 35 29-35m-29 35v79" stroke="#bec6b7" fill="none" stroke-width="3"/><path d="M436 277v26q10 12 22 0v-26" fill="#dcbda5"/><ellipse cx="447" cy="253" rx="32" ry="39" fill="#e5c8b1"/><path d="M414 257q-15-53 27-54l35 10 12 34-23-19-8 21-10-20-25 34-1-21z" fill="#202733"/><path d="M429 257h9m18 0h9" stroke="#2b3037" stroke-width="3"/><circle cx="429" cy="265" r="1.6" fill="#3d3936"/><path d="M441 278q7 ${performed?'7':'2'} 15 0" fill="none" stroke="#9b6d65" stroke-width="2"/>
+ ${guitar?`<path d="M413 313l80 93" stroke="#c1a16c" stroke-width="6"/><path d="M410 382q-30 16-7 44 17 16 36-4 20 2 23-20-7-25-28-15z" fill="${role==='bass'?'#b88c53':'#a65a47'}" stroke="#e1b88b" stroke-width="3"/><path d="m433 393 72-78" stroke="#d1b185" stroke-width="12"/><path d="m429 406 77-89" stroke="#ede4ca" stroke-width="2"/><path d="m405 326-23 45 38 24m66-68 7 21-13 11" fill="none" stroke="#dcbda5" stroke-width="13" stroke-linecap="round"/>`:`<path d="m407 325-15 53 29 12m65-64 19-29-20-19" fill="none" stroke="#dcbda5" stroke-width="14" stroke-linecap="round"/><path d="m483 280-17-14" stroke="#182637" stroke-width="9" stroke-linecap="round"/><ellipse cx="462" cy="263" rx="9" ry="7" fill="#c0c6bf"/><path d="M481 296q45 84 1 184t75 43" fill="none" stroke="#14202b" stroke-width="3"/>`}</g>
+ <g fill="#efe4cd" font-family="sans-serif" font-size="15"><text x="44" y="42">예술동 · 대형 합주실</text><text x="44" y="610">${{setup:'준비',practice:'파트 연습',together:'호흡 맞추기',performance:'짧은 공연',wrap:'마무리'}[phase]} · ${{vocal:'VOCAL',bass:'BASS',guitar:'GUITAR'}[role]}</text></g></svg><span class="tableau-note">2D 활동 장면 시제품</span></div>`;
+}
+
 // Presentation-only pacing: these functions never advance the world or choose an answer.
 function splitNovelText(text,limit=180){
  if(!Number.isInteger(limit)||limit<1)throw new Error('올바른 문장 길이를 지정해야 합니다.');
@@ -2667,6 +2701,7 @@ const communityActivityDefinitions={
    {id:'blend',label:'다른 파트의 소리를 듣고 호흡과 음량을 맞춘다.',fact:'공개 합주 호흡 조율 메모',reply:'서로의 소리가 들릴 만큼만 음량을 줄이고 같은 구간을 반복한다. “이번에는 넘어갈 때 덜 급하네요.” 한 번에 완벽해지지는 않아도 기준이 생겼다.'},
    {id:'mark',label:'전환 구간에 표시하고 누가 신호를 줄지 먼저 정한다.',fact:'공개 합주 전환 신호 메모',reply:'악보의 전환 구간에 표시를 남기고 신호를 정했다. 태이가 맡은 파트만 잘 끝내는 대신 다음 사람이 들어올 자리를 함께 확인한다.'}]},
   {name:'연습 마무리',prompt:'마지막으로 한 번 더 맞춰볼 시간이 남았다. 다음 연습에 무엇을 남길까?',choices:[
+   {id:'perform',label:'마지막 한 번은 악보에서 눈을 떼고 짧게 노래하거나 연주한다.',fact:'공개 합주 짧은 공연 경험',reply:'마지막 구간을 작은 공연처럼 이어가본다.'},
    {id:'take',label:'짧게 맞춰본 내용을 휴대폰에 기록하고 수정할 부분을 적는다.',fact:'공개 합주 수정 메모',reply:'마지막 합주에서 확인한 부분을 기록한다. 지금 잘 들린 부분과 다음에 고칠 부분을 따로 적어 자작곡 작업 때도 참고할 수 있게 했다.'},
    {id:'gear',label:'악기와 케이블을 함께 정리하고 보관 위치를 확인한다.',fact:'예술동 대형 합주실 케이블 보관 위치',reply:'케이블을 밟지 않게 걷어 올리고 함께 정리한다. “이건 이쪽에 두면 돼요.” 보관 위치를 알게 됐지만 공동 장비를 개인 물건처럼 챙기지는 않는다.'}]}]},
  'football-recruit':{title:'축구 동아리 공개 체험',club:'football',day:2,route:'football',venue:{location:'gym',area:null,label:'공개 훈련 운동장'},intro:'선수로 참가한 남학생들이 몸을 풀고, 운영을 맡은 부원은 순서를 안내하고 있다. “바로 뛰지 말고 준비 운동부터 같이 해요.” 가입 여부부터 묻기보다 움직일 자리를 내준다.',stages:[
@@ -2732,9 +2767,10 @@ function progressCommunityActivity(state,choice){
  const chunks=[Math.round(r.duration/6),Math.round(r.duration/2),r.duration-Math.round(r.duration/6)-Math.round(r.duration/2)];
  const minutes=chunks[r.step],start=s.clock.minute;
  if(selected.approach)s=planEvent(s,r.routeId,selected.approach);
+ const performance=record.postId==='music-recruit'&&choice==='perform'?musicPerformance(record):null;
  const firstExchange=def.club==='volunteer'&&!contact(s,'yeogyeong').introduced;
  if(firstExchange){introduce(s,'yeogyeong','community-activity-exchange');s.memory.push(`[${s.day}일차] 봉사 물품을 확인하며 차여경과 인사를 나눴다.`);}
- r=currentCommunityActivity(s);r.choices.push({stage:r.step,id:choice});r.spent+=minutes;r.step++;r.last={player:selected.label,speaker:def.club==='volunteer'?'차여경':'현장의 부원',text:(firstExchange?'“차여경이에요. 같이 봐주셔서 고마워요.” ':'')+selected.reply};r.segments.push({start,end:start+minutes});
+ r=currentCommunityActivity(s);r.choices.push({stage:r.step,id:choice});r.spent+=minutes;r.step++;r.last={player:selected.label,speaker:def.club==='volunteer'?'차여경':'현장의 부원',text:(firstExchange?'“차여경이에요. 같이 봐주셔서 고마워요.” ':'')+(performance?.text??selected.reply)};if(performance)r.performance=performance;r.segments.push({start,end:start+minutes});
  if(!s.known.includes(selected.fact))s.known.push(selected.fact);
  s.memory.push(`[${s.day}일차] ${def.title}: ${selected.label} ${selected.reply}`);
  s=advanceFreeTime(s,minutes,{activeChoice:r.step===def.stages.length?r.routeId:null});
@@ -2751,8 +2787,15 @@ function progressCommunityActivity(state,choice){
 function communityActivityOutcome(record){
  const ids=record.choices.map(c=>c.id);
  if(record.postId==='volunteer-recruit')return ids[2]==='next'?'남은 일을 넘겨준 뒤 다음 공개 사진 정리 활동에 대한 안내도 들었다.':'다음 사람이 이어받을 수 있도록 완료한 일과 남은 일을 정리했다.';
- if(record.postId==='music-recruit')return `${{vocal:'보컬',bass:'베이스',guitar:'기타'}[ids[0]]} 파트로 들어가 ${ids[1]==='blend'?'다른 파트와 호흡과 음량을 맞췄다.':'전환 신호를 함께 정했다.'} ${ids[2]==='take'?'다음 연습과 곡 작업에 참고할 수정 메모를 남겼다.':'케이블을 함께 정리하고 보관 위치를 확인했다.'}`;
+ if(record.postId==='music-recruit')return `${{vocal:'보컬',bass:'베이스',guitar:'기타'}[ids[0]]} 파트로 들어가 ${ids[1]==='blend'?'다른 파트와 호흡과 음량을 맞췄다.':'전환 신호를 함께 정했다.'} ${ids[2]==='perform'?'짧은 공연으로 마무리하며 함께 맞춘 구간을 기억했다.':ids[2]==='take'?'다음 연습과 곡 작업에 참고할 수정 메모를 남겼다.':'케이블을 함께 정리하고 보관 위치를 확인했다.'}`;
  return `${record.rain?'실내에서 ':''}${{pass:'짝 패스',press:'방향 전환',mobility:'가동성',balance:'균형과 코어'}[ids[1]]} 훈련을 했다. ${ids[2]==='cool'?'정리 운동과 다음 체험의 준비물 확인까지 마쳤다.':'운영진에게 동작 피드백을 듣고 다시 확인했다.'}`;
+}
+
+// Grounded in the part and rehearsal the player actually chose; no invented listeners.
+function musicPerformance(record){
+ const role=record.choices[0]?.id??'vocal',blend=record.choices[1]?.id==='blend';
+ const opening={vocal:'마이크 높이를 맞추고 첫 소절을 시작한다. 연습 때보다 목소리를 조금 열자 드럼이 한 박자 뒤에서 받쳐준다.',bass:'베이스를 메고 드럼을 바라본다. 킥에 맞춰 낮은 음을 짚자 다른 파트가 그 위로 들어온다.',guitar:'기타 줄을 가볍게 눌러 소리를 확인한다. 반주가 들어올 자리를 남기고 첫 코드를 울린다.'}[role];
+ return {role,coordination:blend?'listening':'signal',text:opening+' '+(blend?'후렴에서 소리가 겹치자 태이가 잠깐 힘을 뺀다. 건반을 맡은 학생도 음량을 낮춘다. 끝음을 길게 남긴 뒤 서로 눈을 마주친다. “방금은 제 소리가 들렸어요. 아까보다 편했는데요?”':'연습 때 표시한 구간이 다가온다. 태이가 고개로 신호를 보내자 드럼이 전환을 받아준다. 마지막 박자는 조금 어긋나서 누군가 웃는다. “끝만 다시 맞춰볼까요? 들어가는 건 좋았어요.”')};
 }
 
 function flowState(s){s.flow??={seen:{}};return s.flow;}
@@ -3019,7 +3062,7 @@ function sceneVisual(){
  const atHome=screen==='dayEnd'&&state.freeDay?.home;
  const area=atHome?null:selectedBuildingArea(state);
  const caption=lunch?'비 오는 점심시간':session?communityActivityDefinitions[session.postId].title+' · '+Math.min(session.step+1,3)+'/3':{classLesson:'수업',encounter:'우연한 만남',warningScene:'눈앞의 상황',detail:'활동 준비',result:'활동을 마친 뒤',buildingDirectory:'건물 안에서',dayEnd:'하루의 끝'}[screen]??'캠퍼스의 일상';
- return `<aside class="scene-visual" aria-label="현재 장면"><div class="scene-context"><span class="scene-kicker">${caption}</span><p class="scene-location">${esc(session?session.venue.label:atHome?'자취방':screen==='campus'?'캠퍼스':locations[state.location]??'캠퍼스')}${area?`<small>${esc((area.floor==='층 미확정'?'':area.floor+' · ')+area.name)}</small>`:''}</p><p class="scene-time">${esc(timeLabel())}<span class="scene-weather">${weatherNow(state).icon} ${weatherNow(state).name} · ${weatherNow(state).temperature}°C</span></p></div>${portrait(column)}<p class="scene-person">${esc(person==='taei'?'김태이':nameOf(person))}</p></aside>`;
+ return `<aside class="scene-visual" aria-label="현재 장면"><div class="scene-context"><span class="scene-kicker">${caption}</span><p class="scene-location">${esc(session?session.venue.label:atHome?'자취방':screen==='campus'?'캠퍼스':locations[state.location]??'캠퍼스')}${area?`<small>${esc((area.floor==='층 미확정'?'':area.floor+' · ')+area.name)}</small>`:''}</p><p class="scene-time">${esc(timeLabel())}<span class="scene-weather">${weatherNow(state).icon} ${weatherNow(state).name} · ${weatherNow(state).temperature}°C</span></p></div>${session?.postId==='music-recruit'?activityScene(session):portrait(column)}<p class="scene-person">${esc(person==='taei'?'김태이':nameOf(person))}</p></aside>`;
 }
 function page(title,body,back='campus',backAction='go'){
  if(['quickMenu','menu'].includes(screen)){if(quickReturn){back='';backAction='closeQuick';}body=menuTabs()+body;}

@@ -145,3 +145,15 @@ body[data-utility-screen="phone"] .weather-strip,body[data-utility-screen="quick
 body[data-utility-screen="phone"]{background:radial-gradient(ellipse at top,#d9e5dc,#d5dcd7 60%,#cbd6d0)}
 .widget-label{color:#52634c}.phone-home .app strong{font-size:12px}.phone-class-widget>small{font-size:11px}
 @media(max-width:650px){.game-menu .shortcut-copy strong{font-size:13px}.game-menu .shortcut-copy small{font-size:11px}.phone-class-widget>small{font-size:11px}}
+
+/* Activity staging occupies the same visual plane as the VN, never a modal. */
+.vn-stage .scene-visual:has(.activity-tableau){background:#172432}
+.activity-tableau{position:absolute;inset:0;overflow:hidden;background:#172432}
+.activity-tableau svg{width:100%;height:100%;display:block}
+.scene-visual:has(.activity-tableau) .scene-context{z-index:2;background:#142331c9;border-radius:12px;padding:10px;max-width:290px}
+.scene-visual:has(.activity-tableau) .scene-person{display:none}
+.tableau-note{position:absolute;right:14px;top:18px;color:#e2d9c5;font-size:11px;background:#142331a8;padding:5px 9px;border-radius:20px}
+.activity-tableau[data-phase="performance"] .activity-taei{animation:stage-breathe 2.8s ease-in-out infinite;transform-origin:450px 520px}
+@keyframes stage-breathe{50%{transform:rotate(1deg) translateY(-3px)}}
+@media(max-width:650px){.activity-tableau svg{height:64%;margin-top:55px}.tableau-note{top:12px}.scene-visual:has(.activity-tableau) .scene-context{max-width:210px;padding:7px}.activity-tableau{background:linear-gradient(#263c4c,#172432)}}
+@media(prefers-reduced-motion:reduce){.activity-tableau .activity-taei{animation:none!important}}
