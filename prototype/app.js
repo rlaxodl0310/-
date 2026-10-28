@@ -1,10 +1,11 @@
+import {needsActivityMiniGame,startActivityMiniGame,tickActivityMiniGame,pauseActivityMiniGame,hitActivityMiniGame,skipActivityMiniGame,activityMiniPosition,activityMiniConfig,activityMiniFeedback} from './activity-minigame.js';
 import {activityScene} from './activity-scene.js';
 import {lunchEpisode,rainLunchView,rainLunchAction,interruptRainLunch} from './rain-lunch.js';
 import {utilityIcon,utilityShortcut} from './utility-ui.js';
 import {submitClubApplication,interviewAvailability,clubInterviewView,answerClubInterview,settleClubAdmissions,clubInterviewRooms} from './club-admissions.js';
 import {roomFloorLabel,roomFloorList} from './campus-rooms.js';
 import {createDialogueService,dialogueServiceContext,applyServiceDialogue} from './dialogue-service.js';
-import {communityActivityDefinitions,onsiteCommunityActivities,hearOnsiteActivity,activityAvailability,currentCommunityActivity,communityActivityStage,beginCommunityActivity,progressCommunityActivity,pauseCommunityActivity,resumeCommunityActivity} from './community-activities.js';
+import {communityActivityDefinitions,queueActivityMiniGame,onsiteCommunityActivities,hearOnsiteActivity,activityAvailability,currentCommunityActivity,communityActivityStage,beginCommunityActivity,progressCommunityActivity,pauseCommunityActivity,resumeCommunityActivity} from './community-activities.js';
 import {splitNovelText,novelChoicePage,advanceNovel} from './vn-flow.js';
 import {timetable,nextLesson,lessonStatus,classPlace,schoolTime,schoolEnabled,classConflicts,roomUseLabel} from './timetable.js';
 import {attendLesson} from './classes.js';
@@ -32,7 +33,7 @@ let state=newGame(),screen='campus',selected=null,note='',returnTo='campus',spea
 let gains=[],paceNotice='',weatherReturn='campus',warningScene=null,activityReturn='campus',clubReturn='communityPost',selectedClub=null,communityReturn='campus',communityPhoneReturn='campus',selectedPost=null,feedIds=null,visibleCommentCount=0,communityFilter='all';
 const app=document.querySelector('#app');
 const dialogueService=createDialogueService();dialogueService.probe();
-let modelPending=false,modelAbort=null;
+let modelPending=false,modelAbort=null,miniFrame=null,miniFrameTime=0;
 const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const nameOf=id=>displayName(state,id);
 const narrative=text=>{
@@ -251,9 +252,13 @@ function render(){
  if(paceNotice)feedback.insertAdjacentHTML('afterbegin',`<section class="time-summary" role="status">${esc(paceNotice)}</section>`);
  if(gains.length)feedback.insertAdjacentHTML('afterbegin',`<section class="discovery-notice" aria-label="새로 얻은 정보와 아이템"><div role="status" aria-live="polite">${gains.map(g=>`<p class="${g.kind==='item'?'item-text':'information-text'}"><strong>${g.kind==='item'?'▣ 아이템 획득':'◇ 새 정보'}</strong> · ${esc(g.name)}${g.quantity?` × ${g.quantity}`:''}</p>`).join('')}</div><div class="actions">${btn('정보 · 소지품 확인','go','discoveries')}${btn('확인','dismissDiscoveries')}</div></section>`);
  novelPresentation();
+ renderActivityMiniGame();
  if(modelPending){const panel=app.querySelector('.vn-panel');if(panel)panel.innerHTML=`<p role="status" aria-live="polite">잠시 말을 고르고 있다…</p><div class="vn-controls">${btn('기다리지 않고 이어가기','skipModel')}</div>`;}
 }
-app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b){if(modelPending)return;if(e.target.closest('.vn-copy')&&vnModel&&!vnView.choosing){vnView=advanceNovel(vnView,vnModel.beats.length);drawNovelBeat();}return;}const a=b.dataset.action,v=b.dataset.value;
+app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b){if(modelPending)return;if(e.target.closest('.vn-copy')&&vnModel&&!vnView.choosing){vnView=advanceNovel(vnView,vnModel.beats.length);drawNovelBeat();}return;}let a=b.dataset.action,v=b.dataset.value;
+ if(a.startsWith('mini')&&a!=='miniContinue'){handleMiniAction(a);return;}
+ if(a==='miniContinue'){const mini=activeMiniGame();if(mini?.phase!=='result')return;a='eventStep';v=mini.choice;}
+ else if(!['miniStart','miniHit'].includes(a))freezeActivityMiniGame();
  if(a==='buildingFloor'){const floors=roomFloorList(campusBuildings[atPlace()]);if(v&&!floors.includes(v))return;buildingFloorView=v?{place:atPlace(),floor:v}:null;vnCursors.clear();vnView.key='';render();return;}
  if(a==='skipModel'){modelAbort?.abort();return;}
  if(modelPending)return;
@@ -307,7 +312,7 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
   if(warningScene){state=finishWarningSite(state,warningScene,false).state;warningScene=null;}
   state=a==='eventBegin'?beginCommunityActivity(state,v):resumeCommunityActivity(state,v);screen='communityActivity';reply=null;
  }
- if(a==='eventStep'){state=progressCommunityActivity(state,v);screen='communityActivity';}
+ if(a==='eventStep'){const r=currentCommunityActivity(state);state=needsActivityMiniGame(r)&&!r.mini?queueActivityMiniGame(state,v):progressCommunityActivity(state,v);screen='communityActivity';}
  if(a==='eventPause'||a==='eventLeave'){state=pauseCommunityActivity(state);if(state.activitySessions)state.activitySessions.active=null;screen='campus';reply=null;}
  if(a==='classTravel'){
   const c=timetable(state).find(c=>c.key===v);if(!c||state.clock.minute>=c.end||state.academics.records[v])throw new Error('이미 끝난 수업입니다.');
@@ -405,3 +410,49 @@ setInterval(()=>{
 },15000);
 
 app.addEventListener('keydown',e=>{if(modelPending||e.code!=='Space'||e.target.closest('button,input,textarea,select')||!vnModel||vnView.choosing)return;e.preventDefault();vnView=advanceNovel(vnView,vnModel.beats.length);drawNovelBeat();});
+
+
+function activeMiniGame(){return screen==='communityActivity'?currentCommunityActivity(state)?.mini:null;}
+function stopActivityMiniLoop(){if(miniFrame!==null)cancelAnimationFrame(miniFrame);miniFrame=null;miniFrameTime=0;}
+function freezeActivityMiniGame(){
+ stopActivityMiniLoop();const record=currentCommunityActivity(state);if(record?.mini)record.mini=pauseActivityMiniGame(record.mini);
+}
+function handleMiniAction(action){
+ const mini=activeMiniGame();if(!mini)return;
+ const record=currentCommunityActivity(state);
+ if(action==='miniStart')record.mini=startActivityMiniGame(mini);
+ if(action==='miniHit')record.mini=hitActivityMiniGame(mini);
+ if(action==='miniPause')record.mini=pauseActivityMiniGame(mini);
+ if(action==='miniSkip')record.mini=skipActivityMiniGame(mini);
+ render();app.querySelector('.vn-panel')?.focus({preventScroll:true});
+}
+function renderActivityMiniGame(){
+ stopActivityMiniLoop();const mini=activeMiniGame();if(!mini)return;
+ const panel=app.querySelector('.vn-panel');if(!panel)return;
+ vnModel=null;panel.classList.add('mini-panel');panel.setAttribute('aria-label','활동 미니게임');
+ const config=activityMiniConfig(mini),result=mini.phase==='result',last=mini.hits.at(-1),target=mini.targets[Math.min(mini.hits.length,mini.targets.length-1)];
+ panel.innerHTML=`<div class="mini-heading"><span class="mini-tag">가벼운 미니게임</span><h2>${config.title}</h2><span>${Math.min(mini.hits.length+1,mini.targets.length)} / ${mini.targets.length}</span></div>
+ <p class="mini-instructions">${esc(config.hint)} <kbd>Space</kbd> 또는 아래 버튼</p>
+ <div class="mini-gauge" data-kind="${mini.kind}" aria-hidden="true"><div class="mini-target" style="left:${(target-.13)*100}%;width:26%"><span>목표</span></div><div class="mini-marker" data-mini-position style="left:${activityMiniPosition(mini)*100}%"></div></div>
+ <div class="mini-scale"><span>${mini.kind==='cooking'?'약한 불':'왼쪽'}</span><span>${config.axis}</span><span>${mini.kind==='cooking'?'센 불':'오른쪽'}</span></div>
+ <p class="mini-feedback" role="status" aria-live="polite">${result?(mini.result.mode==='assisted'?'타이밍 조작 없이 기존 활동 방식으로 진행합니다.':activityMiniFeedback(mini.result.score)+' · '+mini.result.score+'점'):mini.phase==='paused'?'잠시 멈췄어요. 이어서 시작하면 같은 지점에서 계속합니다.':last?activityMiniFeedback(last.score)+' · '+last.score+'점':mini.phase==='running'?'목표 구간을 보고 눌러주세요.':'시작 버튼을 누르면 표시가 움직입니다.'}</p>
+ <div class="mini-controls">${result?btn('결과를 확인하고 이어간다.','miniContinue'):mini.phase==='running'?btn(config.action+' · Space / 클릭','miniHit'):btn(mini.phase==='paused'?'이어서 시작 · Space':'시작 · Space','miniStart')}${!result&&mini.phase==='running'?btn('잠깐 멈추기','miniPause'):''}${!result?btn('타이밍 조작 없이 진행','miniSkip'):''}</div>`;
+ if(mini.phase!=='running')return;
+ const id=mini.id;
+ const frame=now=>{
+  const current=activeMiniGame();if(!current||current.id!==id||current.phase!=='running'||document.hidden){freezeActivityMiniGame();return;}
+  const delta=miniFrameTime?Math.min(80,Math.max(0,now-miniFrameTime)):0;miniFrameTime=now;
+  currentCommunityActivity(state).mini=tickActivityMiniGame(current,delta);
+  const marker=app.querySelector('[data-mini-position]');if(marker)marker.style.left=activityMiniPosition(currentCommunityActivity(state).mini)*100+'%';
+  miniFrame=requestAnimationFrame(frame);
+ };
+ miniFrame=requestAnimationFrame(frame);
+}
+document.addEventListener('keydown',e=>{
+ const mini=activeMiniGame();if(!mini||e.code!=='Space'||e.target.closest('input,textarea,select,[contenteditable="true"]'))return;
+ const button=e.target.closest('button');if(button&&!['miniStart','miniHit'].includes(button.dataset.action))return;
+ e.preventDefault();e.stopImmediatePropagation();if(e.repeat||mini.phase==='result')return;
+ handleMiniAction(mini.phase==='running'?'miniHit':'miniStart');
+},true);
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&activeMiniGame()?.phase==='running'){freezeActivityMiniGame();render();}});
+window.addEventListener('blur',()=>{if(activeMiniGame()?.phase==='running'){freezeActivityMiniGame();render();}});

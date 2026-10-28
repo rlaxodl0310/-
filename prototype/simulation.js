@@ -129,6 +129,7 @@ export function restore(raw){
  s.memberships??={};s.invitationDecisions??={};
  s.pace??={count:0,seen:{}};
  s.inventory??=[];s.discoveries??=[];
+ for(const record of Object.values(s.activitySessions?.records??{}))if(record.mini?.phase==='running')record.mini.phase='paused';
  if(s.academics.enabled&&!s.campusVariation){s.campusVariation={seed:s.dialogue.generation?.rng??417193,plans:{}};prepareCampusVariation(s);}
  return s;
 }

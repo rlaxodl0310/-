@@ -1,8 +1,14 @@
 """Play real action loops, pause/save, and discover an event inside its room."""
 import os
 from playwright.sync_api import sync_playwright
-from vn_browser_helpers import choose,read_to_choices,finish_school_morning,open_tool
+from vn_browser_helpers import choose as choose_novel,read_to_choices,finish_school_morning,open_tool
 base=os.environ.get('CAMPUS_TEST_URL','http://127.0.0.1:8000')
+def choose(page,action,value=None):
+ choose_novel(page,action,value)
+ # This regression suite covers the optional non-timing route; the input suite plays it.
+ if action=='eventStep' and page.locator('[data-action="miniSkip"]').count():
+  page.locator('[data-action="miniSkip"]').click();page.locator('[data-action="miniContinue"]').click()
+
 def event_post(page,id):
  page.locator('.vn-toolbar [data-action="phone"]').click();page.get_by_role('button',name='학내 커뮤니티',exact=True).click();page.get_by_role('button',name='체험',exact=True).click()
  page.locator(f'[data-action="readPost"][data-value="{id}"]').click();page.locator('[data-action="communityEventView"]').click();choose(page,'eventBegin',id)

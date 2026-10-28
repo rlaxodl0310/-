@@ -1,3 +1,4 @@
+import {needsActivityMiniGame,createActivityMiniGame} from './activity-minigame.js';
 import {physicalActivityDefinitions,preparePhysicalActivity,physicalActivityStage,performPhysicalAction,physicalActivityOutcome} from './physical-activities.js';
 import {classConflicts} from './timetable.js';
 import {noteNpcExperience} from './npc-state.js';
@@ -91,6 +92,7 @@ export function progressCommunityActivity(state,choice){
  if(state.location!==record.venue.location||(record.venue.area&&(state.buildingArea?.place!==record.venue.location||state.buildingArea?.id!==record.venue.area)))throw new Error('먼저 활동 현장으로 돌아가 주세요.');
  const selected=stage.choices.find(c=>c.id===choice);if(!selected)throw new Error('지금 할 수 없는 활동입니다.');
  const availability=activityAvailability(state,record.postId,record);if(!availability.ok)throw new Error(availability.reason);
+ if(record.mini&&(record.mini.choice!==choice||record.mini.phase!=='result'))throw new Error('미니게임을 마친 뒤 결과를 확인해 주세요.');
  let s=structuredClone(state),r=currentCommunityActivity(s),def=communityActivityDefinitions[r.postId];
  const chunks=[Math.round(r.duration/6),Math.round(r.duration/2),r.duration-Math.round(r.duration/6)-Math.round(r.duration/2)];
  const action=def.physical?performPhysicalAction(r,choice):null;
@@ -99,7 +101,7 @@ export function progressCommunityActivity(state,choice){
  const performance=record.postId==='music-recruit'&&choice==='perform'?musicPerformance(record):null;
  const firstExchange=def.club==='volunteer'&&!contact(s,'yeogyeong').introduced;
  if(firstExchange){introduce(s,'yeogyeong','community-activity-exchange');s.memory.push(`[${s.day}일차] 봉사 물품을 확인하며 차여경과 인사를 나눴다.`);}
- r=currentCommunityActivity(s);r.choices.push({stage:r.step,id:choice});r.spent+=minutes;if(action?.advance!==false)r.step++;r.last={player:selected.label,speaker:def.club==='volunteer'?'차여경':def.physical?'함께 활동하며':'현장의 부원',text:(firstExchange?'“차여경이에요. 같이 봐주셔서 고마워요.” ':'')+(action?.text??performance?.text??selected.reply)};if(performance)r.performance=performance;r.segments.push({start,end:start+minutes});
+ r=currentCommunityActivity(s);r.choices.push({stage:r.step,id:choice});r.spent+=minutes;if(action?.advance!==false)r.step++;r.last={player:selected.label,speaker:def.club==='volunteer'?'차여경':def.physical?'함께 활동하며':'현장의 부원',text:(firstExchange?'“차여경이에요. 같이 봐주셔서 고마워요.” ':'')+(action?.text??performance?.text??selected.reply)};if(performance)r.performance=performance;r.segments.push({start,end:start+minutes});if(r.mini){r.miniGames??=[];r.miniGames.push(structuredClone(r.mini));delete r.mini;}
  if(!s.known.includes(selected.fact))s.known.push(selected.fact);
  s.memory.push(`[${s.day}일차] ${def.title}: ${selected.label} ${r.last.text}`);
  s=advanceFreeTime(s,minutes,{activeChoice:r.step===def.stages.length?r.routeId:null});
@@ -139,4 +141,13 @@ export function hearOnsiteActivity(state,id){
  const s=structuredClone(state);s.flow??={seen:{}};s.flow.activitiesHeard??={};
  if(!s.flow.activitiesHeard[id]){s.flow.activitiesHeard[id]={day:s.day,minute:s.clock.minute};s.memory.push(`[${s.day}일차] ${physicalActivityDefinitions[id].venue.label}에서 ${physicalActivityDefinitions[id].title} 참여 안내를 직접 들었다.`);}
  return s;
+}
+
+export function queueActivityMiniGame(state,choice){
+ const record=currentCommunityActivity(state),stage=communityActivityStage(state);
+ if(!needsActivityMiniGame(record)||record.day!==state.day||!stage?.choices.some(c=>c.id===choice))throw new Error('이 행동에는 지금 참여할 수 없습니다.');
+ if(state.location!==record.venue.location||state.buildingArea?.id!==record.venue.area||state.buildingArea?.place!==record.venue.location)throw new Error('활동 현장으로 돌아가 주세요.');
+ const availability=activityAvailability(state,record.postId,record);if(!availability.ok)throw new Error(availability.reason);
+ if(record.mini)throw new Error('진행 중인 미니게임을 먼저 마쳐주세요.');
+ const s=structuredClone(state);currentCommunityActivity(s).mini=createActivityMiniGame(record,choice);return s;
 }

@@ -33,25 +33,29 @@ export function physicalActivityStage(record,stage){
 function newDefense(record){return ['close','lane','help'][Math.floor(physicalRoll(record)*3)];}
 export function performPhysicalAction(record,choice){
  const a=record.actionState,step=record.step,id=record.postId;
+ const timing=record.mini?.result?.mode==='played'?record.mini.result:null;
  let text=null,minutes=step===0?10:step===1?(id==='cooking-open'?25:id==='carry-open'?35:30):id==='cooking-open'?10:id==='carry-open'?15:20,advance=true;
  if(id==='basketball-open'){
   if(step===0){a.preparation=choice;a.defense=newDefense(record);}
   if(step===1){
    const advantage=(choice==='pass'&&a.defense==='close')||(choice==='shoot'&&a.defense==='lane')||(choice==='drive'&&a.defense==='help');
    const chance=Math.max(.15,Math.min(.92,.35+(advantage ? .35 : 0)+(a.preparation==='passing'&&choice==='pass' ? .16 : 0)+(a.preparation==='footwork'&&choice==='drive' ? .13 : 0)-(3-a.stamina)*.06));
-   const success=physicalRoll(record)<chance;a.round++;a.scored+=success?1:0;if(choice==='drive')a.stamina=Math.max(0,a.stamina-1);if(choice==='pass')a.teamwork++;
-   a.plays.push({choice,defense:a.defense,success});text=({drive:'공을 낮게 튀기며 수비 옆을 파고든다.',pass:'짝이 움직이는 쪽으로 공을 밀어 보내고 옆 공간으로 빠진다.',shoot:'발을 멈추고 팔을 뻗어 공을 던진다.'}[choice])+' '+(success?(choice==='pass'?'짝이 공을 받아 골밑에서 마무리한다. 돌아오는 길에 손바닥을 가볍게 마주친다.':'공이 림 안으로 떨어진다. 짝이 공을 받아 다시 건네준다.'):(choice==='pass'?'공을 받는 타이밍이 어긋나 바깥으로 튄다. 손을 들어 자기 신호가 늦었다고 알린다.':'공이 림을 맞고 튕겨 나온다. 숨을 고르고 다음 공격 위치로 돌아간다.'));
+   const threshold=65-(advantage?20:0)-(a.preparation==='passing'&&choice==='pass'?8:0)-(a.preparation==='footwork'&&choice==='drive'?7:0)+(3-a.stamina)*4;
+   const success=timing?timing.score>=threshold:physicalRoll(record)<chance;a.round++;a.scored+=success?1:0;if(choice==='drive')a.stamina=Math.max(0,a.stamina-1);if(choice==='pass')a.teamwork++;
+   a.plays.push({choice,defense:a.defense,success,...(timing?{timing:timing.score}:{})});text=({drive:'공을 낮게 튀기며 수비 옆을 파고든다.',pass:'짝이 움직이는 쪽으로 공을 밀어 보내고 옆 공간으로 빠진다.',shoot:'발을 멈추고 팔을 뻗어 공을 던진다.'}[choice])+' '+(success?(choice==='pass'?'짝이 공을 받아 골밑에서 마무리한다. 돌아오는 길에 손바닥을 가볍게 마주친다.':'공이 림 안으로 떨어진다. 짝이 공을 받아 다시 건네준다.'):(choice==='pass'?'공을 받는 타이밍이 어긋나 바깥으로 튄다. 손을 들어 자기 신호가 늦었다고 알린다.':'공이 림을 맞고 튕겨 나온다. 숨을 고르고 다음 공격 위치로 돌아간다.'));
    advance=a.round===3;minutes=advance?30:0;if(!advance)a.defense=newDefense(record);
   }
  }
  if(id==='cooking-open'){
   if(step===0)a.preparation=choice;
-  if(step===1){a.texture=choice==='gentle'?'soft':a.preparation==='batch'?'soft':'uneven';text=choice==='gentle'?'불을 낮추고 냄비 바닥을 따라 천천히 젓는다. 끓어 넘치던 기포가 작아지고 채소가 고르게 부드러워진다.':a.texture==='soft'?'단단한 채소가 먼저 익은 뒤 잎채소를 넣는다. 끓는 모습을 보고 불을 낮춰 형태가 무너지지 않게 한다.':'한꺼번에 넣은 채소 중 작은 조각부터 풀어진다. 불을 낮추고 덜 익은 조각을 확인하며 조금 더 기다렸다.';}
+  if(step===1){a.texture=timing?(timing.score>=60?'soft':'uneven'):choice==='gentle'?'soft':a.preparation==='batch'?'soft':'uneven';text=choice==='gentle'?'불을 낮추고 냄비 바닥을 따라 천천히 젓는다. 끓어 넘치던 기포가 작아지고 채소가 고르게 부드러워진다.':a.texture==='soft'?'단단한 채소가 먼저 익은 뒤 잎채소를 넣는다. 끓는 모습을 보고 불을 낮춰 형태가 무너지지 않게 한다.':'한꺼번에 넣은 채소 중 작은 조각부터 풀어진다. 불을 낮추고 덜 익은 조각을 확인하며 조금 더 기다렸다.';}
+  if(step===1&&timing)text=timing.score>=60?'기포가 올라오는 모습을 보며 불을 맞춘다. 세 번 불을 조절하자 넘치지 않고 고르게 끓는다. 짝이 채소를 확인하고 고개를 끄덕인다.':'불을 줄이는 타이밍이 조금씩 어긋난다. 잠깐 불을 낮추고 바닥에 재료가 붙지 않게 저었다. 작은 조각과 큰 조각이 다르게 익은 점을 다음에 참고하기로 한다.';
   if(step===2){a.finish=choice;a.balanced=(a.salt==='strong'&&choice==='dilute')||(a.salt==='light'&&choice==='reduce');text=choice==='dilute'?(a.salt==='strong'?'육수를 조금씩 더해 다시 맛본다. 짝도 한 숟갈 떠보고 고개를 끄덕인다. 센 간이 한결 누그러졌다.':'육수를 더하니 맛이 예상보다 연해졌다. 짝과 원래 간을 메모하고 작은 그릇에 나눠 담는다.'):choice==='reduce'?(a.salt==='light'?'뚜껑을 열고 조금 더 졸인다. 싱겁던 국물에 맛이 모인다. 짝이 불을 끄고 그릇을 가져온다.':'조금 더 졸이자 간이 더 또렷해졌다. 다음에는 맛을 먼저 보고 불을 정하자고 이야기하며 나눠 담는다.'):'지금의 맛을 작은 그릇에 나눠 담는다. 손질할 때 나온 껍질을 모으고 도마와 실습대를 씻는다. 서로 맡은 일이 끝났는지 확인했다.';}
  }
  if(id==='carry-open'){
   if(step===0)a.method=choice;
   if(step===1){a.route=choice;a.stops=choice==='clear'?1:a.obstacle==='chair'?2:1;text=choice==='clear'?'상자를 안전한 곳에 내려놓고 의자와 빈 상자를 옆으로 모은다. 마주 오는 조가 지나간 뒤, 비워진 통로로 다시 들어간다.':a.obstacle==='chair'?'벽 쪽으로 돌았지만 상자 모서리가 의자에 닿을 듯하다. 멈춰서 한 번 내려놓고 의자 위치를 고친 뒤 다시 옮겼다.':'마주 오는 조를 보고 벽 쪽에서 기다린다. 서로 지나갈 순서를 확인한 뒤, 발을 맞춰 천천히 보관대로 들어간다.';if(a.method==='pair')text+=' “지금 내려요.” 처음 맞춘 신호에 둘이 동시에 무릎을 굽힌다.';}
+  if(step===1&&timing){a.balance=timing.score;if(timing.score<60){a.stops++;text+=' 상자가 기울 때 잠깐 멈춰 내려놓고 손잡는 위치를 다시 맞췄다.';}else text+=' 중심이 흔들리기 전에 손을 고쳐 잡아 상자를 수평으로 유지했다.';}
   if(step===2)a.finish=choice;
  }
  return {text,minutes,advance};
