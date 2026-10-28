@@ -7,7 +7,7 @@ import zipfile
 
 root = Path(__file__).resolve().parent
 destination = Path(sys.argv[1]) if len(sys.argv) > 1 else Path('/tmp/campus-demo.html')
-css = (root / 'style.css').read_text()
+css = (root / 'style.css').read_text() + '\n' + (root / 'interface.css').read_text()
 # Large data URLs exceed browser limits for CSS custom-property values.
 # Inline the URL directly into each image declaration instead.
 for filename in ['campus-front-background.png', 'dialogue-portraits.png', 'activity-character-scenes.png', 'character-expressions.png']:
@@ -21,6 +21,7 @@ simulation = inline_module('campus-rooms.js') + '\n' + inline_module('campus-bui
 app = inline_module('character-acting.js') + '\n' + inline_module('outdoor-life.js') + '\n' + inline_module('activity-scene.js') + '\n' + inline_module('vn-flow.js') + '\n' + inline_module('classes.js') + '\n' + inline_module('campus-moments.js') + '\n' + inline_module('free-roam.js') + '\n' + inline_module('community-simulation.js') + '\n' + inline_module('community.js') + '\n' + inline_module('activity-minigame.js') + '\n' + inline_module('physical-activities.js') + '\n' + inline_module('community-activities.js') + '\n' + inline_module('scene-flow.js') + '\n' + inline_module('campus-time.js') + '\n' + inline_module('dialogue-service.js') + '\n' + inline_module('club-admissions.js') + '\n' + inline_module('utility-ui.js') + '\n' + inline_module('app.js')
 html = (root / 'index.html').read_text()
 html = html.replace('<link rel="stylesheet" href="style.css">', '<style>' + css + '</style>')
+html = html.replace('<link rel="stylesheet" href="interface.css">', '')
 html = html.replace('<script type="module" src="app.js"></script>', '<script>' + simulation + '\n' + app + '</script>')
 destination.write_text(html)
 print('Built:', destination)
