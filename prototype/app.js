@@ -70,12 +70,13 @@ function sceneVisual(){
  const lunch=screen==='rainLunch'?lunchEpisode(state):null;
  const person=lunch?lunch.person:session?.postId==='volunteer-recruit'?'yeogyeong':['dialogue','warningShare'].includes(screen)?speaker:screen==='group'?groupLines[groupIndex].person:screen==='encounter'&&encounter?.person?encounter.person:'taei';
  const column=person==='taei'?0:people[person]?.column??0;
+ const cafeCinematic=screen==='cafeOrder';
  const atHome=screen==='dayEnd'&&state.freeDay?.home;
  const area=atHome?null:selectedBuildingArea(state);
  const caption=lunch?'비 오는 점심시간':session?communityActivityDefinitions[session.postId].title+' · '+Math.min(session.step+1,3)+'/3':{classLesson:'수업',encounter:'우연한 만남',warningScene:'눈앞의 상황',detail:'활동 준비',result:'활동을 마친 뒤',buildingDirectory:'건물 안에서',dayEnd:'하루의 끝'}[screen]??'캠퍼스의 일상';
  const sceneLocation=atHome?'자취방':session?locations[session.venue.location]:screen==='campus'?'캠퍼스':locations[state.location]??'캠퍼스';
  const detail=session?session.venue.label.replace(sceneLocation,'').replace(/^\s*·?\s*/,''):area?((area.floor==='층 미확정'?'':area.floor+' · ')+area.name):'';
- return `<aside class="scene-visual" aria-label="현재 장면"><div class="scene-context"><span class="scene-kicker">${caption}</span><p class="scene-location">${esc(sceneLocation)}${detail?`<small>${esc(detail)}</small>`:''}</p><p class="scene-time"><span>${state.day}일차 · ${clockLabel(state)}</span><span class="scene-weather">${weatherNow(state).icon} ${weatherNow(state).name} · ${weatherNow(state).temperature}°C</span></p></div>${!session&&campusBuildings[state.location]?.outdoor?outdoorScene(state.location):session&&(session.postId==='music-recruit'||communityActivityDefinitions[session.postId]?.physical)?activityScene(session):portrait(column)}<p class="scene-person">${esc(person==='taei'?'김태이':nameOf(person))}</p></aside>`;
+ return `<aside class="scene-visual ${cafeCinematic?'cafe-cinematic':''}" aria-label="현재 장면"><div class="scene-context"><span class="scene-kicker">${caption}</span><p class="scene-location">${esc(sceneLocation)}${detail?`<small>${esc(detail)}</small>`:''}</p><p class="scene-time"><span>${state.day}일차 · ${clockLabel(state)}</span><span class="scene-weather">${weatherNow(state).icon} ${weatherNow(state).name} · ${weatherNow(state).temperature}°C</span></p></div>${cafeCinematic?'<div class="cafe-cinematic-art" role="img" aria-label="봄빛이 드는 카페 카운터에서 주문하는 김태이와 직원"></div>':!session&&campusBuildings[state.location]?.outdoor?outdoorScene(state.location):session&&(session.postId==='music-recruit'||communityActivityDefinitions[session.postId]?.physical)?activityScene(session):portrait(column)}<p class="scene-person">${esc(person==='taei'?'김태이':nameOf(person))}</p></aside>`;
 }
 function page(title,body,back='campus',backAction='go'){
  if(['quickMenu','menu'].includes(screen)){if(quickReturn){back='';backAction='closeQuick';}body=menuTabs()+body;}

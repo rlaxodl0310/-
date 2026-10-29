@@ -10,7 +10,7 @@ destination = Path(sys.argv[1]) if len(sys.argv) > 1 else Path('/tmp/campus-demo
 css = (root / 'style.css').read_text() + '\n' + (root / 'interface.css').read_text()
 # Large data URLs exceed browser limits for CSS custom-property values.
 # Inline the URL directly into each image declaration instead.
-for filename in ['campus-front-background.png', 'dialogue-portraits.png', 'activity-character-scenes.png', 'character-expressions.png']:
+for filename in ['campus-front-background.png', 'dialogue-portraits.png', 'activity-character-scenes.png', 'character-expressions.png', 'cafe-order-cinematic.png']:
     image = base64.b64encode((root.parent / 'docs/assets' / filename).read_bytes()).decode()
     css = css.replace('../docs/assets/' + filename, 'data:image/png;base64,' + image)
 def inline_module(filename):
