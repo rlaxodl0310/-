@@ -1,3 +1,4 @@
+import {usesSupplyStory} from './supply-story.js';
 import {noteNpcExperience} from './npc-state.js';
 import {changeRelationship,relationship} from './dialogue.js';
 import {contact} from './identity.js';
@@ -61,7 +62,7 @@ const campusRules=[
   when:s=>s.day===2&&relationship(s,'soyul','seoyeon').trust>=10&&relationship(s,'soyul','seoyeon').tension<3,
   effect:s=>{s.eventState.flags.photoConfidence=true;return {outcome:'encouraged',result:'서연이 소율에게 사진을 고른 이유도 함께 적어보라고 연락했다.',visibility:'private'};}},
  {id:'supplies',kind:'scheduled',stages:['campus'],trigger:'activity-end',participants:['yeogyeong','seoyeon','soyul'],
-  when:s=>s.day===1,
+  when:s=>s.day===1&&!usesSupplyStory(s),
   effect:(s,c)=>{
    const organized=c.choice==='volunteer'&&c.approach==='organize';
    pairChange(s,organized?{familiarity:1}:{trust:1,familiarity:1});

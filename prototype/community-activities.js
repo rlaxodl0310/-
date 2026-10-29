@@ -1,3 +1,4 @@
+import {usesSupplyStory,prepareSupplyStory,supplyIntro,supplyPeople,supplyStage,progressSupplyStory,finishSupplyPlayer} from './supply-story.js';
 import {needsActivityMiniGame,createActivityMiniGame} from './activity-minigame.js';
 import {physicalActivityDefinitions,preparePhysicalActivity,physicalActivityStage,performPhysicalAction,physicalActivityOutcome} from './physical-activities.js';
 import {noteNpcExperience} from './npc-state.js';
@@ -51,9 +52,14 @@ export function activityAvailability(s,postId,session=null){
  if(!(def.days??[def.day]).includes(s.day))return {ok:false,reason:`${def.day}일차 13:00부터 진행하는 공개 활동입니다.`};
  const stored=session??currentCommunityActivity(s,communityActivityKey(s,postId));
  if(stored?.status==='completed'||(def.route!=='rehearsal'&&(s.freeDay?.completed??[]).some(a=>a.id===def.route)))return {ok:false,reason:'이미 마친 공개 활동입니다.'};
- const route=stored?.route??(def.physical?{id:def.route,name:def.title,duration:def.duration,knowledge:[],memory:''}:availableRoutes(s).find(r=>r.id===def.route));
+ let route=stored?.route??(def.physical?{id:def.route,name:def.title,duration:def.duration,knowledge:[],memory:''}:availableRoutes(s).find(r=>r.id===def.route));
  if(!route||route.locked)return {ok:false,reason:route?.lockReason??'지금은 참여할 수 없습니다.'};
  if(s.clock.minute<(def.physical?540:780))return {ok:false,reason:def.physical?'09:00부터 참여할 수 있습니다.':'현장 공개 활동은 13:00부터 시작합니다.'};
+ if(postId==='volunteer-recruit'&&usesSupplyStory(s)){
+  if(s.supplyStory?.status==='resolved'||s.clock.minute>900&&!stored)return {ok:false,reason:'오늘 봉사 준비는 마무리 단계입니다. 다음에 참여하거나 실제 참가자에게 상황을 물어볼 수 있습니다.'};
+  if(!stored)route={...route,duration:Math.min(route.duration,960-s.clock.minute)};
+  if(s.clock.minute+(stored?stored.duration-stored.spent:route.duration)>960)return {ok:false,reason:'남은 준비 시간 안에 지금 맡은 부분을 마무리하기 어렵습니다.'};
+ }
  const remaining=(stored?.duration??route.duration)-(stored?.spent??0);
  if(s.freeDay?.home||s.clock.minute+remaining>1080)return {ok:false,reason:'18:00 준비 마감까지 남은 활동을 끝내기 어렵습니다. 오늘은 안내만 확인할 수 있습니다.'};
  return {ok:true,route,remaining};
@@ -65,14 +71,15 @@ export function pauseCommunityActivity(state){
 }
 export function beginCommunityActivity(state,postId){
  const availability=activityAvailability(state,postId);if(!availability.ok)throw new Error(availability.reason);
- if(!state.flow?.postsRead?.[postId]&&!state.flow?.activitiesHeard?.[postId])throw new Error('해당 모집글을 먼저 읽어 주세요.');
+ if(!state.flow?.postsRead?.[postId]&&!state.flow?.activitiesHeard?.[postId]&&!(postId==='volunteer-recruit'&&usesSupplyStory(state)&&state.location==='hall'))throw new Error('해당 모집글을 먼저 읽어 주세요.');
  const existing=currentCommunityActivity(state,communityActivityKey(state,postId));
  if(existing)return resumeCommunityActivity(state,communityActivityKey(state,postId));
  const s=pauseCommunityActivity(state),store=sessionStore(s),def=communityActivityDefinitions[postId],rain=def.club==='football'&&wetWeather(s);
  const venue=rain?{location:'gym',area:'fitness',label:'체육관 · 체력단련실'}:structuredClone(def.venue);
  const record={key:communityActivityKey(s,postId),postId,day:s.day,route:structuredClone(availability.route),routeId:def.route,duration:availability.route.duration,startedAt:s.clock.minute,spent:0,step:0,choices:[],segments:[],status:'active',rain,venue,last:null};
  if(def.physical)preparePhysicalActivity(record,Math.floor(Math.random()*4294967296));
- store.records[record.key]=record;store.active=record.key;if(def.club==='volunteer')seePeople(s,['yeogyeong']);s.location=venue.location;s.buildingArea=venue.area?{place:venue.location,id:venue.area}:null;s.pace={count:0,seen:{}};return s;
+ if(postId==='volunteer-recruit'&&usesSupplyStory(s)){prepareSupplyStory(s);record.supplyGroup=!!s.supplyStory;}
+ store.records[record.key]=record;store.active=record.key;if(def.club==='volunteer'&&!record.supplyGroup)seePeople(s,['yeogyeong']);s.location=venue.location;s.buildingArea=venue.area?{place:venue.location,id:venue.area}:null;s.pace={count:0,seen:{}};if(record.supplyGroup)seePeople(s,supplyPeople(s));return s;
 }
 export function resumeCommunityActivity(state,key){
  const record=currentCommunityActivity(state,key);if(!record)throw new Error('이어갈 활동이 없습니다.');
@@ -82,7 +89,7 @@ export function resumeCommunityActivity(state,key){
 }
 export function communityActivityStage(s){
  const r=currentCommunityActivity(s);if(!r)return null;const def=communityActivityDefinitions[r.postId],stage=def.stages[r.step];
- if(!stage)return null;return physicalActivityDefinitions[r.postId]?physicalActivityStage(r,stage):{...stage,prompt:r.rain&&stage.rainPrompt?stage.rainPrompt:stage.prompt,choices:r.rain&&stage.rainChoices?stage.rainChoices:stage.choices};
+ if(!stage)return null;if(r.supplyGroup)return supplyStage(s,stage);return physicalActivityDefinitions[r.postId]?physicalActivityStage(r,stage):{...stage,prompt:r.rain&&stage.rainPrompt?stage.rainPrompt:stage.prompt,choices:r.rain&&stage.rainChoices?stage.rainChoices:stage.choices};
 }
 export function progressCommunityActivity(state,choice){
  const record=currentCommunityActivity(state),stage=communityActivityStage(state);
@@ -97,19 +104,21 @@ export function progressCommunityActivity(state,choice){
  const minutes=action?.minutes??chunks[r.step],start=s.clock.minute;
  if(selected.approach)s=planEvent(s,r.routeId,selected.approach);
  const performance=record.postId==='music-recruit'&&choice==='perform'?musicPerformance(record):null;
- const firstExchange=def.club==='volunteer'&&!contact(s,'yeogyeong').introduced;
+ const groupText=r.supplyGroup?progressSupplyStory(s,r,choice):null;
+ const firstExchange=!r.supplyGroup&&def.club==='volunteer'&&!contact(s,'yeogyeong').introduced;
  if(firstExchange){introduce(s,'yeogyeong','community-activity-exchange');s.memory.push(`[${s.day}일차] 봉사 물품을 확인하며 차여경과 인사를 나눴다.`);}
- r=currentCommunityActivity(s);r.choices.push({stage:r.step,id:choice});r.spent+=minutes;if(action?.advance!==false)r.step++;r.last={player:selected.label,speaker:def.club==='volunteer'?'차여경':def.physical?'함께 활동하며':'현장의 부원',text:(firstExchange?'“차여경이에요. 같이 봐주셔서 고마워요.” ':'')+(action?.text??performance?.text??selected.reply)};if(performance)r.performance=performance;r.segments.push({start,end:start+minutes});if(r.mini){r.miniGames??=[];r.miniGames.push(structuredClone(r.mini));delete r.mini;}
+ r=currentCommunityActivity(s);r.choices.push({stage:r.step,id:choice});r.spent+=minutes;if(action?.advance!==false)r.step++;r.last={player:selected.label,speaker:r.supplyGroup?'함께 준비하며':def.club==='volunteer'?'차여경':def.physical?'함께 활동하며':'현장의 부원',text:(firstExchange?'“차여경이에요. 같이 봐주셔서 고마워요.” ':'')+(groupText??action?.text??performance?.text??selected.reply)};if(performance)r.performance=performance;r.segments.push({start,end:start+minutes});if(r.mini){r.miniGames??=[];r.miniGames.push(structuredClone(r.mini));delete r.mini;}
  if(!s.known.includes(selected.fact))s.known.push(selected.fact);
  s.memory.push(`[${s.day}일차] ${def.title}: ${selected.label} ${r.last.text}`);
  s=advanceFreeTime(s,minutes,{activeChoice:r.step===def.stages.length?r.routeId:null});
- if(def.club==='volunteer')noteNpcExperience(s,'yeogyeong','shared-work-step',{fatigue:minutes/8,stress:-3,warmth:4},`community:${r.key}:${r.step}`);
+ if(def.club==='volunteer'&&!r.supplyGroup)noteNpcExperience(s,'yeogyeong','shared-work-step',{fatigue:minutes/8,stress:-3,warmth:4},`community:${r.key}:${r.step}`);
  s.pace={count:0,seen:{}};r=currentCommunityActivity(s);
  if(r.step===def.stages.length){
-  if(def.physical){
+  if(r.supplyGroup){s.lastResult=finishSupplyPlayer(s,r);}
+  else if(def.physical){
    s.freeDay??={completed:[],settled:false};s.freeDay.completed.push({id:r.routeId,start:r.startedAt,end:s.clock.minute,activeMinutes:r.spent});s.lastResult='';
   }else s=finishFreeActivity(s,r.routeId,r.route,{start:r.startedAt,activeMinutes:r.spent});r=currentCommunityActivity(s);r.status='completed';r.finishedAt=s.clock.minute;
-  s.lastResult+=' '+communityActivityOutcome(r);
+  if(!r.supplyGroup)s.lastResult+=' '+communityActivityOutcome(r);
   r.result=s.lastResult;s.memory.push(`[${s.day}일차] ${def.title} 공개 체험을 마쳤다. 가입 여부는 아직 별개다.`);
  }
  return s;
