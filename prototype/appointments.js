@@ -55,6 +55,7 @@ export function appointmentConflicts(s,offer){return s.appointments.filter(a=>a!
 export function replyOffer(state,id,accept){
  const s=structuredClone(state),a=s.appointments.find(x=>x.id===id);
  if(!a||a.status!=='offered')throw new Error('지금 응답할 수 있는 제안이 아닙니다.');
+ if(a.kind==='supply-followup'&&(a.day!==s.day||s.clock.minute>a.minute+15))throw new Error('이 제안의 시간이 지났습니다.');
  if(a.day<s.day||(a.day===s.day&&s.phase==='evening'))throw new Error('이미 지난 제안입니다.');
  a.status=accept?'pending':'declined';
  s.memory.push(`[${s.day}일차] ${a.label} 제안을 ${accept?'수락했다.':'정중히 거절했다.'}`);

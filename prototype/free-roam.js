@@ -1,3 +1,4 @@
+import {advanceSupplyAftermath,supplyAftermathMemory} from './supply-aftermath.js';
 import {advanceSupplyWorld} from './supply-story.js';
 import {noteNpcExperience} from './npc-state.js';
 import {recordMissedLessons} from './timetable.js';
@@ -30,7 +31,7 @@ export function advanceFreeTime(state,minutes,{activeChoice=null,travelling=fals
  if(!Number.isInteger(minutes)||minutes<0)throw new Error('올바르지 않은 소요 시간입니다.');
  let s=structuredClone(state);const end=(s.clock?.minute??780)+minutes;
  if(end>1320)throw new Error('오늘은 너무 늦어집니다. 짧은 행동을 하거나 귀가할 수 있습니다.');
- const before=s.clock?.minute??780;s.clock={minute:end};recordMissedLessons(s,before,end);advanceSupplyWorld(s,before,end);applyCampusMoments(s,before,end,{travelling});s.phase=end>=1080?'evening':'afternoon';
+ const before=s.clock?.minute??780;s.clock={minute:end};recordMissedLessons(s,before,end);advanceSupplyWorld(s,before,end);advanceSupplyAftermath(s,before,end);applyCampusMoments(s,before,end,{travelling});s.phase=end>=1080?'evening':'afternoon';
  s=settleFreeWorld(s,activeChoice);
  for(const [id,place] of Object.entries(currentSchedule(s)))s.npcs[id].location=place;
  return s;
@@ -38,6 +39,7 @@ export function advanceFreeTime(state,minutes,{activeChoice=null,travelling=fals
 export function freeActivity(state,id){
  if(state.phase!=='afternoon'&&!['rehearsal','work','explore','walk'].includes(id))throw new Error('이 준비 활동은 마무리됐습니다. 주변을 둘러보거나 사람들과 이야기할 수 있습니다.');
  const d=freeDay(structuredClone(state));if(d.completed.some(x=>x.id===id)&&!['rehearsal','work','explore','walk'].includes(id))throw new Error('오늘 이미 마친 일입니다. 다른 자유행동을 할 수 있습니다.');
+ if(state.supplyAftermath&&id==='review'&&(state.location!=='library'||currentSchedule(state).soyul!=='library'))throw new Error('같이 사진을 볼 사람이 지금 도서관에 없습니다. 실제로 만났을 때 진행할 수 있습니다.');
  const route=availableRoutes(state).find(r=>r.id===id);if(!route||route.locked)throw new Error(route?.lockReason??'지금 할 수 없는 일입니다.');
  let s=weatherAdjustAppointments(state,availableRoutes(state));const start=s.clock.minute;
  s=advanceFreeTime(s,route.duration,{activeChoice:id,travelling:['explore','walk','shortcut','checkCampus'].includes(id)});
@@ -60,8 +62,9 @@ export function finishFreeActivity(state,id,route,{start,activeMinutes=null}={})
  for(const a of s.appointments)if(a.day===s.day&&a.status==='pending'&&a.activity===id){a.status='kept';if(a.person)changeRelationship(s,a.person,'taei',{trust:2});}
  if(id==='work'&&s.dayHistory.some(h=>h.choice==='rehearsal'||h.activities?.some(a=>a.id==='rehearsal')))s.lastResult+=' 이전에 합주에서 확인한 부분을 데모에 반영했다.';
  if(id==='volunteer'&&s.contacts?.yeogyeong?.introduced){s.dialogue.threads??={};s.dialogue.threads.yeogyeong??={episode:0,day:s.day,minute:s.clock.minute,origin:'volunteer'};}
+ if(['review','backstage'].includes(id))for(const person of participants){const followup=supplyAftermathMemory(s,person);if(followup&&s.npcs[person]?.location===s.location)s.lastResult+=' '+s.npcs[person].name+'이 말한다. “'+followup+'”';}
  s=warningActivity(s,id);s.memory.push(`[${s.day}일차] ${s.lastResult}`);return s;
 }
 export function goHome(state){
- let s=structuredClone(state);s.clock={minute:Math.max(s.clock?.minute??780,1080)};recordMissedLessons(s,state.clock.minute,s.clock.minute);advanceSupplyWorld(s,state.clock?.minute??780,s.clock.minute);applyCampusMoments(s,state.clock?.minute??780,s.clock.minute,{travelling:true});s.phase='evening';s=settleFreeWorld(s);freeDay(s).home=true;return s;
+ let s=structuredClone(state);s.clock={minute:Math.max(s.clock?.minute??780,1080)};recordMissedLessons(s,state.clock.minute,s.clock.minute);advanceSupplyWorld(s,state.clock?.minute??780,s.clock.minute);advanceSupplyAftermath(s,state.clock?.minute??780,s.clock.minute);applyCampusMoments(s,state.clock?.minute??780,s.clock.minute,{travelling:true});s.phase='evening';s=settleFreeWorld(s);freeDay(s).home=true;return s;
 }

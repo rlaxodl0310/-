@@ -1,3 +1,4 @@
+import {prepareSupplyAftermath} from './supply-aftermath.js';
 import {prepareCampusVariation} from './campus-variation.js';
 import {timetable} from './timetable.js';
 import {warningPhase,warningActivity} from './warnings.js';
@@ -72,11 +73,11 @@ export function nextDay(state){
  let s=structuredClone(state);
  s.dayHistory.push({day:s.day,choice:s.choice,activities:structuredClone(s.freeDay?.completed??[]),promises:structuredClone(s.dialogue.promises)});
  s.freeDay={completed:[],settled:false};s.clock={minute:s.academics?.enabled?540:780};s.pace={count:0,seen:{}};s.day++;s.phase='afternoon';s.choice=null;s.minutes=0;s.lastResult='';s.location='campus';s.dialogue.promises={};
- prepareCampusVariation(s);
+ prepareCampusVariation(s);prepareSupplyAftermath(s);
  for(const [id,npc] of Object.entries(s.npcs))npc.location=currentSchedule(s)[id];
  if(s.day===2){
   s.messages.push({day:2,from:s.memberships?.volunteer?'봉사단 단체방':'캠퍼스톡 동아리 소식',text:s.memberships?.volunteer?'오늘 여경은 자유관에서 정리하고, 소율은 도서관에서 사진을 고릅니다. 서연은 오후에 대학가 카페에 있어요.':'오늘 공개 사진 정리는 도서관, 봉사단 준비 정리는 자유관에서 진행합니다.'});
-  for(const id of Object.keys(s.npcs)){const text=personalMessage(s,id);if(text)s.messages.push({day:2,from:s.npcs[id].name,text});}
+  for(const id of Object.keys(s.npcs)){if(s.supplyAftermath?.reactions[id])continue;const text=personalMessage(s,id);if(text)s.messages.push({day:2,from:s.npcs[id].name,text});}
  }else s.messages.push({day:3,from:s.memberships?.volunteer?'봉사단 단체방':'캠퍼스톡 동아리 소식',text:s.memberships?.volunteer?'오늘 사진 전시 준비는 자유관에서 진행합니다. 소율은 먼저 도서관에서 파일을 챙깁니다. 공연 리허설도 같은 오후에 있어요.':'오늘 사진 전시 준비는 자유관에서 진행합니다. 공개 공연 리허설도 같은 오후에 있습니다.'});
  return warningPhase(weatherAdjustAppointments(phaseEvents(s),availableRoutes(s)));
 }
@@ -128,7 +129,7 @@ export function restore(raw){
  s.social??={facts:[],knowledge:{},shares:[],decisions:{},heardByPlayer:[]};
  s.memberships??={};s.invitationDecisions??={};
  s.pace??={count:0,seen:{}};
- s.inventory??=[];s.discoveries??=[];
+ s.inventory??=[];s.discoveries??=[];const hadSupplyAftermath=!!s.supplyAftermath;prepareSupplyAftermath(s);if(!hadSupplyAftermath&&s.supplyAftermath)for(const [id,place] of Object.entries(currentSchedule(s)))s.npcs[id].location=place;
  for(const record of Object.values(s.activitySessions?.records??{}))if(record.mini?.phase==='running')record.mini.phase='paused';
  if(s.academics.enabled&&!s.campusVariation){s.campusVariation={seed:s.dialogue.generation?.rng??417193,plans:{}};prepareCampusVariation(s);}
  return s;

@@ -1,6 +1,6 @@
 import {nextLesson,classPlace,schoolTime,schoolEnabled} from './timetable.js';
 import {buildingLinks} from './campus-buildings.js';
-import {availableRoutes} from './days.js';
+import {availableRoutes,currentSchedule} from './days.js';
 export function flowState(s){s.flow??={seen:{}};return s.flow;}
 export function markFlow(state,kind,value){const s=structuredClone(state);flowState(s).seen[kind+(value?':'+value:'')]=true;return s;}
 export function campusScene(s){
@@ -26,7 +26,7 @@ export function placeContinuations(s,place){
  if(s.phase==='afternoon'){
   if(s.day===3&&place==='arts')choices.push({label:'1층 공연장 쪽으로 가서 리허설 준비를 돕는다.',action:'select',value:'backstage'});
   if(s.day===1&&place==='hall')choices.push({label:'쌓인 물품 상자 쪽으로 가서 준비를 도울지 살펴본다.',action:'select',value:'volunteer'});
-  if(s.day===2&&place==='library')choices.push({label:'펼쳐진 사진들을 함께 정리할 수 있을지 살펴본다.',action:'select',value:'review'});
+  if(s.day===2&&place==='library'&&(!s.supplyAftermath||currentSchedule(s).soyul==='library'))choices.push({label:'펼쳐진 사진들을 함께 정리할 수 있을지 살펴본다.',action:'select',value:'review'});
   if(s.day===3&&place==='hall')choices.push({label:'아직 비어 있는 전시판 옆에서 준비를 돕는다.',action:'select',value:'exhibit'});
   if(s.day===3&&place==='hall'&&s.known.some(k=>['도서관으로 이어지는 길','대학가 연결 통로'].includes(k)))choices.push({label:'알아둔 연결 통로로 공연 장비를 옮기는 일을 돕는다.',action:'select',value:'shortcut'});
   if(s.day===3&&['hall','library'].includes(place)&&s.warnings?.evidence?.length)choices.push({label:'접한 안내가 마음에 걸린다. 다른 건물의 안내도 확인한다.',action:'select',value:'checkCampus'});

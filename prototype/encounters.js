@@ -1,3 +1,4 @@
+import {aftermathObservation,aftermathGreeting} from './supply-aftermath.js';
 import {rainLunchOffer,beginRainLunch,passRainLunch} from './rain-lunch.js';
 import {campusDetour} from './campus-variation.js';
 import {canGenerateReencounter} from './dialogue-generator.js';
@@ -51,10 +52,10 @@ const surroundings={
  cafe:{entry:['카페 문을 열자 커피 향과 잔 부딪히는 소리가 섞여 들어온다. 주문대에는 짧은 줄이 있고 창가 몇 자리는 비어 있다.','대학가 카페 위치'],counter:['주문대 옆 메뉴판을 살펴보고 줄에서 비켜섰다. 창가 좌석 옆에는 충전용 콘센트가 있다. 주문을 마친 사람들이 각자의 자리로 돌아간다.','카페 충전 좌석 위치']}
 };
 function observePlace(s,location,spot,repeated=false){
- if(campusBuildings[location]&&location!=='hall'){const b=campusBuildings[location];if(!s.known.includes(b.fact)){s.known.push(b.fact);s.memory.push(`[${s.day}일차] ${b.entry}`);}return b.entry;}
+ if(campusBuildings[location]&&location!=='hall'){const b=campusBuildings[location];if(!s.known.includes(b.fact)){s.known.push(b.fact);s.memory.push(`[${s.day}일차] ${b.entry}`);}return b.entry+' '+aftermathObservation(s,location);}
  const [text,information]=surroundings[location]?.[spot]??surroundings[location]?.entry??['주변을 둘러봤다.',null];
  if(information&&!s.known.includes(information)){s.known.push(information);s.memory.push(`[${s.day}일차] ${text}`);}
- return repeated?`다시 주변을 확인했다. ${text}`:text;
+ return (repeated?`다시 주변을 확인했다. ${text}`:text)+' '+aftermathObservation(s,location);
 }
 export function arrive(state,location,spot='entry'){
  const s=structuredClone(state);s.location=location;s.encounters??={};
@@ -112,6 +113,8 @@ export function arrive(state,location,spot='entry'){
  if(person&&!contact(s,person).introduced&&/아직 사진/.test(encounter.action)){encounter.action='길을 막지 않게 옆으로 비켜서며 가볍게 인사한다. “안녕하세요.”';encounter.prefix='안녕하세요. ';}
  if(person&&!contact(s,person).introduced&&/앉아도|가방을 놓/.test(encounter.action)){encounter.action='상대의 공간을 침범하지 않게 멈춰서 가볍게 인사한다. “안녕하세요.”';encounter.prefix='안녕하세요. ';}
  if(location==='library'&&person)encounter.text+=libraryGreeting(s,person);
+ if(person)encounter.text+=aftermathGreeting(s,person);
+ encounter.text+=' '+aftermathObservation(s,location);
  if(person){const now=npcNow(s,person);if(now.mood!=='steady')encounter.text+=' '+now.cue;}
  if(s.encounters[key]?.resolved)s.encounters[key]=null;
  s.encounters[key]??={day:s.day,phase:s.phase,location:s.location,person,group,resolved:false};

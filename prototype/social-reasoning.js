@@ -9,7 +9,7 @@ export function socialIntent(s,id){
  const brokenDays=[];
  if(s.dialogue?.promises[id]==='broken')brokenDays.push(s.day??1);
  if(s.dayHistory?.at(-1)?.promises[id]==='broken')brokenDays.push(s.dayHistory.at(-1).day);
- for(const a of s.appointments??[])if(a.person===id&&a.status==='broken')brokenDays.push(a.day);
+ for(const a of s.appointments??[])if(a.person===id&&a.status==='broken'&&!a.repairedAt)brokenDays.push(a.day);
  const brokenDay=brokenDays.length?Math.max(...brokenDays):0;
  const apology=history.findLast(h=>h.person===id&&(h.choice==='repair'||h.choice==='scene:apologize')&&((h.day??1)>brokenDay||((h.day??1)===brokenDay&&h.phase==='evening')));
  const unresolved=!!brokenDay&&!apology;

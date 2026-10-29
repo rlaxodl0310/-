@@ -1,3 +1,4 @@
+import {supplyAftermathMemory} from './supply-aftermath.js';
 import {supplyConversationMemory} from './supply-story.js';
 import {normalizeNpcAddress} from './identity.js';
 import {socialIntent} from './social-reasoning.js';
@@ -33,6 +34,7 @@ function generatedMemory(s,id){
  if(s.dialogue.generation?.sharedWork?.includes(id))candidates.push({id:'shared-work-story',text:'선배도 자기 이야기를 곡으로 남기고 싶다고 했잖아요.'});
  const lunch=Object.values(s.rainLunch?.episodes??{}).findLast(r=>r.person===id&&r.status==='completed'&&r.walked);
  if(lunch)candidates.push({id:'rain-lunch',text:lunch.ate?'비 오던 날 식당까지 같이 가서 밥 먹었잖아요.':'비 오던 날 식당까지 같이 걸었던 것도 생각나네요.'});
+ const after=supplyAftermathMemory(s,id);if(after)candidates.push({id:'supply-aftermath-memory',text:after});
  const sharedSupply=supplyConversationMemory(s,id);if(sharedSupply)candidates.push({id:'supply-group-memory',text:sharedSupply});
  const work=Object.values(s.activitySessions?.records??{}).findLast(r=>r.status==='completed'&&r.routeId==='volunteer');
  if(id==='yeogyeong'&&work&&!work.supplyGroup)candidates.push({id:'volunteer',text:work.choices.some(c=>c.id==='carry')?'같이 상자 옮기면서 통로부터 비웠잖아요.':'같이 물품 수량을 맞춰봤잖아요.'});
