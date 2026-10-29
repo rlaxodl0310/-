@@ -8,6 +8,9 @@ def read_to_choices(page):
 
 def choose(page,action,value=None):
     read_to_choices(page)
+    if action!='everydayChoice' and page.locator('.vn-choices [data-action="everydayChoice"]').count():
+        page.locator('.vn-choices [data-action="everydayChoice"]').first.click()
+        read_to_choices(page)
     seen=set()
     for _ in range(24):
         selector=f'.vn-choices [data-action="{action}"]'

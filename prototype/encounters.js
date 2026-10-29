@@ -59,6 +59,7 @@ function observePlace(s,location,spot,repeated=false){
 export function arrive(state,location,spot='entry'){
  const s=structuredClone(state);s.location=location;s.encounters??={};
  const warning=beginWarningSite(s,location,spot);if(warning)return {state:warning.state,encounter:null,warning:warning.scene,observation:warning.observation};
+ if(location==='cafe'&&spot==='counter')return {state:s,encounter:null,observation:'주문대에서 메뉴와 가격을 확인한다. 음료와 온도를 고른 뒤 주문할 수 있다.'};
  const present=presentPeople(s,location);seePeople(s,present);
  const lunch=rainLunchOffer(s,location,spot);if(lunch){s.encounters[lunch.key]??={day:s.day,phase:s.phase,location,person:lunch.person,resolved:false};observeSituation(s,lunch);return {state:s,encounter:lunch};}
  const key=encounterKey(s,spot);
@@ -101,6 +102,15 @@ export function arrive(state,location,spot='entry'){
   encounter.text='복도를 지나가다 아까 같이 걸었던 사람과 다시 눈이 마주친다. 이번에는 서로 얼굴을 알아보고 가볍게 인사한다.';
   encounter.action=sharedLunch.ate?'걸음을 늦춘다. “아까 식당에서 헤어지고 나서는 좀 어땠어요?”':'인사한다. “아까 식당 쪽까지 같이 갔었죠. 일정은 괜찮았어요?”';encounter.prefix='';
  }
+ if(location==='cafe'&&person&&!resuming&&!continuation){
+  const known=contact(s,person).introduced;
+  encounter.text=known?'메뉴판을 보다가 전에 이야기한 사람과 눈이 마주친다. 상대는 자기 컵과 펼쳐둔 책을 정리하다 고개를 든다.':'메뉴판 앞을 지나가던 학생과 잠깐 눈이 마주친다. 상대는 주문 줄을 확인하다 한 걸음 옆으로 비킨다.';
+  if(meeting)encounter.text='전에 이곳에서 보기로 한 약속이 있어 주변을 확인한다. 약속한 사람이 자기 짐을 정리하다 태이와 눈을 마주친다.';
+  encounter.action=known?'거리를 두고 가볍게 인사한다. “안녕하세요. 잠깐 들르셨어요?”':'주문 줄을 가리키며 묻는다. “여기가 주문 기다리는 줄 맞나요?”';encounter.prefix=known?'안녕하세요. ':'네, 이쪽이에요. ';
+ }
+ if(person&&!contact(s,person).introduced&&location==='library'&&person==='yeogyeong'){encounter.action='떨어진 종이를 주워 건넨다. “여기 떨어뜨리셨어요.”';encounter.prefix='아, 감사합니다. ';}
+ if(person&&!contact(s,person).introduced&&/아직 사진/.test(encounter.action)){encounter.action='길을 막지 않게 옆으로 비켜서며 가볍게 인사한다. “안녕하세요.”';encounter.prefix='안녕하세요. ';}
+ if(person&&!contact(s,person).introduced&&/앉아도|가방을 놓/.test(encounter.action)){encounter.action='상대의 공간을 침범하지 않게 멈춰서 가볍게 인사한다. “안녕하세요.”';encounter.prefix='안녕하세요. ';}
  if(location==='library'&&person)encounter.text+=libraryGreeting(s,person);
  if(person){const now=npcNow(s,person);if(now.mood!=='steady')encounter.text+=' '+now.cue;}
  if(s.encounters[key]?.resolved)s.encounters[key]=null;

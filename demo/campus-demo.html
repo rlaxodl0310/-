@@ -2462,6 +2462,7 @@ function observePlace(s,location,spot,repeated=false){
 function arrive(state,location,spot='entry'){
  const s=structuredClone(state);s.location=location;s.encounters??={};
  const warning=beginWarningSite(s,location,spot);if(warning)return {state:warning.state,encounter:null,warning:warning.scene,observation:warning.observation};
+ if(location==='cafe'&&spot==='counter')return {state:s,encounter:null,observation:'주문대에서 메뉴와 가격을 확인한다. 음료와 온도를 고른 뒤 주문할 수 있다.'};
  const present=presentPeople(s,location);seePeople(s,present);
  const lunch=rainLunchOffer(s,location,spot);if(lunch){s.encounters[lunch.key]??={day:s.day,phase:s.phase,location,person:lunch.person,resolved:false};observeSituation(s,lunch);return {state:s,encounter:lunch};}
  const key=encounterKey(s,spot);
@@ -2504,6 +2505,15 @@ function arrive(state,location,spot='entry'){
   encounter.text='복도를 지나가다 아까 같이 걸었던 사람과 다시 눈이 마주친다. 이번에는 서로 얼굴을 알아보고 가볍게 인사한다.';
   encounter.action=sharedLunch.ate?'걸음을 늦춘다. “아까 식당에서 헤어지고 나서는 좀 어땠어요?”':'인사한다. “아까 식당 쪽까지 같이 갔었죠. 일정은 괜찮았어요?”';encounter.prefix='';
  }
+ if(location==='cafe'&&person&&!resuming&&!continuation){
+  const known=contact(s,person).introduced;
+  encounter.text=known?'메뉴판을 보다가 전에 이야기한 사람과 눈이 마주친다. 상대는 자기 컵과 펼쳐둔 책을 정리하다 고개를 든다.':'메뉴판 앞을 지나가던 학생과 잠깐 눈이 마주친다. 상대는 주문 줄을 확인하다 한 걸음 옆으로 비킨다.';
+  if(meeting)encounter.text='전에 이곳에서 보기로 한 약속이 있어 주변을 확인한다. 약속한 사람이 자기 짐을 정리하다 태이와 눈을 마주친다.';
+  encounter.action=known?'거리를 두고 가볍게 인사한다. “안녕하세요. 잠깐 들르셨어요?”':'주문 줄을 가리키며 묻는다. “여기가 주문 기다리는 줄 맞나요?”';encounter.prefix=known?'안녕하세요. ':'네, 이쪽이에요. ';
+ }
+ if(person&&!contact(s,person).introduced&&location==='library'&&person==='yeogyeong'){encounter.action='떨어진 종이를 주워 건넨다. “여기 떨어뜨리셨어요.”';encounter.prefix='아, 감사합니다. ';}
+ if(person&&!contact(s,person).introduced&&/아직 사진/.test(encounter.action)){encounter.action='길을 막지 않게 옆으로 비켜서며 가볍게 인사한다. “안녕하세요.”';encounter.prefix='안녕하세요. ';}
+ if(person&&!contact(s,person).introduced&&/앉아도|가방을 놓/.test(encounter.action)){encounter.action='상대의 공간을 침범하지 않게 멈춰서 가볍게 인사한다. “안녕하세요.”';encounter.prefix='안녕하세요. ';}
  if(location==='library'&&person)encounter.text+=libraryGreeting(s,person);
  if(person){const now=npcNow(s,person);if(now.mood!=='steady')encounter.text+=' '+now.cue;}
  if(s.encounters[key]?.resolved)s.encounters[key]=null;
@@ -2527,6 +2537,64 @@ function resolveEncounter(state,encounter,engage){
  response.result={...response.result,requiredPrefix:firstExchange?`저는 ${s.npcs[encounter.person].name}이에요. `:'',playerLine:encounter.action+(firstExchange?' “아, 저는 김태이예요. 이번에 복학했어요.”':''),text:(firstExchange?`저는 ${s.npcs[encounter.person].name}이에요. `:'')+(socialIntent(s,encounter.person).mode==='guarded'?'':encounter.prefix??'')+response.result.text};
  response.state=meetAppointments(response.state,encounter.person);const heard=socialNews(response.state,encounter.person);response.state=heard.state;if(heard.news)response.result.socialNews=heard.news.text;return response;
 }
+
+function everydayStore(s){s.everydayLife??={rng:Math.floor(Math.random()*4294967296),history:[],pending:null,sequence:0};return s.everydayLife;}
+function everydayRoll(s){const life=everydayStore(s);life.rng=(Math.imul(life.rng,1664525)+1013904223)>>>0;return life.rng/4294967296;}
+const everydayEvents=[
+ {id:'loose-paper',places:['hall','academic','arts'],text:'열린 문으로 바람이 들어와 옆 테이블의 종이 몇 장이 통로로 흩어진다. 자료를 챙기던 학생이 뒤늦게 고개를 든다.',choices:[['help','발치의 종이를 주워 묶음 가장자리에 맞춰 건넨다.','발에 밟히기 전에 종이를 모아 건넸다. 상대는 짧게 고맙다고 하고 자료를 가방 안에 넣는다. 이름까지 나누지는 않았다.'],['clear','종이를 밟지 않게 길을 비켜주고 떨어진 위치를 알려준다.','통로에서 비켜서 손으로 위치를 가리켰다. 학생이 나머지 종이를 직접 주워 정리한다.']]},
+ {id:'printer-check',places:['library'],text:'프린터에서 짧은 경고음이 난다. 앞에 선 학생이 같은 출력 버튼을 다시 누르려다 안내문을 확인한다.',choices:[['notice','옆의 안내문을 함께 읽고 담당 데스크 위치를 짚어준다.','기계를 임의로 열지 않고 옆 안내문에서 문의 데스크를 확인했다. 학생은 파일을 저장하고 담당자에게 가본다.'],['wait','프린터 앞을 비워주고 원래 하던 자리로 돌아간다.','지금 바로 출력해야 하는 상황은 아니어서 자리를 비웠다. 뒤에서는 학생이 데스크 쪽으로 걸어가는 소리가 들린다.']]},
+ {id:'seat-change',places:['library','cafe'],text:'가까운 자리의 사람이 짐을 챙겨 나간다. 조금 전까지 가려져 있던 창가 자리와 콘센트가 보인다.',choices:[['check','남은 물건이 없는지 확인한 뒤 빈자리로 옮긴다.','의자와 테이블에 남은 물건이 없는지 먼저 확인했다. 자리를 옮기니 작업할 공간이 조금 넓어진다.'],['stay','짐을 다시 펴지 않고 지금 자리에 머문다.','자리를 옮기는 대신 하던 흐름을 이어가기로 했다. 다른 학생이 잠시 뒤 빈자리를 확인하러 온다.']]},
+ {id:'rolling-ball',places:['field','outdoorCourt','gym'],text:'옆에서 연습하던 공이 경계선을 넘어 태이 발치로 굴러온다. 공을 쫓아오던 학생이 속도를 줄인다.',choices:[['return','공을 멈춰 세운 뒤 상대가 받을 준비를 보고 돌려준다.','공을 잡아 시선을 맞춘 뒤 가볍게 돌려줬다. 상대가 손을 들어 보이고 자기 연습 자리로 돌아간다.'],['step','공이 지나갈 길을 비켜주고 굴러간 방향을 알려준다.','서로 부딪히지 않게 한쪽으로 물러났다. 학생이 공을 챙겨 지나가고 태이는 다시 호흡을 고른다.']]},
+ {id:'wet-bench',places:['field','outdoorCourt','cafe'],wet:true,text:'앉으려던 자리 끝이 젖어 있다. 빗물이 가방 끈에 닿기 전에 눈에 들어온다.',choices:[['dry','젖지 않은 안쪽 공간을 확인하고 가방을 옮긴다.','가방을 젖은 자리에서 치우고 마른 쪽에 놓았다. 자리를 잡는 데 조금 신경이 쓰였지만 짐은 젖지 않았다.'],['move','앉는 대신 처마 안쪽에서 잠깐 서서 쉰다.','의자에 짐을 놓지 않고 처마 안쪽으로 움직였다. 비가 떨어지는 방향을 보며 다음 동선을 생각한다.']]},
+ {id:'cart-crossing',places:['headquarters','creative','cafeteria','sculpture'],text:'복도 모퉁이에서 물품 카트가 나온다. 서로 지나갈 폭이 좁아 잠깐 걸음을 멈춘다.',choices:[['hold','출입문을 잡고 카트가 먼저 지나가게 한다.','카트가 통로를 빠져나올 때까지 문을 잡았다. 바퀴 소리가 멀어진 뒤 자기 방향으로 돌아섰다.'],['detour','옆 통로로 잠깐 돌아가며 서로 지나갈 공간을 만든다.','급하게 비집고 지나가지 않고 옆으로 돌아갔다. 반대편 통로에서 다시 원래 길에 합류했다.']]}
+];
+const actionDetails={
+ read:['대사의 말끝과 실제 행동이 다른 장면에서 손이 멈춘다.','이전 장면의 작은 물건이 다시 등장해 앞부분을 넘겨본다.','결말을 먼저 단정하지 않고 인물이 알고 있던 정보부터 메모한다.'],
+ study:['입력값 하나를 바꾸며 어디서 결과가 달라지는지 확인한다.','오류를 한꺼번에 고치기보다 작은 예제부터 다시 실행한다.','아까 막혔던 부분을 짧게 적어두고 다른 방법을 시도한다.'],
+ rest:['한동안 휴대폰을 꺼내지 않고 어깨의 힘을 뺀다.','가방 끈을 느슨하게 하고 호흡이 가라앉기를 기다린다.','일정을 바로 채우지 않고 다음에 어디로 갈지 천천히 생각한다.'],
+ jog:['앞사람과 간격을 두고 한 구간만 속도를 올렸다가 낮춘다.','처음보다 보폭을 줄이니 호흡을 유지하기 편해진다.','트랙의 바깥 선을 따라 돌며 발을 디디는 위치를 바꿔본다.'],
+ shots:['림에 맞고 돌아오는 공을 따라가 다시 발을 정렬한다.','팔보다 무릎의 힘이 먼저 이어지도록 천천히 던져본다.','몇 번 던진 뒤 거리를 좁혀 손목 감각을 다시 잡는다.'],
+ stretch:['좌우가 다르게 뻣뻣한 부분이 있어 한쪽을 조금 더 천천히 푼다.','가방을 내려놓고 어깨부터 종아리까지 순서대로 이완한다.','크게 반동을 주지 않고 편하게 움직일 수 있는 범위를 확인한다.']
+};
+function varyEverydayAction(state,{action,text,minute=state.clock.minute,returnScreen='place'}){
+ const s=structuredClone(state),life=everydayStore(s),key=`${s.day}:${minute}:${s.location}:${action}`;
+ const old=life.history.findLast(r=>r.key===key);if(old)return {state:s,text:old.text,repeated:true};
+ const visits=life.history.filter(r=>r.location===s.location&&r.action===action),details=actionDetails[action]??['하던 일을 마친 뒤 다음 사람이 사용할 공간을 정리한다.','주변의 움직임을 보며 방해되지 않게 자리를 고쳐 잡는다.','이번에는 서두르지 않고 앞에서 놓친 부분을 한 번 더 확인한다.'];
+ const previous=visits.at(-1)?.detail;const options=details.filter(d=>d!==previous);const detail=options[Math.floor(everydayRoll(s)*options.length)];
+ const atmosphere=wetWeather(s)?'창밖과 출입구 쪽에서 빗소리가 이어진다.':s.clock.minute<720?'오전의 소음이 멀어지고 자기 손이 움직이는 소리가 또렷해진다.':s.clock.minute>=1080?'사람들이 하나둘 짐을 챙기는 사이 남은 일을 이어간다.':'주변 사람들도 각자의 일에 집중하거나 자리를 옮긴다.';
+ const combined=(visits.length?`같은 활동이라도 이번에는 ${detail}`:text+' '+detail)+' '+atmosphere;
+ const record={key,day:s.day,minute,location:s.location,action,text:combined,detail};life.history.push(record);life.sequence++;
+ const recent=life.history.filter(h=>h.eventId&&h.day===s.day&&Math.abs(s.clock.minute-(h.eventMinute??h.minute))<60);
+ const pool=everydayEvents.filter(e=>e.places.includes(s.location)&&(!e.wet||wetWeather(s))&&!life.history.slice(-5).some(h=>h.eventId===e.id));
+ if(!life.pending&&!recent.length&&pool.length&&everydayRoll(s)<.38){
+  const event=pool[Math.floor(everydayRoll(s)*pool.length)];record.eventId=event.id;record.eventMinute=s.clock.minute;life.pending={key:'everyday:'+life.sequence,id:event.id,day:s.day,minute:s.clock.minute,location:s.location,text:event.text,choices:event.choices.map(([id,label])=>({id,label})),returnScreen,recordKey:key};
+ }
+ s.memory.push(`[${s.day}일차] ${combined}`);return {state:s,text:combined,repeated:false};
+}
+function everydayEventView(s){const e=s.everydayLife?.pending;return e&&e.day===s.day&&e.location===s.location?structuredClone(e):null;}
+function resolveEverydayEvent(state,choice){
+ const event=everydayEventView(state),def=everydayEvents.find(e=>e.id===event?.id),selected=def?.choices.find(c=>c[0]===choice);if(!event||!selected)throw new Error('이미 지나간 상황입니다.');
+ const s=structuredClone(state),record=s.everydayLife.history.find(r=>r.key===event.recordKey);record.eventOutcome=choice;record.eventText=selected[2];s.everydayLife.pending=null;s.memory.push(`[${s.day}일차] ${selected[2]}`);return {state:s,text:selected[2],returnScreen:event.returnScreen};
+}
+function abandonEverydayEvent(state){if(!state.everydayLife?.pending)return state;const s=structuredClone(state),e=s.everydayLife.pending,r=s.everydayLife.history.find(h=>h.key===e.recordKey);if(r)r.eventOutcome='left';s.everydayLife.pending=null;return s;}
+
+const cafeMenu=[{id:'americano',name:'아메리카노',price:3000},{id:'latte',name:'카페라테',price:3800},{id:'tea',name:'차',price:3500}];
+function requireCafe(s){if(s.location!=='cafe')throw new Error('카페 주문대에서 할 수 있는 행동입니다.');if(s.clock.minute>=1260)throw new Error('오늘 주문은 마감했습니다.');}
+function cafeStore(s){s.cafeLife??={orders:[],draft:null,active:null,spent:0,sequence:0};return s.cafeLife;}
+function cafeOrderView(s){const life=s.cafeLife,active=life?.orders.find(o=>o.id===life.active);return {draft:life?.draft??null,active:active??null,menu:cafeMenu,spent:life?.spent??0};}
+function chooseCafeDrink(state,id){requireCafe(state);const drink=cafeMenu.find(d=>d.id===id);if(!drink)throw new Error('메뉴를 다시 확인해 주세요.');if(cafeOrderView(state).active?.status==='ready'&&cafeOrderView(state).active?.day===state.day)throw new Error('먼저 주문한 음료를 받아 주세요.');const s=structuredClone(state);cafeStore(s).draft={drink:id,temperature:null};return s;}
+function setCafeTemperature(state,value){requireCafe(state);if(!['hot','iced'].includes(value)||!state.cafeLife?.draft)throw new Error('음료부터 골라 주세요.');const s=structuredClone(state);s.cafeLife.draft.temperature=value;return s;}
+function payCafeOrder(state){
+ requireCafe(state);const draft=state.cafeLife?.draft,drink=cafeMenu.find(d=>d.id===draft?.drink);if(!drink||!draft.temperature)throw new Error('음료와 온도를 골라 주세요.');
+ const s=structuredClone(state),life=cafeStore(s),busy=s.clock.minute>=720&&s.clock.minute<840,wait=(busy?8:4)+Math.floor(everydayRoll(s)*4);if(s.clock.minute+wait>1260)throw new Error('주문 마감 전까지 준비가 어렵습니다.');
+ const order={id:`cafe-${s.day}-${++life.sequence}`,day:s.day,minute:s.clock.minute,drink:drink.id,name:(draft.temperature==='iced'?'아이스 ':'따뜻한 ')+drink.name,price:drink.price,temperature:draft.temperature,status:'ready',wait};
+ order.text=(busy?'앞선 주문이 있어 진동벨을 받고 옆에서 기다렸다.':'결제한 뒤 수령대 옆에서 조금 기다렸다.')+' '+(wetWeather(s)&&draft.temperature==='hot'?'창에 맺힌 빗방울을 보는 동안 컵에서 김이 올라온다.':draft.temperature==='iced'?'얼음 담는 소리 뒤로 주문한 음료의 진동벨이 울린다.':'직원이 잔을 준비해 주문 번호를 부른다.');
+ life.orders.push(order);life.active=order.id;life.spent+=order.price;life.draft=null;s.memory.push(`[${s.day}일차] ${order.name}을 ${order.price.toLocaleString()}원에 주문하고 ${wait}분 기다렸다.`);
+ const next=advanceFreeTime(s,wait);next.pace={count:0,seen:{}};return next;
+}
+function collectCafeOrder(state){if(state.location!=='cafe')throw new Error('카페 수령대로 돌아가 주세요.');const active=cafeOrderView(state).active;if(!active||active.status!=='ready'||active.day!==state.day)throw new Error('받을 음료가 없습니다.');const s=structuredClone(state),order=s.cafeLife.orders.find(o=>o.id===active.id);order.status='collected';s.inventory??=[];s.inventory.push({id:order.id,name:order.name,quantity:1,consumable:true});s.memory.push(`[${s.day}일차] 주문 번호를 확인하고 ${order.name} 한 잔을 받았다.`);return s;}
+function drinkCafeOrder(state){if(state.location!=='cafe')throw new Error('음료를 마실 자리를 먼저 잡아 주세요.');const active=cafeOrderView(state).active,item=state.inventory?.find(i=>i.id===active?.id&&i.quantity>0);if(!active||active.status!=='collected'||!item)throw new Error('받아둔 음료가 없습니다.');const s=structuredClone(state);s.inventory=s.inventory.filter(i=>i.id!==active.id);s.cafeLife.orders.find(o=>o.id===active.id).status='drunk';s.memory.push(`[${s.day}일차] ${active.name}을 마시며 잠깐 쉬었다.`);return s;}
+function cancelCafeDraft(state){const s=structuredClone(state);if(s.cafeLife)s.cafeLife.draft=null;return s;}
 
 function characterActing(state,id,{scene='',text=''}={}){
  // Visual direction only: no relationship, knowledge, RNG or clock mutations.
@@ -3301,7 +3369,7 @@ function portrait(column){
  const id=column===0?'taei':Object.entries(people).find(([,p])=>p.column===column)?.[0],acting=characterActing(state,id,{scene:screen,text:reply?.text??''});
  return `<div class="portrait ${acting.row===null?'':'expression-portrait'}" data-actor="${id}" data-expression="${acting.row??'neutral'}" style="--column:${column};--expression:${acting.row??0}" role="img" aria-label="${id==='taei'?'김태이':nameOf(id)} · ${acting.name}"></div>`;
 }
-const storyScreens=new Set(['place','encounter','warningScene','classLesson','detail','result','buildingDirectory','dayEnd','clubDetail','warningShare','communityEvent','communityActivity','clubApply','clubInterview','rainLunch']);
+const storyScreens=new Set(['place','encounter','warningScene','classLesson','detail','result','buildingDirectory','dayEnd','clubDetail','warningShare','communityEvent','communityActivity','clubApply','clubInterview','rainLunch','cafeOrder','everydayEvent']);
 function readableText(text){
  const value=String(text??'');if(value.length<110)return esc(value);
  const sentences=value.split(/(?<=[.!?])\s+/),chunks=[];
@@ -3430,7 +3498,7 @@ function quickMenuBody(){
  const groups=[['지금 할 일',[{label:'이동',id:'travel',hint:'건물과 호실 찾기'},{label:'휴대폰',id:'phone',hint:'커뮤니티 · 연락 · 일정',badge:unreadMessages()+newOffers()}]],['학교생활',[...(schoolEnabled(state)?[{label:'시간표 · 출석',id:'timetable',hint:'수업 장소와 출석 확인'}]:[]),{label:'약속',id:'schedule',hint:'제안과 참석 일정',badge:newOffers()},{label:'지도',id:'map',hint:'교내 공간 살펴보기'},{label:'날씨 · 예보',id:'weather',hint:'오늘 날씨와 준비물',action:'openWeather'}]],['내 기록',[{label:'정보 · 소지품',id:'discoveries',hint:'발견한 정보와 가진 물건'},{label:'알게 된 사람들',id:'peopleRecord',hint:'만난 사람과 마지막 목격'},{label:'메시지',id:'messages',hint:'받은 연락 확인',badge:unreadMessages()},{label:'일지',id:'journal',hint:'지나온 선택 돌아보기'}]]];
  const lunch=lunchEpisode(state);
  const resume=Object.values(state.activitySessions?.records??{}).filter(r=>r.day===state.day&&['active','paused'].includes(r.status));
- return `<div class="menu-dashboard"><aside class="menu-context"><span class="utility-overline">CAMPUS LIFE</span><div class="menu-avatar">태</div><h2>김태이</h2><p>${esc(locations[state.location]??'캠퍼스')}</p><span class="context-time">${clockLabel(state)}</span><p>${state.day}일차 · ${days[state.day].weekday}</p><div class="context-weather">${weatherNow(state).icon} ${weatherNow(state).name} · ${weatherNow(state).temperature}°C</div><small>다음 행동을 골라보세요.</small></aside><div class="menu-sections">${lunch?.status==='active'&&lunch.day===state.day?`<article class="resume-card"><span>이어서 할 수 있어요</span><strong>비 오는 점심시간</strong>${btn('함께하던 일로 돌아간다.','resumeLunch')}</article>`:''}${resume.map(r=>`<article class="resume-card"><span>이어서 할 수 있어요</span><strong>${esc(communityActivityDefinitions[r.postId].title)}</strong><p>${r.spent}/${r.duration}분 참여</p>${activityAvailability(state,r.postId,r).ok?btn('현장에서 이어서 한다.','eventResume',r.key):`<p>${esc(activityAvailability(state,r.postId,r).reason)}</p>`}</article>`).join('')}${groups.map(([title,items],i)=>`<section class="shortcut-section"><h2>${title}</h2><div class="grid shortcut-grid ${i===0?'featured-shortcuts':''}">${items.map(item=>utilityShortcut({...item,style:i===0?'feature':'row'})).join('')}</div></section>`).join('')}</div></div>`;
+ return `<div class="menu-dashboard"><aside class="menu-context"><span class="utility-overline">CAMPUS LIFE</span><div class="menu-avatar">태</div><h2>김태이</h2><p>${esc(locations[state.location]??'캠퍼스')}</p><span class="context-time">${clockLabel(state)}</span><p>${state.day}일차 · ${days[state.day].weekday}</p><div class="context-weather">${weatherNow(state).icon} ${weatherNow(state).name} · ${weatherNow(state).temperature}°C</div><small>다음 행동을 골라보세요.</small></aside><div class="menu-sections">${everydayEventView(state)?`<article class="resume-card"><span>이어서 볼 수 있어요</span><strong>잠깐 생긴 일</strong>${btn('상황으로 돌아간다.','resumeEveryday')}</article>`:''}${lunch?.status==='active'&&lunch.day===state.day?`<article class="resume-card"><span>이어서 할 수 있어요</span><strong>비 오는 점심시간</strong>${btn('함께하던 일로 돌아간다.','resumeLunch')}</article>`:''}${resume.map(r=>`<article class="resume-card"><span>이어서 할 수 있어요</span><strong>${esc(communityActivityDefinitions[r.postId].title)}</strong><p>${r.spent}/${r.duration}분 참여</p>${activityAvailability(state,r.postId,r).ok?btn('현장에서 이어서 한다.','eventResume',r.key):`<p>${esc(activityAvailability(state,r.postId,r).reason)}</p>`}</article>`).join('')}${groups.map(([title,items],i)=>`<section class="shortcut-section"><h2>${title}</h2><div class="grid shortcut-grid ${i===0?'featured-shortcuts':''}">${items.map(item=>utilityShortcut({...item,style:i===0?'feature':'row'})).join('')}</div></section>`).join('')}</div></div>`;
 }
 function phoneHomeBody(){
  const lesson=nextLesson(state),weather=weatherNow(state);
@@ -3452,6 +3520,17 @@ function render(){
   const scene=rainLunchView(state),last=scene?.last??{};
   app.innerHTML=page('비 오는 점심시간',`${last.player?`<p data-voice="김태이">${esc(last.player)}</p>`:''}${last.text?`<p data-voice="${esc(nameOf(lunchEpisode(state).person))}">${narrative(last.text)}</p>`:''}${last.narration?`<p>${narrative(last.narration)}</p>`:''}<div class="actions">${scene?.options.map(o=>btn(o.label,'lunchAction',o.id)).join('')??''}</div>`,'place');
  }
+ if(screen==='cafeOrder'){
+  const view=cafeOrderView(state),active=view.active?.day===state.day?view.active:null,draft=view.draft,drink=cafeMenu.find(d=>d.id===draft?.drink);
+  let body='';
+  if(active?.status==='ready')body=`<p>${esc(active.text)}</p><p>주문한 ${esc(active.name)}이 준비됐다. 번호와 음료를 확인하고 받는다.</p><div class="actions">${btn('수령대에서 주문한 음료를 받는다.','cafeCollect')}</div>`;
+  else if(active?.status==='collected'&&!draft)body=`<p>${esc(active.name)}을 받았다. 다른 사람의 테이블 대신 빈자리를 찾아 쉬거나 음료를 가지고 이동할 수 있다.</p><div class="actions">${btn('빈자리를 확인하고 음료를 마신다.','cafeDrink')}${btn('음료를 가지고 하던 일로 돌아간다.','go','place')}</div>`;
+  else if(draft&&!draft.temperature)body=`<p>${esc(drink.name)} · ${drink.price.toLocaleString()}원. 어떻게 준비해 달라고 할까?</p><div class="actions">${btn('따뜻하게 부탁한다.','cafeTemperature','hot')}${btn('얼음을 넣어 달라고 한다.','cafeTemperature','iced')}${btn('아직 주문하지 않고 메뉴를 다시 본다.','cafeCancel')}</div>`;
+  else if(draft)body=`<p>${draft.temperature==='iced'?'아이스':'따뜻한'} ${esc(drink.name)} 한 잔 · ${drink.price.toLocaleString()}원. 주문하면 결제 내역이 남고 준비하는 동안 몇 분이 지난다.</p><div class="actions">${btn('결제하고 음료가 준비되기를 기다린다.','cafePay')}${btn('결제하지 않고 메뉴를 다시 본다.','cafeCancel')}</div>`;
+  else body=`<p>${active?.status==='drunk'?'컵을 정리한 뒤 메뉴판을 다시 본다.':'주문대 앞에서 메뉴판과 줄을 확인한다.'} 음료를 고른 뒤 온도를 정하고 주문할 수 있다.</p>${state.clock.minute>=1260?'<p>오늘 주문은 마감했다.</p>':`<div class="actions">${cafeMenu.map(d=>btn(d.name+' · '+d.price.toLocaleString()+'원','cafeChoose',d.id)).join('')}</div>`}`;
+  app.innerHTML=page('카페 주문대',body+`<div class="actions">${btn('지금은 주문대를 떠난다.','go','place')}</div>`,'place');
+ }
+ if(screen==='everydayEvent'){const event=everydayEventView(state);app.innerHTML=page('잠깐 생긴 일',event?`<p>${narrative(event.text)}</p><div class="actions">${event.choices.map(c=>btn(c.label,'everydayChoice',c.id)).join('')}</div>`:'<p>주변은 다시 조용해졌다.</p>','place');}
  if(screen==='communityActivity'){const record=currentCommunityActivity(state),def=record?communityActivityDefinitions[record.postId]:null,stage=communityActivityStage(state);app.innerHTML=page(def?.title??'공개 활동',record?`${record.last?`<p data-voice="김태이">${esc(record.last.player)}</p><p ${def.physical?'':`data-voice="${esc(record.last.speaker)}"`}>${narrative(record.last.text)}</p>`:`<p>${narrative(def.intro)}</p>`}${stage?`<p>${narrative(stage.prompt)}</p><div class="actions">${stage.choices.map(c=>btn(narrative(c.label),'eventStep',c.id)).join('')}${btn('여기까지 하고 잠깐 나온다.','eventPause')}</div>`:`<p class="lead">${narrative(record.result??'공개 활동을 마쳤다.')}</p><p>실제로 참여한 시간 ${record.spent}분. 가입 여부와 다음 약속은 직접 결정할 수 있다.</p><div class="actions">${def.club?btn('동아리 안내를 읽어본다.','clubDetail',def.club):''}${btn('현장을 나와 주변을 둘러본다.','eventLeave')}</div>`}`:'<p>이어갈 활동이 없습니다.</p>','campus');}
  if(screen==='communityPost'&&selectedPost){const p=visibleCommunityPosts(state).find(p=>p.id===selectedPost);if(p)app.innerHTML=page(p.board,`<article class="community-detail"><p class="post-meta">${esc(p.author)} · ${p.day===state.day?'오늘':p.day+'일차'}${p.kind==='anonymous'?' · 작성자·내용 미확인':''}</p><h2>${esc(p.title)}</h2><p>${esc(p.body)}</p>${p.kind==='anonymous'?'<p class="source-note">익명 작성자의 글입니다. 직접 본 일이나 공식 안내와 구분해 기억합니다.</p>':''}</article><div class="dialogue-options">${p.club?btn('이 글의 모집 안내를 자세히 읽는다.','clubDetail',p.club):''}${communityActivityDefinitions[p.id]?btn('이 공개 활동을 자세히 살펴본다.','communityEventView',p.id):''}${p.id==='ambulance-post'?btn('지나갈 일이 있는 카페 쪽에서 직접 확인해본다.','visit','cafe'):''}</div><div class="community-live" aria-live="polite"></div>${` <h3>댓글 ${p.comments.length}</h3>${p.comments.map(c=>`<p class="community-comment ${c.reply?'reply':''}"><strong>${typeof c==='string'?'익명':esc(c.author)}</strong>${esc(typeof c==='string'?c:c.text)}</p>`).join('')}`}`, 'community');}
  if(screen==='travel')app.innerHTML=page('캠퍼스 이동',travelPage());
@@ -3533,13 +3612,15 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
  if(a==='quickTab'){screen=v==='save'?'menu':'quickMenu';note='';render();return;}
  if(a==='phone'||(a==='go'&&utilityScreens.has(v)))rememberReading();
  if(screen==='quickMenu'&&a==='go'){quickTool=v;if(v==='phone')returnTo='quickMenu';}
- if(['visit','walk','classTravel','act','answer','nextDay','scenario','reset','load','buildingArea','libraryActivity','buildingActivity','classChoice','encounter','freeHome','groupAnswer','eventBegin','eventStep','eventResume','eventPause','eventLeave','lunchAction','resumeLunch'].includes(a)){quickReturn=null;quickSnapshot=null;readingSnapshots.clear();quickTool='';}
+ if(['visit','walk','classTravel','act','answer','nextDay','scenario','reset','load','buildingArea','libraryActivity','buildingActivity','classChoice','encounter','freeHome','groupAnswer','eventBegin','eventStep','eventResume','eventPause','eventLeave','cafeChoose','cafeTemperature','cafePay','cafeCollect','cafeDrink','cafeCancel','everydayChoice','resumeEveryday','lunchAction','resumeLunch'].includes(a)){quickReturn=null;quickSnapshot=null;readingSnapshots.clear();quickTool='';}
  if(!['phone','go','openWeather','closeWeather','save','load','dismissDiscoveries','plan','closeCommunity','communityFilter','readPost','applyCommunityUpdates','clubDetail','communityEventView'].includes(a)){vnCursors.clear();vnView.key='';}
  if(['visit','walk','buildingArea','libraryActivity','buildingActivity','classTravel','classChoice','act','wait','freeHome','nextDay','interviewAnswer'].includes(a)){state=pauseCommunityActivity(state);state=interruptRainLunch(state);}
+ if(['act','eventBegin','eventResume','outdoorActivity','buildingArea','libraryActivity','buildingActivity','classTravel','wait','freeHome','nextDay'].includes(a))state=abandonEverydayEvent(state);
  note='';const before=structuredClone(state);const fromScreen=screen;paceNotice='';try{
  if(a==='openWeather'){if(screen!=='weather')weatherReturn=screen;screen='weather';}
  if(a==='closeWeather')screen=weatherReturn;
  if(a==='go'){
+  if(screen==='everydayEvent'&&['place','campus','travel'].includes(v))state=abandonEverydayEvent(state);
   if(screen==='rainLunch'&&['place','campus'].includes(v))state=interruptRainLunch(state);
   if(v==='buildingDirectory')buildingFloorView=null;
   if(screen==='dialogue'&&v==='place'&&state.dialogue?.sessions?.[`${state.day}:${state.phase}:${speaker}`]?.generated)state=endTopic(state,speaker);
@@ -3551,15 +3632,23 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
   if(v==='discoveries'&&screen!=='phone'&&screen!=='discoveries')returnTo=screen;
   screen=v;reply=null;if(readingSnapshots.has(v)){const snapshot=readingSnapshots.get(v);note=snapshot.note;reply=snapshot.reply;paceNotice=snapshot.paceNotice??'';vnResumeView=snapshot.view;readingSnapshots.delete(v);}if(v==='messages')state=readMessages(state);
  }
- if(a==='visit'||a==='walk'){
+ if(a==='visit'||a==='walk'){state=abandonEverydayEvent(state);
   const destination=a==='walk'?atPlace():v;
   if(!locations[destination])throw new Error('알 수 없는 장소입니다.');
   if(encounter){state=resolveEncounter(state,encounter,false).state;encounter=null;}
   if(warningScene){state=finishWarningSite(state,warningScene,false).state;warningScene=null;}
   if(state.location!==destination)state.buildingArea=null;
   state=markFlow(state,'visit',destination);
-  const arrived=arrive(state,destination,a==='walk'?v:'entry');state=arrived.state;encounter=arrived.encounter;warningScene=arrived.warning??null;screen=warningScene?'warningScene':encounter?'encounter':'place';reply=null;note=arrived.observation??'';
+  const arrived=arrive(state,destination,a==='walk'?v:'entry');state=arrived.state;encounter=arrived.encounter;warningScene=arrived.warning??null;screen=a==='walk'&&destination==='cafe'&&v==='counter'?'cafeOrder':warningScene?'warningScene':encounter?'encounter':'place';reply=null;note=arrived.observation??'';
  }
+ if(a==='cafeChoose'){state=chooseCafeDrink(state,v);screen='cafeOrder';}
+ if(a==='cafeTemperature'){state=setCafeTemperature(state,v);screen='cafeOrder';}
+ if(a==='cafePay'){state=payCafeOrder(state);screen='cafeOrder';}
+ if(a==='cafeCollect'){state=collectCafeOrder(state);screen='cafeOrder';}
+ if(a==='cafeDrink'){state=drinkCafeOrder(state);screen='place';note='빈자리에 앉아 음료를 마시고 컵을 정리했다.';}
+ if(a==='cafeCancel'){state=cancelCafeDraft(state);screen='cafeOrder';}
+ if(a==='resumeEveryday'){if(!everydayEventView(state))throw new Error('지금 이어갈 상황이 없습니다.');screen='everydayEvent';}
+ if(a==='everydayChoice'){const result=resolveEverydayEvent(state,v);state=result.state;note=result.text;screen=result.returnScreen;}
  if(a==='buildingArea'){const result=enterBuildingArea(state,v);state=result.state;note=result.text;screen='place';if(result.destination){state=markFlow(state,'visit',result.destination);const r=arrive(state,result.destination);state=r.state;encounter=r.encounter;note=r.observation??result.text;screen=encounter?'encounter':'place';}}
  if(a==='outdoorActivity'){state=pauseCommunityActivity(state);state=interruptRainLunch(state);const result=outdoorActivity(state,v);state=result.state;note=result.text;screen='place';}
  if(a==='buildingActivity'){const result=buildingActivity(state,v);state=result.state;note=result.text;screen='place';}
@@ -3632,7 +3721,7 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
  if(a==='save'){localStorage.setItem('campus.slot.'+v,save(state));note=`슬롯 ${v}에 저장했습니다.`;}
  if(a==='load'){const raw=localStorage.getItem('campus.slot.'+v);if(!raw)throw new Error('비어 있는 슬롯입니다.');state=warningPhase(restore(raw));warningScene=null;reply=null;selected=null;encounter=null;note=`슬롯 ${v}을 불러왔습니다.`;}
  if(a==='reset'){state=newGame();screen='campus';selected=null;reply=null;encounter=null;returnTo='campus';}
- if(!['load','reset','scenario','nextDay','act','classChoice','eventBegin','eventStep','eventResume','eventPause','eventLeave','communityEventView','onsiteEvent','outdoorActivity','lunchAction','resumeLunch'].includes(a)){
+ if(!['load','reset','scenario','nextDay','act','classChoice','eventBegin','eventStep','eventResume','eventPause','eventLeave','communityEventView','onsiteEvent','outdoorActivity','cafeChoose','cafeTemperature','cafePay','cafeCollect','cafeDrink','cafeCancel','everydayChoice','resumeEveryday','lunchAction','resumeLunch'].includes(a)){
   const paced=paceAction(before,state,{action:a,value:v,from:fromScreen,to:screen,person:fromScreen==='group'?'group':speaker});state=paced.state;
   if(paced.minutes)paceNotice=`${a==='wait'?'잠시 쉬고 나니':'여러 일을 마치고 나니'} 어느새 ${clockLabel(state)}. 약 ${paced.minutes}분이 지났다.`;
  }
@@ -3641,6 +3730,10 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
  if(!['load','save','reset','scenario'].includes(a)){state=evolveRisk(state,{allowMove:['place','campus','travel','activities','result'].includes(screen)});for(const [id,place] of Object.entries(currentSchedule(state)))state.npcs[id].location=place;}
  if(!['load','save','reset'].includes(a))state=evaluateInvitations(state);
  if(!['load','save','reset','scenario'].includes(a)){state=advanceCommunity(state);state=settleClubAdmissions(state);}
+ if((['buildingActivity','libraryActivity','outdoorActivity','cafeDrink','act'].includes(a)||a==='eventStep'&&currentCommunityActivity(state)?.status==='completed')&&['place','result','communityActivity'].includes(screen)){
+  const varied=varyEverydayAction(state,{action:v||a,text:note||state.lastResult,minute:before.clock.minute,returnScreen:screen});state=varied.state;note=varied.text;if(screen==='result')state.lastResult=varied.text;if(screen==='communityActivity'){currentCommunityActivity(state).result=varied.text;note='';}
+  if(everydayEventView(state))screen='everydayEvent';
+ }
  if(a==='dismissDiscoveries')gains=[];
  if(['load','reset','scenario'].includes(a))gains=[];else {const found=recordDiscoveries(before,state,b.textContent.trim());if(found.length)gains=found;}
 }catch(err){note=err.message;}

@@ -68,7 +68,7 @@ test('encounter resolution persists across saving and day changes permit new sce
 });
 
 test('unoccupied locations and interior actions produce observations and lasting discoveries',()=>{
- for(const [location,spot,information] of [['library','shelves','도서관 공용 프린터 위치'],['cafe','counter','카페 충전 좌석 위치']]){
+ for(const [location,spot,information] of [['library','shelves','도서관 공용 프린터 위치']]){
   const entry=arrive(newGame(),location);
   assert.equal(entry.encounter,null);assert.ok(entry.observation.length>20);
   const inside=arrive(entry.state,location,spot);
@@ -84,7 +84,7 @@ test('unoccupied locations and interior actions produce observations and lasting
 
 test('interior exploration can encounter present people without respawning resolved exchanges',()=>{
  const day2=nextDay(act(newGame(),'rehearsal'));
- for(const [location,spot,person] of [['library','shelves','soyul'],['cafe','counter','seoyeon']]){
+ for(const [location,spot,person] of [['library','shelves','soyul'],['cafe','entry','seoyeon']]){
   const inside=arrive(day2,location,spot);
   assert.equal(inside.encounter.person,person);
   const passed=resolveEncounter(inside.state,inside.encounter,false).state;
