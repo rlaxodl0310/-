@@ -72,6 +72,10 @@ namespace CampusSurvival
         public int version = 1, day = 1, minute = 540, seed = 197609, worldSeed = 197609;
         public string location = "arts", room = "", screen = "place", person = "", focus = "", narrative = "", speaker = "김태이";
         public string returnScreen = "place";
+        public int returnBeat;
+        public string readingKey = "";
+        public int revealedGlyphs;
+        public List<Entry> transcript = new List<Entry>();
         public int playerStrain;
         public int dialogueStep, spent, beat, choicePage, communityTick = -1, lastRandomAt = -1000;
         public string randomEvent = "", pendingOutcome = "";

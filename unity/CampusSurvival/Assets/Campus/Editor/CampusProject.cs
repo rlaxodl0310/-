@@ -87,6 +87,20 @@ namespace CampusSurvival.Editor
         [MenuItem("Campus/Repair Startup Scene")]
         public static void RepairStartup() { OpenScene(); }
 
+        [MenuItem("Campus/Preview/Conversation")]
+        public static void PreviewConversation() { OpenPreview("conversation"); }
+        [MenuItem("Campus/Preview/Phone")]
+        public static void PreviewPhone() { OpenPreview("phone"); }
+        [MenuItem("Campus/Preview/Cafe")]
+        public static void PreviewCafe() { OpenPreview("cafe"); }
+        static void OpenPreview(string scenario)
+        {
+            if(EditorApplication.isPlayingOrWillChangePlaymode){Debug.LogWarning("먼저 Play를 종료해주세요.");return;}
+            OpenScene();
+            var app=UnityEngine.Object.FindFirstObjectByType<CampusApp>();
+            if(app!=null)app.RenderEditorPreview(scenario);
+            Debug.Log("표시 전용 시안입니다. 실제 저장 파일은 변경하지 않습니다.");
+        }
         [MenuItem("Campus/Check Current UI")]
         public static void CheckCurrentUi()
         {

@@ -34,6 +34,7 @@ def metadata(path):
     wrapV: 1
     wrapW: 1
   maxTextureSize: 4096
+  nPOTScale: 0
   textureCompression: 1
   compressionQuality: 75
   alphaUsage: 1

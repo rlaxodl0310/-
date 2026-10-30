@@ -24,6 +24,7 @@ namespace CampusSurvival
                 Journal("등교", "예술동에서 복학 첫날을 시작했다.");
                 TickCommunity();
             }
+            if (S.transcript == null) S.transcript = new List<Entry>();
             if (S.version != 1 || S.day < 1 || S.day > 3 || S.minute < 540 || S.minute > 1320 || S.actors.Count != 3)
                 throw new ArgumentException("지원하지 않거나 손상된 Unity 저장입니다.");
         }
@@ -334,7 +335,7 @@ namespace CampusSurvival
         public void OpenUtility(string screen)
         {
             if (screen != "menu" && screen != "phone") throw new ArgumentException("상단 메뉴에서 열 수 없는 화면입니다.");
-            if (S.screen != "menu" && S.screen != "phone") S.returnScreen = S.screen;
+            if (!BuildView().menu) { S.returnScreen = S.screen; S.returnBeat = S.beat; }
             if (S.activity != null && S.activity.phase == 1) S.activity.phase = 2;
             S.screen = screen; S.beat = 0; S.choicePage = 0;
         }
@@ -350,7 +351,7 @@ namespace CampusSurvival
             switch (id)
             {
                 case "back":
-                    if (new[] { "menu", "phone", "community", "post", "appointments", "clubs", "messages", "knowledge", "contacts", "inventory", "journal", "timetable" }.Contains(S.screen)) { S.screen = S.returnScreen; S.returnScreen = "place"; }
+                    if (new[] { "menu", "phone", "community", "post", "appointments", "clubs", "messages", "knowledge", "contacts", "inventory", "journal", "timetable" }.Contains(S.screen)) { S.screen = S.returnScreen; S.beat = S.returnBeat; S.returnScreen = "place"; }
                     else
                     {
                         if (S.screen == "dialogue" || S.screen == "encounter") Say("인사를 마치고 하던 일로 돌아온다. 다음에 나눌 이야기는 조금 남겨둔다.");

@@ -22,6 +22,7 @@ class CoreChecks
     static void Main(string[] args)
     {
         world=JsonSerializer.Deserialize<WorldData>(File.ReadAllText(args[0]),Json);
+        if(args.Length>=3&&args[1]=="--layout") {File.WriteAllText(args[2],JsonSerializer.Serialize(VnComposition.Create(1600,900,.5f),Json));return;}
         Check("Unity UI/editor C# syntax (not Unity API compilation)",()=>{
             string assets=Path.GetFullPath(Path.Combine(Path.GetDirectoryName(args[0]), "../.."));
             foreach(string file in Directory.GetFiles(assets,"*.cs",SearchOption.AllDirectories)) {
@@ -131,6 +132,36 @@ class CoreChecks
             var learned=Game(800,"arts","band");var skipped=Game(800,"arts","band");learned.S.knowledge.Add(new Entry{id="lesson:1:taei:ensemble:blend",text="호흡 메모"});
             foreach(var g in new[]{learned,skipped}){g.Dispatch("activity","music");g.Dispatch("activityChoice","vocal");g.Dispatch("activityChoice","blend");}
             True(learned.S.activity.score>skipped.S.activity.score);
+        });
+        Check("visual-novel composition keeps sprite heads and dialogue inside the viewport",()=>{
+            foreach(var size in new[]{(1600f,900f),(1280f,900f),(620f,900f),(540f,720f)}){
+                var c=VnComposition.Create(size.Item1,size.Item2,.5f);
+                foreach(var b in new[]{c.dialogue,c.choices,c.character,c.header})True(b.x>=0&&b.y>=0&&b.Right<=c.width+.01f&&b.Top<=c.height+.01f);
+                True(c.character.Top<=c.header.y);True(c.choices.y>c.dialogue.Top);
+            }
+        });
+        Check("typewriter respects grapheme boundaries and finishes without advancing game time",()=>{
+            var g=Game();int seed=g.S.seed;var r=new VnReader();r.Set("one","가\u0301나");r.Tick(.1f,10,false);True(r.Visible==1&&r.Text=="가\u0301");r.Finish();True(r.Text=="가\u0301나"&&r.Complete);True(g.S.minute==540&&g.S.seed==seed);
+        });
+        Check("opening an overlay pauses typing and preserves the exact reading beat",()=>{
+            var g=Game();g.S.beat=2;g.OpenUtility("phone");g.Dispatch("community");g.Dispatch("back");True(g.S.screen=="place"&&g.S.beat==2);
+            var r=new VnReader();r.Set("a","읽던 문장");r.Tick(.1f,20,false);int count=r.Visible;r.Tick(10,20,true);True(r.Visible==count);r.Set("a","읽던 문장");True(r.Visible==count);
+        });
+        Check("AUTO stops at choices and never advances a minigame",()=>{
+            var r=new VnReader();r.Set("a","끝",instantly:true);r.Tick(2,38,false);True(r.AutoAdvance(true,true,false));True(!r.AutoAdvance(true,false,false));True(!r.AutoAdvance(true,true,true));True(!r.AutoAdvance(false,true,false));
+        });
+        Check("saved reveal progress restores safely and clamps corrupt counts",()=>{
+            var r=new VnReader();r.Set("a","다시 읽기",2);True(r.Visible==2);r.Set("b","짧음",999);True(r.Complete);r.Set("c","처음",-10);True(r.Visible==0);r.Set("same-a","가나",instantly:true);True(r.Text=="가나");r.Set("same-b","다라",instantly:true);True(r.Text=="다라");
+            var g=Game();g.S.readingKey="a";g.S.revealedGlyphs=2;g.S.transcript.Add(new Entry{id="line",text="직접 읽은 문장"});var loaded=Reload(g);True(loaded.S.revealedGlyphs==2&&loaded.S.transcript.Count==1);
+        });
+        Check("utility-to-utility navigation cannot replace the original story return point",()=>{
+            var g=Game(800,"hall");g.Dispatch("encounter");g.Dispatch("talk","yeogyeong");g.S.beat=1;g.OpenUtility("phone");g.Dispatch("community");g.OpenUtility("menu");g.Dispatch("back");True(g.S.screen=="dialogue"&&g.S.beat==1);
+        });
+        Check("standing sprite atlas retains alpha and native non-power-of-two proportions",()=>{
+            string assets=Path.GetFullPath(Path.Combine(Path.GetDirectoryName(args[0]), "../.."));
+            string path=Path.Combine(assets,"Resources/Art/StandSprites.png");byte[] bytes=File.ReadAllBytes(path);
+            int w=(bytes[16]<<24)|(bytes[17]<<16)|(bytes[18]<<8)|bytes[19],h=(bytes[20]<<24)|(bytes[21]<<16)|(bytes[22]<<8)|bytes[23];
+            True(w%4==0&&h%3==0&&bytes[25]==6);string meta=File.ReadAllText(path+".meta");True(meta.Contains("nPOTScale: 0")&&meta.Contains("alphaIsTransparency: 1"));
         });
         Console.WriteLine("Native C# checks passed: "+count);
     }

@@ -9,7 +9,7 @@
 3. Unity Hub → **Projects → Add → Add project from disk**에서 **CampusSurvival** 폴더를 선택합니다. `Assets`, `Packages`, `ProjectSettings`가 바로 들어 있는 폴더입니다.
 4. 첫 임포트·패키지 설치가 끝날 때까지 기다립니다. 최초에는 Unity 패키지 다운로드를 위한 인터넷 연결이 필요할 수 있습니다. 플레이 중에는 필요 없습니다.
 5. 최초 임포트 후 시작 장면을 자동으로 선택합니다(현재 장면에 저장하지 않은 수정이 있으면 바꾸지 않습니다). 상단 **Campus → Open Game Scene**으로도 열 수 있습니다. 실제 `Assets/Campus/Scenes/Campus.unity`와 시작 컴포넌트를 포함합니다. Game 탭에는 Play 전에도 배경·대화창 미리보기가 생성됩니다.
-6. Unity 상단 **▶ Play**를 누릅니다. UI·배경·초상화·게임 상태는 시작 코드가 생성하므로 Inspector에 별도로 연결할 작업이 없습니다.
+6. Unity 상단 **▶ Play**를 누르면 타이틀 화면이 나옵니다. **새 이야기 시작** 또는 자동 저장이 있을 때 **이어하기**를 선택합니다. UI·배경·인물·게임 상태는 시작 코드가 생성하므로 Inspector에 별도로 연결할 작업이 없습니다.
 
 Game 탭은 우선 **1440×900** 또는 **16:10**으로 검수하세요. 창 크기에 따라 UI가 조정되지만 Unity 실제 화면 검수는 아직 하지 않았습니다. Space는 본문 이어 읽기와 타이밍 입력에 사용하며, 선택지는 마우스로 고릅니다. 상단 메뉴·휴대폰은 전용 화면으로 전환됩니다.
 
@@ -28,6 +28,25 @@ Game 탭은 우선 **1440×900** 또는 **16:10**으로 검수하세요. 창 크
 **Campus → Open Game Scene** 후 Game 탭에서 배경과 대화창이 보이는지 확인하고 Play를 누르세요. Hierarchy에는 `Campus Survival`과 그 아래 `Canvas`가 있어야 합니다. 여전히 기본 하늘만 보이면 Console의 **첫 빨간 오류**를 확인하세요. `Campus` 메뉴 자체가 없으면 프로젝트 폴더/스크립트 임포트/컴파일부터 확인해야 합니다.
 
 실행 후 **Campus → Check Current UI**를 선택하면 현재 Editor에서 활성 Canvas·글자·폰트·버튼·배경 생성 여부를 확인합니다. 이 메뉴는 사용자 컴퓨터의 Unity에서 실행하는 검사이며, 클라우드에서 실행했다고 주장하지 않습니다.
+
+## 비주얼 노벨 연출과 화면
+
+이번 프레젠테이션 개편은 기존 C# 게임 규칙을 유지하면서 Unity UGUI 렌더러를 교체합니다. 에디터 버전은 **6000.0.62f1** 그대로입니다.
+
+- **새 인물 스프라이트:** 기존 얼굴·의상·헤어를 참고해 만든 투명 배경 4열×3행 아틀라스. 4명에게 각각 평상·생각·단호한 표현을 적용합니다. 텍스처의 원래 비율을 유지하도록 NPOT 자동 변환을 끕니다. 사각 배경 없이 배경 위에 배치하며, 표정 전환은 페이드로 연결합니다. 3D 모델·Live2D·립싱크는 아닙니다.
+- **VN 대화 화면:** 작은 상단 HUD, 이름표, 남색 대화창과 아이보리 본문, 최대 3개 선택지, 읽은 뒤 등장하는 선택지와 호버 반응. 배경·인물 노드는 문장을 넘길 때마다 다시 만들지 않습니다.
+- **읽기:** 대사 타이핑, 클릭/Space로 현재 문장 완성 → 다음 문장, AUTO, 실제로 읽은 문장만 남기는 대화 기록. AUTO는 선택지를 실행하지 않고 미니게임 입력도 대신하지 않습니다.
+- **일시정지:** 메뉴·휴대폰에서 타이핑이 멈추고 읽던 문장/표시 위치를 복원합니다. H 또는 하단 UI 숨김으로 그림을 볼 수 있으며, 숨긴 동안 읽기와 입력 게임도 멈춥니다.
+- **시작/저장/설정:** 타이틀의 새 이야기·이어하기·저장 불러오기, 자동+수동 3슬롯, 대사 속도·움직임 줄이기·버튼 효과음 설정. 효과음은 짧은 합성 UI음이며 음악·캐릭터 음성은 포함하지 않습니다.
+- **생활 화면:** 휴대폰 앱 그리드와 밝은 커뮤니티, 시간표·연락처·기록 카드, 장소 검색, 호실 검색·층별 필터, 약속 제안별 응답. 검색·필터·메뉴 자체에는 게임 시간 비용이 없습니다.
+
+코드는 `CampusApp.cs`(초기화·입력·저장), `CampusPresentation.cs`(화면), `VnUiMotion.cs`(등장/호버), `VnPresentationModel.cs`(읽기·배치 계산)로 나눴습니다. `Assets/Campus/Resources/Art/StandSprites.png`는 새 투명 인물 자산입니다.
+
+상단 **Campus → Preview → Conversation / Phone / Cafe**는 Editor에서 확인하는 표시용 시안입니다. 이 명령으로 실제 저장 파일을 수정하지 않습니다. Play를 시작하면 타이틀에서 정상 진행합니다.
+
+[대화 화면 참고 이미지](../docs/assets/vn-quality-layout-preview.png) · [휴대폰 참고 이미지](../docs/assets/vn-quality-phone-preview.png)
+
+위 두 PNG는 같은 배치 계산값과 실제 자산을 사용해 브라우저로 렌더링한 **정적 디자인 참고 이미지**입니다. Unity 실행 캡처가 아닙니다. 타이핑·페이드·호버·실제 UGUI 배치는 사용자 컴퓨터의 Editor에서 검수해야 합니다. 이 클라우드에는 Unity Editor가 없으며, 이를 실행 검증 완료로 표현하지 않습니다.
 
 ## 인물 표시와 선택지 정리
 
@@ -101,7 +120,9 @@ PowerShell로 실행할 수도 있습니다. 경로는 설치한 버전에 맞�
 
 - `Assets/Campus/Runtime/CampusData.cs`: 저장 가능한 데이터 모델.
 - `CampusEngine.cs`: Unity 의존성이 없는 게임 규칙과 화면별 가능한 행동. 오래된 버튼으로 결제·보상을 중복 처리하지 않게 검증합니다.
-- `CampusApp.cs`: Unity UI, 아트 표시, 입력, 저장 파일 I/O.
+- `CampusApp.cs`: 초기화, 입력, 저장 파일 I/O.
+- `CampusPresentation.cs`: Unity UI, 장면·인물·휴대폰·메뉴.
+- `VnUiMotion.cs` / `VnPresentationModel.cs`: 전환/호버와 읽기·배치 계산.
 - `Assets/Campus/Editor/CampusProject.cs`: 시작 장면 생성과 Windows 빌드 메뉴.
 - `Assets/Campus/Resources/Data/world.json`: 게임용 건물/호실/시간표/공지 데이터.
 
@@ -118,4 +139,4 @@ python3 unity/Tools/package_project.py
 dotnet run --project unity/Tests/Campus.CoreChecks.csproj -- unity/CampusSurvival/Assets/Campus/Resources/Data/world.json
 ```
 
-현재 **55개 검사**가 통과했습니다. 이 검사는 **순수 C# 로직 컴파일·테스트, 시작 장면/빌드 GUID 연결, Unity 연결 코드의 C# 문법 검사**입니다. Unity API에 대한 컴파일, Play 모드, 그래픽 검수 또는 Windows 빌드를 대체하지 않습니다. `Korean.ttf`는 SIL OFL의 나눔고딕이며 라이선스를 함께 포함합니다. 그림은 이 저장소의 기존 시제품 자산을 재사용합니다.
+현재 **62개 검사**가 통과했습니다. 이 검사는 **순수 C# 로직 컴파일·테스트, 시작 장면/빌드 GUID 연결, Unity 연결 코드의 C# 문법 검사**입니다. Unicode 타이핑, 읽기 복원, AUTO 중단, 뷰포트 배치도 검사합니다. Unity API에 대한 컴파일, Play 모드, 그래픽 검수 또는 Windows 빌드를 대체하지 않습니다. `Korean.ttf`는 SIL OFL의 나눔고딕이며 라이선스를 함께 포함합니다. 그림은 이 저장소의 기존 시제품 자산을 재사용합니다.
