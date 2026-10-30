@@ -163,6 +163,24 @@ class CoreChecks
             int w=(bytes[16]<<24)|(bytes[17]<<16)|(bytes[18]<<8)|bytes[19],h=(bytes[20]<<24)|(bytes[21]<<16)|(bytes[22]<<8)|bytes[23];
             True(w%4==0&&h%3==0&&bytes[25]==6);string meta=File.ReadAllText(path+".meta");True(meta.Contains("nPOTScale: 0")&&meta.Contains("alphaIsTransparency: 1"));
         });
+        Check("school preparation persists into the actual lesson without granting attendance",()=>{
+            var lesson=world.lessons.First(x=>x.person=="taei"&&x.day==1);var g=Game(lesson.start-15,lesson.location,lesson.room);
+            g.Dispatch("school","prep:"+lesson.Key);g=Reload(g);g.Dispatch("schoolChoice","prepare");True(!g.S.attendance.Any());
+            g.Dispatch("class",lesson.Key);g.Dispatch("classChoice",lesson.choices[0].id);True(g.S.narrative.Contains("미리 표시"));
+        });
+        Check("lunch rush costs time and money once and old clicks are rejected",()=>{
+            var g=Game(730,"cafeteria","dining");g.Dispatch("school","meal");g=Reload(g);True(g.View().text.Contains("입구까지"));g.Dispatch("schoolChoice","tray");True(g.S.minute==765&&g.S.spent==5000);Reject(()=>g.Dispatch("schoolChoice","tray"));True(!g.View().actions.Concat(g.View().utilityActions).Any(x=>x.id=="school"&&x.arg=="meal"));
+        });
+        Check("late lunch and quick meal have distinct durations",()=>{
+            var g=Game(800,"headquarters","dining");g.Dispatch("school","meal");g.Dispatch("schoolChoice","tray");True(g.S.minute==825);var q=Game(730,"cafeteria","dining");q.Dispatch("school","meal");q.Dispatch("schoolChoice","quick");True(q.S.minute==745&&q.S.spent==3000);
+        });
+        Check("practice occupancy is stable through reads reload and menus",()=>{
+            var g=Game(800,"music","medium");g.Dispatch("school","practice");var text=g.View().text;g.View();g=Reload(g);True(g.View().text==text);g.OpenUtility("phone");g.Dispatch("back");True(g.View().text==text);
+            if(g.View().actions.Any(x=>x.arg=="voice")){g.Dispatch("schoolChoice","voice");True(g.S.minute==830&&g.S.knowledge.Any(x=>x.id=="practice:1"));}else Reject(()=>g.Dispatch("schoolChoice","voice"));
+        });
+        Check("reviewing missed classes never converts absence into attendance",()=>{
+            var g=Game();var lesson=g.Lessons().First();g.Advance(lesson.end-g.S.minute);g.S.location="library";g.Dispatch("school","review");g.Dispatch("schoolChoice","review");True(g.S.attendance.First(x=>x.id==lesson.Key).text.Contains("결석"));True(g.S.knowledge.Any(x=>x.id=="review:"+lesson.Key));
+        });
         Console.WriteLine("Native C# checks passed: "+count);
     }
 }

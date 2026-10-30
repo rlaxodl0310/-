@@ -18,12 +18,13 @@ namespace CampusSurvival
                 S.seed = S.worldSeed = seed == 0 ? 197609 : seed;
                 S.actors.Add(new Actor("yeogyeong", "차여경", "복슬한 머리의 학생", "간호학과"));
                 S.actors.Add(new Actor("seoyeon", "한서연", "단발머리 학생", "치위생과"));
-                S.actors.Add(new Actor("soyul", "박소율", "긴 머리의 학생", "치위생과"));
+                S.actors.Add(new Actor("soyul", "박소율", "날렵한 단발머리 학생", "치위생과"));
                 S.peers.Add(new PeerLink { first = "seoyeon", second = "soyul", trust = 3 });
                 S.narrative = "복학 첫날. 문 너머에서 반주를 맞추는 소리가 새어 나온다. 휴대폰 시간표부터 확인할까.";
                 Journal("등교", "예술동에서 복학 첫날을 시작했다.");
                 TickCommunity();
             }
+            Person("soyul").silhouette = "날렵한 단발머리 학생";
             if (S.transcript == null) S.transcript = new List<Entry>();
             if (S.version != 1 || S.day < 1 || S.day > 3 || S.minute < 540 || S.minute > 1320 || S.actors.Count != 3)
                 throw new ArgumentException("지원하지 않거나 손상된 Unity 저장입니다.");
@@ -139,7 +140,7 @@ namespace CampusSurvival
         {
             var all = view.actions.ToList();
             var selected = new List<GameAction>();
-            Func<string, bool> primary = id => new[] { "class", "goClass", "meeting", "waitClass", "interview", "supply", "activity", "counter", "encounter", "home" }.Contains(id);
+            Func<string, bool> primary = id => new[] { "class", "goClass", "school", "meeting", "waitClass", "interview", "supply", "activity", "counter", "encounter", "home" }.Contains(id);
             if (screen == "place")
             {
                 selected.AddRange(all.Where(x => primary(x.id)).Take(2));
@@ -200,6 +201,7 @@ namespace CampusSurvival
                     foreach (var a in S.clubs.Where(x => x.status == "submitted" && Absolute - x.submittedAt >= 30 && S.minute >= 780 && S.minute <= 1000 && S.room == ClubRoom(x.id))) v.Add("interview", "모집 담당자에게 면접을 문의한다.", a.id);
                     if (S.day == 1 && S.minute >= 780 && S.minute <= 900 && !S.supply.finished && !S.supply.resolved) v.Add("supply", "물품 준비 중인 쪽에 말을 건다.");
                 }
+                AddSchoolLife(v);
                 AddActivities(v);
                 if (TimeFor(15)) v.Add("rest", "잠깐 앉아서 쉰다. · 15분");
                 if (TimeFor(15)) v.Add("wait", "이곳에서 조금 기다린다. · 15분");
@@ -297,6 +299,7 @@ namespace CampusSurvival
                 v.Add("interviewAnswer", a.step == 0 ? "어떤 역할이든 내가 가장 잘할 거라고 말한다." : "다른 일정이 있어도 전부 참석할 수 있다고 장담한다.", "overpromise");
                 v.Add("back", "면접을 잠시 멈춘다.");
             }
+            else if (screen == "school") SchoolView(v);
             else if (screen == "cafe")
             {
                 v.art = "Cafe"; v.title = "주문대"; v.portrait = "";
@@ -391,13 +394,15 @@ namespace CampusSurvival
                     S.focus = aid; S.screen = "meeting"; Say("잠깐이면 괜찮아요. 지난번에 일 나눴던 거, 나도 생각해봤어요.", Name(actor)); break;
                 case "meeting": S.focus = arg; S.person = S.appointments.First(x => x.id == arg).person; S.screen = "meeting"; Say("먼저 와 있었네요. 잠깐 여기서 이야기할까요?", Name(Person(S.person))); break;
                 case "meetingChoice": ProgressMeeting(arg); break;
+                case "school": S.focus = arg; S.screen = "school"; break;
+                case "schoolChoice": SchoolChoice(arg); break;
                 case "class": S.focus = arg; S.screen = "class"; break;
                 case "goClass":
                     var target = World.lessons.First(x => x.Key == arg); S.location = target.location; S.room = target.room; S.screen = "place"; S.returnScreen = "place"; Say(PlaceName(target.location) + " " + RoomName(target.location, target.room) + " 앞에 도착했다."); Pace("classRoute:" + target.Key); break;
                 case "classChoice":
                     var c = World.lessons.First(x => x.Key == S.focus); var chosen = c.choices.First(x => x.id == arg); int arrived = S.minute;
                     S.attendance.Add(new Entry { id = c.Key, text = c.name + (arrived <= c.start ? " · 출석" : arrived <= c.start + 15 ? " · 지각" : " · 부분 참석"), day = S.day, minute = arrived });
-                    Spend(c.end - S.minute); S.playerStrain++; Know("lesson:" + c.Key + ":" + arg, c.name + "에서 남긴 메모: " + chosen.text); Journal("수업", c.name + ": " + chosen.text); S.screen = "place"; Say(chosen.text); break;
+                    Spend(c.end - S.minute); S.playerStrain++; Know("lesson:" + c.Key + ":" + arg, c.name + "에서 남긴 메모: " + chosen.text); Journal("수업", c.name + ": " + chosen.text); S.screen = "place"; Say(chosen.text + (S.knowledge.Any(x => x.id == "prep:" + c.Key) ? " 미리 표시해 둔 부분을 짚으며 들으니 필기가 한결 수월했다." : " 빠르게 넘어간 부분에 표시를 남겼다. 공강에 다시 읽어봐야겠다.")); break;
                 case "post":
                     var post = AllPosts().First(x => x.id == arg); S.focus = arg; S.screen = "post";
                     if (!S.completed.Contains("post:" + arg)) { S.completed.Add("post:" + arg); Know("post:" + arg, "캠퍼스톡에서 읽음: " + post.title + (post.kind == "anonymous" ? " (익명 주장 · 미확인)" : "")); }
@@ -443,6 +448,49 @@ namespace CampusSurvival
                 case "nextDay": NextDay(); break;
             }
         }
+        string DailyLife(string kind) { return "school:" + S.day + ":" + kind; }
+        bool Ate { get { return S.completed.Contains(DailyLife("meal")); } }
+        bool Dining { get { return (S.location == "cafeteria" || S.location == "headquarters") && S.room == "dining"; } }
+        bool PracticeRoom { get { return S.location == "music" && S.room != "" || S.location == "arts" && (S.room.StartsWith("small") || S.room == "room711" || S.room == "room712" || S.room == "room804"); } }
+        bool PracticeBusy { get { return ((S.worldSeed & 7) + S.day + S.minute / 30 + S.room.Length) % 3 == 0; } }
+        bool MealRush { get { return S.minute >= 720 && S.minute < 780; } }
+        void AddSchoolLife(GameView v)
+        {
+            var next = Lessons().FirstOrDefault(x => S.minute < x.start && x.start - S.minute <= 60 && S.location == x.location && S.room == x.room);
+            if (next != null && !S.knowledge.Any(x => x.id == "prep:" + next.Key)) v.Add("school", "빈자리에 앉아 수업 자료를 펼친다.", "prep:" + next.Key);
+            if (Dining && S.minute >= 660 && S.minute < 1140 && !Ate && TimeFor(35)) v.Add("school", "식당 안의 줄과 메뉴를 살핀다.", "meal");
+            if (PracticeRoom && S.minute < 1260 && !S.completed.Contains(DailyLife("practice")) && TimeFor(30)) v.Add("school", "연습실 문 옆 이용표를 확인한다.", "practice");
+            if ((S.location == "library" || S.location == "creative" && S.room == "library") && Lessons().Any(x => x.end <= S.minute && !S.completed.Contains(DailyLife("review:" + x.Key))) && TimeFor(20)) v.Add("school", "오늘 수업에서 걸린 부분을 다시 찾아본다.", "review");
+        }
+        void SchoolView(GameView v)
+        {
+            v.title = "공강 사이"; v.portrait = "taei";
+            if (S.focus.StartsWith("prep:"))
+            { v.text = "강의실 앞자리는 조금씩 차고 있다. 자료를 넘기다 익숙하지 않은 용어에서 손이 멈춘다. 전부 외우기보다 오늘 확인할 부분을 정해두자."; v.Add("schoolChoice", "모르는 부분에 질문 표시를 남긴다.", "prepare"); }
+            else if (S.focus == "meal")
+            {
+                v.text = MealRush ? "쟁반이 부딪히는 소리 사이로 줄이 입구까지 이어진다. 한 학생이 시계를 보고 줄에서 빠진다. 식판 메뉴는 5,000원, 간편식은 3,000원이다." : "배식대 앞 줄이 짧다. 막 닦은 테이블이 몇 개 보인다. 식판 메뉴는 5,000원, 간편식은 3,000원이다.";
+                v.Add("schoolChoice", "식판 메뉴를 먹고 반납한다. · " + (MealRush ? 35 : 25) + "분 / 5,000원", "tray"); v.Add("schoolChoice", "간편식을 받아 짧게 먹는다. · 15분 / 3,000원", "quick");
+            }
+            else if (S.focus == "practice")
+            { v.text = PracticeBusy ? "문틈으로 반복하는 스케일 소리가 들린다. 이용표에도 현재 시간에 표시가 있다. 문을 열지 않고 발걸음을 멈춘다. 나중에 다시 확인하거나 다른 방을 찾아보자." : "현재 시간 칸이 비어 있다. 문을 두드려도 답이 없다. 다음 이용 시간 전까지 30분 정도 연습하고 정리할 수 있겠다."; if (!PracticeBusy) { v.Add("schoolChoice", "30분 이용을 적고 호흡과 발성을 연습한다.", "voice"); v.Add("schoolChoice", "30분 이용을 적고 곡의 기타 구간을 맞춘다.", "guitar"); } }
+            else
+            { v.text = "필기와 수업 자료를 나란히 놓는다. 참석한 수업은 놓친 부분을 메우고, 빠진 수업은 자료에서 확인할 수 있는 내용부터 정리하자. 읽는 것만으로 출석이 바뀌지는 않는다."; v.Add("schoolChoice", "가장 먼저 끝난 수업부터 정리한다. · 20분", "review"); }
+            v.Add("back", "지금은 자료를 덮고 나간다.");
+        }
+        void SchoolChoice(string choice)
+        {
+            if (choice == "prepare")
+            { string key = S.focus.Substring(5); Know("prep:" + key, World.lessons.First(x => x.Key == key).name + " 자료에서 질문할 부분을 미리 표시했다."); Pace("prepare:" + key); Say("페이지 옆에 짧게 질문을 적는다. 수업에서 이 부분이 나오면 놓치지 말자."); }
+            else if (choice == "tray" || choice == "quick")
+            { int cost = choice == "tray" ? 5000 : 3000; Spend(choice == "tray" ? (MealRush ? 35 : 25) : 15); S.spent += cost; S.completed.Add(DailyLife("meal")); S.playerStrain = Math.Max(0, S.playerStrain - (choice == "tray" ? 2 : 1)); Journal("식사", "식사를 마치고 " + cost + "원을 지출했다."); Say(choice == "tray" ? "쟁반을 내려놓고 따뜻한 식사를 한다. 마지막 반찬까지 먹은 뒤 식기를 반납한다. 다음 수업까지 남은 시간을 확인한다." : "간편식을 먹으며 잠깐 발을 쉰다. 포장지를 정리하고 일어난다. 긴 식사는 못 했지만 속은 한결 낫다."); }
+            else if (choice == "voice" || choice == "guitar")
+            { Spend(30); S.completed.Add(DailyLife("practice")); S.playerStrain++; Know("practice:" + S.day, choice == "voice" ? "개인 연습에서 숨이 끊기는 구간을 표시했다." : "개인 연습에서 기타 전환이 늦는 구간을 표시했다."); Journal("연습", RoomName(S.location, S.room) + "에서 30분 개인 연습 후 정리했다."); Say(choice == "voice" ? "처음부터 크게 부르지 않고 호흡부터 푼다. 자꾸 끊기는 구간을 녹음해 두고, 의자를 정리한 뒤 이용 표시를 지운다." : "느린 박자로 코드 전환을 반복한다. 한 번 매끄럽게 이어진 부분을 메모하고, 케이블과 의자를 정리한 뒤 방을 비운다."); }
+            else
+            { var lesson = Lessons().First(x => x.end <= S.minute && !S.completed.Contains(DailyLife("review:" + x.Key))); bool missed = S.attendance.Any(x => x.id == lesson.Key && x.text.Contains("결석")); Spend(20); S.completed.Add(DailyLife("review:" + lesson.Key)); Know("review:" + lesson.Key, lesson.name + " 자료를 다시 읽고 질문을 정리했다."); Say(missed ? "자료로 확인되는 내용과 설명이 더 필요한 부분을 나눠 적는다. 빠진 수업을 전부 이해했다고 할 수는 없다. 다음에 물어볼 질문이 남았다." : "수업 때 급히 적은 문장을 풀어 쓴다. 앞뒤 내용이 이어지는 부분은 표시하고 아직 모르는 부분은 질문으로 남긴다."); }
+            S.screen = "place";
+        }
+
         void MaybeRandom()
         {
             string attempt = "randomAttempt:" + Absolute + ":" + S.location;
