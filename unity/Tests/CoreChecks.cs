@@ -1,0 +1,76 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
+using CampusSurvival;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+
+class CoreChecks
+{
+    static int count;
+    static WorldData world;
+    static readonly JsonSerializerOptions Json = new JsonSerializerOptions { IncludeFields = true };
+    static void Check(string name, Action action)
+    { try { action(); Console.WriteLine("PASS " + name); count++; } catch(Exception e) { Console.Error.WriteLine("FAIL " + name + "\n" + e); Environment.Exit(1); } }
+    static void True(bool value) { if(!value) throw new Exception("Assertion failed"); }
+    static void Reject(Action a) { bool rejected=false; try { a(); } catch(InvalidOperationException) { rejected=true; } True(rejected); }
+    static CampusEngine Game(int minute=540, string loc="arts", string room="", int day=1)
+    { var g=new CampusEngine(world); g.S.day=day; g.S.minute=minute; g.S.location=loc; g.S.room=room; return g; }
+    static Actor Actor(CampusEngine g,string id="yeogyeong") { return g.S.actors.First(x=>x.id==id); }
+    static CampusEngine Reload(CampusEngine g) { return new CampusEngine(world,JsonSerializer.Deserialize<CampusState>(JsonSerializer.Serialize(g.S,Json),Json)); }
+    static void Main(string[] args)
+    {
+        world=JsonSerializer.Deserialize<WorldData>(File.ReadAllText(args[0]),Json);
+        Check("Unity UI/editor C# syntax (not Unity API compilation)",()=>{
+            string assets=Path.GetFullPath(Path.Combine(Path.GetDirectoryName(args[0]), "../.."));
+            foreach(string file in Directory.GetFiles(assets,"*.cs",SearchOption.AllDirectories)) {
+                var errors=CSharpSyntaxTree.ParseText(File.ReadAllText(file)).GetDiagnostics().Where(x=>x.Severity==DiagnosticSeverity.Error).ToArray();
+                if(errors.Length>0)throw new Exception(file+"\n"+string.Join("\n",errors.Select(x=>x.ToString())));
+            }
+        });
+        Check("exported 15 locations and concrete arts rooms",()=>{ True(world.buildings.Length==15); True(world.buildings.First(x=>x.id=="arts").rooms.Any(x=>x.name.Contains("409"))); True(world.lessons.Length==24); });
+        Check("cold start has no names, no club, 09:00",()=>{ var g=Game(); True(g.S.actors.All(x=>!x.named)); True(g.S.clubs.Count==0); True(g.S.minute==540); });
+        Check("reading views consumes no clock or randomness",()=>{ var g=Game(); int seed=g.S.seed; for(int i=0;i<100;i++)g.View(); True(g.S.minute==540&&g.S.seed==seed); });
+        Check("three short distinct actions batch time",()=>{ var g=Game(); g.Dispatch("look"); g.S.randomEvent=""; g.Dispatch("look"); True(g.S.minute==540); g.Dispatch("rooms"); g.Dispatch("room","band"); True(g.S.minute==540); g.Dispatch("travel"); g.Dispatch("visit","music"); True(g.S.minute==570); });
+        Check("room-specific actual attendance",()=>{ var g=Game(570,"arts","band"); g.Dispatch("class","1:taei:ensemble"); g.Dispatch("classChoice","blend"); True(g.S.minute==660); True(g.S.attendance.Any(x=>x.id=="1:taei:ensemble"&&x.text.Contains("출석"))); });
+        Check("wrong room cannot attend",()=>{ var g=Game(570,"arts","classes"); Reject(()=>g.Dispatch("class","1:taei:ensemble")); });
+        Check("class skipping remains free, records absence",()=>{ var g=Game(570); g.Advance(90); True(g.S.attendance.Any(x=>x.text.Contains("결석"))); True(g.View().actions.Any(x=>x.id=="travel")); });
+        Check("late and partial class records",()=>{ foreach(var pair in new[]{(580,"지각"),(600,"부분 참석")}) { var g=Game(pair.Item1,"arts","band"); g.Dispatch("class","1:taei:ensemble"); g.Dispatch("classChoice","blend"); True(g.S.attendance.First().text.Contains(pair.Item2)); } });
+        Check("NPC class and room privacy priority",()=>{ var g=Game(600,"creative","nursing"); True(g.Present().Any(x=>x.id=="yeogyeong")); True(!g.Available(Actor(g))); g.S.room="art"; True(!g.Present().Any()); });
+        Check("NPCs move with passing time",()=>{ var g=Game(800,"hall"); string before=g.LocationOf(Actor(g)); bool moved=false; for(int i=0;i<6;i++){g.Advance(60); if(g.LocationOf(Actor(g))!=before)moved=true;} True(moved); });
+        Check("first encounter does not expose name or seniority",()=>{ var g=Game(800,"hall"); g.Dispatch("encounter"); g.Dispatch("talk","yeogyeong"); True(!g.View().text.Contains("선배")); True(!g.View().title.Contains("차여경")); g.Dispatch("respond","introduce"); True(g.View().title=="차여경"); True(!Actor(g).seniorityKnown); });
+        Check("saved dialogue does not reroll",()=>{ var g=Game(800,"hall"); g.Dispatch("encounter"); g.Dispatch("talk","yeogyeong"); g.Dispatch("respond","work"); var r=Reload(g); True(g.View().text==r.View().text&&g.S.seed==r.S.seed); });
+        Check("same question can generate distinct replies without free relationship farming",()=>{ var g=Game(800,"hall"); g.Dispatch("encounter"); g.Dispatch("talk","yeogyeong"); g.Dispatch("respond","check"); int trust=Actor(g).trust; var first=g.S.narrative; g.Dispatch("respond","follow"); g.Dispatch("respond","follow"); True(g.S.narrative!=first); True(Actor(g).trust==trust); });
+        Check("menu returns to exact dialogue",()=>{ var g=Game(800,"hall"); g.Dispatch("encounter"); g.Dispatch("talk","yeogyeong"); string line=g.S.narrative; g.OpenUtility("phone"); g.Dispatch("community"); g.Dispatch("phone"); g.Dispatch("back"); True(g.S.screen=="dialogue"&&g.S.narrative==line&&g.S.minute==800); });
+        Check("phone community has no time cost and knowledge source",()=>{ var g=Game(); g.OpenUtility("phone"); g.Dispatch("community"); g.Dispatch("post","library-seats"); True(g.S.minute==540); True(g.S.knowledge.Last().text.Contains("미확인")); });
+        Check("community evolves only on simulation time",()=>{ var g=Game(); int posts=g.S.feed.Count; for(int i=0;i<20;i++)g.View(); True(g.S.feed.Count==posts); g.Advance(60); True(g.S.feed.Count==posts+1); });
+        Check("application cannot join instantly",()=>{ var g=Game(780,"hall","clubs"); g.OpenUtility("phone"); g.Dispatch("clubs"); g.Dispatch("apply","volunteer"); Reject(()=>g.Dispatch("join","volunteer")); g.Dispatch("back"); True(!g.View().actions.Any(x=>x.id=="interview")); });
+        Check("in-person two-exchange interview and delayed acceptance",()=>{ var g=Game(780,"hall","clubs"); g.OpenUtility("phone"); g.Dispatch("clubs"); g.Dispatch("apply","volunteer"); g.Dispatch("back"); g.Advance(30); g.Dispatch("interview","volunteer"); g.Dispatch("interviewAnswer","honest"); True(g.S.minute==810); g=Reload(g); g.Dispatch("interviewAnswer","honest"); True(g.S.minute==830); True(g.S.clubs[0].status=="reviewing"); g.Advance(30); g.OpenUtility("phone"); g.Dispatch("clubs"); g.Dispatch("join","volunteer"); True(g.S.clubs[0].status=="accepted"); });
+        Check("cafe payment, pickup and drink commit once",()=>{ var g=Game(800,"cafe"); g.Dispatch("counter"); g.Dispatch("drink","latte"); g.Dispatch("temperature","iced"); True(g.S.spent==0); g.Dispatch("pay"); True(g.S.spent==3800); Reject(()=>g.Dispatch("pay")); g=Reload(g); g.Dispatch("waitDrink"); g.Dispatch("collect"); Reject(()=>g.Dispatch("collect")); True(g.S.inventory.Count==1); g.Dispatch("consume"); True(g.S.inventory.Count==0); });
+        Check("cancelled unpaid order costs nothing",()=>{ var g=Game(800,"cafe"); g.Dispatch("counter"); g.Dispatch("drink","tea"); g.Dispatch("temperature","hot"); g.Dispatch("cancelOrder"); True(g.S.spent==0&&g.S.order==null); });
+        Check("offscreen supply changes NPC peers without player diary or names",()=>{ var g=Game(780,"music"); int entries=g.S.journal.Count; g.Advance(180); True(g.S.supply.resolved&&!g.S.supply.attended); True(g.S.peers[0].trust==4); True(g.S.actors.All(x=>!x.named)); True(g.S.journal.Count==entries); });
+        Check("late supply uses actual remaining time and witnesses",()=>{ var g=Game(900,"hall"); g.Dispatch("supply"); g.Dispatch("supplyChoice","share"); g.Dispatch("supplyChoice","share"); g.Dispatch("supplyChoice","share"); True(g.S.minute==960); True(g.S.supply.finished); True(!g.S.supply.witnesses.Contains("soyul")); True(!Actor(g,"soyul").named); });
+        Check("supply completion cannot duplicate relationship reward",()=>{ var g=Game(780,"hall"); g.Dispatch("supply"); for(int i=0;i<3;i++)g.Dispatch("supplyChoice","share"); int trust=Actor(g).trust; Reject(()=>g.Dispatch("supplyChoice","share")); True(Actor(g).trust==trust); });
+        Check("known witness initiates next-day optional proposal",()=>{ var g=Game(780,"hall"); g.Dispatch("supply"); for(int i=0;i<3;i++)g.Dispatch("supplyChoice","share"); g.Dispatch("back"); g.Advance(60); g.Dispatch("home"); g.Dispatch("nextDay"); True(g.S.day==2&&g.S.minute==540); True(g.S.appointments.Count==1&&g.S.appointments[0].status=="offered"); });
+        Check("meeting requires twenty actual minutes not just arrival",()=>{ var g=Game(810,"library",day:2); var p=Actor(g); p.named=true; p.trust=3; g.S.appointments.Add(new Appointment{id="test",person=p.id,day=2,minute=810,location="library",label="잠깐"}); g.OpenUtility("phone"); g.Dispatch("appointments"); g.Dispatch("accept","test"); g.Dispatch("back"); g.Dispatch("meeting","test"); g.Dispatch("meetingChoice","listen"); True(g.S.appointments[0].status=="pending"&&g.S.minute==820); g=Reload(g); g.Dispatch("meetingChoice","share"); True(g.S.appointments[0].status=="kept"&&g.S.minute==830); });
+        Check("decline no penalty, missed accepted proposal penalized once",()=>{ var g=Game(800,"hall",day:2); var p=Actor(g); g.S.appointments.Add(new Appointment{id="m",person=p.id,day=2,minute=810,location="hall",label="약속",status="pending"}); g.Advance(60); int t=p.tension; g.Advance(15); True(t==1&&p.tension==1); });
+        Check("high affection cannot override class or strong tension",()=>{ var g=Game(600,"creative"); var p=Actor(g); p.affection=99; True(!g.Available(p,20)); g.S.minute=800; g.S.location="hall"; p.tension=8; g.Dispatch("encounter"); g.Dispatch("talk",p.id); True(g.S.narrative.Contains("길게")); });
+        foreach(string id in new[]{"basketball","cooking","carry"}) Check(id+" input survives reload, pauses in menus and commits duration once",()=>{
+            string loc=id=="basketball"?"gym":id=="cooking"?"cafeteria":"hall"; string room=id=="basketball"?"court":id=="cooking"?"kitchen":"meeting";
+            var g=Game(800,loc,room); g.Dispatch("activity",id); g.Dispatch("activityChoice","share"); g.Dispatch("miniStart"); g.AdvanceMini(100); int elapsed=g.S.activity.elapsedMs; g.OpenUtility("phone"); g.AdvanceMini(100); True(g.S.activity.elapsedMs==elapsed&&g.S.activity.phase==2); g=Reload(g); g.Dispatch("back"); g.Dispatch("miniStart");
+            for(int i=0;i<3;i++){ for(int k=0;k<5;k++)g.AdvanceMini(100); g.Dispatch("miniHit"); }
+            True(g.S.activity.phase==3); int before=g.S.minute; g.Dispatch("miniConfirm"); Reject(()=>g.Dispatch("miniConfirm")); True(g.S.minute>before); g.Dispatch("activityChoice","finish"); True(g.S.activity.status=="completed"); True(g.S.minute==800+(id=="cooking"?45:60)); });
+        Check("mini assisted path does not claim timing input",()=>{ var g=Game(800,"gym","court"); g.Dispatch("activity","basketball"); g.Dispatch("activityChoice","share"); g.Dispatch("miniAssist"); True(g.S.activity.assisted&&g.S.activity.attempts==0); });
+        Check("time cannot overflow into next day",()=>{ var g=Game(1315); Reject(()=>g.Advance(10)); True(g.S.minute==1315); });
+        Check("three-day boundary has explicit completion",()=>{ var g=Game(1100,day:3); g.Dispatch("home"); g.Dispatch("nextDay"); True(g.S.ended&&g.S.day==3); True(g.View().text.Contains("아직 구현되지")); });
+        Check("dialogue RNG cannot teleport NPCs",()=>{ var g=Game(800,"hall"); g.Dispatch("encounter"); g.Dispatch("talk","yeogyeong"); string loc=g.LocationOf(Actor(g)); g.Dispatch("respond","work"); g.Dispatch("respond","follow"); True(g.LocationOf(Actor(g))==loc); });
+        Check("all authored lessons point to an existing room",()=>{ foreach(var c in world.lessons) True(world.buildings.Any(b=>b.id==c.location&&b.rooms.Any(r=>r.id==c.room))); });
+        Check("NPC class fatigue updates only once and is private",()=>{ var g=Game(600); g.Advance(60); int fatigue=Actor(g).fatigue; int known=g.S.knowledge.Count; g.Advance(1); True(fatigue==1&&Actor(g).fatigue==fatigue&&g.S.knowledge.Count==known); });
+        Check("last-minute short actions cannot overflow",()=>{ var g=Game(1315); g.S.pace.Add("a");g.S.pace.Add("b");g.Dispatch("look");True(g.S.minute==1320);True(g.View().actions.Count==1&&g.View().actions[0].id=="home"); });
+        Check("new story memories stay with their actual participant",()=>{ var g=Game(810,"library",day:2); var p=Actor(g); p.named=true;p.trust=3; g.S.appointments.Add(new Appointment{id="f",kind="followup",person=p.id,day=2,minute=810,location="library",label="이야기",status="pending"});g.Dispatch("meeting","f");g.Dispatch("meetingChoice","listen");g.Dispatch("meetingChoice","share");True(p.memories.Contains("followup:shared"));True(!Actor(g,"soyul").memories.Any(x=>x.StartsWith("followup:"))); });
+        Check("entire three-day attendance and home loop",()=>{ var g=Game(); for(int day=1;day<=3;day++){foreach(var c in g.Lessons().ToArray()){g.S.screen="place";g.S.location=c.location;g.S.room=c.room;if(g.S.minute<c.start)g.Advance(c.start-g.S.minute);g.Dispatch("class",c.Key);g.Dispatch("classChoice",c.choices[0].id);}g.Advance(1020-g.S.minute);g.Dispatch("home");g.Dispatch("nextDay");}True(g.S.ended);True(g.S.attendance.Count==6);True(g.S.attendance.All(x=>x.text.Contains("출석"))); });
+        Check("a free NPC cannot appear in every room in the same building",()=>{ var g=Game(800,"hall","musicClub");True(!g.Present().Any());g.S.room="clubs";True(g.Present().Any(x=>x.id=="yeogyeong")); });
+        Console.WriteLine("Native C# checks passed: "+count);
+    }
+}

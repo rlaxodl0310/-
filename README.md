@@ -1,7 +1,17 @@
 # 캠퍼스 생존 시뮬레이션
 
 대학교의 일상·관계 형성과 좀비 아포칼립스 생존을 결합하는 게임의 초기 개발 저장소입니다.
-최종 엔진 방향은 Unity입니다. 현재 구현은 일상 선택 흐름을 확인하는 별도 웹 시제품이며 Unity 프로젝트나 3D 플레이가 아닙니다.
+웹 시제품과 이를 C#으로 옮기는 Unity 네이티브 이식판을 함께 관리합니다. Unity 판은 2D 일러스트·대화 중심이며 실시간 3D 플레이가 아닙니다.
+
+## Unity 프로젝트
+
+[Unity 프로젝트 ZIP 다운로드](https://github.com/rlaxodl0310/-/raw/refs/heads/main/demo/campus-unity-project.zip) · [실행·검수 안내](unity/README.md) · [프로젝트 소스](unity/CampusSurvival)
+
+ZIP 압축 해제 → Unity Hub에서 `CampusSurvival` 폴더 추가 → Unity 6 LTS로 열기 → **Campus → Open Game Scene → Play** 순서로 실행합니다. Windows 실행 파일은 Unity 메뉴 **Campus → Build Windows**로 직접 빌드할 수 있습니다. 다운로드 ZIP은 실행 파일이 아닌 소스 프로젝트입니다.
+
+15개 장소·구체 호실·24개 수업 데이터, 학교 생활·이름 해금·관계 대화·커뮤니티·동아리 면접·카페 주문·약속·봉사 후속 교류·활동 미니게임·저장을 옮겼습니다. 웹의 모든 분기를 1:1 이식한 것은 아니며 차이와 남은 작업은 Unity 안내에 적었습니다. Unity Editor와 Windows 빌드 환경이 없어 실제 화면·Editor 컴파일·Windows 빌드는 미검수입니다. 순수 C# 로직은 별도 컴파일·테스트합니다.
+
+아래 실행 안내는 기존 **웹 시제품** 기준입니다.
 
 ## 실행
 

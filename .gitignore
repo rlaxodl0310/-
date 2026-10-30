@@ -1,2 +1,18 @@
 __pycache__/
 *.py[cod]
+
+# Unity generated files (source assets and .meta remain tracked)
+unity/**/Library/
+unity/**/Temp/
+unity/**/Obj/
+unity/**/Logs/
+unity/**/UserSettings/
+unity/**/Builds/
+unity/**/*.csproj
+unity/**/*.sln
+unity/**/.vs/
+unity/Tests/bin/
+unity/Tests/obj/
+
+!unity/Tests/Campus.CoreChecks.csproj
+unity/**/windows-build.log
