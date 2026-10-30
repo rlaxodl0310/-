@@ -140,3 +140,7 @@ dotnet run --project unity/Tests/Campus.CoreChecks.csproj -- unity/CampusSurviva
 ```
 
 현재 **62개 검사**가 통과했습니다. 이 검사는 **순수 C# 로직 컴파일·테스트, 시작 장면/빌드 GUID 연결, Unity 연결 코드의 C# 문법 검사**입니다. Unicode 타이핑, 읽기 복원, AUTO 중단, 뷰포트 배치도 검사합니다. Unity API에 대한 컴파일, Play 모드, 그래픽 검수 또는 Windows 빌드를 대체하지 않습니다. `Korean.ttf`는 SIL OFL의 나눔고딕이며 라이선스를 함께 포함합니다. 그림은 이 저장소의 기존 시제품 자산을 재사용합니다.
+
+## 전신 일러스트 자산
+
+`Assets/Campus/Resources/Art/FullBodyLineup.png`에 태이·서연·여경·소율의 정면 전신 시안을 포함했습니다. 한 장의 라인업이며 대화용 4×3 아틀라스가 아닙니다. 현재 대화 UI는 `StandSprites.png`를 계속 사용합니다. 전신 이미지 제작·포함 작업이며 3D 모델이나 전신 애니메이션 구현은 아닙니다.
