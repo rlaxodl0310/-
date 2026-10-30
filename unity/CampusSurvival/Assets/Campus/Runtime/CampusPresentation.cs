@@ -269,8 +269,17 @@ namespace CampusSurvival
                 var navigation=view.actions.Where(x=>x.id!="back").ToList();var grid=Grid(content,navigation.Count,width,composition.compact?2:3,82);
                 foreach(var a0 in navigation){var a=a0;Button(grid,a.label,()=>Act(a.id,a.arg),82);}
                 if(view.utilityActions.Count>0){Section(content,"이 장소에서 할 수 있는 일");foreach(var a0 in view.utilityActions){var a=a0;Button(content,a.label,()=>Act(a.id,a.arg));}}
-                Section(content,"태이의 상태 · "+(game.S.playerStrain>=5?"많이 지쳤다":game.S.playerStrain>=3?"휴식이 필요하다":"여유가 있다"));
+                Section(content,"태이의 상태 · "+game.Condition);
                 var tools=Grid(content,3,width,composition.compact?2:3,64);Button(tools,"저장 · 불러오기",()=>OpenPage("saves"),64);Button(tools,"읽은 대화",()=>OpenPage("backlog"),64);Button(tools,"설정",()=>OpenPage("settings"),64);
+            }
+            else if(screen=="status")
+            {
+                Section(content,"김태이 · 몸과 마음"); Flow(content,game.Condition,23);
+                StatusMeter(content,"스태미나",game.Stamina,"운동과 작업으로 소모 · 휴식으로 회복",new Color(.42f,.72f,.64f));
+                StatusMeter(content,"배고픔",game.S.hunger,"시간이 지나면 증가 · 식사로 해소",new Color(.85f,.67f,.39f));
+                StatusMeter(content,"목마름",game.S.thirst,"시간이 지나면 증가 · 물과 음료로 해소",new Color(.45f,.68f,.83f));
+                StatusMeter(content,"공포감",game.S.fear,"직접 확인한 이상징후로 증가 · 휴식으로 완화",new Color(.69f,.57f,.78f));
+                Flow(content,"스태미나는 높을수록, 나머지는 낮을수록 편안합니다. 지금의 수치는 생존 시스템 시제품이며, 0이 되거나 가득 찬다고 즉시 사망하지 않습니다.",18,muted);
             }
             else if(screen=="travel"||screen=="rooms")DrawTravel(content,view,width,screen=="rooms");
             else if(screen=="community")
@@ -321,6 +330,15 @@ namespace CampusSurvival
                 Flow(content,view.text,21,phone?darkInk:muted);
                 foreach(var a0 in view.actions.Where(x=>x.id!="back")){var a=a0;Button(content,a.label,()=>Act(a.id,a.arg),62,phone);}
             }
+        }
+        void StatusMeter(RectTransform content,string title,int value,string hint,Color color)
+        {
+            var frame=Block(content,124);var text=Label(frame,title+"   "+value+" / 100",24,color);At(text.rectTransform,Vector2.zero,Vector2.one,20,20,12,0);
+            var note=Label(frame,hint,17,muted);At(note.rectTransform,Vector2.zero,Vector2.one,20,20,49,0);
+            var track=new GameObject("Status track",typeof(RectTransform),typeof(Image));track.transform.SetParent(frame,false);track.GetComponent<Image>().color=new Color(.17f,.23f,.27f);
+            var rt=track.GetComponent<RectTransform>();At(rt,Vector2.zero,Vector2.one,20,20,88,20);
+            var fill=new GameObject("Status fill",typeof(RectTransform),typeof(Image));fill.transform.SetParent(track.transform,false);fill.GetComponent<Image>().color=color;
+            var fr=fill.GetComponent<RectTransform>();fr.anchorMin=Vector2.zero;fr.anchorMax=new Vector2(value/100f,1);fr.offsetMin=fr.offsetMax=Vector2.zero;
         }
         void DrawTravel(RectTransform content,GameView view,float width,bool rooms)
         {

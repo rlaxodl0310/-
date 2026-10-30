@@ -25,10 +25,17 @@ namespace CampusSurvival
                 TickCommunity();
             }
             Person("soyul").silhouette = "날렵한 단발머리 학생";
+            if (!S.survivalReady) { S.hunger = 15; S.thirst = 10; S.fear = 0; S.needMinutes = 0; S.survivalReady = true; }
+            S.hunger = ClampNeed(S.hunger); S.thirst = ClampNeed(S.thirst); S.fear = ClampNeed(S.fear); S.needMinutes = Math.Max(0, Math.Min(29, S.needMinutes));
             if (S.transcript == null) S.transcript = new List<Entry>();
             if (S.version != 1 || S.day < 1 || S.day > 3 || S.minute < 540 || S.minute > 1320 || S.actors.Count != 3)
                 throw new ArgumentException("지원하지 않거나 손상된 Unity 저장입니다.");
         }
+        static int ClampNeed(int value) { return Math.Max(0, Math.Min(100, value)); }
+        public int Stamina { get { return ClampNeed(100 - Math.Max(0, S.playerStrain) * 8 - Math.Max(0, S.hunger - 60) / 2 - Math.Max(0, S.thirst - 50) / 2); } }
+        public string Condition { get { return Stamina < 30 ? "무리하지 말고 잠깐 쉬자" : S.thirst >= 60 ? "입이 마른다. 물을 마시자" : S.hunger >= 60 ? "속이 비었다. 식사가 필요하다" : S.fear >= 40 ? "긴장이 가라앉지 않는다" : "아직 몸을 움직일 여유가 있다"; } }
+        bool WaterHere { get { return S.location == "library" || S.location == "creative" && S.room == "library" || S.location == "gym" && (S.room == "" || S.room == "fitness") || S.location == "arts" && S.room == ""; } }
+        void Nourish(int food, int water) { S.hunger = ClampNeed(S.hunger - food); S.thirst = ClampNeed(S.thirst - water); }
         public static string Clock(int minute) { return (minute / 60).ToString("00") + ":" + (minute % 60).ToString("00"); }
         public string Weather { get { return S.day == 2 ? "비 · 18°C" : S.day == 3 ? "흐림 · 20°C" : "맑음 · 22°C"; } }
         public string PlaceName(string id) { var b = World.buildings.FirstOrDefault(x => x.id == id); return b == null ? id : b.name; }
@@ -80,7 +87,7 @@ namespace CampusSurvival
         int Absolute { get { return S.day * 1440 + S.minute; } }
         void Journal(string id, string text) { S.journal.Add(new Entry { id = id, text = text, day = S.day, minute = S.minute }); }
         void Know(string id, string text)
-        { if (S.knowledge.Any(x => x.id == id)) return; S.knowledge.Add(new Entry { id = id, text = text, day = S.day, minute = S.minute }); Journal("발견", text); }
+        { if (S.knowledge.Any(x => x.id == id)) return; S.knowledge.Add(new Entry { id = id, text = text, day = S.day, minute = S.minute }); if (id.StartsWith("warning:")) S.fear = Math.Max(S.fear, Math.Min(30, S.fear + 8)); Journal("발견", text); }
         void Message(string id, string text) { S.messages.Add(new Entry { id = id, text = text, day = S.day, minute = S.minute }); }
         void Say(string text, string speaker = "김태이") { S.narrative = text; S.speaker = speaker; S.beat = 0; S.choicePage = 0; }
         void Pace(string key)
@@ -91,6 +98,9 @@ namespace CampusSurvival
         public void Advance(int minutes)
         {
             if (minutes < 0 || S.minute + minutes > 1320) throw new InvalidOperationException("오늘 남은 시간이 부족합니다.");
+            int ticks = (S.needMinutes + minutes) / 30;
+            S.needMinutes = (S.needMinutes + minutes) % 30;
+            S.hunger = ClampNeed(S.hunger + ticks * 2); S.thirst = ClampNeed(S.thirst + ticks * 3);
             S.minute += minutes;
             foreach (var p in S.actors)
                 foreach (var c in Lessons(p.id).Where(x => x.end <= S.minute && !S.npcClasses.Contains(x.Key)))
@@ -201,6 +211,7 @@ namespace CampusSurvival
                     foreach (var a in S.clubs.Where(x => x.status == "submitted" && Absolute - x.submittedAt >= 30 && S.minute >= 780 && S.minute <= 1000 && S.room == ClubRoom(x.id))) v.Add("interview", "모집 담당자에게 면접을 문의한다.", a.id);
                     if (S.day == 1 && S.minute >= 780 && S.minute <= 900 && !S.supply.finished && !S.supply.resolved) v.Add("supply", "물품 준비 중인 쪽에 말을 건다.");
                 }
+                if (WaterHere && S.thirst >= 10 && TimeFor(5)) v.Add("water", "정수기에서 물을 마신다. · 5분");
                 AddSchoolLife(v);
                 AddActivities(v);
                 if (TimeFor(15)) v.Add("rest", "잠깐 앉아서 쉰다. · 15분");
@@ -248,9 +259,11 @@ namespace CampusSurvival
             {
                 v.menu = true; v.title = screen == "phone" ? "휴대폰" : "캠퍼스 생활"; v.text = "창을 확인하는 동안 게임 시간은 흐르지 않습니다.";
                 if (screen == "phone") { v.Add("community", "캠퍼스톡 · 학내 커뮤니티"); v.Add("messages", "메시지 · " + S.messages.Count + "건"); v.Add("appointments", "약속 · 제안과 일정"); v.Add("clubs", "동아리 · 모집과 신청"); }
-                else { v.Add("travel", "이동 · 건물과 호실"); v.Add("timetable", "시간표 · 출석 기록"); v.Add("phone", "휴대폰"); v.Add("knowledge", "알게 된 정보"); v.Add("contacts", "만난 사람들"); v.Add("inventory", "소지품 · 지출 " + S.spent + "원"); v.Add("journal", "지난 기록"); }
+                else { v.Add("status", "내 상태 · " + Condition); v.Add("travel", "이동 · 건물과 호실"); v.Add("timetable", "시간표 · 출석 기록"); v.Add("phone", "휴대폰"); v.Add("knowledge", "알게 된 정보"); v.Add("contacts", "만난 사람들"); v.Add("inventory", "소지품 · 지출 " + S.spent + "원"); v.Add("journal", "지난 기록"); }
                 v.Add("back", "장면으로 돌아가기");
             }
+            else if (screen == "status")
+            { v.menu = true; v.title = "몸과 마음"; v.text = Condition + "\n스태미나는 높을수록, 배고픔·목마름·공포감은 낮을수록 편안하다.\n휴식으로 스태미나와 긴장을 돌보고, 식사와 물로 허기·갈증을 해소하자."; v.Add("back", "장면으로 돌아가기"); }
             else if (screen == "community")
             {
                 v.menu = true; v.title = "캠퍼스톡"; v.text = "익명글은 확인되지 않은 이야기일 수 있습니다. 글을 읽어도 현장에서 경험한 것으로 처리되지 않습니다.";
@@ -350,11 +363,11 @@ namespace CampusSurvival
             if (S.screen == "menu" && available.utilityActions.Any(x => x.id == id && x.arg == arg))
             { S.screen = S.returnScreen; S.returnScreen = "place"; }
             S.choicePage = 0; S.beat = 0;
-            if (new[] { "phone", "menu", "community", "appointments", "clubs", "messages", "knowledge", "contacts", "inventory", "journal", "timetable" }.Contains(id)) { S.screen = id; return; }
+            if (new[] { "status", "phone", "menu", "community", "appointments", "clubs", "messages", "knowledge", "contacts", "inventory", "journal", "timetable" }.Contains(id)) { S.screen = id; return; }
             switch (id)
             {
                 case "back":
-                    if (new[] { "menu", "phone", "community", "post", "appointments", "clubs", "messages", "knowledge", "contacts", "inventory", "journal", "timetable" }.Contains(S.screen)) { S.screen = S.returnScreen; S.beat = S.returnBeat; S.returnScreen = "place"; }
+                    if (new[] { "status", "menu", "phone", "community", "post", "appointments", "clubs", "messages", "knowledge", "contacts", "inventory", "journal", "timetable" }.Contains(S.screen)) { S.screen = S.returnScreen; S.beat = S.returnBeat; S.returnScreen = "place"; }
                     else
                     {
                         if (S.screen == "dialogue" || S.screen == "encounter") Say("인사를 마치고 하던 일로 돌아온다. 다음에 나눌 이야기는 조금 남겨둔다.");
@@ -377,7 +390,8 @@ namespace CampusSurvival
                     Say(Pick("출입문과 계단으로 이어지는 길을 눈으로 따라간다.", "오가는 사람을 피해 한쪽에 선다. 문 옆 안내가 눈에 들어온다.", "가방끈을 고쳐 멘다. 잠깐 멈추니 주변 소리가 들린다.") + (S.day == 2 ? " 밖에는 비가 내린다." : " 창밖으로 학생들이 지나간다."));
                     if (S.day == 3 && S.location == "headquarters") Know("warning:ambulance", "본부동 밖에서 구급차 소리를 직접 들었다. 원인은 모른다.");
                     Pace("look:" + S.location); MaybeRandom(); break;
-                case "rest": Spend(15); S.playerStrain = Math.Max(0, S.playerStrain - 2); foreach (var a in Present()) a.fatigue = Math.Max(0, a.fatigue - 1); Say(Pick("빈 의자에 앉아 호흡을 고른다. 아까보다 어깨가 가볍다.", "휴대폰을 잠깐 뒤집어 둔다. 창밖을 보다가 물을 한 모금 마신다.")); MaybeRandom(); break;
+                case "water": Spend(5); Nourish(0, 35); Say("정수기 옆에서 물을 천천히 마신다. 컵을 정리하니 입 안의 마른 느낌이 덜하다."); break;
+                case "rest": Spend(15); S.fear = Math.Max(0, S.fear - 5); S.playerStrain = Math.Max(0, S.playerStrain - 2); foreach (var a in Present()) a.fatigue = Math.Max(0, a.fatigue - 1); Say(Pick("빈 의자에 앉아 호흡을 고른다. 아까보다 어깨가 가볍다.", "휴대폰을 잠깐 뒤집어 둔다. 창밖을 보며 천천히 숨을 내쉰다.")); MaybeRandom(); break;
                 case "waitClass":
                     var waiting = World.lessons.First(x => x.Key == arg); Spend(waiting.start - S.minute); Say("수업 자료를 꺼내 정리하며 기다린다. 강의실 안으로 사람들이 들어오고 수업이 시작될 시간이다."); break;
                 case "wait": Spend(15); Say("주변의 움직임을 보며 잠시 기다린다. 조금 전과는 다른 사람들이 지나간다."); break;
@@ -430,7 +444,7 @@ namespace CampusSurvival
                     S.spent += S.order.price; S.order.status = "paid"; Spend(4); S.order.readyAt = S.minute + 4 + Random(3); Journal("구매", DrinkName(S.order.item) + " " + S.order.price + "원 결제"); break;
                 case "waitDrink": Spend(S.order.readyAt - S.minute); break;
                 case "collect": S.order.status = "collected"; S.inventory.Add(new Entry { id = "drink", text = DrinkName(S.order.item), day = S.day, minute = S.minute }); break;
-                case "consume": Spend(15); S.order.status = "consumed"; S.inventory.RemoveAll(x => x.id == "drink"); S.screen = "place"; Say(Pick("잔을 내려놓고 창밖을 본다. 급하던 생각이 조금 느려진다.", "빈자리에 앉아 한 모금 마신다. 옆 테이블 이야기는 소음 사이로 흩어진다.")); MaybeRandom(); break;
+                case "consume": Spend(15); Nourish(S.order.item == "latte" ? 8 : 0, S.order.item == "latte" ? 25 : 20); S.order.status = "consumed"; S.inventory.RemoveAll(x => x.id == "drink"); S.screen = "place"; Say(Pick("잔을 내려놓고 창밖을 본다. 급하던 생각이 조금 느려진다.", "빈자리에 앉아 한 모금 마신다. 옆 테이블 이야기는 소음 사이로 흩어진다.")); MaybeRandom(); break;
                 case "supply": S.screen = "supply"; S.supply.attended = true; SupplyWitness(); Say("상자 옆에 붙일 표와 옮길 물품이 남아 있다. 먼저 어느 일을 할지 물어본다."); break;
                 case "supplyChoice": ProgressSupply(arg); break;
                 case "activity": StartActivity(arg); break;
@@ -483,7 +497,7 @@ namespace CampusSurvival
             if (choice == "prepare")
             { string key = S.focus.Substring(5); Know("prep:" + key, World.lessons.First(x => x.Key == key).name + " 자료에서 질문할 부분을 미리 표시했다."); Pace("prepare:" + key); Say("페이지 옆에 짧게 질문을 적는다. 수업에서 이 부분이 나오면 놓치지 말자."); }
             else if (choice == "tray" || choice == "quick")
-            { int cost = choice == "tray" ? 5000 : 3000; Spend(choice == "tray" ? (MealRush ? 35 : 25) : 15); S.spent += cost; S.completed.Add(DailyLife("meal")); S.playerStrain = Math.Max(0, S.playerStrain - (choice == "tray" ? 2 : 1)); Journal("식사", "식사를 마치고 " + cost + "원을 지출했다."); Say(choice == "tray" ? "쟁반을 내려놓고 따뜻한 식사를 한다. 마지막 반찬까지 먹은 뒤 식기를 반납한다. 다음 수업까지 남은 시간을 확인한다." : "간편식을 먹으며 잠깐 발을 쉰다. 포장지를 정리하고 일어난다. 긴 식사는 못 했지만 속은 한결 낫다."); }
+            { int cost = choice == "tray" ? 5000 : 3000; Spend(choice == "tray" ? (MealRush ? 35 : 25) : 15); S.spent += cost; S.completed.Add(DailyLife("meal")); Nourish(choice == "tray" ? 50 : 25, 10); S.playerStrain = Math.Max(0, S.playerStrain - (choice == "tray" ? 2 : 1)); Journal("식사", "식사를 마치고 " + cost + "원을 지출했다."); Say(choice == "tray" ? "쟁반을 내려놓고 따뜻한 식사를 한다. 마지막 반찬까지 먹은 뒤 식기를 반납한다. 다음 수업까지 남은 시간을 확인한다." : "간편식을 먹으며 잠깐 발을 쉰다. 포장지를 정리하고 일어난다. 긴 식사는 못 했지만 속은 한결 낫다."); }
             else if (choice == "voice" || choice == "guitar")
             { Spend(30); S.completed.Add(DailyLife("practice")); S.playerStrain++; Know("practice:" + S.day, choice == "voice" ? "개인 연습에서 숨이 끊기는 구간을 표시했다." : "개인 연습에서 기타 전환이 늦는 구간을 표시했다."); Journal("연습", RoomName(S.location, S.room) + "에서 30분 개인 연습 후 정리했다."); Say(choice == "voice" ? "처음부터 크게 부르지 않고 호흡부터 푼다. 자꾸 끊기는 구간을 녹음해 두고, 의자를 정리한 뒤 이용 표시를 지운다." : "느린 박자로 코드 전환을 반복한다. 한 번 매끄럽게 이어진 부분을 메모하고, 케이블과 의자를 정리한 뒤 방을 비운다."); }
             else
@@ -693,7 +707,7 @@ namespace CampusSurvival
             else
             {
                 int remaining = a.duration - a.spentMinutes;
-                Spend(remaining); a.spentMinutes += remaining; a.status = "completed"; S.playerStrain += a.id == "basketball" || a.id == "carry" || a.id == "football" || a.id == "exercise" ? 2 : 1; S.completed.Add("activity:" + S.day + ":" + a.id);
+                Spend(remaining); a.spentMinutes += remaining; a.status = "completed"; S.playerStrain += a.id == "basketball" || a.id == "carry" || a.id == "football" || a.id == "exercise" ? 2 : 1; S.completed.Add("activity:" + S.day + ":" + a.id); if (a.id == "lunch") Nourish(45, 10);
                 foreach (string id in a.witnesses.Where(id => people.Any(p => p.id == id)))
                 { var p = Person(id); p.familiarity++; if (a.approach == "share" || choice == "review") p.trust++; p.memories.Add(a.id + ":" + a.score); }
                 Know("activity:" + a.id, PlaceName(S.location) + " · " + ActivityName(a.id) + "의 이용 공간과 정리 방법");
@@ -712,7 +726,7 @@ namespace CampusSurvival
             a.lastHitMs = a.elapsedMs;
             float tolerance = a.approach == "share" ? 0.60f : 0.50f;
             int score = (int)Math.Round(Math.Max(0, 1 - Math.Abs(MiniPosition - 0.5f) / tolerance) * 100);
-            score = Math.Max(0, score - Math.Min(15, Math.Max(0, S.playerStrain - 2) * 5));
+            score = Math.Max(0, score - Math.Min(20, Math.Max(0, S.playerStrain - 2) * 5 + (S.thirst >= 70 ? 5 : 0) + (S.hunger >= 80 ? 5 : 0)));
             a.hits += score; a.attempts++;
             if (a.attempts == 3) { a.score = a.hits / 3; a.phase = 3; }
         }
@@ -731,6 +745,7 @@ namespace CampusSurvival
                     if (p.trust >= 2 && p.tension < 3) { Invite(p.id, true); break; }
             }
             S.playerStrain = Math.Max(0, S.playerStrain - 4);
+            S.hunger = 15; S.thirst = 10; S.fear = Math.Max(0, S.fear - 15); S.needMinutes = 0;
             S.day++; S.minute = 540; S.location = "arts"; S.room = ""; S.person = ""; S.focus = ""; S.screen = "place"; S.returnScreen = "place"; S.randomEvent = ""; S.pace.Clear(); S.order = null; S.inventory.RemoveAll(x => x.id == "drink");
             foreach (var p in S.actors) p.fatigue = Math.Max(0, p.fatigue - 3);
             TickCommunity(); Say(S.day == 2 ? "비가 내린다. 처마 아래서 가방을 고쳐 멘다. 오늘 수업과 어제 남겨둔 연락을 확인해볼까." : "복도에서 학생들이 휴대폰 화면을 보여주며 이야기한다. 정확히 무슨 일인지는 아직 모르겠다.");

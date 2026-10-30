@@ -181,6 +181,27 @@ class CoreChecks
         Check("reviewing missed classes never converts absence into attendance",()=>{
             var g=Game();var lesson=g.Lessons().First();g.Advance(lesson.end-g.S.minute);g.S.location="library";g.Dispatch("school","review");g.Dispatch("schoolChoice","review");True(g.S.attendance.First(x=>x.id==lesson.Key).text.Contains("결석"));True(g.S.knowledge.Any(x=>x.id=="review:"+lesson.Key));
         });
+        Check("survival clock is independent of read frequency and advance chunk size",()=>{
+            var a=Game();var b=Game();a.Advance(60);for(int i=0;i<12;i++){b.Advance(5);b.View();}True(a.S.hunger==19&&a.S.thirst==16&&a.S.hunger==b.S.hunger&&a.S.thirst==b.S.thirst);b=Reload(b);True(b.S.thirst==16);
+        });
+        Check("status menu preserves exact reading beat and never advances needs",()=>{
+            var g=Game();g.S.beat=2;g.OpenUtility("menu");g.Dispatch("status");True(g.View().menu&&g.S.minute==540&&g.S.hunger==15);g.Dispatch("back");True(g.S.screen=="place"&&g.S.beat==2);
+        });
+        Check("drinking requires a real water point and reduces thirst once per action",()=>{
+            var g=Game(800,"library");g.S.thirst=60;g.Dispatch("water");True(g.S.thirst==25&&g.S.minute==805);var wrong=Game(800,"field");wrong.S.thirst=60;Reject(()=>wrong.Dispatch("water"));
+        });
+        Check("meal reduces hunger and strain affects stamina without health or mana",()=>{
+            var g=Game(800,"cafeteria","dining");g.S.hunger=80;g.S.thirst=70;g.S.playerStrain=5;int before=g.Stamina;g.Dispatch("school","meal");g.Dispatch("schoolChoice","tray");True(g.S.hunger==30&&g.S.thirst==60&&g.Stamina>before);
+        });
+        Check("rest calms fear and restores stamina without fake drinking",()=>{
+            var g=Game(800,"field");g.S.fear=40;g.S.playerStrain=5;g.S.thirst=40;int before=g.Stamina;g.Dispatch("rest");True(g.S.fear==35&&g.S.thirst==40&&g.Stamina>before);
+        });
+        Check("legacy survival defaults migrate and malformed stats are clamped",()=>{
+            var g=Game();g.S.survivalReady=false;g.S.hunger=0;g=Reload(g);True(g.S.hunger==15&&g.S.survivalReady);g.S.thirst=999;g.S.fear=-99;g=Reload(g);True(g.S.thirst==100&&g.S.fear==0);
+        });
+        Check("direct warning raises fear only once and reading anonymous posts is not danger",()=>{
+            var g=Game(800,"headquarters","",3);g.S.lastRandomAt=3*1440+800;g.Dispatch("look");int fear=g.S.fear;True(fear==8);g.Dispatch("look");True(g.S.fear==fear);g.OpenUtility("phone");g.Dispatch("community");g.View();True(g.S.fear==fear);
+        });
         Console.WriteLine("Native C# checks passed: "+count);
     }
 }

@@ -77,6 +77,8 @@ namespace CampusSurvival
         public int revealedGlyphs;
         public List<Entry> transcript = new List<Entry>();
         public int playerStrain;
+        public bool survivalReady;
+        public int hunger = 15, thirst = 10, fear, needMinutes;
         public int dialogueStep, spent, beat, choicePage, communityTick = -1, lastRandomAt = -1000;
         public string randomEvent = "", pendingOutcome = "";
         public bool ended, umbrella;
