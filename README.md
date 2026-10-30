@@ -7,7 +7,7 @@
 
 [Unity 프로젝트 ZIP 다운로드](https://github.com/rlaxodl0310/-/raw/refs/heads/main/demo/campus-unity-project.zip) · [실행·검수 안내](unity/README.md) · [프로젝트 소스](unity/CampusSurvival)
 
-ZIP 압축 해제 → Unity Hub에서 `CampusSurvival` 폴더 추가 → Unity 6 LTS로 열기 → **Campus → Open Game Scene → Play** 순서로 실행합니다. Windows 실행 파일은 Unity 메뉴 **Campus → Build Windows**로 직접 빌드할 수 있습니다. 다운로드 ZIP은 실행 파일이 아닌 소스 프로젝트입니다.
+ZIP 압축 해제 → Unity Hub에서 `CampusSurvival` 폴더 추가 → Unity 6 LTS로 열기 → **Campus → Open Game Scene → Play** 순서로 실행합니다. 시작 오브젝트가 연결된 `Campus.unity`, Play 전 UI 미리보기, 초기화 오류 표시와 `Campus → Check Current UI` 검사를 포함합니다. Windows 실행 파일은 Unity 메뉴 **Campus → Build Windows**로 직접 빌드할 수 있습니다. 다운로드 ZIP은 실행 파일이 아닌 소스 프로젝트입니다.
 
 15개 장소·구체 호실·24개 수업 데이터, 학교 생활·이름 해금·관계 대화·커뮤니티·동아리 면접·카페 주문·약속·봉사 후속 교류·활동 미니게임·저장을 옮겼습니다. 웹의 모든 분기를 1:1 이식한 것은 아니며 차이와 남은 작업은 Unity 안내에 적었습니다. Unity Editor와 Windows 빌드 환경이 없어 실제 화면·Editor 컴파일·Windows 빌드는 미검수입니다. 순수 C# 로직은 별도 컴파일·테스트합니다.
 

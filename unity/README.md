@@ -8,10 +8,26 @@
 2. 배포 ZIP을 압축 해제합니다. Git 저장소를 내려받았다면 `unity/CampusSurvival`이 프로젝트 폴더입니다.
 3. Unity Hub → **Projects → Add → Add project from disk**에서 **CampusSurvival** 폴더를 선택합니다. `Assets`, `Packages`, `ProjectSettings`가 바로 들어 있는 폴더입니다.
 4. 첫 임포트·패키지 설치가 끝날 때까지 기다립니다. 최초에는 Unity 패키지 다운로드를 위한 인터넷 연결이 필요할 수 있습니다. 플레이 중에는 필요 없습니다.
-5. 상단 **Campus → Open Game Scene**을 선택합니다. 첫 임포트 시 빈 시작 장면도 자동 생성합니다.
+5. 최초 임포트 후 시작 장면을 자동으로 선택합니다(현재 장면에 저장하지 않은 수정이 있으면 바꾸지 않습니다). 상단 **Campus → Open Game Scene**으로도 열 수 있습니다. 실제 `Assets/Campus/Scenes/Campus.unity`와 시작 컴포넌트를 포함합니다. Game 탭에는 Play 전에도 배경·대화창 미리보기가 생성됩니다.
 6. Unity 상단 **▶ Play**를 누릅니다. UI·배경·초상화·게임 상태는 시작 코드가 생성하므로 Inspector에 별도로 연결할 작업이 없습니다.
 
 Game 탭은 우선 **1440×900** 또는 **16:10**으로 검수하세요. 창 크기에 따라 UI가 조정되지만 Unity 실제 화면 검수는 아직 하지 않았습니다. Space는 본문 이어 읽기와 타이밍 입력에 사용하며, 선택지는 마우스로 고릅니다. 상단 메뉴·휴대폰은 전용 화면으로 전환됩니다.
+
+## 기본 하늘만 보이는 경우 · 시작 화면 수정
+
+이전 배포본은 빈 장면과 런타임 자동 생성 코드에 의존했고, Unity 실행 검수 없이 제공했습니다. 기본 카메라의 하늘만 나온다는 제보를 받아 아래를 수정했습니다. 제보 화면만으로 기존 문제의 정확한 오류 문장까지 확인한 것은 아닙니다.
+
+- 시작 오브젝트의 스크립트 GUID를 연결한 `Campus.unity`를 배포본에 포함하고 빌드 시작 장면으로 등록했습니다.
+- Play 전에도 같은 렌더러로 배경·대화창·선택지 미리보기를 만듭니다. 시작 장면 재생성 메뉴 `Campus → Repair Startup Scene`도 추가했습니다.
+- 초기화 중 리소스/폰트/기타 오류가 나면 Console에 예외를 기록하고 화면에 오류·재시작 버튼을 표시합니다. 컴파일 오류로 스크립트 자체가 실행되지 않는 경우까지 이 화면을 표시할 수는 없습니다.
+- 실제 시작에 성공하면 Console에 `Campus 시작 완료`가 표시됩니다.
+- 인물의 위쪽이 화면 밖으로 잘리던 배치를 수정하고, 본문 클릭으로 이어 읽기를 추가했습니다.
+
+업데이트 ZIP은 **새 폴더에 압축 해제**하고, Unity Hub에서 그 안의 **CampusSurvival** 폴더를 추가해 여세요. 이 폴더 바로 아래에 `Assets`, `Packages`, `ProjectSettings`가 있어야 합니다. 기존 Unity 프로젝트에 ZIP 전체를 폴더로 넣는 방식으로 설치하지 마세요. 기존 수동 저장은 별도 LocalLow 폴더에 남습니다.
+
+**Campus → Open Game Scene** 후 Game 탭에서 배경과 대화창이 보이는지 확인하고 Play를 누르세요. Hierarchy에는 `Campus Survival`과 그 아래 `Canvas`가 있어야 합니다. 여전히 기본 하늘만 보이면 Console의 **첫 빨간 오류**를 확인하세요. `Campus` 메뉴 자체가 없으면 프로젝트 폴더/스크립트 임포트/컴파일부터 확인해야 합니다.
+
+실행 후 **Campus → Check Current UI**를 선택하면 현재 Editor에서 활성 Canvas·글자·폰트·버튼·배경 생성 여부를 확인합니다. 이 메뉴는 사용자 컴퓨터의 Unity에서 실행하는 검사이며, 클라우드에서 실행했다고 주장하지 않습니다.
 
 ## 현재 옮긴 범위
 
@@ -87,4 +103,4 @@ python3 unity/Tools/package_project.py
 dotnet run --project unity/Tests/Campus.CoreChecks.csproj -- unity/CampusSurvival/Assets/Campus/Resources/Data/world.json
 ```
 
-현재 **41개 검사**가 통과했습니다. 이 검사는 **순수 C# 로직 컴파일·테스트와 Unity 연결 코드의 C# 문법 검사**입니다. Unity API에 대한 컴파일, Play 모드, 그래픽 검수 또는 Windows 빌드를 대체하지 않습니다. `Korean.ttf`는 SIL OFL의 나눔고딕이며 라이선스를 함께 포함합니다. 그림은 이 저장소의 기존 시제품 자산을 재사용합니다.
+현재 **43개 검사**가 통과했습니다. 이 검사는 **순수 C# 로직 컴파일·테스트, 시작 장면/빌드 GUID 연결, Unity 연결 코드의 C# 문법 검사**입니다. Unity API에 대한 컴파일, Play 모드, 그래픽 검수 또는 Windows 빌드를 대체하지 않습니다. `Korean.ttf`는 SIL OFL의 나눔고딕이며 라이선스를 함께 포함합니다. 그림은 이 저장소의 기존 시제품 자산을 재사용합니다.

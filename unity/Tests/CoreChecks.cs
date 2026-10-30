@@ -29,6 +29,20 @@ class CoreChecks
                 if(errors.Length>0)throw new Exception(file+"\n"+string.Join("\n",errors.Select(x=>x.ToString())));
             }
         });
+        Check("shipped scene binds the enabled startup MonoBehaviour",()=>{
+            string assets=Path.GetFullPath(Path.Combine(Path.GetDirectoryName(args[0]), "../.."));
+            string runtime=File.ReadAllText(Path.Combine(assets,"Runtime/CampusApp.cs.meta"));
+            string guid=runtime.Split('\n').First(x=>x.StartsWith("guid:")).Substring(6).Trim();
+            string scene=File.ReadAllText(Path.Combine(assets,"Scenes/Campus.unity"));
+            True(scene.Contains("m_Name: Campus Survival")&&scene.Contains("m_Enabled: 1")&&scene.Contains("guid: "+guid));
+        });
+        Check("build settings point to the shipped scene GUID",()=>{
+            string assets=Path.GetFullPath(Path.Combine(Path.GetDirectoryName(args[0]), "../.."));
+            string meta=File.ReadAllText(Path.Combine(assets,"Scenes/Campus.unity.meta"));
+            string guid=meta.Split('\n').First(x=>x.StartsWith("guid:")).Substring(6).Trim();
+            string settings=File.ReadAllText(Path.GetFullPath(Path.Combine(assets,"../../ProjectSettings/EditorBuildSettings.asset")));
+            True(settings.Contains("path: Assets/Campus/Scenes/Campus.unity")&&settings.Contains("guid: "+guid));
+        });
         Check("exported 15 locations and concrete arts rooms",()=>{ True(world.buildings.Length==15); True(world.buildings.First(x=>x.id=="arts").rooms.Any(x=>x.name.Contains("409"))); True(world.lessons.Length==24); });
         Check("cold start has no names, no club, 09:00",()=>{ var g=Game(); True(g.S.actors.All(x=>!x.named)); True(g.S.clubs.Count==0); True(g.S.minute==540); });
         Check("reading views consumes no clock or randomness",()=>{ var g=Game(); int seed=g.S.seed; for(int i=0;i<100;i++)g.View(); True(g.S.minute==540&&g.S.seed==seed); });

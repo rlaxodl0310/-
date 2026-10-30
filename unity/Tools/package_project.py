@@ -58,6 +58,8 @@ def metadata(path):
   ascentCalculationMode: 1
   useLegacyBoundsCalculation: 0
 ''' + tail
+    if path.suffix == '.unity':
+        return header + 'DefaultImporter:\n  externalObjects: {}\n' + tail
     return header + 'TextScriptImporter:\n  externalObjects: {}\n' + tail
 
 for path in sorted(ASSETS.rglob('*')):

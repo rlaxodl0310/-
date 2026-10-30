@@ -22,37 +22,96 @@ namespace CampusSurvival
         int lastWidth, lastHeight;
         float miniRemainder;
         bool saving, dirty, isError;
+        bool initializing;
+        string startupError = "";
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void Boot()
         {
-            if (FindFirstObjectByType<CampusApp>() != null) return;
-            var go = new GameObject("Campus Survival");
-            DontDestroyOnLoad(go);
-            go.AddComponent<CampusApp>();
+            var app = FindFirstObjectByType<CampusApp>();
+            if (app == null)
+            {
+                var go = new GameObject("Campus Survival");
+                app = go.AddComponent<CampusApp>();
+            }
+            app.EnsureStarted();
         }
-        void Awake()
+        void Awake() { if (Application.isPlaying) EnsureStarted(); }
+        public void EnsureStarted()
         {
+            if (initializing || game != null && canvas != null && startupError == "") return;
+            try
+            {
+                initializing = true;
+                Initialize(false);
+                startupError = "";
+                Debug.Log("Campus 시작 완료 · Unity " + Application.unityVersion + " · 배경/대화 UI/선택지 생성", this);
+                DontDestroyOnLoad(gameObject);
+            }
+            catch (Exception e)
+            {
+                startupError = e.ToString();
+                if (canvas != null) canvas.enabled = false;
+                Debug.LogException(e, this);
+            }
+            finally { initializing = false; }
+        }
+        // Editor preview uses exactly the same renderer; no disk reads, saves or gameplay callbacks run.
+        public void RenderEditorPreview()
+        {
+            if (Application.isPlaying) throw new InvalidOperationException("Play 모드에서는 미리보기를 다시 만들 수 없습니다.");
+            Initialize(true);
+        }
+        void Initialize(bool preview)
+        {
+            var previousCanvases = transform.Cast<Transform>().Where(x => x.name == "Canvas" || x.name == "Startup Preview").ToArray();
             Application.targetFrameRate = 60;
             font = Resources.Load<Font>("Korean");
             if (font == null) font = Font.CreateDynamicFontFromOSFont(new[] { "Malgun Gothic", "Apple SD Gothic Neo", "NanumGothic", "Arial" }, 24);
+            if (font == null) throw new InvalidOperationException("한글 폰트를 불러오지 못했습니다. Assets/Campus/Resources/Korean.ttf를 확인해주세요.");
             var data = Resources.Load<TextAsset>("Data/world");
-            if (data == null) { Debug.LogError("Data/world.json이 없습니다. Unity 프로젝트의 Assets 폴더를 확인해주세요."); enabled = false; return; }
-            game = new CampusEngine(JsonUtility.FromJson<WorldData>(data.text), seed: Environment.TickCount);
-            foreach (var key in new[] { "Campus", "Expressions", "Activities", "Cafe" }) art[key] = Resources.Load<Texture2D>("Art/" + key);
-            if (EventSystem.current == null) new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
-            EventSystem.current.sendNavigationEvents = false;
+            if (data == null) throw new InvalidOperationException("Data/world.json이 없습니다. ZIP의 CampusSurvival 폴더를 Unity Hub에서 직접 열어주세요.");
+            game = new CampusEngine(JsonUtility.FromJson<WorldData>(data.text), seed: preview ? 197609 : Environment.TickCount);
+            foreach (var key in new[] { "Campus", "Expressions", "Activities", "Cafe" })
+            {
+                art[key] = Resources.Load<Texture2D>("Art/" + key);
+                if (art[key] == null) throw new InvalidOperationException("배경/인물 이미지가 없습니다: Art/" + key);
+            }
+            if (!preview)
+            {
+                if (EventSystem.current == null)
+                {
+                    var events = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+                    events.transform.SetParent(transform, false);
+                }
+                EventSystem.current.sendNavigationEvents = false;
+            }
             var c = new GameObject("Canvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             c.transform.SetParent(transform, false);
-            canvas = c.GetComponent<Canvas>(); canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas = c.GetComponent<Canvas>(); canvas.renderMode = RenderMode.ScreenSpaceOverlay; canvas.sortingOrder = 20;
             var scaler = c.GetComponent<CanvasScaler>(); scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; scaler.matchWidthOrHeight = 0.5f;
             root = c.GetComponent<RectTransform>();
-            if (File.Exists(SavePath(0))) game.OpenUtility("menu");
+            if (!preview && File.Exists(SavePath(0))) game.OpenUtility("menu");
             Draw();
+            foreach (var old in previousCanvases) RemoveObject(old.gameObject);
+        }
+        void RemoveObject(GameObject target)
+        { if (Application.isPlaying) { target.SetActive(false); Destroy(target); } else DestroyImmediate(target); }
+        void OnGUI()
+        {
+            if (startupError == "") return;
+            GUI.depth = -100;
+            float width = Mathf.Min(Screen.width - 32, 1000), height = Mathf.Min(Screen.height - 32, 600);
+            var rect = new Rect((Screen.width - width) / 2, (Screen.height - height) / 2, width, height);
+            GUI.Box(rect, "Campus Survival · 시작 오류");
+            var style = new GUIStyle(GUI.skin.label) { fontSize = 17, wordWrap = true };
+            if (font != null) style.font = font;
+            GUI.Label(new Rect(rect.x + 18, rect.y + 40, width - 36, height - 120), "게임 UI 초기화가 중단됐습니다. Console의 첫 빨간 오류와 아래 내용을 확인해주세요.\n\n" + startupError, style);
+            if (GUI.Button(new Rect(rect.x + 18, rect.yMax - 60, width - 36, 40), "다시 시작")) EnsureStarted();
         }
         void Update()
         {
-            if (game == null || root == null) return;
+            if (game == null || root == null || startupError != "") return;
             if (lastWidth != Screen.width || lastHeight != Screen.height) { Draw(); return; }
             var a = game.S.activity;
             if (game.S.screen == "activity" && a != null && a.phase == 1)
@@ -127,6 +186,7 @@ namespace CampusSurvival
             var element = rt.gameObject.AddComponent<LayoutElement>(); element.minHeight = height; element.preferredHeight = height;
             var b = rt.gameObject.AddComponent<Button>(); var colors = b.colors; colors.normalColor = Color.white; colors.highlightedColor = new Color(0.71f, 0.92f, 0.87f); colors.pressedColor = new Color(0.49f, 0.72f, 0.68f); b.colors = colors;
             var text = Label(rt, label, 21); text.alignment = TextAnchor.MiddleLeft; Stretch(text.rectTransform, 20, 16, 5, 5);
+            rt.name = "Action · " + label;
             b.onClick.AddListener(() => clicked()); return b;
         }
         void Column(RectTransform rt, int spacing = 10)
@@ -179,13 +239,14 @@ namespace CampusSurvival
             var raw = Box("Character", root).gameObject.AddComponent<RawImage>(); raw.texture = art["Expressions"]; raw.raycastTarget = false; raw.uvRect = new Rect(col / 4f, (2 - row) / 3f, 0.25f, 1f / 3f);
             // Atlas cells are square. Keep their native proportion at every aspect ratio.
             float availableWidth = root.rect.width > 0 ? root.rect.width : canvas.GetComponent<CanvasScaler>().referenceResolution.x;
-            float size = Mathf.Min(lastWidth / (float)lastHeight < 1 ? 580 : 660, availableWidth * 0.85f);
-            var rt = raw.rectTransform; rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.45f); rt.pivot = new Vector2(0.5f, 0); rt.anchoredPosition = new Vector2(0, -20); rt.sizeDelta = new Vector2(size, size);
+            float referenceHeight = canvas.GetComponent<CanvasScaler>().referenceResolution.y;
+            float size = Mathf.Min(Mathf.Max(160, referenceHeight - 88 - 428), availableWidth * 0.85f);
+            var rt = raw.rectTransform; rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0); rt.pivot = new Vector2(0.5f, 0); rt.anchoredPosition = new Vector2(0, 428); rt.sizeDelta = new Vector2(size, size);
         }
         void Draw()
         {
             if (root == null) return;
-            foreach (Transform child in root) Destroy(child.gameObject);
+            foreach (var child in root.Cast<Transform>().ToArray()) RemoveObject(child.gameObject);
             marker = null;
             lastWidth = Screen.width; lastHeight = Screen.height;
             float aspect = (float)Mathf.Max(1, Screen.width) / Mathf.Max(1, Screen.height);
@@ -202,6 +263,9 @@ namespace CampusSurvival
             var speaker = Label(panel, view.speaker ?? "김태이", 23, accent); At(speaker.rectTransform, new Vector2(0, 1), Vector2.one, 24, 24, 53, -92);
             string[] beats = Beats(view.text); game.S.beat = Mathf.Clamp(game.S.beat, 0, beats.Length - 1);
             var copy = Label(panel, beats[game.S.beat], 25); At(copy.rectTransform, new Vector2(0, 1), Vector2.one, 24, 24, 99, -202);
+            var readArea = Box("Click to continue", panel, new Color(0, 0, 0, 0));
+            At(readArea, new Vector2(0, 1), Vector2.one, 24, 24, 99, -166);
+            readArea.gameObject.AddComponent<Button>().onClick.AddListener(AdvanceReading);
             if (game.S.screen == "activity" && game.S.activity != null && game.S.activity.step == 1 && game.S.activity.phase == 1) DrawMini(panel);
             var choices = Box("Choices", panel); At(choices, Vector2.zero, new Vector2(1, 0), 18, 18, -197, 14); Column(choices, 7);
             if (game.S.beat < beats.Length - 1) { Button(choices, "다음  ·  Space  " + (game.S.beat + 1) + "/" + beats.Length, AdvanceReading, 56); return; }
