@@ -72,6 +72,7 @@ namespace CampusSurvival
         public int version = 1, day = 1, minute = 540, seed = 197609, worldSeed = 197609;
         public string location = "arts", room = "", screen = "place", person = "", focus = "", narrative = "", speaker = "김태이";
         public string returnScreen = "place";
+        public int playerStrain;
         public int dialogueStep, spent, beat, choicePage, communityTick = -1, lastRandomAt = -1000;
         public string randomEvent = "", pendingOutcome = "";
         public bool ended, umbrella;
@@ -100,6 +101,7 @@ namespace CampusSurvival
     public class GameView
     {
         public string title, text, speaker, portrait, art = "Campus";
+        public List<GameAction> utilityActions = new List<GameAction>();
         public bool menu;
         public List<GameAction> actions = new List<GameAction>();
         public void Add(string id, string label, string arg = "") { actions.Add(new GameAction(id, label, arg)); }

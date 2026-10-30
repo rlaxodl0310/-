@@ -49,7 +49,7 @@ class CoreChecks
         Check("three short distinct actions batch time",()=>{ var g=Game(); g.Dispatch("look"); g.S.randomEvent=""; g.Dispatch("look"); True(g.S.minute==540); g.Dispatch("rooms"); g.Dispatch("room","band"); True(g.S.minute==540); g.Dispatch("travel"); g.Dispatch("visit","music"); True(g.S.minute==570); });
         Check("room-specific actual attendance",()=>{ var g=Game(570,"arts","band"); g.Dispatch("class","1:taei:ensemble"); g.Dispatch("classChoice","blend"); True(g.S.minute==660); True(g.S.attendance.Any(x=>x.id=="1:taei:ensemble"&&x.text.Contains("출석"))); });
         Check("wrong room cannot attend",()=>{ var g=Game(570,"arts","classes"); Reject(()=>g.Dispatch("class","1:taei:ensemble")); });
-        Check("class skipping remains free, records absence",()=>{ var g=Game(570); g.Advance(90); True(g.S.attendance.Any(x=>x.text.Contains("결석"))); True(g.View().actions.Any(x=>x.id=="travel")); });
+        Check("class skipping remains free, records absence",()=>{ var g=Game(570); g.Advance(90); True(g.S.attendance.Any(x=>x.text.Contains("결석"))); True(g.View().utilityActions.Any(x=>x.id=="travel")); });
         Check("late and partial class records",()=>{ foreach(var pair in new[]{(580,"지각"),(600,"부분 참석")}) { var g=Game(pair.Item1,"arts","band"); g.Dispatch("class","1:taei:ensemble"); g.Dispatch("classChoice","blend"); True(g.S.attendance.First().text.Contains(pair.Item2)); } });
         Check("NPC class and room privacy priority",()=>{ var g=Game(600,"creative","nursing"); True(g.Present().Any(x=>x.id=="yeogyeong")); True(!g.Available(Actor(g))); g.S.room="art"; True(!g.Present().Any()); });
         Check("NPCs move with passing time",()=>{ var g=Game(800,"hall"); string before=g.LocationOf(Actor(g)); bool moved=false; for(int i=0;i<6;i++){g.Advance(60); if(g.LocationOf(Actor(g))!=before)moved=true;} True(moved); });
@@ -85,6 +85,53 @@ class CoreChecks
         Check("new story memories stay with their actual participant",()=>{ var g=Game(810,"library",day:2); var p=Actor(g); p.named=true;p.trust=3; g.S.appointments.Add(new Appointment{id="f",kind="followup",person=p.id,day=2,minute=810,location="library",label="이야기",status="pending"});g.Dispatch("meeting","f");g.Dispatch("meetingChoice","listen");g.Dispatch("meetingChoice","share");True(p.memories.Contains("followup:shared"));True(!Actor(g,"soyul").memories.Any(x=>x.StartsWith("followup:"))); });
         Check("entire three-day attendance and home loop",()=>{ var g=Game(); for(int day=1;day<=3;day++){foreach(var c in g.Lessons().ToArray()){g.S.screen="place";g.S.location=c.location;g.S.room=c.room;if(g.S.minute<c.start)g.Advance(c.start-g.S.minute);g.Dispatch("class",c.Key);g.Dispatch("classChoice",c.choices[0].id);}g.Advance(1020-g.S.minute);g.Dispatch("home");g.Dispatch("nextDay");}True(g.S.ended);True(g.S.attendance.Count==6);True(g.S.attendance.All(x=>x.text.Contains("출석"))); });
         Check("a free NPC cannot appear in every room in the same building",()=>{ var g=Game(800,"hall","musicClub");True(!g.Present().Any());g.S.room="clubs";True(g.Present().Any(x=>x.id=="yeogyeong")); });
+        Check("Taei portrait is visible on ordinary arrival, class and quiet screens",()=>{
+            var g=Game();True(g.View().portrait=="taei");g.Dispatch("goClass","1:taei:ensemble");True(g.View().portrait=="taei");g.Dispatch("waitClass","1:taei:ensemble");g.Dispatch("class","1:taei:ensemble");True(g.View().portrait=="taei");
+        });
+        Check("real encounter shows an unnamed NPC illustration without disclosing identity",()=>{
+            var g=Game(800,"hall");g.Dispatch("encounter");True(g.View().portrait==g.Present().First().id);True(!g.View().text.Contains("차여경"));g.Dispatch("talk","yeogyeong");True(g.View().portrait=="yeogyeong");
+        });
+        Check("no story screen has a hidden multi-page choice list",()=>{
+            foreach(var b in world.buildings)foreach(int day in new[]{1,2,3})foreach(int minute in new[]{540,570,800,1020,1320}){
+                var g=Game(minute,b.id,day:day);True(g.View().actions.Count<=3);foreach(var a in g.View().actions)True(!new[]{"rooms","travel","umbrella","wait"}.Contains(a.id));
+            }
+            var talk=Game(800,"hall");talk.Dispatch("encounter");talk.Dispatch("talk","yeogyeong");for(int step=0;step<4;step++){talk.S.dialogueStep=step;True(talk.View().actions.Count<=3);}
+        });
+        Check("moved scene actions stay accessible in the menu and show their result",()=>{
+            var g=Game(800,"hall");g.S.playerStrain=4;int minute=g.S.minute;g.OpenUtility("menu");True(g.View().utilityActions.Any(x=>x.id=="rooms"));True(g.View().utilityActions.Any(x=>x.id=="wait"));True(g.S.minute==minute);g.Dispatch("rest");True(g.S.screen=="place"&&g.S.minute==minute+15&&g.S.playerStrain==2);
+        });
+        Check("asking about work learns information, sharing music discloses only to the listener",()=>{
+            var g=Game(800,"hall");g.Dispatch("encounter");g.Dispatch("talk","yeogyeong");g.Dispatch("respond","work");True(g.S.knowledge.Any(x=>x.id=="conversation:yeogyeong:1:work"));True(!Actor(g).memories.Contains("song"));g.Dispatch("respond","share");True(Actor(g).memories.Contains("song"));True(!Actor(g,"soyul").memories.Contains("song"));
+        });
+        Check("consent and self-disclosure choices produce different relationship consequences",()=>{
+            var a=Game(800,"hall");a.Dispatch("encounter");a.Dispatch("talk","yeogyeong");a.Dispatch("respond","check");
+            var b=Game(800,"hall");b.Dispatch("encounter");b.Dispatch("talk","yeogyeong");b.Dispatch("respond","work");b.Dispatch("respond","share");
+            True(Actor(a).trust==1&&Actor(b).trust==0);True(Actor(b).memories.Contains("song")&&!Actor(a).memories.Contains("song"));
+        });
+        Check("the same conversation choice cannot repeatedly farm trust",()=>{
+            var g=Game(800,"hall");for(int i=0;i<2;i++){g.Dispatch("encounter");g.Dispatch("talk","yeogyeong");g.Dispatch("respond","check");g.Dispatch("back");}True(Actor(g).trust==1);
+        });
+        Check("a completed conversation stops offering endless identical followups",()=>{
+            var g=Game(800,"hall");g.Dispatch("encounter");g.Dispatch("talk","yeogyeong");g.Dispatch("respond","introduce");g.Dispatch("respond","follow");g.Dispatch("respond","share");True(!g.View().actions.Concat(g.View().utilityActions).Any(x=>x.id=="respond"&&x.arg=="follow"));
+        });
+        Check("waiting for an actual upcoming class changes the scene at the right minute",()=>{
+            var g=Game(540,"arts","band");g.Dispatch("waitClass","1:taei:ensemble");True(g.S.minute==570);True(g.View().actions.Any(x=>x.id=="class"));
+        });
+        Check("class interpretation choices preserve different learned notes",()=>{
+            var a=Game(570,"arts","band");a.Dispatch("class","1:taei:ensemble");a.Dispatch("classChoice","blend");
+            var b=Game(570,"arts","band");b.Dispatch("class","1:taei:ensemble");b.Dispatch("classChoice","phrase");
+            True(a.S.knowledge.Any(x=>x.id=="lesson:1:taei:ensemble:blend"));True(!a.S.knowledge.Any(x=>x.id.EndsWith(":phrase")));True(b.S.knowledge.Any(x=>x.id=="lesson:1:taei:ensemble:phrase"));
+        });
+        Check("accumulated player strain changes physical timing outcomes",()=>{
+            var rested=Game(800,"gym","court");var tired=Game(800,"gym","court");tired.S.playerStrain=5;
+            foreach(var g in new[]{rested,tired}){g.Dispatch("activity","basketball");g.Dispatch("activityChoice","share");g.Dispatch("miniStart");for(int i=0;i<4;i++)g.AdvanceMini(100);g.Dispatch("miniHit");}
+            True(rested.S.activity.hits>tired.S.activity.hits);
+        });
+        Check("ensemble class notes improve the matching later rehearsal approach",()=>{
+            var learned=Game(800,"arts","band");var skipped=Game(800,"arts","band");learned.S.knowledge.Add(new Entry{id="lesson:1:taei:ensemble:blend",text="호흡 메모"});
+            foreach(var g in new[]{learned,skipped}){g.Dispatch("activity","music");g.Dispatch("activityChoice","vocal");g.Dispatch("activityChoice","blend");}
+            True(learned.S.activity.score>skipped.S.activity.score);
+        });
         Console.WriteLine("Native C# checks passed: "+count);
     }
 }

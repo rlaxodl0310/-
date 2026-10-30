@@ -138,6 +138,7 @@ namespace CampusSurvival
                 int known = game.S.knowledge.Count, items = game.S.inventory.Count;
                 game.Dispatch(id, arg); error = ""; isError = false;
                 if (game.S.knowledge.Count > known) error = "새 정보 · " + game.S.knowledge.Last().text;
+                if (error.Length > 68) error = error.Substring(0, 65) + "…";
                 if (game.S.inventory.Count > items) error = "획득 · " + game.S.inventory.Last().text;
                 if (!new[] { "back", "phone", "menu", "community", "appointments", "clubs", "messages", "knowledge", "contacts", "inventory", "journal", "timetable", "travel", "rooms", "class", "counter", "encounter", "interview", "resumeActivity" }.Contains(id))
                 { dirty = true; Save(0, false); }
@@ -226,7 +227,8 @@ namespace CampusSurvival
         {
             var header = Box("Header", root, new Color(0.025f, 0.065f, 0.08f, 0.96f)); At(header, new Vector2(0, 1), Vector2.one, top: 0, bottom: -88);
             string title = "CAMPUS / " + game.S.day + "일차  " + CampusEngine.Clock(game.S.minute) + "  ·  " + game.Weather;
-            var t = Label(header, title, 20, accent); At(t.rectTransform, Vector2.zero, Vector2.one, 24, 260, 20, 0);
+            var t = Label(header, title, 20, accent); At(t.rectTransform, Vector2.zero, Vector2.one, 24, 388, 20, 0);
+            var travel = Button(header, "이동", () => { game.OpenUtility("menu"); Act("travel"); }); At(travel.GetComponent<RectTransform>(), new Vector2(1, 0), Vector2.one, -372, 256, 16, 16);
             var phone = Button(header, "휴대폰", () => { game.OpenUtility("phone"); Draw(); }); At(phone.GetComponent<RectTransform>(), new Vector2(1, 0), Vector2.one, -244, 128, 16, 16);
             var menu = Button(header, "메뉴", () => { game.OpenUtility("menu"); Draw(); }); At(menu.GetComponent<RectTransform>(), new Vector2(1, 0), Vector2.one, -116, 16, 16, 16);
         }
@@ -235,7 +237,7 @@ namespace CampusSurvival
             if (view.menu || string.IsNullOrEmpty(view.portrait) || !art.ContainsKey("Expressions")) return;
             int col = view.portrait == "seoyeon" ? 1 : view.portrait == "yeogyeong" ? 2 : view.portrait == "soyul" ? 3 : 0;
             var p = game.S.actors.FirstOrDefault(x => x.id == view.portrait);
-            int row = p != null && p.tension >= 3 ? 2 : p != null && p.fatigue >= 3 ? 1 : 0;
+            int row = p != null && p.tension >= 3 ? 2 : (p != null && p.fatigue >= 3 || view.portrait == "taei" && game.S.playerStrain >= 3) ? 1 : 0;
             var raw = Box("Character", root).gameObject.AddComponent<RawImage>(); raw.texture = art["Expressions"]; raw.raycastTarget = false; raw.uvRect = new Rect(col / 4f, (2 - row) / 3f, 0.25f, 1f / 3f);
             // Atlas cells are square. Keep their native proportion at every aspect ratio.
             float availableWidth = root.rect.width > 0 ? root.rect.width : canvas.GetComponent<CanvasScaler>().referenceResolution.x;
@@ -269,10 +271,8 @@ namespace CampusSurvival
             if (game.S.screen == "activity" && game.S.activity != null && game.S.activity.step == 1 && game.S.activity.phase == 1) DrawMini(panel);
             var choices = Box("Choices", panel); At(choices, Vector2.zero, new Vector2(1, 0), 18, 18, -197, 14); Column(choices, 7);
             if (game.S.beat < beats.Length - 1) { Button(choices, "다음  ·  Space  " + (game.S.beat + 1) + "/" + beats.Length, AdvanceReading, 56); return; }
-            int pageSize = view.actions.Count > 3 ? 2 : 3, pages = Math.Max(1, (view.actions.Count + pageSize - 1) / pageSize);
-            game.S.choicePage = Mathf.Clamp(game.S.choicePage, 0, pages - 1);
-            foreach (var action in view.actions.Skip(game.S.choicePage * pageSize).Take(pageSize)) { var a = action; Button(choices, a.label, () => Act(a.id, a.arg), 53); }
-            if (pages > 1) Button(choices, "다른 선택을 생각해본다.  " + (game.S.choicePage + 1) + "/" + pages, () => { game.S.choicePage = (game.S.choicePage + 1) % pages; Draw(); }, 53);
+            foreach (var action in view.actions.Take(3)) { var a = action; Button(choices, a.label, () => Act(a.id, a.arg), 53); }
+
         }
         void DrawMini(RectTransform panel)
         {
@@ -292,6 +292,12 @@ namespace CampusSurvival
             foreach (var action in view.actions) { var a = action; Button(content, a.label, () => Act(a.id, a.arg), 66); }
             if (game.S.screen == "menu")
             {
+                if (view.utilityActions.Count > 0)
+                {
+                    FlexibleText(content, "지금 이 장소에서", 26, accent);
+                    foreach (var action in view.utilityActions) { var a = action; Button(content, a.label, () => Act(a.id, a.arg), 60); }
+                }
+                FlexibleText(content, "태이의 상태 · " + (game.S.playerStrain >= 5 ? "피로가 많이 쌓였다" : game.S.playerStrain >= 3 ? "조금 쉬어도 좋겠다" : "움직일 여유가 있다"), 22, muted);
                 FlexibleText(content, "저장 · 불러오기", 26, accent);
                 for (int i = 0; i <= 3; i++)
                 {
