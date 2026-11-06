@@ -61,3 +61,21 @@ body{background:#e6e7df}.utility-page{border-radius:8px;box-shadow:none;border-c
 @media(max-height:650px) and (min-width:651px){.vn-stage .vn-panel{bottom:14px;padding:16px 25px}.vn-line{font-size:16px;min-height:2.7em}.vn-controls{margin-top:11px}}
 @media(max-width:650px){.cafe-cinematic-art{background-size:auto 78%;background-position:58% 10%;background-color:#283229}}
 .vn-stage .vn-panel{background:#17241fdc}.vn-stage:has(.cafe-cinematic) .vn-line{min-height:0}
+
+/* Taei's dedicated three-pose sheet: shared identity in neutral and emotional scenes. */
+.vn-stage .scene-visual .portrait[data-actor="taei"],
+.portrait[data-actor="taei"]{
+ background-image:url('../docs/assets/taei-web-expressions.png');
+ background-size:300% 100%;
+ background-position:calc(var(--expression,0)*50%) 0;
+ aspect-ratio:1/2;
+ border-radius:0;
+ box-shadow:none;
+ mask-image:linear-gradient(#000 88%,transparent);
+}
+.vn-stage .scene-visual .portrait[data-actor="taei"]{
+ top:100px;right:16%;width:min(30vw,360px);max-width:none;
+}
+@media(max-width:650px){
+ .vn-stage .scene-visual .portrait[data-actor="taei"]{top:150px;right:5%;width:min(64vw,270px);max-width:none;}
+}
