@@ -1,3 +1,4 @@
+import {debitMoney} from './wallet.js';
 import {advanceFreeTime} from './free-roam.js';
 import {everydayRoll} from './everyday-life.js';
 import {wetWeather} from './weather.js';
@@ -12,6 +13,7 @@ export function payCafeOrder(state){
  const s=structuredClone(state),life=cafeStore(s),busy=s.clock.minute>=720&&s.clock.minute<840,wait=(busy?8:4)+Math.floor(everydayRoll(s)*4);if(s.clock.minute+wait>1260)throw new Error('주문 마감 전까지 준비가 어렵습니다.');
  const order={id:`cafe-${s.day}-${++life.sequence}`,day:s.day,minute:s.clock.minute,drink:drink.id,name:(draft.temperature==='iced'?'아이스 ':'따뜻한 ')+drink.name,price:drink.price,temperature:draft.temperature,status:'ready',wait};
  order.text=(busy?'앞선 주문이 있어 진동벨을 받고 옆에서 기다렸다.':'결제한 뒤 수령대 옆에서 조금 기다렸다.')+' '+(wetWeather(s)&&draft.temperature==='hot'?'창에 맺힌 빗방울을 보는 동안 컵에서 김이 올라온다.':draft.temperature==='iced'?'얼음 담는 소리 뒤로 주문한 음료의 진동벨이 울린다.':'직원이 잔을 준비해 주문 번호를 부른다.');
+ debitMoney(s,order.price,order.name);
  life.orders.push(order);life.active=order.id;life.spent+=order.price;life.draft=null;s.memory.push(`[${s.day}일차] ${order.name}을 ${order.price.toLocaleString()}원에 주문하고 ${wait}분 기다렸다.`);
  const next=advanceFreeTime(s,wait);next.pace={count:0,seen:{}};return next;
 }

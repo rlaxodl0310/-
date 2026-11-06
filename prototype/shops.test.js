@@ -1,0 +1,15 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {newGame,save,restore,nextDay} from './simulation.js';
+import {moneyBalance} from './wallet.js';
+import {chooseShopItem,payShopItem,consumeShopItem,shopView,cancelShopDraft} from './shops.js';
+import {chooseCafeDrink,setCafeTemperature,payCafeOrder} from './cafe-life.js';
+function game(location='market',minute=800){const s=newGame();s.location=location;s.clock.minute=minute;return s;}
+function buy(s,id){return payShopItem(chooseShopItem(s,id));}
+test('purchase adds inventory, debit, time exactly once; saved receipt cannot pay again',()=>{let s=buy(game(),'water');assert.equal(moneyBalance(s),99000);assert.equal(s.clock.minute,805);assert.equal(s.inventory.find(x=>x.shopGood==='water').quantity,1);s=restore(save(s));assert.throws(()=>payShopItem(s));assert.equal(moneyBalance(s),99000);});
+test('insufficient balance and cancellation do not mutate original state',()=>{const s=game();s.wallet={balance:500,ledger:[]};const draft=chooseShopItem(s,'water'),before=structuredClone(draft);assert.throws(()=>payShopItem(draft));assert.deepEqual(draft,before);assert.equal(moneyBalance(cancelShopDraft(draft)),500);});
+test('shops enforce actual location, operating hours, stock and closing duration',()=>{assert.throws(()=>chooseShopItem(game('arts'),'water'));assert.throws(()=>chooseShopItem(game('pub',1000),'beer'));assert.throws(()=>buy(game('restaurant',1250),'set'));let s=game();for(let i=0;i<5;i++)s=buy(s,'tissue');assert.throws(()=>buy(s,'tissue'));});
+test('campus store needs actual store room and groceries consume once',()=>{let s=game('academic');assert.equal(shopView(s),null);s.buildingArea={place:'academic',id:'store'};s=buy(s,'rice');const item=s.inventory.find(x=>x.shopGood==='rice');s=consumeShopItem(s,item.id);assert.ok(!s.inventory.some(x=>x.id===item.id));assert.throws(()=>consumeShopItem(s,item.id));});
+test('restaurant meals use money and time without granting takeaway inventory',()=>{const s=buy(game('restaurant'),'ricebowl');assert.equal(moneyBalance(s),92500);assert.equal(s.clock.minute,830);assert.ok(!s.inventory.some(x=>x.shopGood==='ricebowl'));});
+test('pub supports alcohol-free option and at most one alcohol order per day',()=>{let s=buy(game('pub',1080),'soda');assert.equal(s.clock.minute,1110);s=buy(s,'beer');assert.equal(s.clock.minute,1150);assert.throws(()=>buy(s,'beer'));});
+test('cafe shares wallet and legacy cafe spending is deducted only once',()=>{let s=game('cafe');s.cafeLife={orders:[],draft:null,active:null,spent:3800,sequence:0};assert.equal(moneyBalance(s),96200);s=payCafeOrder(setCafeTemperature(chooseCafeDrink(s,'americano'),'iced'));assert.equal(moneyBalance(s),93200);assert.equal(moneyBalance(restore(save(s))),93200);});
+test('wallet and stock persist across day boundary; day stock renews without free money',()=>{let s=game();s=buy(s,'water');s.phase='evening';s=nextDay(s);assert.equal(moneyBalance(s),99000);s.location='market';s.clock.minute=800;s=buy(s,'water');assert.equal(moneyBalance(s),98000);});

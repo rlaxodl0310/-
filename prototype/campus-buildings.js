@@ -1,3 +1,4 @@
+import {debitMoney} from './wallet.js';
 import {gameRoomLayouts} from './campus-rooms.js';
 // User-confirmed building uses/floors. Paths and service rules remain prototype assumptions.
 export const campusBuildings={
@@ -315,15 +316,21 @@ export function buildingActivity(state,id){
  if(state.clock.minute>=1320)throw new Error('오늘은 늦었습니다. 귀가할 시간입니다.');
  const s=structuredClone(state);s.buildingLife??={history:[],meals:[]};
  const repeated=s.buildingLife.history.some(h=>h.day===s.day&&h.minute===s.clock.minute&&h.place===s.location&&h.id===id);
+ if(a.meal)debitMoney(s,5000,b.name+' 식사');
  if(a.meal)s.buildingLife.meals.push(`${s.day}:${mealPeriod(s)}`);
  if(!repeated){s.buildingLife.history.push({day:s.day,minute:s.clock.minute,place:s.location,id});if(!s.known.includes(a.fact))s.known.push(a.fact);s.memory.push(`[${s.day}일차] ${b.name}: ${a.text}`);}
  return {state:s,text:repeated?'방금 확인한 곳이다. 잠깐 더 머물다가 시선을 돌린다.':a.text};
 }
 export function buildingLinks(place){
- const paths={hall:['cafeteria','academic','arts','field'],library:['creative'],cafe:['dorm','cafeteria'],cafeteria:['headquarters','hall','dorm'],dorm:['cafeteria','cafe'],academic:['headquarters','sculpture','baekseok'],music:['arts','gym'],gym:['music','arts','field','outdoorCourt'],field:['gym','outdoorCourt','hall'],outdoorCourt:['field','gym'],headquarters:['academic','cafeteria','creative'],arts:['music','gym','hall'],creative:['library','sculpture','headquarters'],sculpture:['creative','academic'],baekseok:['academic','headquarters']};
+ const paths={hall:['cafeteria','academic','arts','field'],library:['creative'],cafe:['dorm','cafeteria','market','restaurant','pub'],market:['cafe','restaurant'],restaurant:['market','pub','cafe'],pub:['restaurant','cafe'],cafeteria:['headquarters','hall','dorm'],dorm:['cafeteria','cafe'],academic:['headquarters','sculpture','baekseok'],music:['arts','gym'],gym:['music','arts','field','outdoorCourt'],field:['gym','outdoorCourt','hall'],outdoorCourt:['field','gym'],headquarters:['academic','cafeteria','creative'],arts:['music','gym','hall'],creative:['library','sculpture','headquarters'],sculpture:['creative','academic'],baekseok:['academic','headquarters']};
  return (paths[place]??[]).map(value=>({label:(campusBuildings[value]?.name??{library:'창조관 안 도서관',cafe:'대학가 카페'}[value])+' 쪽으로 걸어간다.',action:'visit',value}));
 }
 
 // Outdoor placement is a game layout proposal, not a surveyed campus map.
 campusBuildings.field={name:'운동장',outdoor:true,description:'야외 운동장과 트랙·그늘 벤치',entry:'트랙을 따라 달리는 학생과 잔디 쪽에서 공을 차는 사람들이 보인다. 관중석 아래 벤치에는 가방이 놓여 있다.',fact:'운동장 트랙 위치',day:'트랙 안쪽에서 공을 주고받는 소리가 들린다. 바깥쪽에는 각자의 속도로 걷고 뛰는 사람들이 있다.',night:'운동장 가장자리 조명 아래로 트랙 선이 이어진다.',actions:[]};
 campusBuildings.outdoorCourt={name:'야외 코트',outdoor:true,description:'야외 농구 코트와 운동장 연결 길',entry:'철망 너머 골대에 공이 부딪힌다. 코트 한쪽에는 자유투를 연습할 수 있는 빈 공간이 있다.',fact:'야외 코트 위치',day:'공을 튀기는 소리와 신발 끄는 소리가 섞인다. 그늘 벤치에 물병 몇 개가 놓여 있다.',night:'가로등 아래 코트 선이 희미하게 보인다.',actions:[]};
+
+// Fictional nearby shops, not a claim about real campus businesses.
+campusBuildings.market={name:'대학가 편의점',outdoor:false,description:'생수 · 간편식 · 생활용품',entry:'냉장고 모터 소리 사이로 계산대 알림음이 들린다. 진열대에 간편식과 물이 놓여 있다.',fact:'대학가 편의점 위치',day:'학생들이 물과 간편식을 골라 계산대로 간다.',night:'늦은 수업을 마친 학생들이 편의점에 들른다.',actions:[]};
+campusBuildings.restaurant={name:'대학가 작은 밥집',outdoor:false,description:'국수 · 덮밥 · 백반',entry:'주방에서 국 끓는 냄새가 난다. 입구의 메뉴판 옆으로 빈 테이블이 보인다.',fact:'대학가 밥집 위치',day:'점심 시간에는 주문표를 든 직원이 테이블 사이를 오간다.',night:'저녁을 먹으러 온 학생들이 창가 자리를 채운다.',actions:[]};
+campusBuildings.pub={name:'대학가 골목 술집',outdoor:false,description:'18시부터 · 음료와 안주',entry:'문 옆에 영업시간과 메뉴가 적혀 있다. 안쪽에는 작은 테이블들이 놓여 있다.',fact:'대학가 술집 위치',day:'영업시간은 저녁 6시부터라고 적혀 있다. 낮에는 문이 닫혀 있다.',night:'테이블마다 낮은 이야기 소리가 이어진다. 술 대신 탄산음료를 고를 수도 있다.',actions:[]};
