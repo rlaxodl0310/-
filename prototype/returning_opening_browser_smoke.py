@@ -16,7 +16,7 @@ try:
     page.locator('[data-action="openingNext"]').click();assert page.locator('[data-action="openingNext"]').inner_text()=='휴대폰에서 수강 계획을 확인한다.'
     panel=page.locator('.opening-panel').bounding_box();assert panel['x']>=0 and panel['x']+panel['width']<=width+1;assert panel['y']>=0 and panel['y']+panel['height']<=height+1
     if path=='/prototype/':page.screenshot(path=f'docs/assets/returning-opening-{width}.png',full_page=True)
-    page.locator('[data-action="openingNext"]').click();assert page.get_by_role('heading',name='복학생 수강 계획').is_visible()
+    page.locator('[data-action="openingNext"]').click();assert page.get_by_role('heading',name='공강에 어떤 수업을 넣을까?').is_visible()
     page.locator('[data-action="courseConfirm"]').click();assert page.locator('.vn-stage').is_visible();assert '09:00' in page.locator('.scene-time').inner_text();assert not errors,errors;page.close()
   b.close()
  subprocess.run(['python3','prototype/vn_browser_smoke.py'],env=dict(os.environ,CAMPUS_TEST_URL=base),check=True)

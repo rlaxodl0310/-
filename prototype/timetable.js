@@ -48,7 +48,7 @@ export function roomUseLabel(s,location,area){
  return classes.some(c=>s.clock.minute>=c.start&&s.clock.minute<c.end)?'수업 중':classes.some(c=>s.clock.minute<c.start&&c.start-s.clock.minute<=15)?'수업 준비 중':'사용 상태 미확인';
 }
 export function schoolEnabled(s){return s.academics?.enabled===true;}
-export function timetable(s,person='taei',day=s.day){const courses=person==='taei'&&Array.isArray(s.academics?.courseIds)?registrationCourses().filter(c=>c.day===(day-1)%7+1&&s.academics.courseIds.includes(c.registrationId)):(characterTimetables[person]?.[day]??[]);return schoolEnabled(s)?courses.map(c=>({...c,key:`${day}:${person}:${c.id}`,day})).sort((a,b)=>a.start-b.start):[];}
+export function timetable(s,person='taei',day=s.day){const courses=person==='taei'&&Array.isArray(s.academics?.courseIds)?registrationCatalog(s).filter(c=>c.day===(day-1)%7+1&&s.academics.courseIds.includes(c.registrationId)):(characterTimetables[person]?.[day]??[]);return schoolEnabled(s)?courses.map(c=>({...c,key:`${day}:${person}:${c.id}`,day})).sort((a,b)=>a.start-b.start):[];}
 export function lessonStatus(s,c){const record=s.academics?.records?.[c.key];if(record)return record.status;const m=s.clock.minute;return m>=c.end?'absent':m>=c.start?'in-progress':'upcoming';}
 export function nextLesson(s){return timetable(s).find(c=>!s.academics?.records?.[c.key]&&s.clock.minute<c.end)??null;}
 export function classPlace(c){const b=campusBuildings[c.location],a=b?.areas?.find(a=>a.id===c.area);return `${b?.name??c.location}${a?' · '+(a.floor==='층 미확정'?'':a.floor+' ')+a.name:''}`;}
@@ -69,20 +69,30 @@ export function recordMissedLessons(s,before,end){
 }
 
 // Weekly registration for the two-week game, not the university's official curriculum.
-export function registrationCourses(){
+function legacyRegistrationCourses(){
  const base=[1,2,3,4,5].flatMap(day=>characterTimetables.taei[day].map(c=>({...c,day,registrationId:`${day}:${c.id}`,credits:c.id==='chapel'?1:2,required:['ensemble','vocal','chapel'].includes(c.id)})));
  const extra=(id,name,day,start,end,location,area,topic)=>({...lesson(id,name,start,end,location,area,topic,[{id:'note',label:'수업에서 들은 내용과 질문을 메모한다.',text:topic+' 설명을 들으며 이해한 부분과 더 확인할 부분을 나눠 적었다.'},{id:'apply',label:'내 작업이나 일상에 연결해 생각한다.',text:'수업 예제를 내 경험에 대입해보고 달리 볼 수 있는 점을 메모했다.'}]),day,registrationId:`${day}:${id}`,credits:2,required:false});
  return [...base,extra('coding','기초 프로그래밍',1,690,780,'academic','room201','간단한 조건과 반복으로 문제를 나누는 방법을 연습한다.'),extra('film','영화 장면 읽기',2,570,660,'arts','av','같은 장면의 시점과 편집이 감상을 어떻게 바꾸는지 비교한다.'),extra('writing','창작 글쓰기',3,810,900,'academic','room202','짧은 경험을 장면으로 옮기고 서로의 문장을 읽는다.')];
 }
-export function registeredCourseIds(s){return s.academics?.courseIds??registrationCourses().filter(c=>characterTimetables.taei[c.day].some(x=>x.id===c.id)).map(c=>c.registrationId);}
+const generalCourseIds=['expression','coding','film','writing','media'];
+export function registrationCourses(){
+ const courses=legacyRegistrationCourses().map(c=>({...c,required:!generalCourseIds.includes(c.id),category:generalCourseIds.includes(c.id)?'general':'required',...(c.id==='coding'||c.id==='film'?{start:810,end:900}:{})}));
+ const media={...courses.find(c=>c.id==='coding'),id:'media',registrationId:'1:media',name:'디지털 콘텐츠의 이해',area:'room203',topic:'짧은 콘텐츠의 구성과 전달 방식을 비교한다.',choices:[{id:'compare',label:'두 콘텐츠의 구성 차이를 찾아본다.',text:'같은 주제를 다르게 전달하는 방식을 비교해 메모했다.'},{id:'plan',label:'내 이야기를 전달할 구성을 그려본다.',text:'전달하고 싶은 내용을 작은 장면으로 나눠 초안을 적었다.'}]};return [...courses,media];
+}
+export function registrationCatalog(s){
+ if(Array.isArray(s.academics?.courseIds)&&s.academics.catalogVersion!==2)return legacyRegistrationCourses().map(c=>({...c,category:generalCourseIds.includes(c.id)?'general':'required',required:c.required||!generalCourseIds.includes(c.id)&&s.academics.courseIds.includes(c.registrationId)}));
+ return registrationCourses();
+}
+export function generalCourseOptions(s,ids){return registrationCatalog(s).filter(c=>c.category==='general'&&!ids.includes(c.registrationId)&&!registrationLocked(s,c)&&registrationProblems(s,[...ids,c.registrationId]).length===0);}
+export function registeredCourseIds(s){return s.academics?.courseIds??registrationCourses().filter(c=>c.required).map(c=>c.registrationId);}
 export function registrationLocked(s,c){return c.day<s.day||c.day===s.day&&c.start<=(s.clock?.minute??540)||!!s.academics?.records?.[`${c.day}:taei:${c.id}`];}
 export function registrationProblems(s,ids){
- const all=registrationCourses(),selected=all.filter(c=>ids.includes(c.registrationId)),errors=[];
+ const all=registrationCatalog(s),selected=all.filter(c=>ids.includes(c.registrationId)),errors=[];
  if(new Set(ids).size!==ids.length||ids.some(id=>!all.some(c=>c.registrationId===id)))errors.push('과목 목록을 다시 확인해 주세요.');
- if(all.some(c=>c.required&&!ids.includes(c.registrationId)))errors.push('시제품 필수 과목을 포함해 주세요.');
- if(selected.reduce((n,c)=>n+c.credits,0)>18)errors.push('이번 시제품 수강 한도는 18학점입니다.');
+ if(all.some(c=>c.required&&!ids.includes(c.registrationId)))errors.push('이미 신청된 필수 과목은 유지해 주세요.');
+ if(selected.reduce((n,c)=>n+c.credits,0)>18)errors.push('이번 수강 한도는 18학점입니다.');
  for(const c of all)if(registrationLocked(s,c)&&ids.includes(c.registrationId)!==registeredCourseIds(s).includes(c.registrationId))errors.push('이미 시작했거나 끝난 수업은 변경할 수 없습니다.');
  for(let day=1;day<=5;day++){const list=selected.filter(c=>c.day===day).sort((a,b)=>a.start-b.start);for(let i=1;i<list.length;i++){if(list[i].start<list[i-1].end)errors.push(`${day}일차 ${list[i-1].name} / ${list[i].name} 시간이 겹칩니다.`);else if(list[i].location!==list[i-1].location&&list[i].start-list[i-1].end<10)errors.push('다른 건물 수업 사이에 이동 시간 10분이 필요합니다.');}}
  return [...new Set(errors)];
 }
-export function confirmRegistration(state,ids){const errors=registrationProblems(state,ids);if(errors.length)throw new Error(errors.join(' '));const s=structuredClone(state),changed=JSON.stringify([...ids].sort())!==JSON.stringify([...registeredCourseIds(s)].sort());s.academics.courseIds=[...ids];s.academics.registrationPending=false;s.academics.registered=true;if(changed||!state.academics.registered)s.memory.push(`[${s.day}일차] 복학생 수강 계획을 확인했다. 선택한 수업과 공강에 맞춰 학교생활을 시작한다.`);return s;}
+export function confirmRegistration(state,ids){const errors=registrationProblems(state,ids);if(errors.length)throw new Error(errors.join(' '));const s=structuredClone(state),changed=JSON.stringify([...ids].sort())!==JSON.stringify([...registeredCourseIds(s)].sort());s.academics.catalogVersion=Array.isArray(state.academics.courseIds)&&state.academics.catalogVersion!==2?1:2;s.academics.courseIds=[...ids];s.academics.registrationPending=false;s.academics.registered=true;if(changed||!state.academics.registered)s.memory.push(`[${s.day}일차] 복학생 수강 계획을 확인했다. 선택한 수업과 공강에 맞춰 학교생활을 시작한다.`);return s;}

@@ -1,6 +1,6 @@
 import {prepareSupplyAftermath} from './supply-aftermath.js';
 import {prepareCampusVariation} from './campus-variation.js';
-import {timetable} from './timetable.js';
+import {timetable,registrationCourses} from './timetable.js';
 import {warningPhase,warningActivity} from './warnings.js';
 import {defaultWeather,weatherAdjustAppointments} from './weather.js';
 import {expireOffers} from './appointments.js';
@@ -136,4 +136,4 @@ export function restore(raw){
  return s;
 }
 
-export function newReturningGame(){const s=newGame();s.academics.registrationPending=true;s.opening={step:0,done:false};return s;}
+export function newReturningGame(){const s=newGame();s.academics.registrationPending=true;s.academics.catalogVersion=2;s.academics.courseIds=registrationCourses().filter(c=>c.required).map(c=>c.registrationId);s.opening={step:0,done:false};return s;}
