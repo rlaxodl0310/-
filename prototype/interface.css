@@ -79,3 +79,13 @@ body{background:#e6e7df}.utility-page{border-radius:8px;box-shadow:none;border-c
 @media(max-width:650px){
  .vn-stage .scene-visual .portrait[data-actor]{top:150px;right:5%;width:min(64vw,270px);max-width:none;}
 }
+
+.character-art-card{max-width:780px;margin:auto;padding:20px;background:#172b2de6;border:1px solid #ffffff24;border-radius:18px}
+.character-art-card h2{font-size:28px;margin:8px 0 12px}
+.art-angle-tabs{display:flex;gap:10px;margin:18px 0;flex-wrap:wrap}
+.art-angle-tabs button{flex:1;min-height:44px}
+.art-angle-tabs button[aria-pressed="true"]{background:#d8d4bd;color:#1c302e;border-color:#d8d4bd}
+.iseo-art{width:min(100%,520px);aspect-ratio:2/3;margin:auto;background-size:contain;background-repeat:no-repeat;background-position:center;border-radius:12px}
+.iseo-art-front{background-image:url('../docs/assets/iseo-fullbody-concept.png')}
+.iseo-art-side{background-image:url('../docs/assets/iseo-side-concept.png')}
+.iseo-art-back{background-image:url('../docs/assets/iseo-back-concept.png')}
