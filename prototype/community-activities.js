@@ -49,7 +49,7 @@ export function sessionStore(s){s.activitySessions??={active:null,records:{}};re
 export function currentCommunityActivity(s,key=s.activitySessions?.active){return s.activitySessions?.records?.[key]??null;}
 export function activityAvailability(s,postId,session=null){
  const def=communityActivityDefinitions[postId];if(!def)return {ok:false,reason:'연결된 공개 활동이 없습니다.'};
- if(!(def.days??[def.day]).includes(s.day))return {ok:false,reason:`${def.day}일차 13:00부터 진행하는 공개 활동입니다.`};
+ if(!(def.physical?Array.from({length:14},(_,i)=>i+1):def.days??[def.day]).includes(s.day))return {ok:false,reason:`${def.day}일차 13:00부터 진행하는 공개 활동입니다.`};
  const stored=session??currentCommunityActivity(s,communityActivityKey(s,postId));
  if(stored?.status==='completed'||(def.route!=='rehearsal'&&(s.freeDay?.completed??[]).some(a=>a.id===def.route)))return {ok:false,reason:'이미 마친 공개 활동입니다.'};
  let route=stored?.route??(def.physical?{id:def.route,name:def.title,duration:def.duration,knowledge:[],memory:''}:availableRoutes(s).find(r=>r.id===def.route));

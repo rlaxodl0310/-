@@ -3,6 +3,10 @@ import {currentSchedule} from './days.js';
 import {changeRelationship} from './dialogue.js';
 import {recordEvent} from './event-engine.js';
 export function applyCampusMoments(s,before,end,{travelling=false}={}){
+ if(s.day>=4){
+  if(before<900&&end>=900){const pair=s.day%2===0?['seoyeon','soyul']:['yeogyeong','soyul'];const r=recordEvent(s,{id:'ordinary-peer-contact',kind:'scheduled',participants:pair,status:'resolved',visibility:'private',result:'두 학생이 각자의 준비 상황과 다음에 확인할 일을 연락했다.'});if(r.created){changeRelationship(s,pair[0],pair[1],{familiarity:1});const positions=currentSchedule({...s,clock:{minute:900}});if(!travelling&&pair.every(id=>positions[id]===s.location))s.memory.push(`[${s.day}일차] 근처 학생들이 준비 상황을 확인하며 짧게 연락하는 모습을 봤다. 구체적인 내용은 듣지 못했다.`);}}
+  return s;
+ }
  if(s.day!==1)return s;
  // A private exchange happens without player attendance; it is never shown omnisciently.
  if(before<870&&end>=870){

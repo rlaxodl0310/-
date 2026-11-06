@@ -24,6 +24,7 @@ export const placeActions={
 };
 export function encounterKey(s,spot='entry'){return `${s.day}:${s.phase}:${s.location}:${spot}${s.clock?':'+Math.floor(s.clock.minute/60):''}${s.day===3&&s.risk?.revision?':risk'+s.risk.revision:''}`;}
 function encounterContent(s,id){
+ if(s.day>3)return {text:'지나가던 중 '+({yeogyeong:'정리하던 자료를 가방에 넣는 학생',seoyeon:'컵을 들고 자리에서 일어나는 학생',soyul:'읽던 페이지에 책갈피를 끼우는 학생'}[id])+'과 시선이 마주친다.',action:'잠깐 이야기할 여유가 있는지 묻는다.',prefix:''};
  const day=s.day,evening=s.phase==='evening';
  if(evening)return {
   yeogyeong:{text:'자유관을 나가려는데 공용 테이블 아래에서 무언가 떨어지는 소리가 난다. 차여경이 가방에서 물병을 꺼내다 작은 필통을 떨어뜨렸다. 혼자 물건을 주워 담느라 발소리를 듣지 못한 듯하다.',action:'필통을 주워 건넨다. “가방에 뭘 그렇게 많이 넣었어요?”',prefix:'아, 감사합니다. '},

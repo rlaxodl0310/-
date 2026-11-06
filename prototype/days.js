@@ -17,6 +17,14 @@ export const days={
 };
 const personalActivities={rehearsal:days[1].routes.rehearsal,work:days[2].routes.work,explore:days[1].routes.explore,walk:days[2].routes.walk};
 for(const day of Object.values(days))day.routes={...personalActivities,...day.routes};
+export const schoolDays=Array.from({length:14},(_,i)=>i+1);
+const fortnightTitles=['복학 뒤 첫 과제','금요일의 작은 여유','첫 주말의 느린 아침','다음 주를 준비하는 날','다시 월요일','조금 익숙해진 사이','나눠 맡는 준비','몸과 마음의 속도','작은 공개 연습','두 번째 주말','두 주를 돌아보며'];
+for(let day=4;day<=14;day++){
+ const weekday=['월요일','화요일','수요일','목요일','금요일','토요일','일요일'][(day-1)%7],weekend=(day-1)%7>=5;
+ const routes={walk:{name:'대학가 산책',duration:45,description:'익숙해진 대학가를 천천히 걸으며 쉬어갑니다.',memory:'대학가를 걸으며 잠깐 머리를 식혔다.',knowledge:[]},work:{name:'개인 음악 작업',duration:60,description:'지난 수업과 연습 메모를 보며 작업합니다.',memory:'남겨둔 메모를 참고해 개인 음악 작업을 이어갔다.',knowledge:[]},exercise:{name:'자율 운동',duration:45,description:'컨디션에 맞춰 몸을 풀고 운동합니다.',memory:'자율 운동 뒤 장비를 정리했다.',knowledge:[]}};
+ if(!weekend)routes.rehearsal={name:'합주 자율 연습',duration:60,description:'그날 수업에서 메모한 구간을 다시 맞춥니다.',memory:'수업 메모를 보며 합주 연습을 이어갔다.',knowledge:[]};
+ days[day]={title:fortnightTitles[day-4],weekday,weekend,event:'campus-life',routes,schedules:{afternoon:weekend?{yeogyeong:'market',seoyeon:'cafe',soyul:'library'}:{yeogyeong:'hall',seoyeon:'cafeteria',soyul:'library'},evening:{yeogyeong:'cafeteria',seoyeon:'cafe',soyul:'hall'}}};
+}
 export const locations={market:'대학가 편의점',restaurant:'대학가 작은 밥집',pub:'대학가 골목 술집',hall:'자유관',library:'창조관 · 도서관',cafe:'대학가 카페',...Object.fromEntries(Object.entries(campusBuildings).map(([id,b])=>[id,b.name]))};
 export function availableRoutes(s){return Object.entries(days[s.day??1].routes).filter(([,r])=>!r.requiresWarning||(s.warnings?.evidence?.length??0)>0).map(([id,r])=>weatherRoute(s,id,{id,...(id==='rehearsal'&&s.location==='gym'?{...r,description:'체육관 지하·1층의 합주실에서 합주하고 장비 위치를 익힙니다.',memory:'체육관의 합주실에서 합주를 마쳤다. 연습 공간의 장비 보관 위치를 확인했다.'}:r),locked:!!r.requiresAny&&!r.requiresAny.some(k=>s.known.includes(k)),lockReason:r.requiresAny&&!r.requiresAny.some(k=>s.known.includes(k))?'이전 탐색으로 연결 통로를 알아야 합니다.':null}));}
 function baseSchedule(s){

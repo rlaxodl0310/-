@@ -20,6 +20,7 @@ export function changeRelationship(s,from,to,delta){
 }
 function rawGroupDialogue(s){
  const friends=relationship(s,'soyul','seoyeon').familiarity>=4;
+ if(s.day>3){const topics=[['이 부분은 한번 더 읽어봐야겠어.','어디가 걸리는데?','말은 알겠는데, 내 말로 설명하려니까 잘 안 돼.'],['끝나고 바로 갈 거야?','잠깐 앉아 있다가. 오늘 좀 많이 돌아다녔어.','그럼 나도 조금만 쉬다 가야겠다.'],['이번 주는 지난주보다 덜 헤맨 것 같아.','길이 익숙해져서 그런가.','응. 그래도 시간은 또 금방 가더라.']][s.day%3];return [{person:'soyul',text:topics[0]},{person:'seoyeon',text:topics[1]},{person:'soyul',text:topics[2]},{person:'seoyeon',text:'잠깐 같이 이야기해도 괜찮아요. 지금은 급한 일 없어서요.'}];}
  const exhibition=scheduledEvent(s,'campus-showcase');
  if(s.day===3&&s.phase==='evening'&&exhibition){const joint=exhibition.outcome==='joint-display';return [{person:'seoyeon',text:'사진은 다 붙였어? 아까 비어 있던 칸이 있던데.'},{person:'soyul',text:joint?'응. 고른 이유를 쓰고 나니까 순서도 정해지더라.':exhibition.outcome==='separate-display'?'응. 각자 고른 건 각자 붙였어. 다음에는 기준부터 이야기해야겠어.':'사진은 붙였어. 설명은 다음 활동 때 조금 더 보완하려고.'},{person:'seoyeon',text:joint?'이제 사진 옆에 네 이야기도 있네. 그냥 사진만 볼 때랑 또 다르다.':'오늘 다 해결하려고 하지는 마. 각자 뭘 남기고 싶은지부터 이야기해봐.'},{person:'soyul',text:'응. 일단 오늘은 집에 가서 다시 고르지는 말아야겠다.'}];}
 
@@ -53,6 +54,7 @@ export function respondGroup(state,choice){
   lines=[{person:'soyul',text:close?'잠깐, 내 사진인데 왜 서연이가 골라. 내가 말할게.':'잠깐만요. 제가 고르던 거라… 저도 말씀드릴 수 있어요.'},{person:'seoyeon',text:'저한테 맡기면 또 소율이 눈 감은 걸로 골라요. 본인한테 물어봐줘요.'}];
   if(!repeated){changeRelationship(s,'soyul','taei',{tension:1});changeRelationship(s,'seoyeon','taei',{trust:-1});}
  }
+ if(s.day>3)lines=choice==='wait'?[{person:'soyul',text:close?'고마워. 조금만 정리해서 말해볼게.':'고마워요. 생각을 조금만 정리해서 말해볼게요.'},{person:'seoyeon',text:'천천히 말해. 급한 거 아니잖아.'}]:choice==='include'?[{person:'soyul',text:close?'응. 아까 이야기하던 거 이어서 말해도 되지?':'네. 잠깐 같이 이야기해도 괜찮아요.'},{person:'seoyeon',text:'좋아요. 서로 어떻게 생각하는지 들어봐요.'}]:[{person:'soyul',text:close?'잠깐, 그건 내가 직접 말할게.':'잠깐만요. 제 생각은 제가 말하고 싶어요.'},{person:'seoyeon',text:'우리도 그 얘기 듣고 있었어요. 먼저 말해봐.'}];
  lines=lines.map(line=>({...line,text:normalizeNpcAddress(s,line.person,line.text)}));
  s.dialogue.history.push({person:'group',choice,day:s.day??1,phase:s.phase,lines});
  return {state:s,lines};

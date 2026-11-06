@@ -10,6 +10,8 @@ export function attendLesson(state,key,choice){
  s.academics.records[key]={status,day:s.day,course:c.id,arrival:m,start:Math.max(m,c.start),end:c.end,choice};
  s.academics.lesson=null;s=advanceFreeTime(s,c.end-m);s.pace={count:0,seen:{}};
  const fact=`${c.name} 수업 메모`;if(!s.known.includes(fact))s.known.push(fact);
- const text=(m<c.start?`${schoolTime(c.start)}까지 수업을 준비했다. `:'')+answer.text+` ${schoolTime(c.end)}, 수업이 끝났다.`;
+ const prior=state.academics.records[`${s.day-7}:taei:${c.id}`];
+ const weekRecall=s.day>7&&prior?(['present','late','partial'].includes(prior.status)?' 지난주에 남긴 수업 메모와 이번 설명을 비교했다.':' 지난주 빠졌던 부분은 따로 확인해야 할 질문으로 남겼다.'):'';
+ const text=(m<c.start?`${schoolTime(c.start)}까지 수업을 준비했다. `:'')+answer.text+` ${schoolTime(c.end)}, 수업이 끝났다.`+weekRecall;
  s.memory.push(`[${s.day}일차] ${c.name} · ${classPlace(c)} · ${text}`);return {state:s,text};
 }

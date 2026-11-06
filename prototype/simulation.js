@@ -69,7 +69,7 @@ export function act(state,choice,options={}){
 }
 export function nextDay(state){
  if(state.phase!=='evening')throw new Error('오후 활동을 마친 뒤 하루를 마무리할 수 있습니다.');
- if(state.day>=3)throw new Error('3일간의 시제품을 모두 마쳤습니다.');
+ if(state.day>=14)throw new Error('14일의 학교생활을 마쳤습니다. 기록과 저장은 계속 확인할 수 있습니다.');
  let s=structuredClone(state);
  s.dayHistory.push({day:s.day,choice:s.choice,activities:structuredClone(s.freeDay?.completed??[]),promises:structuredClone(s.dialogue.promises)});
  s.freeDay={completed:[],settled:false};s.clock={minute:s.academics?.enabled?540:780};s.pace={count:0,seen:{}};s.day++;s.phase='afternoon';s.choice=null;s.minutes=0;s.lastResult='';s.location='campus';s.dialogue.promises={};
@@ -78,7 +78,8 @@ export function nextDay(state){
  if(s.day===2){
   s.messages.push({day:2,from:s.memberships?.volunteer?'봉사단 단체방':'캠퍼스톡 동아리 소식',text:s.memberships?.volunteer?'오늘 여경은 자유관에서 정리하고, 소율은 도서관에서 사진을 고릅니다. 서연은 오후에 대학가 카페에 있어요.':'오늘 공개 사진 정리는 도서관, 봉사단 준비 정리는 자유관에서 진행합니다.'});
   for(const id of Object.keys(s.npcs)){if(s.supplyAftermath?.reactions[id])continue;const text=personalMessage(s,id);if(text)s.messages.push({day:2,from:s.npcs[id].name,text});}
- }else s.messages.push({day:3,from:s.memberships?.volunteer?'봉사단 단체방':'캠퍼스톡 동아리 소식',text:s.memberships?.volunteer?'오늘 사진 전시 준비는 자유관에서 진행합니다. 소율은 먼저 도서관에서 파일을 챙깁니다. 공연 리허설도 같은 오후에 있어요.':'오늘 사진 전시 준비는 자유관에서 진행합니다. 공개 공연 리허설도 같은 오후에 있습니다.'});
+ }else if(s.day===3)s.messages.push({day:3,from:s.memberships?.volunteer?'봉사단 단체방':'캠퍼스톡 동아리 소식',text:s.memberships?.volunteer?'오늘 사진 전시 준비는 자유관에서 진행합니다. 소율은 먼저 도서관에서 파일을 챙깁니다. 공연 리허설도 같은 오후에 있어요.':'오늘 사진 전시 준비는 자유관에서 진행합니다. 공개 공연 리허설도 같은 오후에 있습니다.'});
+ if(s.day>=4){s.messages.push({day:s.day,from:'학내 일정',text:days[s.day].title+' · '+(days[s.day].weekend?'주말에는 정규 수업이 없습니다. 개인 약속과 쉬는 시간을 정해보세요.':'오늘 수업과 남겨둔 약속을 확인해보세요.')});}
  return warningPhase(weatherAdjustAppointments(phaseEvents(s),availableRoutes(s)));
 }
 export function acceptAppointment(state,person){
@@ -115,7 +116,7 @@ export function restore(raw){
   if(s.events?.some(e=>e.id==='photo-selection'))s.eventState.flags.photoStyle='joint';
  }
  for(const c of Object.values(s.contacts??{}))if(!c.introduced&&c.sources?.length&&c.sources.every(x=>['joined-club-notice','club-roster'].includes(x.source))){c.nameLevel='unknown';c.sources=[];}
- if(s?.version!==6||!s.world||!s.eventState||!s.encounters||!s.contacts||!Number.isInteger(s.day)||s.day<1||s.day>3||!['afternoon','evening'].includes(s.phase)||!Array.isArray(s.memory)||!Array.isArray(s.known)||!Array.isArray(s.messages)||!Array.isArray(s.events)||!Array.isArray(s.dayHistory)||!Array.isArray(s.appointments)||!s.npcs||!s.relations||!Array.isArray(s.dialogue?.history)||!s.dialogue?.promises)throw new Error('지원하지 않는 저장 파일입니다.');
+ if(s?.version!==6||!s.world||!s.eventState||!s.encounters||!s.contacts||!Number.isInteger(s.day)||s.day<1||s.day>14||!['afternoon','evening'].includes(s.phase)||!Array.isArray(s.memory)||!Array.isArray(s.known)||!Array.isArray(s.messages)||!Array.isArray(s.events)||!Array.isArray(s.dayHistory)||!Array.isArray(s.appointments)||!s.npcs||!s.relations||!Array.isArray(s.dialogue?.history)||!s.dialogue?.promises)throw new Error('지원하지 않는 저장 파일입니다.');
  if(!s.flow){s.flow={seen:{}};for(const place of ['hall','library','cafe'])if(Object.keys(s.encounters).some(k=>k.includes(':'+place+':')))s.flow.seen['visit:'+place]=true;if(Object.keys(s.memberships??{}).length)s.flow.seen.board=true;}
  if(s.flow.seen.board&&!s.flow.seen.community){s.flow.seen.community=true;for(const club of ['volunteer','football','music'])s.flow.seen['club:'+club]=true;}
  s.known=s.known.map(text=>text.replaceAll('학생회관','자유관').replaceAll('음악 연습동','음악관').replaceAll('강의동','은혜관'));
@@ -124,7 +125,7 @@ export function restore(raw){
  s.playMode='free';s.freeDay??={completed:s.choice&&s.phase==='evening'?[{id:s.choice,start:Math.max(780,(s.clock?.minute??1140)-(s.minutes??0)),end:s.clock?.minute??1140}]:[],settled:s.phase==='evening'};
  s.risk??={knowledge:{},decisions:{},positions:{},actions:[],sent:{},requests:{}};
  s.warnings??={evidence:[],resolved:{}};
- s.weather??=defaultWeather();
+ s.weather??=defaultWeather();s.weather.days={...defaultWeather().days,...s.weather.days};
  s.clock??={minute:s.phase==='evening'?1140:780};
  s.social??={facts:[],knowledge:{},shares:[],decisions:{},heardByPlayer:[]};
  s.memberships??={};s.invitationDecisions??={};

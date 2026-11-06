@@ -35,13 +35,20 @@ for(const id of ['seoyeon','soyul']){
  characterTimetables[id][2].find(c=>c.id==='dental2').area='room302';
  characterTimetables[id][3].find(c=>c.id==='dental3').area='room401';
 }
+// Recurring weekday classes; weekends are free and records use actual calendar days.
+for(const person of Object.keys(characterTimetables)){
+ const own=characterTimetables[person];
+ own[4]=person==='taei'?[lesson('songwriting','송라이팅 기초',630,720,'arts','room201','작은 경험을 가사와 선율로 옮기는 방법을 연습한다.',[{id:'draft',label:'이번 주 경험에서 가사 초안을 쓴다.',text:'직접 겪은 작은 장면 하나를 골라 가사로 옮겼다.'},{id:'melody',label:'짧은 선율을 반복하며 말을 붙여본다.',text:'말의 억양과 선율이 어긋나는 부분을 찾아 다시 불렀다.'}])]:[clinical('major4','전공 실습',person==='yeogyeong'?'creative':'sculpture',person==='yeogyeong'?'nursing':'classes',630,720)];
+ own[5]=person==='taei'?[lesson('production','음악 제작 기초',630,720,'arts','room202','녹음과 편집의 기본 과정을 익힌다.',[{id:'record',label:'짧은 테이크를 녹음하고 비교한다.',text:'다시 녹음한 테이크를 비교하며 달라진 부분을 표시했다.'},{id:'edit',label:'편집 예제를 직접 따라 정리한다.',text:'원본을 남긴 채 수정본을 나눠 편집했다.'}])]:[clinical('major5','전공 수업',person==='yeogyeong'?'creative':'sculpture',person==='yeogyeong'?'room504':'classes',630,720)];
+ for(let day=6;day<=14;day++){const weekday=(day-1)%7+1;own[day]=weekday>5?[]:own[weekday].map(c=>({...c}));}
+}
 export function schoolArea(s,person){return timetable(s,person).find(c=>s.clock.minute>=c.start-30&&s.clock.minute<c.end)?.area??null;}
 export function roomUseLabel(s,location,area){
  const classes=['taei','yeogyeong','seoyeon','soyul'].flatMap(id=>timetable(s,id)).filter(c=>c.location===location&&c.area===area);
  return classes.some(c=>s.clock.minute>=c.start&&s.clock.minute<c.end)?'수업 중':classes.some(c=>s.clock.minute<c.start&&c.start-s.clock.minute<=15)?'수업 준비 중':'사용 상태 미확인';
 }
 export function schoolEnabled(s){return s.academics?.enabled===true;}
-export function timetable(s,person='taei',day=s.day){const courses=person==='taei'&&Array.isArray(s.academics?.courseIds)?registrationCourses().filter(c=>c.day===day&&s.academics.courseIds.includes(c.registrationId)):(characterTimetables[person]?.[day]??[]);return schoolEnabled(s)?courses.map(c=>({...c,key:`${day}:${person}:${c.id}`,day})).sort((a,b)=>a.start-b.start):[];}
+export function timetable(s,person='taei',day=s.day){const courses=person==='taei'&&Array.isArray(s.academics?.courseIds)?registrationCourses().filter(c=>c.day===(day-1)%7+1&&s.academics.courseIds.includes(c.registrationId)):(characterTimetables[person]?.[day]??[]);return schoolEnabled(s)?courses.map(c=>({...c,key:`${day}:${person}:${c.id}`,day})).sort((a,b)=>a.start-b.start):[];}
 export function lessonStatus(s,c){const record=s.academics?.records?.[c.key];if(record)return record.status;const m=s.clock.minute;return m>=c.end?'absent':m>=c.start?'in-progress':'upcoming';}
 export function nextLesson(s){return timetable(s).find(c=>!s.academics?.records?.[c.key]&&s.clock.minute<c.end)??null;}
 export function classPlace(c){const b=campusBuildings[c.location],a=b?.areas?.find(a=>a.id===c.area);return `${b?.name??c.location}${a?' · '+(a.floor==='층 미확정'?'':a.floor+' ')+a.name:''}`;}
@@ -61,9 +68,9 @@ export function recordMissedLessons(s,before,end){
  return s;
 }
 
-// A three-day registration prototype, not the university's official curriculum.
+// Weekly registration for the two-week game, not the university's official curriculum.
 export function registrationCourses(){
- const base=[1,2,3].flatMap(day=>characterTimetables.taei[day].map(c=>({...c,day,registrationId:`${day}:${c.id}`,credits:c.id==='chapel'?1:2,required:['ensemble','vocal','chapel'].includes(c.id)})));
+ const base=[1,2,3,4,5].flatMap(day=>characterTimetables.taei[day].map(c=>({...c,day,registrationId:`${day}:${c.id}`,credits:c.id==='chapel'?1:2,required:['ensemble','vocal','chapel'].includes(c.id)})));
  const extra=(id,name,day,start,end,location,area,topic)=>({...lesson(id,name,start,end,location,area,topic,[{id:'note',label:'수업에서 들은 내용과 질문을 메모한다.',text:topic+' 설명을 들으며 이해한 부분과 더 확인할 부분을 나눠 적었다.'},{id:'apply',label:'내 작업이나 일상에 연결해 생각한다.',text:'수업 예제를 내 경험에 대입해보고 달리 볼 수 있는 점을 메모했다.'}]),day,registrationId:`${day}:${id}`,credits:2,required:false});
  return [...base,extra('coding','기초 프로그래밍',1,690,780,'academic','room201','간단한 조건과 반복으로 문제를 나누는 방법을 연습한다.'),extra('film','영화 장면 읽기',2,570,660,'arts','av','같은 장면의 시점과 편집이 감상을 어떻게 바꾸는지 비교한다.'),extra('writing','창작 글쓰기',3,810,900,'academic','room202','짧은 경험을 장면으로 옮기고 서로의 문장을 읽는다.')];
 }
@@ -75,7 +82,7 @@ export function registrationProblems(s,ids){
  if(all.some(c=>c.required&&!ids.includes(c.registrationId)))errors.push('시제품 필수 과목을 포함해 주세요.');
  if(selected.reduce((n,c)=>n+c.credits,0)>18)errors.push('이번 시제품 수강 한도는 18학점입니다.');
  for(const c of all)if(registrationLocked(s,c)&&ids.includes(c.registrationId)!==registeredCourseIds(s).includes(c.registrationId))errors.push('이미 시작했거나 끝난 수업은 변경할 수 없습니다.');
- for(let day=1;day<=3;day++){const list=selected.filter(c=>c.day===day).sort((a,b)=>a.start-b.start);for(let i=1;i<list.length;i++){if(list[i].start<list[i-1].end)errors.push(`${day}일차 ${list[i-1].name} / ${list[i].name} 시간이 겹칩니다.`);else if(list[i].location!==list[i-1].location&&list[i].start-list[i-1].end<10)errors.push('다른 건물 수업 사이에 이동 시간 10분이 필요합니다.');}}
+ for(let day=1;day<=5;day++){const list=selected.filter(c=>c.day===day).sort((a,b)=>a.start-b.start);for(let i=1;i<list.length;i++){if(list[i].start<list[i-1].end)errors.push(`${day}일차 ${list[i-1].name} / ${list[i].name} 시간이 겹칩니다.`);else if(list[i].location!==list[i-1].location&&list[i].start-list[i-1].end<10)errors.push('다른 건물 수업 사이에 이동 시간 10분이 필요합니다.');}}
  return [...new Set(errors)];
 }
 export function confirmRegistration(state,ids){const errors=registrationProblems(state,ids);if(errors.length)throw new Error(errors.join(' '));const s=structuredClone(state),changed=JSON.stringify([...ids].sort())!==JSON.stringify([...registeredCourseIds(s)].sort());s.academics.courseIds=[...ids];s.academics.registrationPending=false;s.academics.registered=true;if(changed||!state.academics.registered)s.memory.push(`[${s.day}일차] 복학생 수강 계획을 확인했다. 선택한 수업과 공강에 맞춰 학교생활을 시작한다.`);return s;}

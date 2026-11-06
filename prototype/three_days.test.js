@@ -5,7 +5,7 @@ import {act,nextDay,acceptAppointment,cancelAppointment,save,restore} from './si
 import {availableRoutes,presentPeople} from './days.js';
 import {dialogue,respond,relationship,groupDialogue,endTopic} from './dialogue.js';
 
-test('days cannot be skipped, replayed, or advanced past day three',()=>{
+test('first three story days remain ordered inside the fortnight',()=>{
  assert.throws(()=>nextDay(newGame()));
  let s=newGame();
  for(const choice of ['rehearsal','work','backstage']){
@@ -14,7 +14,7 @@ test('days cannot be skipped, replayed, or advanced past day three',()=>{
   assert.throws(()=>act(s,choice));
   if(day<3)s=nextDay(s);
  }
- assert.throws(()=>nextDay(s));assert.equal(s.dayHistory.length,2);
+ const fourth=nextDay(s);assert.equal(fourth.day,4);assert.equal(s.dayHistory.length,2);
  assert.equal(new Set(s.events.filter(e=>e.kind==='scheduled').map(e=>e.id)).size,5);
 });
 test('prior promises survive through morning greetings without being silently cleared',()=>{

@@ -2,7 +2,7 @@ export const weatherTypes={
  sunny:{name:'맑음',icon:'☀',temperature:22},cloudy:{name:'흐림',icon:'☁',temperature:20},
  rain:{name:'비',icon:'☂',temperature:18},storm:{name:'강한 비',icon:'☂',temperature:16}
 };
-export function defaultWeather(){return {days:{1:{afternoon:'sunny',evening:'cloudy'},2:{afternoon:'rain',evening:'rain'},3:{afternoon:'cloudy',evening:'sunny'}}};}
+export function defaultWeather(){const days={};const patterns=['sunny','rain','cloudy','sunny','cloudy','sunny','rain','cloudy','sunny','rain','cloudy','sunny','sunny','cloudy'];for(let day=1;day<=14;day++)days[day]={afternoon:patterns[day-1],evening:day===1?'cloudy':day===2?'rain':day===3?'sunny':day%3===0?'cloudy':patterns[day-1]};return {days};}
 export function weatherNow(s,day=s.day,phase=s.phase){const kind=s.weather?.days?.[day]?.[phase]??'sunny';return {kind,...weatherTypes[kind],temperature:weatherTypes[kind].temperature-(phase==='evening'?3:0)};}
 export function wetWeather(s){return ['rain','storm'].includes(weatherNow(s).kind);}
 export function hasUmbrella(s){return (s.inventory??[]).some(i=>i.id==='umbrella'&&i.quantity>0);}
@@ -47,7 +47,7 @@ export function borrowUmbrella(state,returning=false){
 }
 export function setWeatherExample(state,kind){
  if(!weatherTypes[kind])throw new Error('알 수 없는 날씨입니다.');
- const s=structuredClone(state);s.weather??=defaultWeather();s.weather.days[s.day][s.phase]=kind;return s;
+ const s=structuredClone(state);s.weather??=defaultWeather();s.weather.days[s.day]??={afternoon:weatherNow(s,s.day,'afternoon').kind,evening:weatherNow(s,s.day,'evening').kind};s.weather.days[s.day][s.phase]=kind;return s;
 }
 
 export function weatherAdjustAppointments(state,routes){

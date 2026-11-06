@@ -28,7 +28,7 @@ function targetDay(s){return s.day+1;}
 function npcOccupied(s,id,day){return s.appointments.some(a=>a.person===id&&a.day===day&&a.status==='pending');}
 export function evaluateInvitations(state){
  const s=structuredClone(state);s.invitationDecisions??={};
- if(s.day>=3)return s;
+ if(s.day>=14)return s;
  for(const id of ['yeogyeong','seoyeon','soyul']){
   const key=`npc:${id}:${s.day}`;
   if(socialOpinion(s,id).cautious){
@@ -62,7 +62,7 @@ export function replyOffer(state,id,accept){
  return s;
 }
 export function suggestMeeting(state,id){
- if(!contact(state,id).introduced||state.day>=3)throw new Error('먼저 인사를 나누거나 이후 일정이 있는 날에 제안해 주세요.');
+ if(!contact(state,id).introduced||state.day>=14)throw new Error('먼저 인사를 나누거나 이후 일정이 있는 날에 제안해 주세요.');
  const s=structuredClone(state);s.invitationDecisions??={};const key=`player:${id}:${s.day}`;
  if(s.invitationDecisions[key])throw new Error('오늘은 이미 의사를 물었습니다. 답변을 존중해 주세요.');
  const day=targetDay(s),intent=socialIntent(s,id),r=s.relations[`${id}>taei`]??{};
