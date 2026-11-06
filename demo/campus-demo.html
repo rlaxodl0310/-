@@ -304,6 +304,8 @@ body{background:#e6e7df}.utility-page{border-radius:8px;box-shadow:none;border-c
 .registration-electives>p{font-size:13px;color:#63766b;line-height:1.7}.general-course{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 16px;margin:10px 0;background:#fffdf7;border:1px solid #d8e0d4;border-radius:12px}.general-course span{font-size:12px;color:#61796a}.general-course h3{font-size:17px;margin:7px 0}.general-course p{font-size:12px;line-height:1.5;color:#728074;margin:0}.registration-page .general-course button{min-width:64px;min-height:44px;background:#2b5b4e;border:1px solid #2b5b4e;border-radius:8px;color:#fffdf0;font-size:14px}.registration-page .general-course button[aria-pressed="true"]{background:#f5f0e4;color:#655b40;border-color:#cfc2a4}.registration-page button:disabled{opacity:.5;cursor:not-allowed}.empty-courses{padding:14px;border:1px dashed #d2dbcd;border-radius:10px;color:#758171;font-size:13px;line-height:1.7}.registration-footer{display:flex;align-items:center;justify-content:flex-end;gap:18px;padding-top:22px;margin-top:24px;border-top:1px solid #d8dfd3}.registration-footer p{margin-right:auto;font-size:13px;color:#63776b}.registration-footer button{background:#254e46;border:1px solid #254e46;border-radius:10px;min-height:50px;padding:12px 22px;font-size:16px;color:#fffbea}
 @media(max-width:850px){.registration-page{margin:14px;padding:20px}.registration-layout{grid-template-columns:1fr}.registration-header h1{font-size:26px}.registration-summary{padding:16px}.registration-summary>span{font-size:12px}.registration-footer{flex-wrap:wrap}.registration-footer button{flex:1}.registration-footer p{width:100%;margin:0}.week-scroll{scrollbar-width:thin}.week-hint:before{content:'↔ 시간표는 옆으로 밀어볼 수 있어요. ';}}
 .registration-board,.registration-electives{min-width:0}
+
+.opportunity-hint{position:relative;z-index:3;width:min(680px,calc(100% - 32px));box-sizing:border-box;margin:16px auto 24px;padding:20px 24px;border:1px solid #c5d1bd;border-radius:18px;background:#faf8ef;color:#293e37;box-shadow:0 12px 32px #142b2620;display:flex;gap:20px;align-items:center}.opportunity-hint span{display:block;color:#7c7450;font-size:11px;letter-spacing:.12em;margin-bottom:6px}.opportunity-hint strong{font-size:17px}.opportunity-hint p{font-size:14px;line-height:1.7;margin:8px 0}.opportunity-hint small{font-size:11px;color:#65776b}.hint-actions{display:flex;flex-direction:column;gap:8px;flex-shrink:0}.hint-actions button{background:#31594d;color:#fff;border:0;border-radius:10px;padding:12px}.hint-actions button+button{background:transparent;color:#65776b;font-size:12px}@media(max-width:600px){.opportunity-hint{padding:16px;display:block}.hint-actions{flex-direction:row;margin-top:12px}.hint-actions button{flex:1}}
 </style></head><body><main id="app"><section style="padding:32px;font-family:system-ui;line-height:1.8"><h1>캠퍼스의 하루</h1><p>게임 화면을 준비하고 있습니다.</p><p>이 안내가 계속 보이면 파일 미리보기 대신 다운로드한 HTML을 Chrome 또는 Edge에서 직접 열어주세요. GitHub 파일 보기 화면에서는 게임이 실행되지 않습니다.</p></section></main><noscript>게임 실행에는 JavaScript가 필요합니다. JavaScript를 허용하는 브라우저에서 열어주세요.</noscript><script>
 window.addEventListener('error', function(event) {
   var app = document.getElementById('app');
@@ -2933,6 +2935,33 @@ function resolveEncounter(state,encounter,engage){
  response.state=meetAppointments(response.state,encounter.person);const heard=socialNews(response.state,encounter.person);response.state=heard.state;if(heard.news)response.result.socialNews=heard.news.text;return response;
 }
 
+// Hints use personal plans, public posts already read, or activity observed here.
+function opportunityCandidates(s){
+ if(s.phase==='evening'||s.academics?.registrationPending||s.clock.minute<600||s.clock.minute>1200)return [];
+ const lesson=nextLesson(s);if(lesson&&lesson.start>=s.clock.minute&&lesson.start-s.clock.minute<45)return [];
+ const out=[],daily=fortnightActivities[s.day];
+ if(daily&&!s.fortnightLife?.[s.day]?.done&&s.clock.minute>=780)out.push({id:`daily:${s.day}`,place:daily.place,title:'공강에 잠깐, 다른 일을',text:daily.place===s.location?'잠깐 멈춰 주변을 둘러볼까. 오늘 남겨둘 만한 일이 있을지도 모른다.':'오늘은 늘 가던 길에서 조금 벗어나 볼까. 잠깐 들러 하고 싶은 일을 찾아봐도 좋겠다.'});
+ const onsite=new Set(onsiteCommunityActivities(s).map(x=>x.id));
+ for(const [id,d] of Object.entries(communityActivityDefinitions)){
+  if(!onsite.has(id)&&!s.flow?.postsRead?.[id])continue;
+  if(!activityAvailability(s,id).ok)continue;
+  out.push({id:`public:${s.day}:${id}`,place:d.venue.location,title:onsite.has(id)?'근처에서 들려오는 소리':'읽어둔 모집글이 떠오른다',text:onsite.has(id)?'근처에서 활동 안내가 들린다. 관심이 있으면 직접 어떤 자리인지 물어볼까?':`${d.title} 안내를 읽어뒀지. 시간이 된다면 현장 분위기를 살펴봐도 좋겠다.`});
+ }
+ return out;
+}
+function currentOpportunity(s){const h=s.opportunityHints?.active;return h&&opportunityCandidates(s).some(c=>c.id===h.id)?h:null;}
+function updateOpportunityHints(s){
+ const log=s.opportunityHints??={seen:[],day:s.day,count:0,last:-999,active:null};
+ if(log.day!==s.day){log.day=s.day;log.count=0;log.last=-999;log.active=null;}
+ if(log.active&&!currentOpportunity(s))log.active=null;
+ if(log.active||log.count>=2||s.clock.minute-log.last<90)return;
+ const candidates=opportunityCandidates(s).filter(c=>!log.seen.includes(c.id));
+ if(!candidates.length)return;
+ const h=candidates[(s.day+Math.floor(s.clock.minute/30))%candidates.length];
+ log.active=h;log.seen.push(h.id);log.count++;log.last=s.clock.minute;
+}
+function dismissOpportunity(s){if(s.opportunityHints)s.opportunityHints.active=null;}
+
 // Story progress is saved separately from the simulation clock and registration draft.
 const returningOpening=[
  {speaker:'',text:'군휴학을 마치고 다시 돌아온 캠퍼스. 교문 앞에서 잠깐 걸음을 늦춘다. 가방 안쪽에 넣어둔 학생증이 손끝에 걸린다.'},
@@ -4105,11 +4134,18 @@ function render(){
  if(paceNotice)feedback.insertAdjacentHTML('afterbegin',`<section class="time-summary" role="status">${esc(paceNotice)}</section>`);
  if(gains.length)feedback.insertAdjacentHTML('afterbegin',`<section class="discovery-notice" aria-label="새로 얻은 정보와 아이템"><div role="status" aria-live="polite">${gains.map(g=>`<p class="${g.kind==='item'?'item-text':'information-text'}"><strong>${g.kind==='item'?'▣ 아이템 획득':'◇ 새 정보'}</strong> · ${esc(g.name)}${g.quantity?` × ${g.quantity}`:''}</p>`).join('')}</div><div class="actions">${btn('정보 · 소지품 확인','go','discoveries')}${btn('확인','dismissDiscoveries')}</div></section>`);
  novelPresentation();
+ if(['campus','place'].includes(screen)&&!activeMiniGame()){
+  updateOpportunityHints(state);const hint=currentOpportunity(state);
+  if(hint)app.insertAdjacentHTML('beforeend',`<aside class="opportunity-hint" aria-label="행동 힌트"><div><span>문득 떠오른 생각</span><strong>${esc(hint.title)}</strong><p>${esc(hint.text)}</p><small>관심이 간다면 · ${esc(locations[hint.place])} · 참여 여부는 직접 결정</small></div><div class="hint-actions">${btn('주변 살펴보기','hintExplore')}${btn('지금은 넘어간다','hintDismiss')}</div></aside>`);
+ }
+
  if(screen==='travel')applyTravelFilter();
  renderActivityMiniGame();
  if(modelPending){const panel=app.querySelector('.vn-panel');if(panel)panel.innerHTML=`<p role="status" aria-live="polite">잠시 말을 고르고 있다…</p><div class="vn-controls">${btn('기다리지 않고 이어가기','skipModel')}</div>`;}
 }
 app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b){if(modelPending)return;if(e.target.closest('.vn-copy')&&vnModel&&!vnView.choosing){vnView=advanceNovel(vnView,vnModel.beats.length);drawNovelBeat();}return;}let a=b.dataset.action,v=b.dataset.value;
+ if(a==='hintDismiss'){dismissOpportunity(state);render();return;}
+ if(a==='hintExplore'){const hint=currentOpportunity(state);if(!hint){render();return;}travelQuery=locations[hint.place]??'';dismissOpportunity(state);rememberReading();screen='travel';render();return;}
  if(a==='travelFilter'){travelFilter=v;applyTravelFilter();return;}
  if(a.startsWith('mini')&&a!=='miniContinue'){handleMiniAction(a);return;}
  if(a==='miniContinue'){const mini=activeMiniGame();if(mini?.phase!=='result')return;a='eventStep';v=mini.choice;}

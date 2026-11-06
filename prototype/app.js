@@ -1,3 +1,4 @@
+import {updateOpportunityHints,currentOpportunity,dismissOpportunity} from './opportunity-hints.js';
 import {returningOpeningView,progressReturningOpening,initialReturningScreen} from './returning-opening.js';
 import {fortnightActivities,fortnightActivityView,progressFortnightActivity} from './fortnight-life.js';
 import {registrationCourses,registrationCatalog,generalCourseOptions,registeredCourseIds,registrationLocked,registrationProblems,confirmRegistration} from './timetable.js';
@@ -313,11 +314,18 @@ function render(){
  if(paceNotice)feedback.insertAdjacentHTML('afterbegin',`<section class="time-summary" role="status">${esc(paceNotice)}</section>`);
  if(gains.length)feedback.insertAdjacentHTML('afterbegin',`<section class="discovery-notice" aria-label="새로 얻은 정보와 아이템"><div role="status" aria-live="polite">${gains.map(g=>`<p class="${g.kind==='item'?'item-text':'information-text'}"><strong>${g.kind==='item'?'▣ 아이템 획득':'◇ 새 정보'}</strong> · ${esc(g.name)}${g.quantity?` × ${g.quantity}`:''}</p>`).join('')}</div><div class="actions">${btn('정보 · 소지품 확인','go','discoveries')}${btn('확인','dismissDiscoveries')}</div></section>`);
  novelPresentation();
+ if(['campus','place'].includes(screen)&&!activeMiniGame()){
+  updateOpportunityHints(state);const hint=currentOpportunity(state);
+  if(hint)app.insertAdjacentHTML('beforeend',`<aside class="opportunity-hint" aria-label="행동 힌트"><div><span>문득 떠오른 생각</span><strong>${esc(hint.title)}</strong><p>${esc(hint.text)}</p><small>관심이 간다면 · ${esc(locations[hint.place])} · 참여 여부는 직접 결정</small></div><div class="hint-actions">${btn('주변 살펴보기','hintExplore')}${btn('지금은 넘어간다','hintDismiss')}</div></aside>`);
+ }
+
  if(screen==='travel')applyTravelFilter();
  renderActivityMiniGame();
  if(modelPending){const panel=app.querySelector('.vn-panel');if(panel)panel.innerHTML=`<p role="status" aria-live="polite">잠시 말을 고르고 있다…</p><div class="vn-controls">${btn('기다리지 않고 이어가기','skipModel')}</div>`;}
 }
 app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b){if(modelPending)return;if(e.target.closest('.vn-copy')&&vnModel&&!vnView.choosing){vnView=advanceNovel(vnView,vnModel.beats.length);drawNovelBeat();}return;}let a=b.dataset.action,v=b.dataset.value;
+ if(a==='hintDismiss'){dismissOpportunity(state);render();return;}
+ if(a==='hintExplore'){const hint=currentOpportunity(state);if(!hint){render();return;}travelQuery=locations[hint.place]??'';dismissOpportunity(state);rememberReading();screen='travel';render();return;}
  if(a==='travelFilter'){travelFilter=v;applyTravelFilter();return;}
  if(a.startsWith('mini')&&a!=='miniContinue'){handleMiniAction(a);return;}
  if(a==='miniContinue'){const mini=activeMiniGame();if(mini?.phase!=='result')return;a='eventStep';v=mini.choice;}
