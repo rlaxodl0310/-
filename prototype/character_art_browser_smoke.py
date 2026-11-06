@@ -1,3 +1,4 @@
+from vn_browser_helpers import read_returning_opening
 import http.server,threading
 from playwright.sync_api import sync_playwright
 class Quiet(http.server.SimpleHTTPRequestHandler):
@@ -10,6 +11,7 @@ try:
    for w,h in [(390,844),(1440,1000)]:
     page=b.new_page(viewport={'width':w,'height':h});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.goto(f'http://127.0.0.1:{server.server_port}'+path)
+    read_returning_opening(page)
     if page.locator('[data-action="courseConfirm"]').count():page.locator('[data-action="courseConfirm"]').click()
     page.locator('[data-action="openQuick"]').first.click();page.locator('[data-action="quickTab"][data-value="save"]').click();page.locator('[data-action="save"][data-value="1"]').click()
     before=page.evaluate("JSON.parse(localStorage.getItem('campus.slot.1'))")

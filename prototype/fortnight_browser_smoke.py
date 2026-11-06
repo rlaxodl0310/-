@@ -1,6 +1,6 @@
 import http.server,threading
 from playwright.sync_api import sync_playwright
-from vn_browser_helpers import choose,open_tool
+from vn_browser_helpers import read_returning_opening,choose,open_tool
 class Quiet(http.server.SimpleHTTPRequestHandler):
  def log_message(self,*args):pass
 server=http.server.ThreadingHTTPServer(('127.0.0.1',0),Quiet);threading.Thread(target=server.serve_forever,daemon=True).start()
@@ -9,7 +9,7 @@ try:
   b=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium')
   for path in ['/prototype/','/demo/campus-demo.html']:
    for width,height in [(390,844),(1440,1000)]:
-    page=b.new_page(viewport={'width':width,'height':height});errors=[];page.on('pageerror',lambda e:errors.append(str(e)));base=f'http://127.0.0.1:{server.server_port}';page.goto(base+path);page.locator('[data-action="courseConfirm"]').click()
+    page=b.new_page(viewport={'width':width,'height':height});errors=[];page.on('pageerror',lambda e:errors.append(str(e)));base=f'http://127.0.0.1:{server.server_port}';page.goto(base+path);read_returning_opening(page);page.locator('[data-action="courseConfirm"]').click()
     open_tool(page,'calendar');assert page.locator('.page-reading article.list').count()==14
     if path=='/prototype/' and width==1440:page.screenshot(path='docs/assets/fortnight-calendar-preview.png',full_page=True)
     # Build later saves by actually advancing the domain from day1, then load via game UI.

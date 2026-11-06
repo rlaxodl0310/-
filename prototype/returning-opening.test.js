@@ -1,0 +1,8 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {newReturningGame,newGame,save,restore} from './simulation.js';
+import {returningOpening,returningOpeningView,progressReturningOpening,initialReturningScreen} from './returning-opening.js';
+import {confirmRegistration,registeredCourseIds} from './timetable.js';
+test('new return starts with story and reaches registration only after the final beat',()=>{let s=newReturningGame();assert.equal(initialReturningScreen(s),'opening');for(let n=0;n<returningOpening.length;n++){assert.equal(returningOpeningView(s).step,n);s=progressReturningOpening(s);assert.equal(initialReturningScreen(s),n===returningOpening.length-1?'enrollment':'opening');}assert.throws(()=>progressReturningOpening(s));});
+test('opening progress saves without advancing money time knowledge or relationships',()=>{let s=newReturningGame();const original=structuredClone(s);s=progressReturningOpening(s);s=restore(save(s));assert.equal(returningOpeningView(s).step,1);for(const k of ['clock','relations','contacts','inventory','memory','wallet'])assert.deepEqual(s[k],original[k]);});
+test('legacy pending registration resumes in planner; active saves never replay prologue',()=>{const old=newReturningGame();delete old.opening;assert.equal(initialReturningScreen(restore(save(old))),'enrollment');assert.equal(initialReturningScreen(newGame()),'campus');});
+test('confirming courses preserves completed opening without touching its clock',()=>{let s=newReturningGame();while(!s.opening.done)s=progressReturningOpening(s);s=confirmRegistration(s,registeredCourseIds(s));assert.equal(initialReturningScreen(s),'campus');assert.equal(s.clock.minute,540);assert.equal(s.opening.done,true);});

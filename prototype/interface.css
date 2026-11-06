@@ -101,3 +101,14 @@ body{background:#e6e7df}.utility-page{border-radius:8px;box-shadow:none;border-c
 .iseo-talk-box>p{color:#edf3e8}
 .character-art-card{color:#edf3e8}
 .utility-page .character-art-card .muted{color:#c5d1cb}
+
+.opening-stage{position:relative;min-height:100dvh;overflow:hidden}
+.opening-heading{position:absolute;top:32px;left:6%;color:#f5f3e8;text-shadow:0 2px 12px #122a32}
+.opening-heading small{letter-spacing:.12em;font-size:14px}.opening-heading h1{font-size:30px;margin:10px 0}
+.opening-stage .opening-taei{position:absolute;right:14%;top:100px;width:min(30vw,340px);aspect-ratio:1/2;mask-image:linear-gradient(#000 84%,transparent)}
+.opening-panel{position:absolute;bottom:5%;left:8%;right:8%;padding:28px 32px;background:#142b30f5;border:1px solid #c3c9b844;border-radius:14px;color:#f1f0e5;box-shadow:0 12px 40px #10252b55}
+.opening-speaker{color:#e2cda2;font-size:16px;margin:0 0 14px}.opening-copy{font-size:22px;line-height:1.85;min-height:4em;margin:0 0 20px;word-break:keep-all}
+.opening-panel footer{display:flex;justify-content:space-between;align-items:center;gap:16px}.opening-panel button{min-height:48px;padding:12px 20px;border:1px solid #aabbac88;background:#334e50;color:#fffdf3;border-radius:9px;font-size:16px}
+.opening-progress{display:flex;gap:7px}.opening-progress i{display:block;width:7px;height:7px;border-radius:50%;background:#ffffff35}.opening-progress i.read{background:#e2cda2}
+@media(max-width:650px){.opening-heading{top:24px;left:6%}.opening-heading h1{font-size:25px}.opening-stage .opening-taei{top:135px;right:7%;width:64vw;max-width:280px}.opening-panel{left:4%;right:4%;bottom:3%;padding:20px}.opening-copy{font-size:19px;min-height:7.4em}.opening-panel footer{align-items:stretch;flex-direction:column;gap:12px}.opening-progress{justify-content:center}.opening-panel button{width:100%}}
+@media(max-height:640px) and (min-width:651px){.opening-panel{bottom:2%;padding:18px 26px}.opening-copy{font-size:18px;min-height:3.5em}.opening-heading{top:18px}.opening-stage .opening-taei{top:60px}}

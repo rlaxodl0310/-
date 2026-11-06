@@ -136,4 +136,4 @@ export function restore(raw){
  return s;
 }
 
-export function newReturningGame(){const s=newGame();s.academics.registrationPending=true;return s;}
+export function newReturningGame(){const s=newGame();s.academics.registrationPending=true;s.opening={step:0,done:false};return s;}

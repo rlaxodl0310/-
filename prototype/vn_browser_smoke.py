@@ -1,7 +1,7 @@
 """Sequential reading, few choices, menu return, real school and incidental conversation."""
 import os
 from playwright.sync_api import sync_playwright
-from vn_browser_helpers import read_to_choices,choose,open_tool,finish_school_morning
+from vn_browser_helpers import read_returning_opening,read_to_choices,choose,open_tool,finish_school_morning
 base=os.environ.get('CAMPUS_TEST_URL','http://127.0.0.1:8000')
 with sync_playwright() as p:
  browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium')
@@ -10,6 +10,7 @@ with sync_playwright() as p:
    page=browser.new_page(viewport={'width':width,'height':height});page.set_default_timeout(7000);errors=[]
    page.on('pageerror',lambda e:errors.append(str(e)))
    page.goto(base+path)
+   read_returning_opening(page)
    page.locator('[data-action="courseConfirm"]').click()
    assert page.locator('.vn-stage').is_visible()
    for selector in ['.scene-visual','.scene-visual .portrait']:

@@ -1,5 +1,13 @@
 """Navigate the actual sequential dialogue UI without skipping domain actions."""
+def read_returning_opening(page):
+    for _ in range(8):
+        button=page.locator('[data-action="openingNext"]')
+        if not button.count():return
+        button.click()
+    raise AssertionError('Opening did not reach registration')
+
 def confirm_returning_plan(page):
+    read_returning_opening(page)
     if page.locator('[data-action="courseConfirm"]').count():page.locator('[data-action="courseConfirm"]').click()
 
 def read_to_choices(page):
