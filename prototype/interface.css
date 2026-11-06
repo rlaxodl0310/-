@@ -89,3 +89,15 @@ body{background:#e6e7df}.utility-page{border-radius:8px;box-shadow:none;border-c
 .iseo-art-front{background-image:url('../docs/assets/iseo-fullbody-concept.png')}
 .iseo-art-side{background-image:url('../docs/assets/iseo-side-concept.png')}
 .iseo-art-back{background-image:url('../docs/assets/iseo-back-concept.png')}
+
+.iseo-conversation{max-width:900px;margin:auto;position:relative;background:linear-gradient(#14282b44,#14282be6),url('../docs/assets/campus-front-background.png') center/cover;border-radius:16px;overflow:hidden}
+.iseo-talk-art{width:min(72vw,360px);aspect-ratio:1/2;margin:0 auto -160px;background:url('../docs/assets/iseo-dialogue-expressions.png') no-repeat;background-size:300% 100%;background-position:calc(var(--pose)*50%) 0}
+.iseo-talk-box{position:relative;padding:22px;background:#172c2ff2;border-top:1px solid #b4c5ba66}
+.iseo-talk-box>strong{color:#e7d9b0;font-size:20px}
+.iseo-talk-box>p{font-size:20px;line-height:1.8;min-height:3.6em}
+.iseo-talk-box .actions{display:grid;gap:10px}
+.iseo-talk-box button{text-align:left;min-height:48px}
+@media(max-width:650px){.iseo-talk-art{width:260px;max-width:85vw;margin-bottom:-110px}.iseo-talk-box{padding:16px}.iseo-talk-box>p{font-size:18px}}
+.iseo-talk-box>p{color:#edf3e8}
+.character-art-card{color:#edf3e8}
+.utility-page .character-art-card .muted{color:#c5d1cb}

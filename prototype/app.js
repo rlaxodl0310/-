@@ -1,3 +1,4 @@
+import {newIseoPreview,iseoPreviewView,advanceIseoPreview} from './iseo-preview.js';
 import {canDiscussSupplyAftermath,activeSupplyAftermath,pauseSupplyAftermath,beginSupplyAftermath,supplyAftermathScene,progressSupplyAftermath} from './supply-aftermath.js';
 import {usesSupplyStory,supplyPeople,supplyIntro,canAskSupplyReport,supplyReport} from './supply-story.js';
 import {varyEverydayAction,everydayEventView,resolveEverydayEvent,abandonEverydayEvent} from './everyday-life.js';
@@ -36,7 +37,7 @@ import {people,dialogue,respond,groupDialogue,respondGroup,endTopic,openConversa
 import {newGame,newAfternoonScenario,nextDay,acceptAppointment,cancelAppointment,save,restore} from './simulation.js';
 import {days,locations,availableRoutes,presentPeople,currentSchedule} from './days.js';
 let state=newGame(),screen='campus',selected=null,note='',returnTo='campus',speaker='seoyeon',reply=null,groupLines=[],groupIndex=0,groupAnswered=false,encounter=null;
-let travelQuery='',travelFilter='all',artAngle='front';
+let travelQuery='',travelFilter='all',artAngle='front',iseoAudition=newIseoPreview();
 let gains=[],paceNotice='',weatherReturn='campus',warningScene=null,activityReturn='campus',clubReturn='communityPost',selectedClub=null,communityReturn='campus',communityPhoneReturn='campus',selectedPost=null,feedIds=null,visibleCommentCount=0,communityFilter='all';
 const app=document.querySelector('#app');
 const dialogueService=createDialogueService();dialogueService.probe();
@@ -109,7 +110,7 @@ const vnCursors=new Map();
 let selectedCommunityEvent=null,buildingFloorView=null;
 let quickReturn=null,quickSnapshot=null,quickTool='';
 const readingSnapshots=new Map();
-const utilityScreens=new Set(['phone','timetable','schedule','messages','map','journal','discoveries','observations','weather','community','communityPost','clubs','travel','menu','quickMenu','reset','peopleRecord','characterArt']);
+const utilityScreens=new Set(['phone','timetable','schedule','messages','map','journal','discoveries','observations','weather','community','communityPost','clubs','travel','menu','quickMenu','reset','peopleRecord','characterArt','iseoDialogue']);
 function rememberReading(){if(vnModel&&!utilityScreens.has(screen))readingSnapshots.set(screen,{screen,note,reply,paceNotice,view:{...vnView}});}
 function plainNode(node){const copy=node.cloneNode(true);if(copy.classList.contains('player-line'))copy.querySelector('span')?.remove();copy.querySelectorAll('.note-label,.time-cost,button').forEach(n=>n.remove());return copy.textContent.replace(/\s+/g,' ').trim();}
 function novelPresentation(){
@@ -265,7 +266,11 @@ function render(){
  if(screen==='schedule')app.innerHTML=page('약속과 기록',`<p>${timeLabel()}</p><p class="muted">직접 잡거나 수락한 약속을 확인합니다. 약속이 없는 시간은 자유롭게 보낼 수 있습니다.</p><h2>약속</h2>${commitments()}<h2>오늘 한 일</h2>${(state.freeDay?.completed??[]).map(x=>`<div class="list">${esc(days[state.day].routes[x.id]?.name??x.id)} · ${x.activeMinutes??x.end-x.start}분</div>`).join('')||'<p class="muted">아직 기록된 긴 활동이 없습니다. 주변을 둘러보며 자유롭게 시작할 수 있습니다.</p>'}`,'phone');
  if(screen==='clubs')app.innerHTML=page('동아리 살펴보기',`<p class="muted">${Object.keys(state.memberships??{}).length?'가입한 동아리와 다른 곳의 안내를 확인할 수 있습니다.':'복학 후 아직 가입한 동아리는 없습니다. 관심 있는 곳에 신청하고 현장 면접을 볼 수 있습니다.'} 가입과 활동 참석은 별개입니다.</p><div class="grid">${Object.entries(clubs).map(([id,c])=>`<button class="card" data-action="clubDetail" data-value="${id}"><strong>${esc(c.name)}</strong>${state.memberships?.[id]?'가입 중':'모집 안내 보기'} · ${esc(c.place)}</button>`).join('')}</div>`);
  if(screen==='clubDetail'&&clubs[selectedClub]){const c=clubs[selectedClub];app.innerHTML=page(c.name,`<p class="lead">${esc(c.description)}</p><p>주요 활동 장소 · ${esc(c.place)}</p><p class="muted">신청서 제출 후 자유관 현장 면접과 결과 안내를 거쳐 가입합니다. 가입하면 예정된 공개 활동을 약속 제안으로 안내받습니다. 수락해야 참석 약속이 됩니다. 공개 체험 활동은 가입 전에도 참여할 수 있습니다.</p>${state.memberships?.[selectedClub]?'<p class="information-text">가입 중입니다. 활동 참석 여부는 휴대폰 일정에서 정할 수 있습니다.</p>':(state.clubApplications?.[selectedClub]?.status==='offered'?btn('안내를 확인하고 가입 의사를 전한다.','joinClub',selectedClub):state.clubApplications?.[selectedClub]?`<p>${esc(clubInterviewView(state,selectedClub)?.text??'신청 처리 중입니다.')}</p>${state.clubApplications[selectedClub].status==='submitted'?btn('면접 장소와 접수 상태 확인','openInterview',selectedClub):''}`:btn('신청서를 작성한다.','openClubApply',selectedClub))}<div class="actions">${btn('약속과 일정 보기','go','schedule')}</div>`,clubReturn);}
- if(screen==='characterArt')app.innerHTML=page('캐릭터 일러스트',`<article class="character-art-card"><p class="eyebrow">외형 미리보기</p><h2>정이서</h2><p class="muted">이름과 일러스트만 등록된 캐릭터입니다. 전공·성격·과거사·일정·이벤트는 아직 게임에 적용하지 않았습니다.</p><nav class="art-angle-tabs" aria-label="일러스트 방향">${[['front','정면'],['side','측면'],['back','뒷모습']].map(([id,label])=>`<button data-action="artAngle" data-value="${id}" aria-pressed="${artAngle===id}">${label}</button>`).join('')}</nav><div class="iseo-art iseo-art-${artAngle}" role="img" aria-label="정이서 ${artAngle==='front'?'정면':artAngle==='side'?'측면':'뒷모습'} 전신 일러스트"></div></article>`,'quickMenu');
+ if(screen==='iseoDialogue'){
+  const v=iseoPreviewView(iseoAudition),reading=iseoAudition.beat<v.lines.length-1;
+  app.innerHTML=page('이서 · 대화 미리보기',`<p class="muted">독립된 대화 시안 · 실제 만남·시간·관계 기록에는 반영되지 않습니다.</p><section class="iseo-conversation"><div class="iseo-talk-art" style="--pose:${v.expression}" role="img" aria-label="이서 · ${['차분함','밝은 미소','쑥스러움'][v.expression]}"></div><div class="iseo-talk-box" aria-live="polite"><strong>${esc(v.name)}</strong><p>${esc(v.lines[iseoAudition.beat])}</p><div class="actions">${reading?btn('다음 · Space','iseoChoice','next'):v.options.map(([id,label])=>btn(label,'iseoChoice',id)).join('')}${!reading&&!v.options.length?btn('다른 대화로 다시 보기','iseoRestart'):''}</div></div></section>`,'characterArt');
+ }
+ if(screen==='characterArt')app.innerHTML=page('캐릭터 일러스트',`<article class="character-art-card"><p class="eyebrow">외형 미리보기</p><h2>정이서</h2><p class="muted">일상 속 등장은 준비 중입니다. 아래 대화 미리보기에서 말투와 표정을 시험할 수 있어요.</p>${btn('이서와 대화 미리보기','iseoTalk')}<nav class="art-angle-tabs" aria-label="일러스트 방향">${[['front','정면'],['side','측면'],['back','뒷모습']].map(([id,label])=>`<button data-action="artAngle" data-value="${id}" aria-pressed="${artAngle===id}">${label}</button>`).join('')}</nav><div class="iseo-art iseo-art-${artAngle}" role="img" aria-label="정이서 ${artAngle==='front'?'정면':artAngle==='side'?'측면':'뒷모습'} 전신 일러스트"></div></article>`,'quickMenu');
  if(screen==='peopleRecord')app.innerHTML=page('알게 된 사람들',Object.entries(state.contacts??{}).filter(([,c])=>c.seen).map(([id,c])=>`<article class="list"><strong>${esc(nameOf(id))}</strong><p>${c.details?.major?esc(c.details.major):'전공은 아직 듣지 못했다.'}</p><p>${c.lastSeen?'마지막으로 본 곳 · '+esc(locations[c.lastSeen.location]??'교내')+' · '+c.lastSeen.day+'일차 '+schoolTime(c.lastSeen.minute):''}</p></article>`).join('')||'<p>아직 따로 기억해둔 사람이 없다.</p>');
  if(screen==='clubApply')app.innerHTML=page('가입 신청서',`<p>${esc(clubs[selectedClub].name)}에 신청하는 이유를 적는다. 제출만으로 가입되는 것은 아니다.</p><div class="actions">${btn('활동에 관심이 있어 배우고 싶다고 적는다.','submitClubApply','interest')}${btn('지금까지 해본 일과 가능한 역할을 적는다.','submitClubApply','experience')}${btn('아직 제출하지 않는다.','go','clubDetail')}</div>`,'clubDetail');
  if(screen==='clubInterview'){const a=state.clubApplications?.[selectedClub],view=clubInterviewView(state,selectedClub),reason=interviewAvailability(state,selectedClub);app.innerHTML=page('동아리 면접',`<p>${esc(a?.status!=='submitted'?(view?.text??'신청서를 먼저 제출해야 한다.'):(reason??view?.text))}</p><div class="actions">${!reason?view.options.map(o=>btn(o.label,'interviewAnswer',o.id)).join(''):''}${a?.status==='submitted'&&state.location==='hall'&&state.buildingArea?.id!==a.room?btn('안내받은 동아리실로 간다.','interviewTravel',selectedClub):''}${btn('지금은 하던 일로 돌아간다.','go','place')}</div>`,'place');}
@@ -307,6 +312,9 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
  }
  if(a==='openQuick'){rememberReading();quickReturn=screen;quickSnapshot={note,reply,paceNotice,view:utilityScreens.has(screen)?null:{...vnView}};screen='quickMenu';note='';render();window.scrollTo(0,0);return;}
  if(a==='closeQuick'){resumeQuick();return;}
+ if(a==='iseoTalk'){iseoAudition=newIseoPreview(iseoAudition.round);screen='iseoDialogue';render();return;}
+ if(a==='iseoChoice'){try{iseoAudition=advanceIseoPreview(iseoAudition,v);}catch{}render();return;}
+ if(a==='iseoRestart'){iseoAudition=newIseoPreview(iseoAudition.round+1);render();return;}
  if(a==='go'&&(v==='characterArt'||screen==='characterArt'&&v==='quickMenu')){if(v==='characterArt'){rememberReading();quickTool=v;}screen=v;note='';render();window.scrollTo(0,0);return;}
  if(a==='artAngle'){if(['front','side','back'].includes(v))artAngle=v;render();return;}
  if(a==='quickTab'){screen=v==='save'?'menu':'quickMenu';note='';render();return;}
@@ -463,7 +471,7 @@ render();
 
 // Background residents continue writing while the game is open. This does not advance Tae-i's clock.
 setInterval(()=>{
- if(document.hidden||['menu','quickMenu','reset','characterArt'].includes(screen))return;
+ if(document.hidden||['menu','quickMenu','reset','characterArt','iseoDialogue'].includes(screen))return;
  state=advanceCommunity(state,{ambient:true});
  const live=app.querySelector('.community-live');if(!live)return;
  const count=screen==='community'?visibleCommunityPosts(state).filter(p=>!feedIds?.includes(p.id)&&(communityFilter==='all'||p.kind===communityFilter)).length:Math.max(0,(visibleCommunityPosts(state).find(p=>p.id===selectedPost)?.comments.length??0)-visibleCommentCount);
@@ -537,3 +545,5 @@ function applyTravelFilter(){
  const count=app.querySelector('.travel-count');if(count)count.textContent=visible+'개 장소';const empty=app.querySelector('.travel-empty');if(empty)empty.hidden=visible!==0;
 }
 app.addEventListener('input',e=>{if(e.target.id==='travel-search'){travelQuery=e.target.value;applyTravelFilter();}});
+
+document.addEventListener('keydown',e=>{if(screen!=='iseoDialogue'||e.code!=='Space'||e.target.closest('button,input,textarea,select'))return;const v=iseoPreviewView(iseoAudition);if(iseoAudition.beat<v.lines.length-1){e.preventDefault();iseoAudition=advanceIseoPreview(iseoAudition,'next');render();}});

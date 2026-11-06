@@ -20,6 +20,22 @@ try:
      assert art.evaluate('''async el=>{const u=getComputedStyle(el).backgroundImage.match(/url\\(["']?([^"')]+)/)[1],i=new Image();i.src=u;await i.decode();return i.width===1024&&i.height===1536}''')
      assert page.locator(f'[data-action="artAngle"][data-value="{angle}"]').get_attribute('aria-pressed')=='true'
     if path=='/prototype/' and w==1440:page.screenshot(path='docs/assets/iseo-web-gallery-preview.png',full_page=True)
+    page.locator('[data-action="iseoTalk"]').click()
+    assert page.locator('.iseo-talk-box>strong').inner_text()=='단발머리 학생'
+    page.locator('[data-action="iseoChoice"][data-value="welcome"]').click()
+    assert page.locator('.iseo-talk-art').evaluate("el=>el.style.getPropertyValue('--pose')")=='1'
+    page.locator('[data-action="iseoChoice"][data-value="next"]').click()
+    page.locator('[data-action="iseoChoice"][data-value="introduce"]').click()
+    assert page.locator('.iseo-talk-box>strong').inner_text()=='정이서'
+    page.locator('[data-action="iseoChoice"][data-value="next"]').click()
+    page.locator('[data-action="iseoChoice"][data-value="tease"]').click()
+    assert page.locator('.iseo-talk-art').evaluate("el=>el.style.getPropertyValue('--pose')")=='2'
+    page.locator('[data-action="iseoChoice"][data-value="next"]').click()
+    page.locator('[data-action="iseoChoice"][data-value="boundary"]').click()
+    page.locator('[data-action="iseoChoice"][data-value="next"]').click()
+    assert page.locator('[data-action="iseoRestart"]').is_visible()
+    if path=='/prototype/' and w==1440:page.screenshot(path='docs/assets/iseo-dialogue-preview.png',full_page=True)
+    page.get_by_role('button',name='← 뒤로',exact=True).click()
     page.get_by_role('button',name='← 뒤로',exact=True).click();page.locator('[data-action="quickTab"][data-value="save"]').click();page.locator('[data-action="save"][data-value="1"]').click()
     after=page.evaluate("JSON.parse(localStorage.getItem('campus.slot.1'))")
     assert after==before,repr({k:[before.get(k),after.get(k)] for k in set(before)|set(after) if before.get(k)!=after.get(k)})
