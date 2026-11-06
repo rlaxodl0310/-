@@ -90,3 +90,24 @@ test('asking why stays attached to the detail actually said, rather than inventi
  assert.equal(next.plan.topic,first.plan.topic);assert.equal(next.plan.detail,first.plan.detail);
  assert.match(next.text,/아서요/);
 });
+
+test('everyday questions accept a concrete answer and preserve it through save/load',()=>{
+ for(const id of ['yeogyeong','seoyeon','soyul']){
+  let s=sample(76123,id);const first=generateDialogueTurn(s,id,{topic:'lunch'});const option=first.options.find(o=>o.kind==='answer');assert.ok(option);assert.ok(first.text.includes('점심')||first.text.includes('공강')||first.text.includes('사람')||first.text.includes('줄')||first.text.includes('밥')||first.text.includes('앉'));
+  s=restore(save(s));const next=advanceGeneratedDialogue(s,id,option.id).result;
+  assert.equal(next.playerLine,option.label);assert.ok(option.answerReply.some(line=>next.text.includes(line)));assert.equal(next.plan.topic,'lunch');assert.ok(next.options.length<=3);
+ }
+});
+test('fresh unprompted encounters avoid the last three chosen topics',()=>{
+ const s=sample(98122);const topics=[];for(let n=0;n<12;n++){const r=generateDialogueTurn(s,'yeogyeong');assert.ok(!topics.slice(-3).includes(r.plan.topic));topics.push(r.plan.topic);}assert.ok(new Set(topics).size>=4);
+});
+test('respectful disagreement can retain a different opinion without penalty or invented facts',()=>{
+ for(const id of ['yeogyeong','seoyeon','soyul']){
+  const s=sample(99123,id);let r;for(let n=0;n<60;n++){r=generateDialogueTurn(s,id,{topic:'lunch'});if(r.options.some(o=>o.id==='disagree'))break;}
+  assert.ok(r.options.some(o=>o.id==='disagree'));const before=structuredClone(s.relations);const next=advanceGeneratedDialogue(s,id,'disagree');assert.match(next.result.text,/다르|다른|그럴|생각|그쪽/);assert.deepEqual(s.relations,before);assert.deepEqual(next.delta,{});
+ }
+});
+test('busy and guarded everyday encounters never offer casual answer choices',()=>{
+ const busy=sample(9923);busy.clock.minute=560;let r=generateDialogueTurn(busy,'yeogyeong',{topic:'lunch'});assert.equal(r.plan.intent,'defer');assert.ok(r.options.every(o=>['listen','leave'].includes(o.kind)));
+ const guarded=sample(44);guarded.relations['yeogyeong>taei']={tension:5};r=generateDialogueTurn(guarded,'yeogyeong',{topic:'bag'});assert.equal(r.plan.intent,'boundary');assert.ok(!r.options.some(o=>o.kind==='answer'));
+});
