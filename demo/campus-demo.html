@@ -921,7 +921,7 @@ function roomUseLabel(s,location,area){
  return classes.some(c=>s.clock.minute>=c.start&&s.clock.minute<c.end)?'수업 중':classes.some(c=>s.clock.minute<c.start&&c.start-s.clock.minute<=15)?'수업 준비 중':'사용 상태 미확인';
 }
 function schoolEnabled(s){return s.academics?.enabled===true;}
-function timetable(s,person='taei',day=s.day){return schoolEnabled(s)?(characterTimetables[person]?.[day]??[]).map(c=>({...c,key:`${day}:${person}:${c.id}`,day})):[];}
+function timetable(s,person='taei',day=s.day){const courses=person==='taei'&&Array.isArray(s.academics?.courseIds)?registrationCourses().filter(c=>c.day===day&&s.academics.courseIds.includes(c.registrationId)):(characterTimetables[person]?.[day]??[]);return schoolEnabled(s)?courses.map(c=>({...c,key:`${day}:${person}:${c.id}`,day})).sort((a,b)=>a.start-b.start):[];}
 function lessonStatus(s,c){const record=s.academics?.records?.[c.key];if(record)return record.status;const m=s.clock.minute;return m>=c.end?'absent':m>=c.start?'in-progress':'upcoming';}
 function nextLesson(s){return timetable(s).find(c=>!s.academics?.records?.[c.key]&&s.clock.minute<c.end)??null;}
 function classPlace(c){const b=campusBuildings[c.location],a=b?.areas?.find(a=>a.id===c.area);return `${b?.name??c.location}${a?' · '+(a.floor==='층 미확정'?'':a.floor+' ')+a.name:''}`;}
@@ -940,6 +940,25 @@ function recordMissedLessons(s,before,end){
  }
  return s;
 }
+
+// A three-day registration prototype, not the university's official curriculum.
+function registrationCourses(){
+ const base=[1,2,3].flatMap(day=>characterTimetables.taei[day].map(c=>({...c,day,registrationId:`${day}:${c.id}`,credits:c.id==='chapel'?1:2,required:['ensemble','vocal','chapel'].includes(c.id)})));
+ const extra=(id,name,day,start,end,location,area,topic)=>({...lesson(id,name,start,end,location,area,topic,[{id:'note',label:'수업에서 들은 내용과 질문을 메모한다.',text:topic+' 설명을 들으며 이해한 부분과 더 확인할 부분을 나눠 적었다.'},{id:'apply',label:'내 작업이나 일상에 연결해 생각한다.',text:'수업 예제를 내 경험에 대입해보고 달리 볼 수 있는 점을 메모했다.'}]),day,registrationId:`${day}:${id}`,credits:2,required:false});
+ return [...base,extra('coding','기초 프로그래밍',1,690,780,'academic','room201','간단한 조건과 반복으로 문제를 나누는 방법을 연습한다.'),extra('film','영화 장면 읽기',2,570,660,'arts','av','같은 장면의 시점과 편집이 감상을 어떻게 바꾸는지 비교한다.'),extra('writing','창작 글쓰기',3,810,900,'academic','room202','짧은 경험을 장면으로 옮기고 서로의 문장을 읽는다.')];
+}
+function registeredCourseIds(s){return s.academics?.courseIds??registrationCourses().filter(c=>characterTimetables.taei[c.day].some(x=>x.id===c.id)).map(c=>c.registrationId);}
+function registrationLocked(s,c){return c.day<s.day||c.day===s.day&&c.start<=(s.clock?.minute??540)||!!s.academics?.records?.[`${c.day}:taei:${c.id}`];}
+function registrationProblems(s,ids){
+ const all=registrationCourses(),selected=all.filter(c=>ids.includes(c.registrationId)),errors=[];
+ if(new Set(ids).size!==ids.length||ids.some(id=>!all.some(c=>c.registrationId===id)))errors.push('과목 목록을 다시 확인해 주세요.');
+ if(all.some(c=>c.required&&!ids.includes(c.registrationId)))errors.push('시제품 필수 과목을 포함해 주세요.');
+ if(selected.reduce((n,c)=>n+c.credits,0)>18)errors.push('이번 시제품 수강 한도는 18학점입니다.');
+ for(const c of all)if(registrationLocked(s,c)&&ids.includes(c.registrationId)!==registeredCourseIds(s).includes(c.registrationId))errors.push('이미 시작했거나 끝난 수업은 변경할 수 없습니다.');
+ for(let day=1;day<=3;day++){const list=selected.filter(c=>c.day===day).sort((a,b)=>a.start-b.start);for(let i=1;i<list.length;i++){if(list[i].start<list[i-1].end)errors.push(`${day}일차 ${list[i-1].name} / ${list[i].name} 시간이 겹칩니다.`);else if(list[i].location!==list[i-1].location&&list[i].start-list[i-1].end<10)errors.push('다른 건물 수업 사이에 이동 시간 10분이 필요합니다.');}}
+ return [...new Set(errors)];
+}
+function confirmRegistration(state,ids){const errors=registrationProblems(state,ids);if(errors.length)throw new Error(errors.join(' '));const s=structuredClone(state),changed=JSON.stringify([...ids].sort())!==JSON.stringify([...registeredCourseIds(s)].sort());s.academics.courseIds=[...ids];s.academics.registrationPending=false;s.academics.registered=true;if(changed||!state.academics.registered)s.memory.push(`[${s.day}일차] 복학생 수강 계획을 확인했다. 선택한 수업과 공강에 맞춰 학교생활을 시작한다.`);return s;}
 
 const weatherTypes={
  sunny:{name:'맑음',icon:'☀',temperature:22},cloudy:{name:'흐림',icon:'☁',temperature:20},
@@ -2570,6 +2589,8 @@ function restore(raw){
  return s;
 }
 
+function newReturningGame(){const s=newGame();s.academics.registrationPending=true;return s;}
+
 
 const libraryActivities=[
  {id:'read',label:'서가에서 눈에 들어온 책을 읽는다.'},
@@ -3728,7 +3749,8 @@ function utilityShortcut({label,id,hint='',badge=0,style='row',action='go'}){
  return `<button class="utility-shortcut ${style}" data-action="${action}" data-value="${id}" aria-label="${label}" aria-description="${badge?'새 항목 '+badge+'개. ':''}${hint}"><span class="shortcut-icon tone-${id}">${utilityIcon(id)}${badge?`<span class="shortcut-badge" aria-hidden="true">${badge>99?'99+':badge}</span>`:''}</span><span class="shortcut-copy"><strong>${label}</strong>${hint?`<small>${hint}</small>`:''}</span>${style==='row'?`<span class="shortcut-arrow">${utilityIcon('arrow')}</span>`:''}${badge?`<span class="sr-only">새 항목 ${badge}개</span>`:''}</button>`;
 }
 
-let state=newGame(),screen='campus',selected=null,note='',returnTo='campus',speaker='seoyeon',reply=null,groupLines=[],groupIndex=0,groupAnswered=false,encounter=null;
+let state=newReturningGame(),screen='enrollment',selected=null,note='',returnTo='campus',speaker='seoyeon',reply=null,groupLines=[],groupIndex=0,groupAnswered=false,encounter=null;
+let registrationDraft=registeredCourseIds(state);
 let travelQuery='',travelFilter='all',artAngle='front',iseoAudition=newIseoPreview();
 let gains=[],paceNotice='',weatherReturn='campus',warningScene=null,activityReturn='campus',clubReturn='communityPost',selectedClub=null,communityReturn='campus',communityPhoneReturn='campus',selectedPost=null,feedIds=null,visibleCommentCount=0,communityFilter='all';
 const app=document.querySelector('#app');
@@ -3802,7 +3824,7 @@ const vnCursors=new Map();
 let selectedCommunityEvent=null,buildingFloorView=null;
 let quickReturn=null,quickSnapshot=null,quickTool='';
 const readingSnapshots=new Map();
-const utilityScreens=new Set(['phone','timetable','schedule','messages','map','journal','discoveries','observations','weather','community','communityPost','clubs','travel','menu','quickMenu','reset','peopleRecord','characterArt','iseoDialogue','wallet','shop']);
+const utilityScreens=new Set(['phone','timetable','schedule','messages','map','journal','discoveries','observations','weather','community','communityPost','clubs','travel','menu','quickMenu','reset','peopleRecord','characterArt','iseoDialogue','wallet','shop','enrollment']);
 function rememberReading(){if(vnModel&&!utilityScreens.has(screen))readingSnapshots.set(screen,{screen,note,reply,paceNotice,view:{...vnView}});}
 function plainNode(node){const copy=node.cloneNode(true);if(copy.classList.contains('player-line'))copy.querySelector('span')?.remove();copy.querySelectorAll('.note-label,.time-cost,button').forEach(n=>n.remove());return copy.textContent.replace(/\s+/g,' ').trim();}
 function novelPresentation(){
@@ -3881,7 +3903,7 @@ function drawNovelBeat(){
 function unreadMessages(){return state.messages.filter(m=>!m.read).length;}
 function newOffers(){return state.appointments.filter(a=>a.status==='offered').length;}
 function quickMenuBody(){
- const groups=[['지금 할 일',[{label:'이동',id:'travel',hint:'건물과 호실 찾기'},{label:'휴대폰',id:'phone',hint:'커뮤니티 · 연락 · 일정',badge:unreadMessages()+newOffers()}]],['학교생활',[...(schoolEnabled(state)?[{label:'시간표 · 출석',id:'timetable',hint:'수업 장소와 출석 확인'}]:[]),{label:'약속',id:'schedule',hint:'제안과 참석 일정',badge:newOffers()},{label:'지도',id:'map',hint:'교내 공간 살펴보기'},{label:'날씨 · 예보',id:'weather',hint:'오늘 날씨와 준비물',action:'openWeather'}]],['내 기록',[{label:'소지금 · 구매 내역',id:'wallet',hint:moneyBalance(state).toLocaleString()+'원'},{label:'정보 · 소지품',id:'discoveries',hint:'발견한 정보와 가진 물건'},{label:'알게 된 사람들',id:'peopleRecord',hint:'만난 사람과 마지막 목격'},{label:'캐릭터 일러스트',id:'characterArt',hint:'정이서 · 외형 미리보기'},{label:'메시지',id:'messages',hint:'받은 연락 확인',badge:unreadMessages()},{label:'일지',id:'journal',hint:'지나온 선택 돌아보기'}]]];
+ const groups=[['지금 할 일',[{label:'이동',id:'travel',hint:'건물과 호실 찾기'},{label:'휴대폰',id:'phone',hint:'커뮤니티 · 연락 · 일정',badge:unreadMessages()+newOffers()}]],['학교생활',[...(schoolEnabled(state)?[{label:'시간표 · 출석',id:'timetable',hint:'수업 장소와 출석 확인'},{label:'수강 계획 변경',id:'enrollment',hint:'앞으로 들을 수업 고르기'}]:[]),{label:'약속',id:'schedule',hint:'제안과 참석 일정',badge:newOffers()},{label:'지도',id:'map',hint:'교내 공간 살펴보기'},{label:'날씨 · 예보',id:'weather',hint:'오늘 날씨와 준비물',action:'openWeather'}]],['내 기록',[{label:'소지금 · 구매 내역',id:'wallet',hint:moneyBalance(state).toLocaleString()+'원'},{label:'정보 · 소지품',id:'discoveries',hint:'발견한 정보와 가진 물건'},{label:'알게 된 사람들',id:'peopleRecord',hint:'만난 사람과 마지막 목격'},{label:'캐릭터 일러스트',id:'characterArt',hint:'정이서 · 외형 미리보기'},{label:'메시지',id:'messages',hint:'받은 연락 확인',badge:unreadMessages()},{label:'일지',id:'journal',hint:'지나온 선택 돌아보기'}]]];
  const lunch=lunchEpisode(state);
  const resume=Object.values(state.activitySessions?.records??{}).filter(r=>r.day===state.day&&['active','paused'].includes(r.status));
  return `<div class="menu-dashboard"><aside class="menu-context"><span class="utility-overline">CAMPUS LIFE</span><div class="menu-avatar">태</div><h2>김태이</h2><p>${esc(locations[state.location]??'캠퍼스')}</p><span class="context-time">${clockLabel(state)}</span><p>${state.day}일차 · ${days[state.day].weekday}</p><div class="context-weather">${weatherNow(state).icon} ${weatherNow(state).name} · ${weatherNow(state).temperature}°C</div><small>다음 행동을 골라보세요.</small></aside><div class="menu-sections">${Object.values(state.supplyAftermath?.records??{}).filter(r=>r.day===state.day&&['active','paused'].includes(r.status)).map(r=>`<article class="resume-card"><span>이어서 할 수 있어요</span><strong>${esc(nameOf(r.person))}과 짧게 함께한 시간</strong>${btn('같이 하던 일을 이어간다.','startSupplyAftermath',r.person)}</article>`).join('')}${everydayEventView(state)?`<article class="resume-card"><span>이어서 볼 수 있어요</span><strong>잠깐 생긴 일</strong>${btn('상황으로 돌아간다.','resumeEveryday')}</article>`:''}${lunch?.status==='active'&&lunch.day===state.day?`<article class="resume-card"><span>이어서 할 수 있어요</span><strong>비 오는 점심시간</strong>${btn('함께하던 일로 돌아간다.','resumeLunch')}</article>`:''}${resume.map(r=>`<article class="resume-card"><span>이어서 할 수 있어요</span><strong>${esc(communityActivityDefinitions[r.postId].title)}</strong><p>${r.spent}/${r.duration}분 참여</p>${activityAvailability(state,r.postId,r).ok?btn('현장에서 이어서 한다.','eventResume',r.key):`<p>${esc(activityAvailability(state,r.postId,r).reason)}</p>`}</article>`).join('')}${groups.map(([title,items],i)=>`<section class="shortcut-section"><h2>${title}</h2><div class="grid shortcut-grid ${i===0?'featured-shortcuts':''}">${items.map(item=>utilityShortcut({...item,style:i===0?'feature':'row'})).join('')}</div></section>`).join('')}</div></div>`;
@@ -3924,6 +3946,10 @@ function render(){
  if(screen==='communityActivity'){const record=currentCommunityActivity(state),def=record?communityActivityDefinitions[record.postId]:null,stage=communityActivityStage(state);app.innerHTML=page(def?.title??'공개 활동',record?`${record.last?`<p data-voice="김태이">${esc(record.last.player)}</p><p ${def.physical?'':`data-voice="${esc(record.last.speaker)}"`}>${narrative(record.last.text)}</p>`:`<p>${narrative(record.supplyGroup?supplyIntro(state):def.intro)}</p>`}${stage?`<p>${narrative(stage.prompt)}</p><div class="actions">${stage.choices.map(c=>btn(narrative(c.label),'eventStep',c.id)).join('')}${btn('여기까지 하고 잠깐 나온다.','eventPause')}</div>`:`<p class="lead">${narrative(record.result??'공개 활동을 마쳤다.')}</p><p>실제로 참여한 시간 ${record.spent}분. 가입 여부와 다음 약속은 직접 결정할 수 있다.</p><div class="actions">${def.club?btn('동아리 안내를 읽어본다.','clubDetail',def.club):''}${btn('현장을 나와 주변을 둘러본다.','eventLeave')}</div>`}`:'<p>이어갈 활동이 없습니다.</p>','campus');}
  if(screen==='communityPost'&&selectedPost){const p=visibleCommunityPosts(state).find(p=>p.id===selectedPost);if(p)app.innerHTML=page(p.board,`<article class="community-detail"><p class="post-meta">${esc(p.author)} · ${p.day===state.day?'오늘':p.day+'일차'}${p.kind==='anonymous'?' · 작성자·내용 미확인':''}</p><h2>${esc(p.title)}</h2><p>${esc(p.body)}</p>${p.kind==='anonymous'?'<p class="source-note">익명 작성자의 글입니다. 직접 본 일이나 공식 안내와 구분해 기억합니다.</p>':''}</article><div class="dialogue-options">${p.club?btn('이 글의 모집 안내를 자세히 읽는다.','clubDetail',p.club):''}${communityActivityDefinitions[p.id]?btn('이 공개 활동을 자세히 살펴본다.','communityEventView',p.id):''}${p.id==='ambulance-post'?btn('지나갈 일이 있는 카페 쪽에서 직접 확인해본다.','visit','cafe'):''}</div><div class="community-live" aria-live="polite"></div>${` <h3>댓글 ${p.comments.length}</h3>${p.comments.map(c=>`<p class="community-comment ${c.reply?'reply':''}"><strong>${typeof c==='string'?'익명':esc(c.author)}</strong>${esc(typeof c==='string'?c:c.text)}</p>`).join('')}`}`, 'community');}
  if(screen==='travel')app.innerHTML=page('캠퍼스 이동',travelPage());
+ if(screen==='enrollment'){
+  const all=registrationCourses(),errors=registrationProblems(state,registrationDraft),credits=all.filter(c=>registrationDraft.includes(c.registrationId)).reduce((n,c)=>n+c.credits,0);
+  app.innerHTML=`<section class="page utility-page"><header><h1>복학생 수강 계획</h1></header><p>군휴학을 마치고 실용음악과 보컬 전공 2학년으로 복학했다. 첫 등교를 앞두고 수업과 공강을 정해보자.</p><p class="muted">게임용 3일 시간표이며 실제 대학의 수강신청·교육과정이 아닙니다. 시제품 필수 과목을 포함하고 시간 충돌 없이 선택하세요. 수업 참석과 다른 활동은 이후 직접 결정합니다.</p><div class="page-reading"><h2>${credits} / 18학점</h2>${errors.map(x=>`<p class="notice">${esc(x)}</p>`).join('')}${note?`<p class="notice" role="status">${esc(note)}</p>`:''}${[1,2,3].map(day=>`<h2>${day}일차 · ${days[day].weekday}</h2><div class="grid">${all.filter(c=>c.day===day).map(c=>`<article class="list"><strong>${esc(c.name)}</strong><p>${schoolTime(c.start)}–${schoolTime(c.end)} · ${c.credits}학점 · ${c.required?'시제품 필수':'선택'}</p><p>${esc(classPlace(c))}</p><button data-action="courseToggle" data-value="${c.registrationId}" aria-pressed="${registrationDraft.includes(c.registrationId)}" ${c.required||registrationLocked(state,c)?'disabled':''}>${registrationDraft.includes(c.registrationId)?'선택됨':'추가하기'}${registrationLocked(state,c)?' · 변경 마감':''}</button></article>`).join('')}</div>`).join('')}<div class="actions"><button data-action="courseConfirm" ${errors.length?'disabled':''}>${state.academics.registrationPending?'계획 확정하고 첫 등교하기':'시간표 변경 확정'}</button>${!state.academics.registrationPending?btn('변경하지 않고 돌아가기','courseCancel'):''}</div></div></section>`;
+ }
  if(screen==='timetable')app.innerHTML=page('시간표 · 출석',`<p>${timeLabel()}</p><p class="muted">수업 참석 여부도 직접 정할 수 있습니다. 다른 활동을 해도 진행되며, 실제 참석 여부에 따라 지각·결석이 기록됩니다.</p>${[1,2,3].map(day=>`<h2>${day}일차 · ${days[day].weekday}</h2>${timetable(state,'taei',day).map(c=>`<article class="list"><strong>${esc(c.name)} · ${schoolTime(c.start)}~${schoolTime(c.end)}</strong><p>${esc(classPlace(c))}</p><p>${day<state.day?(classStatuses[state.academics.records[c.key]?.status]??'기록 없음'):day>state.day?'예정':classStatuses[lessonStatus(state,c)]}</p>${day===state.day&&state.clock.minute<c.end&&!state.academics.records[c.key]?btn('수업 장소로 간다.','classTravel',c.key):''}</article>`).join('')}`).join('')}`,'phone');
  if(screen==='classLesson'){const c=timetable(state).find(c=>c.key===state.academics?.lesson);app.innerHTML=page(c?.name??'수업',c?`<p class="lead">${esc(classPlace(c))}</p><div class="story-prose">${readableText(c.topic)}</div><p class="muted">${schoolTime(c.start)}~${schoolTime(c.end)} · ${state.clock.minute<c.start?'시작 전까지 준비한 뒤 수업을 듣습니다.':state.clock.minute>c.start?'늦게 들어가면 실제 참석 시각에 따라 지각 또는 일부 참석으로 기록합니다.':'수업을 끝까지 듣습니다.'}</p><div class="dialogue-options">${c.choices.map(a=>btn(a.label,'classChoice',a.id)).join('')}</div>`:'<p>수업 장소와 시간을 다시 확인해 주세요.</p>','place');}
  if(screen==='buildingDirectory'){
@@ -4009,6 +4035,10 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
  }
  if(a==='openQuick'){rememberReading();quickReturn=screen;quickSnapshot={note,reply,paceNotice,view:utilityScreens.has(screen)?null:{...vnView}};screen='quickMenu';note='';render();window.scrollTo(0,0);return;}
  if(a==='closeQuick'){resumeQuick();return;}
+ if(a==='go'&&v==='enrollment'){rememberReading();registrationDraft=[...registeredCourseIds(state)];screen='enrollment';note='';render();return;}
+ if(a==='courseToggle'){const c=registrationCourses().find(x=>x.registrationId===v);if(c&&!c.required&&!registrationLocked(state,c))registrationDraft=registrationDraft.includes(v)?registrationDraft.filter(x=>x!==v):[...registrationDraft,v];render();return;}
+ if(a==='courseCancel'){screen='quickMenu';note='';render();return;}
+ if(a==='courseConfirm'){try{const firstRegistration=state.academics.registrationPending;state=confirmRegistration(state,registrationDraft);screen='campus';note=firstRegistration?'복학 후 첫 등교. 정해둔 수업과 공강 사이에서 오늘을 시작한다.':'앞으로 들을 수업의 시간표를 변경했다. 이미 지난 수업 기록은 그대로 남는다.';quickReturn=null;quickSnapshot=null;readingSnapshots.clear();}catch(error){note=error.message;}render();return;}
  if(['openShop','shopChoose','shopPay','shopCancel','consumePurchase'].includes(a)){
   try{if(a==='openShop'){if(!shopView(state))throw new Error('편의점·매점 공간이나 대학가 매장으로 이동해 주세요.');state=cancelShopDraft(state);screen='shop';}
    if(a==='shopChoose'){state=chooseShopItem(state,v);screen='shop';}
@@ -4140,8 +4170,8 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
  if(a==='plan'){state=planEvent(state,selected,v);vnView.branch='main';vnView.page=0;}
  if(a==='act'){if(encounter){state=resolveEncounter(state,encounter,false).state;encounter=null;}if(warningScene){state=finishWarningSite(state,warningScene,false).state;warningScene=null;}if(v==='volunteer'&&usesSupplyStory(state)){state.location='hall';state=beginCommunityActivity(state,'volunteer-recruit');screen='communityActivity';}else{state=freeActivity(state,v);screen='result';}}
  if(a==='save'){localStorage.setItem('campus.slot.'+v,save(state));note=`슬롯 ${v}에 저장했습니다.`;}
- if(a==='load'){const raw=localStorage.getItem('campus.slot.'+v);if(!raw)throw new Error('비어 있는 슬롯입니다.');state=warningPhase(restore(raw));warningScene=null;reply=null;selected=null;encounter=null;note=`슬롯 ${v}을 불러왔습니다.`;}
- if(a==='reset'){state=newGame();screen='campus';selected=null;reply=null;encounter=null;returnTo='campus';}
+ if(a==='load'){const raw=localStorage.getItem('campus.slot.'+v);if(!raw)throw new Error('비어 있는 슬롯입니다.');state=warningPhase(restore(raw));registrationDraft=[...registeredCourseIds(state)];if(state.academics?.registrationPending)screen='enrollment';warningScene=null;reply=null;selected=null;encounter=null;note=`슬롯 ${v}을 불러왔습니다.`;}
+ if(a==='reset'){state=newReturningGame();registrationDraft=[...registeredCourseIds(state)];screen='enrollment';selected=null;reply=null;encounter=null;returnTo='campus';}
  if(!['load','reset','scenario','nextDay','act','classChoice','eventBegin','eventStep','eventResume','eventPause','eventLeave','communityEventView','onsiteEvent','outdoorActivity','cafeChoose','cafeTemperature','cafePay','cafeCollect','cafeDrink','cafeCancel','everydayChoice','resumeEveryday','startSupplyAftermath','stepSupplyAftermath','leaveSupplyAftermath','lunchAction','resumeLunch'].includes(a)){
   const paced=paceAction(before,state,{action:a,value:v,from:fromScreen,to:screen,person:fromScreen==='group'?'group':speaker});state=paced.state;
   if(paced.minutes)paceNotice=`${a==='wait'?'잠시 쉬고 나니':'여러 일을 마치고 나니'} 어느새 ${clockLabel(state)}. 약 ${paced.minutes}분이 지났다.`;
@@ -4176,7 +4206,7 @@ render();
 
 // Background residents continue writing while the game is open. This does not advance Tae-i's clock.
 setInterval(()=>{
- if(document.hidden||['menu','quickMenu','reset','characterArt','iseoDialogue'].includes(screen))return;
+ if(document.hidden||['menu','quickMenu','reset','characterArt','iseoDialogue','enrollment'].includes(screen))return;
  state=advanceCommunity(state,{ambient:true});
  const live=app.querySelector('.community-live');if(!live)return;
  const count=screen==='community'?visibleCommunityPosts(state).filter(p=>!feedIds?.includes(p.id)&&(communityFilter==='all'||p.kind===communityFilter)).length:Math.max(0,(visibleCommunityPosts(state).find(p=>p.id===selectedPost)?.comments.length??0)-visibleCommentCount);

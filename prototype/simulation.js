@@ -134,3 +134,5 @@ export function restore(raw){
  if(s.academics.enabled&&!s.campusVariation){s.campusVariation={seed:s.dialogue.generation?.rng??417193,plans:{}};prepareCampusVariation(s);}
  return s;
 }
+
+export function newReturningGame(){const s=newGame();s.academics.registrationPending=true;return s;}

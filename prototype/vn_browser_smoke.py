@@ -10,6 +10,7 @@ with sync_playwright() as p:
    page=browser.new_page(viewport={'width':width,'height':height});page.set_default_timeout(7000);errors=[]
    page.on('pageerror',lambda e:errors.append(str(e)))
    page.goto(base+path)
+   page.locator('[data-action="courseConfirm"]').click()
    assert page.locator('.vn-stage').is_visible()
    for selector in ['.scene-visual','.scene-visual .portrait']:
     assert page.locator(selector).evaluate(r'''async el=>{

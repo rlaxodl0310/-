@@ -1,5 +1,9 @@
 """Navigate the actual sequential dialogue UI without skipping domain actions."""
+def confirm_returning_plan(page):
+    if page.locator('[data-action="courseConfirm"]').count():page.locator('[data-action="courseConfirm"]').click()
+
 def read_to_choices(page):
+    confirm_returning_plan(page)
     for _ in range(32):
         next_button=page.locator('.vn-controls [data-action="vnNext"]')
         if not next_button.count():return
@@ -26,6 +30,7 @@ def choose(page,action,value=None):
     raise AssertionError(f'Choice not reachable: {action}:{value}')
 
 def open_tool(page,tool):
+    confirm_returning_plan(page)
     page.locator('.vn-toolbar [data-action="openQuick"]').click()
     page.locator(f'.page-reading .grid [data-action="go"][data-value="{tool}"]').click()
 
