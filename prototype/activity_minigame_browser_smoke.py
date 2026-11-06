@@ -4,7 +4,7 @@ from playwright.sync_api import sync_playwright
 from vn_browser_helpers import choose,finish_school_morning,read_to_choices
 base=os.environ.get('CAMPUS_TEST_URL','http://127.0.0.1:8000')
 def event_post(page,id):
- page.locator('.vn-toolbar [data-action="phone"]').click();page.get_by_role('button',name='학내 커뮤니티',exact=True).click();page.get_by_role('button',name='체험',exact=True).click();page.locator(f'[data-action="readPost"][data-value="{id}"]').click();page.locator('[data-action="communityEventView"]').click();choose(page,'eventBegin',id)
+ page.locator('.vn-toolbar [data-action="phone"]').click();page.locator('.phone-priority [data-value="community"]').click();page.get_by_role('button',name='체험',exact=True).click();page.locator(f'[data-action="readPost"][data-value="{id}"]').click();page.locator('[data-action="communityEventView"]').click();choose(page,'eventBegin',id)
 def on_target(page):
  page.wait_for_function("""()=>{const marker=document.querySelector('[data-mini-position]'),target=document.querySelector('.mini-target');if(!marker||!target)return false;return Math.abs(parseFloat(marker.style.left)-(parseFloat(target.style.left)+13))<2;}""",timeout=6000,polling='raf')
 def hit(page,method='space'):

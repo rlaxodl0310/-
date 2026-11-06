@@ -15,7 +15,7 @@ with sync_playwright() as p:
   assert '402' in page.locator('.scene-location').inner_text()
   # Club guide -> application; no membership shortcut.
   page.locator('.vn-toolbar [data-action="phone"]').click()
-  page.get_by_role('button',name='학내 커뮤니티',exact=True).click()
+  page.locator('.phone-priority [data-value="community"]').click()
   page.get_by_role('button',name='모집',exact=True).click()
   page.locator('[data-action="readPost"][data-value="volunteer-recruit"]').click()
   page.get_by_role('button',name='이 글의 모집 안내를 자세히 읽는다.',exact=True).click()

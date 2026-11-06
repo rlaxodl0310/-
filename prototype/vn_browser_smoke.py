@@ -58,7 +58,7 @@ with sync_playwright() as p:
    at_choice=page.locator('.vn-choices').inner_text()
    open_tool(page,'timetable')
    assert page.locator('.list').filter(has_text='출석').count()==2
-   page.get_by_role('button',name='← 뒤로',exact=True).click()
+   page.locator('[data-navigation-back]').first.click()
    page.locator('[data-action="closeQuick"]').click()
    assert page.locator('.vn-choices').inner_text()==at_choice
    # Physical travel is deliberately in the upper menu, not mixed with dialogue answers.
@@ -79,16 +79,16 @@ with sync_playwright() as p:
    if path=='/prototype/':page.screenshot(path=f'/tmp/vn-dialogue-{width}.png',full_page=True)
    line=page.locator('.vn-line').inner_text();clock=page.locator('.scene-time').inner_text()
    page.locator('.vn-toolbar [data-action="phone"]').click()
-   page.get_by_role('button',name='학내 커뮤니티',exact=True).click()
+   page.locator('.phone-priority [data-value="community"]').click()
    assert page.get_by_role('heading',name='캠퍼스톡',exact=True).is_visible()
    # Reading a club notice opens another VN page without losing the original conversation.
    page.get_by_role('button',name='모집',exact=True).click()
    page.locator('[data-action="readPost"][data-value="volunteer-recruit"]').click()
    page.get_by_role('button',name='이 글의 모집 안내를 자세히 읽는다.',exact=True).click()
    choose(page,'go','communityPost')
-   page.get_by_role('button',name='← 뒤로',exact=True).click()
-   page.get_by_role('button',name='← 뒤로',exact=True).click()
-   page.get_by_role('button',name='← 뒤로',exact=True).click()
+   page.locator('[data-navigation-back]').first.click()
+   page.locator('[data-navigation-back]').first.click()
+   page.locator('[data-navigation-back]').first.click()
    assert page.locator('.vn-line').inner_text()==line,(line,page.locator('.vn-line').inner_text())
    assert page.locator('.scene-time').inner_text()==clock
    choose(page,'answer')
