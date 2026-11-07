@@ -15,7 +15,7 @@ try:
     assert page.locator('.action-overview [data-value="travel"]').count()==1
     assert page.locator('.choice-purpose').count()>0
     if path=='/prototype/' and width==1440:page.screenshot(path='docs/assets/exploration-choices-preview.png',full_page=True)
-    page.locator('.vn-toolbar [data-value="travel"]').click();assert page.locator('.campus-map').is_visible();assert page.locator('.map-building').count()==18;assert page.locator('.map-building:visible').count()==6
+    page.locator('.vn-toolbar [data-value="travel"]').click();assert page.locator('.campus-map').is_visible();assert page.locator('.map-building').count()==30;assert page.locator('.map-building:visible').count()==6
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1')
     assert page.locator('.map-building').evaluate_all("ns=>new Set(ns.map(n=>n.style.gridColumn+':'+n.style.gridRow)).size===ns.length")
     page.locator('#travel-search').fill('없는건물');assert page.locator('.travel-empty').is_visible();page.locator('#travel-search').fill('')
@@ -43,4 +43,4 @@ try:
     assert not errors,errors;page.close()
   b.close()
 finally:server.shutdown();server.server_close()
-print('Campus map passed: 18 destinations, 6 viewport/build cases, search/current location, actual travel, exploration overview, no page overflow/errors')
+print('Campus map passed: 30 destinations, 8 connected regions, 6 viewport/build cases, search/current location, actual travel, exploration overview, no page overflow/errors')

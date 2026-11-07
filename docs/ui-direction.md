@@ -400,3 +400,7 @@ NPC의 피로·부담·대화 여유는 숫자 게이지나 속마음 설명 대
 내 위치 지도 버튼은 플레이어가 있는 구역으로 돌아온다. 검색은 다른 지역의 목적지를 찾으면 그 지역 지도도 함께 연다. 네 장의 기존 지역을 연결한 구현이며 미구현 지역을 이동 가능한 것처럼 표시하지 않는다. 이후 지역은 `mapRegions`의 연결과 목적지 좌표를 추가하는 방식으로 확장한다. 실제 백석대학교 지형·건물 도면을 보증하는 지도가 아니다.
 
 검증: JS 320개 통과. 웹과 다운로드 HTML의 320·390·1440px에서 네 지역 배경 로딩, 지역별 목적지 수, 화살표 전환, 내 위치 지도 복귀, 다른 지역 검색, 실제 이동과 현재 위치 표시를 확인했다. 지도에서 매장 이동 후 구매·소비·저장도 통과했다. 대표 화면은 `campus-map-preview.png`, `arts-map-preview.png`, `athletics-map-preview.png`, `town-map-preview.png`다.
+
+### 캠퍼스 주변 4개 지역 지도
+
+`surroundings-map-atlas.png`는 자취촌 / 서쪽 주택가 / 하천 산책로 / 정류장 생활권의 2×2 조감도다. 각 지역에는 3개 실제 이동 목적지를 배치한다. 기존 4개 지도에서 화살표로 이어지고 검색·내 위치 복귀를 함께 지원한다. 새 장소의 이야기 화면도 해당 지역 배경을 사용한다. 정보 확인은 10분, 휴식·걷기는 15분으로 행동 카드에 표시하며 결과는 직접 획득한 정보와 일지에 반영한다. 외부에서만 살펴볼 수 있는 시설과 미지원 버스 탑승은 본문에 명시한다. 대표 화면은 `surroundings-housing-preview.png`, `surroundings-residential-preview.png`, `surroundings-riverside-preview.png`, `surroundings-transit-preview.png`다.

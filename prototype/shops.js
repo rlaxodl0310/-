@@ -5,7 +5,7 @@ export const shopGoods={
  noodles:{name:'잔치국수',price:6000,kind:'meal',minutes:25},ricebowl:{name:'제육덮밥',price:7500,kind:'meal',minutes:30},set:{name:'백반 정식',price:8000,kind:'meal',minutes:35},
  soda:{name:'탄산음료와 간단한 안주',price:6000,kind:'pub',minutes:30},beer:{name:'생맥주 한 잔과 안주',price:10000,kind:'alcohol',minutes:40}
 };
-export const shopPlaces={market:{name:'대학가 편의점',open:540,close:1320,items:['water','rice','bar','tissue']},restaurant:{name:'대학가 작은 밥집',open:660,close:1260,items:['noodles','ricebowl','set']},pub:{name:'대학가 골목 술집',open:1080,close:1320,items:['soda','beer']}};
+export const shopPlaces={neighborhoodMart:{name:'서쪽 동네 마트',open:540,close:1260,items:['water','rice','bar','tissue']},market:{name:'대학가 편의점',open:540,close:1320,items:['water','rice','bar','tissue']},restaurant:{name:'대학가 작은 밥집',open:660,close:1260,items:['noodles','ricebowl','set']},pub:{name:'대학가 골목 술집',open:1080,close:1320,items:['soda','beer']}};
 export function localShop(s){if(shopPlaces[s.location])return s.location;const a=s.buildingArea;if(a?.place===s.location&&a.id==='store')return 'campus';return null;}
 export function shopView(s){const id=localShop(s),shop=id==='campus'?{name:'교내 편의점 · 매점',open:540,close:1140,items:['water','rice','bar','tissue']}:shopPlaces[id];if(!shop)return null;const minute=s.clock.minute;return {id,...shop,available:minute>=shop.open&&minute<shop.close,balance:moneyBalance(s)};}
 export function stockLeft(s,id){return Math.max(0,5-(s.shopping?.stock?.[`${s.day}:${localShop(s)}:${id}`]??0));}

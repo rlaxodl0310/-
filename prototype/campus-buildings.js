@@ -1,3 +1,4 @@
+import {surroundingPlaces,surroundingPaths} from './surroundings-data.js';
 import {debitMoney} from './wallet.js';
 import {gameRoomLayouts} from './campus-rooms.js';
 // User-confirmed building uses/floors. Paths and service rules remain prototype assumptions.
@@ -323,7 +324,7 @@ export function buildingActivity(state,id){
 }
 export function buildingLinks(place){
  const paths={hall:['cafeteria','academic','arts','field'],library:['creative'],cafe:['dorm','cafeteria','market','restaurant','pub'],market:['cafe','restaurant'],restaurant:['market','pub','cafe'],pub:['restaurant','cafe'],cafeteria:['headquarters','hall','dorm'],dorm:['cafeteria','cafe'],academic:['headquarters','sculpture','baekseok'],music:['arts','gym'],gym:['music','arts','field','outdoorCourt'],field:['gym','outdoorCourt','hall'],outdoorCourt:['field','gym'],headquarters:['academic','cafeteria','creative'],arts:['music','gym','hall'],creative:['library','sculpture','headquarters'],sculpture:['creative','academic'],baekseok:['academic','headquarters']};
- return (paths[place]??[]).map(value=>({label:(campusBuildings[value]?.name??{library:'창조관 안 도서관',cafe:'대학가 카페'}[value])+' 쪽으로 걸어간다.',action:'visit',value}));
+ return [...(paths[place]??[]),...(surroundingPaths[place]??[])].map(value=>({label:(campusBuildings[value]?.name??surroundingPlaces[value]?.name??{library:'창조관 안 도서관',cafe:'대학가 카페'}[value])+' 쪽으로 걸어간다.',action:'visit',value}));
 }
 
 // Outdoor placement is a game layout proposal, not a surveyed campus map.

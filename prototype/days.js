@@ -1,3 +1,4 @@
+import {surroundingPlaces} from './surroundings-data.js';
 import {aftermathPosition} from './supply-aftermath.js';
 import {supplyPosition,usesSupplyStory} from './supply-story.js';
 import {variedCampusSchedule} from './campus-variation.js';
@@ -25,7 +26,7 @@ for(let day=4;day<=14;day++){
  if(!weekend)routes.rehearsal={name:'합주 자율 연습',duration:60,description:'그날 수업에서 메모한 구간을 다시 맞춥니다.',memory:'수업 메모를 보며 합주 연습을 이어갔다.',knowledge:[]};
  days[day]={title:fortnightTitles[day-4],weekday,weekend,event:'campus-life',routes,schedules:{afternoon:weekend?{yeogyeong:'market',seoyeon:'cafe',soyul:'library'}:{yeogyeong:'hall',seoyeon:'cafeteria',soyul:'library'},evening:{yeogyeong:'cafeteria',seoyeon:'cafe',soyul:'hall'}}};
 }
-export const locations={market:'대학가 편의점',restaurant:'대학가 작은 밥집',pub:'대학가 골목 술집',hall:'자유관',library:'창조관 · 도서관',cafe:'대학가 카페',...Object.fromEntries(Object.entries(campusBuildings).map(([id,b])=>[id,b.name]))};
+export const locations={...Object.fromEntries(Object.entries(surroundingPlaces).map(([id,p])=>[id,p.name])),market:'대학가 편의점',restaurant:'대학가 작은 밥집',pub:'대학가 골목 술집',hall:'자유관',library:'창조관 · 도서관',cafe:'대학가 카페',...Object.fromEntries(Object.entries(campusBuildings).map(([id,b])=>[id,b.name]))};
 export function availableRoutes(s){return Object.entries(days[s.day??1].routes).filter(([,r])=>!r.requiresWarning||(s.warnings?.evidence?.length??0)>0).map(([id,r])=>weatherRoute(s,id,{id,...(id==='rehearsal'&&s.location==='gym'?{...r,description:'체육관 지하·1층의 합주실에서 합주하고 장비 위치를 익힙니다.',memory:'체육관의 합주실에서 합주를 마쳤다. 연습 공간의 장비 보관 위치를 확인했다.'}:r),locked:!!r.requiresAny&&!r.requiresAny.some(k=>s.known.includes(k)),lockReason:r.requiresAny&&!r.requiresAny.some(k=>s.known.includes(k))?'이전 탐색으로 연결 통로를 알아야 합니다.':null}));}
 function baseSchedule(s){
  if(s.day!==1||s.phase!=='afternoon'||!s.clock)return days[s.day??1].schedules[s.phase];

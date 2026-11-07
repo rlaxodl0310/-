@@ -1,5 +1,6 @@
+import {surroundingPlaces} from './surroundings-data.js';
 // Game schematic only: these positions are not surveyed real-world geography.
-export const campusMapPositions={headquarters:[2,1],baekseok:[3,1],academic:[4,1],creative:[1,2],library:[1,3],sculpture:[2,2],arts:[3,2],music:[4,2],hall:[2,3],gym:[3,3],field:[3,4],outdoorCourt:[4,4],cafeteria:[1,4],dorm:[4,3],market:[1,5],restaurant:[2,5],cafe:[3,5],pub:[4,5]};
+export const campusMapPositions={...Object.fromEntries(Object.keys(surroundingPlaces).map((id,i)=>[id,[i%4+1,6+Math.floor(i/4)]])),headquarters:[2,1],baekseok:[3,1],academic:[4,1],creative:[1,2],library:[1,3],sculpture:[2,2],arts:[3,2],music:[4,2],hall:[2,3],gym:[3,3],field:[3,4],outdoorCourt:[4,4],cafeteria:[1,4],dorm:[4,3],market:[1,5],restaurant:[2,5],cafe:[3,5],pub:[4,5]};
 export function choicePurpose(action,value){
  if(action==='classTravel')return ['수업 장소로 이동','도착 후 입실 여부를 결정'];
  if(action==='classPrepare')return ['수업 입실','수업 내용과 참여 방식 확인'];
