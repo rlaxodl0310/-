@@ -11,7 +11,7 @@ try:
    for width,height in [(390,844),(1440,1000)]:
     page=b.new_page(viewport={'width':width,'height':height});errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.goto(f'http://127.0.0.1:{server.server_port}'+path)
-    open_tool(page,'travel');page.locator('[data-action="visit"][data-value="market"]').click()
+    open_tool(page,'travel');page.locator('#travel-search').fill('대학가 편의점');page.locator('[data-action="visit"][data-value="market"]').click()
     choose(page,'openShop');assert '100,000원' in page.locator('.page-reading').inner_text()
     page.locator('[data-action="shopChoose"][data-value="water"]').click();page.locator('[data-action="shopPay"]').click()
     assert '99,000원' in page.locator('.page-reading').inner_text();assert page.locator('[data-action="shopChoose"]').count()==4

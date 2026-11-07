@@ -15,11 +15,25 @@ try:
     assert page.locator('.action-overview [data-value="travel"]').count()==1
     assert page.locator('.choice-purpose').count()>0
     if path=='/prototype/' and width==1440:page.screenshot(path='docs/assets/exploration-choices-preview.png',full_page=True)
-    page.locator('.vn-toolbar [data-value="travel"]').click();assert page.locator('.campus-map').is_visible();assert page.locator('.map-building').count()==18
+    page.locator('.vn-toolbar [data-value="travel"]').click();assert page.locator('.campus-map').is_visible();assert page.locator('.map-building').count()==18;assert page.locator('.map-building:visible').count()==6
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1')
     assert page.locator('.map-building').evaluate_all("ns=>new Set(ns.map(n=>n.style.gridColumn+':'+n.style.gridRow)).size===ns.length")
     page.locator('#travel-search').fill('없는건물');assert page.locator('.travel-empty').is_visible();page.locator('#travel-search').fill('')
     if path=='/prototype/' and width==1440:page.screenshot(path='docs/assets/campus-map-preview.png',full_page=True)
+    page.locator('[data-action="mapRegion"][data-value="arts"]').click()
+    assert page.locator('.regional-map').get_attribute('data-region')=='arts'
+    assert page.locator('.map-building:visible').count()==3
+    assert page.locator('.regional-map-art').evaluate("async n=>{const src=getComputedStyle(n).backgroundImage.slice(5,-2);const im=new Image();im.src=src;await im.decode();return im.naturalWidth>1000;}")
+    if path=='/prototype/' and width==1440:page.screenshot(path='docs/assets/arts-map-preview.png',full_page=True)
+    page.locator('[data-action="mapCurrent"]').click()
+    assert page.locator('.regional-map').get_attribute('data-region')=='north'
+    page.locator('[data-action="mapRegion"][data-value="athletics"]').click()
+    assert page.locator('.regional-map').get_attribute('data-region')=='athletics'
+    assert page.locator('.map-building:visible').count()==5
+    if path=='/prototype/' and width==1440:page.screenshot(path='docs/assets/athletics-map-preview.png',full_page=True)
+    page.locator('[data-action="mapRegion"][data-value="town"]').click()
+    assert page.locator('.regional-map').get_attribute('data-region')=='town'
+    if path=='/prototype/' and width==1440:page.screenshot(path='docs/assets/town-map-preview.png',full_page=True)
     page.locator('.map-building[data-value="market"]').click();assert '대학가 편의점' in page.locator('.scene-location').inner_text()
     read_to_choices(page);assert page.locator('[data-action="openShop"]').is_visible()
     assert not page.locator('[data-action="vnCycle"]').count()
