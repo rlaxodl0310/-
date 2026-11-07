@@ -96,7 +96,7 @@ with sync_playwright() as p:
    assert not page.locator('.vn-choices').count()
    read_to_choices(page)
    choose(page,'vnBranch','conversation');choose(page,'go','place')
-   open_tool(page,'travel');page.locator('[data-action="visit"][data-value="library"]').click()
+   open_tool(page,'travel');page.locator('#travel-search').fill('창조관 · 도서관');page.locator('[data-action="visit"][data-value="library"]').click()
    choose(page,'libraryActivity','read')
    assert '소설' in page.locator('.vn-line').inner_text()
    assert page.locator('.vn-controls button').count()<=2
