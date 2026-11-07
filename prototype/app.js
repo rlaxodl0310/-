@@ -76,7 +76,7 @@ const btn=(text,action,value='')=>{const cost=action==='encounter'&&value==='pas
 const duration=n=>n%60?`${n}분`:`${n/60}시간`;
 function portrait(column){
  const id=column===0?'taei':Object.entries(people).find(([,p])=>p.column===column)?.[0],acting=characterActing(state,id,{scene:screen,text:reply?.text??''});
- return `<div class="portrait ${acting.row===null?'':'expression-portrait'}" data-actor="${id}" data-expression="${acting.row??'neutral'}" style="--column:${column};--expression:${acting.row??0}" role="img" aria-label="${id==='taei'?'김태이':nameOf(id)} · ${acting.name}"></div>`;
+ return `<div class="portrait ${acting.row===null?'':'expression-portrait'}" data-actor="${id}" data-emotion="${acting.emotion}" data-emotion-atlas="${acting.atlas}" data-expression="${acting.row??'neutral'}" style="--column:${column};--expression:${acting.row??0}" role="img" aria-label="${id==='taei'?'김태이':nameOf(id)} · ${acting.name}"></div>`;
 }
 function portraitActor(id){if(id==='iseo'){const a=characterActing(state,id,{scene:screen,text:''});return `<div class="portrait iseo-cast-portrait" data-actor="iseo" data-expression="${a.row}" style="--expression:${a.row}" role="img" aria-label="${esc(nameOf(id))} · ${a.name}"></div>`;}return portrait(id==='taei'?0:people[id].column);}
 const storyScreens=new Set(['place','encounter','warningScene','classLesson','detail','result','buildingDirectory','dayEnd','clubDetail','warningShare','neighborhoodEvent','personalEvent','communityEvent','communityActivity','clubApply','clubInterview','rainLunch','cafeOrder','everydayEvent','supplyAftermath']);
@@ -209,7 +209,7 @@ function drawNovelBeat(){
  const castLayer=app.querySelector('.dialogue-cast');if(castLayer)castLayer.dataset.activeActor=activeActor;
  for(const member of app.querySelectorAll('.cast-member')){const active=member.dataset.castId===activeActor;member.dataset.speaking=String(active);member.classList.toggle('cast-listening',!!activeActor&&!active);}
  for(const node of app.querySelectorAll('.portrait[data-actor]')){
-  const acting=characterActing(state,node.dataset.actor,{scene:screen,text:participants.length&&node.dataset.actor!==activeActor?'':current.text});node.classList.toggle('expression-portrait',acting.row!==null);node.style.setProperty('--expression',acting.row??0);node.dataset.expression=acting.row??'neutral';node.setAttribute('aria-label',(node.dataset.actor==='taei'?'김태이':nameOf(node.dataset.actor))+' · '+acting.name);
+  const acting=characterActing(state,node.dataset.actor,{scene:screen,text:current.text,listening:!!activeActor&&node.dataset.actor!==activeActor,heardText:current.text,emotion:node.dataset.actor===activeActor?current.emotion:undefined});node.classList.toggle('expression-portrait',acting.row!==null);node.style.setProperty('--expression',acting.row??0);node.dataset.expression=acting.row??'neutral';node.dataset.emotion=acting.emotion;node.dataset.emotionAtlas=acting.atlas;node.setAttribute('aria-label',(node.dataset.actor==='taei'?'김태이':nameOf(node.dataset.actor))+' · '+acting.name);
  }
  const label=current.who||(current.kind==='outcome'?'그 뒤의 이야기':current.kind==='warning'?'잠깐, 확인할 일':'이야기');
  copy.innerHTML=`<div class="vn-reading-meta"><p class="vn-speaker">${esc(label)}</p><span class="vn-reading-progress" aria-label="문장 진행 ${vnView.beat+1}/${vnModel.beats.length}">${vnView.beat+1} / ${vnModel.beats.length}</span></div><p class="vn-line ${current.kind==='player'?'vn-player':''}">${narrative(current.text)}</p>`;
