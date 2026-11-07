@@ -1,3 +1,4 @@
+import {eventCutscene} from './event-cutscenes.js';
 import {personalEventsAt,personalEventRecord,personalEventView,beginPersonalEvent,progressPersonalEvent,pausePersonalEvent,personalEventDefinition} from './personal-events.js';
 import {conversationCast,speakingActor,castPositions} from './dialogue-cast.js';
 import {mapEventsAt} from './map-events.js';
@@ -211,6 +212,8 @@ function drawNovelBeat(){
  for(const node of app.querySelectorAll('.portrait[data-actor]')){
   const acting=characterActing(state,node.dataset.actor,{scene:screen,text:current.text,listening:!!activeActor&&node.dataset.actor!==activeActor,heardText:current.text,emotion:node.dataset.actor===activeActor?current.emotion:undefined});node.classList.toggle('expression-portrait',acting.row!==null);node.style.setProperty('--expression',acting.row??0);node.dataset.expression=acting.row??'neutral';node.dataset.emotion=acting.emotion;node.dataset.emotionAtlas=acting.atlas;node.setAttribute('aria-label',(node.dataset.actor==='taei'?'김태이':nameOf(node.dataset.actor))+' · '+acting.name);
  }
+ const cut=eventCutscene(state,screen,current),visual=app.querySelector('.scene-visual');
+ if(visual){let layer=visual.querySelector('.event-cutscene');if(cut){if(!layer){layer=document.createElement('figure');layer.className='event-cutscene';visual.append(layer);}layer.dataset.cutscene=cut.id;layer.style.setProperty('--cg-x',cut.x+'%');layer.style.setProperty('--cg-y',cut.y+'%');layer.innerHTML=`<div class="event-cutscene-art" role="img" aria-label="${esc(cut.label)} · SD 컷신"></div><figcaption>${esc(cut.label)}</figcaption>`;}else layer?.remove();visual.classList.toggle('has-event-cutscene',!!cut);}
  const label=current.who||(current.kind==='outcome'?'그 뒤의 이야기':current.kind==='warning'?'잠깐, 확인할 일':'이야기');
  copy.innerHTML=`<div class="vn-reading-meta"><p class="vn-speaker">${esc(label)}</p><span class="vn-reading-progress" aria-label="문장 진행 ${vnView.beat+1}/${vnModel.beats.length}">${vnView.beat+1} / ${vnModel.beats.length}</span></div><p class="vn-line ${current.kind==='player'?'vn-player':''}">${narrative(current.text)}</p>`;
  if(!vnView.choosing){controls.innerHTML=`<div class="vn-reading-controls">${vnView.beat>0?btn('이전 문장','vnPrevious'):''}${btn(vnView.beat+1<vnModel.beats.length?'다음':'선택지 보기','vnNext')}</div>`;return;}
