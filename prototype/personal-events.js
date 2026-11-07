@@ -1,3 +1,4 @@
+import {dogyeomStories,dogyeomEventsAt,beginDogyeomEvent,dogyeomEventView,progressDogyeomEvent} from './dogyeom-events.js';
 import {personalFollowups,followupGameOutcome} from './personal-followups.js';
 import {presentPeople} from './days.js';
 import {contact,introduce,displayName,seePeople} from './identity.js';
@@ -43,7 +44,7 @@ export function pausePersonalEvent(state){const s=structuredClone(state),r=perso
 function firstPersonalEventGreeting(s,id){const r=s.personalEvents?.records?.[id];if(!r||r.status!=='completed'||s.day<=r.completedDay||r.lastRecallDay===s.day)return '';const texts={yeogyeong:r.choices[0]==='pay'?'지난번엔 기록부터 같이 보고 싶었던 거예요. 말이 조금 딱딱했죠.':'지난번에 같이 확인했던 방식으로 표시해 봤어요. 누가 어디까지 봤는지 남기니까 덜 헷갈리네요.',seoyeon:r.choices[0]==='decide'?'지난번에 제 방식으로 말해 보고 싶다고 했잖아요. 조금 어색했지만 직접 답장했어요.':'지난번에 적었던, 가능한 시간까지만 말하는 답장 있잖아요. 어색해도 한번 써봤어요.',soyul:r.choices[0]==='choose'?'그 사진은 제가 조금 더 골라보고 있어요. 아직 지우지는 않았어요.':'그때 보여드린 사진은 아직 제 폴더에 있어요. 급하게 공개하지 않아도 된다는 말이 좀 남아서요.'};if(!texts[id])return '';r.lastRecallDay=s.day;return ` ${displayName(s,id)}이 지난번 이야기를 짧게 꺼낸다. “${texts[id]}”`;}
 
 // Legacy first-event records keep their person key. Later chapters have independent IDs.
-export function personalEventDefinition(id){return personalFollowups[id]??personalEventDefs[id]??null;}
+export function personalEventDefinition(id){return dogyeomStories[id]??personalFollowups[id]??personalEventDefs[id]??null;}
 function followupAvailable(s,id,d,place){
  const r=s.personalEvents?.records?.[id],prior=s.personalEvents?.records?.[d.previous];
  if(r?.status==='completed'||prior?.status!=='completed'||s.day<=(prior.completedDay??prior.day??s.day)||!d.places.includes(place)||s.clock.minute<720||!enoughTime(s,d.person,r?.stage?20:30))return false;
@@ -51,8 +52,9 @@ function followupAvailable(s,id,d,place){
  if(d.person==='iseo')return (personalEventPosition(s,'iseo')??iseoEventLocation(s))===place;
  return contact(s,d.person).introduced&&s.clock.minute<1080&&(personalEventPosition(s,d.person)===place||presentPeople({...s,location:place},place).includes(d.person))&&!npcNow(s,d.person).rushed;
 }
-export function personalEventsAt(s,place=s.location){if(s.academics?.registrationPending||s.freeDay?.home)return [];return [...firstPersonalEventsAt(s,place),...Object.entries(personalFollowups).filter(([id,d])=>followupAvailable(s,id,d,place)).map(([eventId,d])=>({eventId,person:d.person,title:d.person==='iseo'&&!contact(s,'iseo').introduced?'다시 마주친 운동복 학생':d.title,resuming:s.personalEvents?.records?.[eventId]?.status==='paused'}))];}
+export function personalEventsAt(s,place=s.location){if(s.academics?.registrationPending||s.freeDay?.home)return [];return [...dogyeomEventsAt(s,place),...firstPersonalEventsAt(s,place),...Object.entries(personalFollowups).filter(([id,d])=>followupAvailable(s,id,d,place)).map(([eventId,d])=>({eventId,person:d.person,title:d.person==='iseo'&&!contact(s,'iseo').introduced?'다시 마주친 운동복 학생':d.title,resuming:s.personalEvents?.records?.[eventId]?.status==='paused'}))];}
 export function beginPersonalEvent(state,eventId){
+ if(dogyeomStories[eventId])return beginDogyeomEvent(state,eventId);
  const d=personalFollowups[eventId];if(!d)return beginFirstPersonalEvent(state,eventId);
  if(!personalEventsAt(state).some(e=>e.eventId===eventId))throw new Error('아직 이 이야기를 이어갈 조건이 되지 않았습니다.');
  const s=structuredClone(state);s.personalEvents??={active:null,records:{}};const store=s.personalEvents,previous=store.records[store.active];if(previous?.status==='active'&&store.active!==eventId)previous.status='paused';const old=store.records[eventId],prior=store.records[d.previous];
@@ -65,6 +67,7 @@ function followupOpening(d,r){
  return [r.context.priorIntrusive?repair[d.person]??'':r.context.close?({yeogyeong:'태이 씨도 잠깐 앉아 있어요. 오늘은 제가 먼저 말 걸었네요.',seoyeon:'아, 태이 씨. 마침 잠깐 쉬려던 참이었어요.',soyul:'저기… 잠깐만요. 지난번 보고 나서 한번 더 물어보고 싶었어요.',iseo:'아, 또 봤네요! 오늘도 그냥 지나가면 좀 아쉬웠을 것 같은데.'}[d.person]??''):'',d.opening].filter(Boolean).join(' ');
 }
 export function personalEventView(s){
+ if(dogyeomStories[s.personalEvents?.active])return dogyeomEventView(s);
  const r=personalEventRecord(s),d=personalFollowups[r?.eventId];if(!d)return firstPersonalEventView(s);
  let options=r.stage?d.second:d.options;options=options.map(o=>o.slice(0,2));
  if(r.person==='iseo'&&!contact(s,'iseo').introduced)options=r.stage?[...options,['names','마무리하기 전에 서로 이름을 묻는다.']]:[...options.slice(0,2),['introduce','장난을 이어가기 전에 서로 이름부터 묻는다.']];
@@ -72,6 +75,7 @@ export function personalEventView(s){
 }
 function followupIntroduceIseo(s){introduce(s,'iseo','personal-event');s.contacts.iseo.details={major:'태권도과',year:2};s.contacts.iseo.lastSeen={day:s.day,minute:s.clock.minute,location:s.location};}
 export function progressPersonalEvent(state,choice){
+ if(dogyeomStories[state.personalEvents?.active])return progressDogyeomEvent(state,choice);
  const r=personalEventRecord(state),d=personalFollowups[r?.eventId];if(!d)return progressFirstPersonalEvent(state,choice);
  const view=personalEventView(state),option=view.options.find(o=>o[0]===choice),minutes=r.stage?20:10;
  if(r.status!=='active'||r.day!==state.day||r.location!==state.location||!option||state.clock.minute+minutes>r.until||!enoughTime(state,r.person,minutes))throw new Error('현재 장소·시간·선택을 다시 확인해 주세요.');
