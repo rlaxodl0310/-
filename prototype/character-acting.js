@@ -1,6 +1,7 @@
 import {npcNow} from './npc-state.js';
 export function characterActing(state,id,{scene='',text=''}={}){
  // Visual direction only: no relationship, knowledge, RNG or clock mutations.
+ if(id==='iseo'){const row=/놀|장난|민망|부끄/.test(text)?2:/그만|무리|쉬고 싶/.test(text)?0:1;return {row,name:row===2?'쑥스러운 표정':row===1?'밝게 이야기하는 표정':'차분한 표정'};}
  const mood=id==='taei'?'steady':npcNow(state,id).mood;
  let row=null;
  if(/걱정|미안|피곤|불안|무섭|죄책/.test(text)||['overwhelmed','drained'].includes(mood))row=1;

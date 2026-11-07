@@ -160,3 +160,4 @@ body{background:#e6e7df}.utility-page{border-radius:8px;box-shadow:none;border-c
 @media(max-height:650px) and (min-width:651px){.cast-member{top:75px;width:25dvh}.dialogue-cast[data-count="3"] .cast-member{top:75px;width:23dvh}.dialogue-stage .vn-panel{max-height:43dvh!important}}
 @media(prefers-reduced-motion:reduce){.cast-member{transition:none}}
 .vn-stage .scene-visual:has(.dialogue-cast){isolation:isolate;z-index:0}
+.vn-stage .scene-visual .dialogue-cast .portrait.iseo-cast-portrait[data-actor=iseo]{background-image:url('../docs/assets/iseo-dialogue-expressions.png');background-size:300% 100%;background-position:calc(var(--expression)*50%) 0;aspect-ratio:1/2}

@@ -1,3 +1,4 @@
+import {personalEventGreeting} from './personal-events.js';
 import {aftermathObservation,aftermathGreeting} from './supply-aftermath.js';
 import {rainLunchOffer,beginRainLunch,passRainLunch} from './rain-lunch.js';
 import {campusDetour} from './campus-variation.js';
@@ -114,7 +115,7 @@ export function arrive(state,location,spot='entry'){
  if(person&&!contact(s,person).introduced&&/아직 사진/.test(encounter.action)){encounter.action='길을 막지 않게 옆으로 비켜서며 가볍게 인사한다. “안녕하세요.”';encounter.prefix='안녕하세요. ';}
  if(person&&!contact(s,person).introduced&&/앉아도|가방을 놓/.test(encounter.action)){encounter.action='상대의 공간을 침범하지 않게 멈춰서 가볍게 인사한다. “안녕하세요.”';encounter.prefix='안녕하세요. ';}
  if(location==='library'&&person)encounter.text+=libraryGreeting(s,person);
- if(person)encounter.text+=aftermathGreeting(s,person);
+ if(person)encounter.text+=aftermathGreeting(s,person)+personalEventGreeting(s,person);
  encounter.text+=' '+aftermathObservation(s,location);
  if(person){const now=npcNow(s,person);if(now.mood!=='steady')encounter.text+=' '+now.cue;}
  if(s.encounters[key]?.resolved)s.encounters[key]=null;
