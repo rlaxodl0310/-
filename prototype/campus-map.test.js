@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {locations} from './days.js';import {campusMapPositions,choicePurpose,choiceSection} from './campus-map.js';
+test('every playable destination has a unique map position',()=>{const positions=Object.keys(locations).map(id=>{assert.ok(campusMapPositions[id],id);return campusMapPositions[id].join(':');});assert.equal(new Set(positions).size,positions.length);});
+test('activity previews and immediate actions have distinct explanations',()=>{assert.match(choicePurpose('select','work')[1],/시작 결정/);assert.match(choicePurpose('buildingActivity','water')[1],/바로 실행/);assert.match(choicePurpose('openShop')[1],/아직 결제하지 않음/);assert.equal(choiceSection('walk','counter'),'이동·탐색');assert.equal(choiceSection('classPrepare'),'수업');});

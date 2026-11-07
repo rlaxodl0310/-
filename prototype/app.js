@@ -1,3 +1,4 @@
+import {campusMapPositions,choicePurpose,choiceSection} from './campus-map.js';
 import {screenNames,screenGuides,navigationBackLabel,forecastDays} from './navigation-copy.js';
 import {updateOpportunityHints,currentOpportunity,dismissOpportunity} from './opportunity-hints.js';
 import {returningOpeningView,progressReturningOpening,initialReturningScreen} from './returning-opening.js';
@@ -160,6 +161,12 @@ function novelPresentation(){
   }
   if(screen==='detail'){plans=primary.filter(n=>n.dataset.action==='plan');primary=primary.filter(n=>n.dataset.action!=='plan');}
  }
+ if(['campus','place'].includes(screen)){
+  const hadTravel=primary.some(n=>n.dataset.action==='visit'||n.dataset.action==='go'&&['travel','campus'].includes(n.dataset.value));
+  primary=primary.filter(n=>n.dataset.action!=='visit'&&!(n.dataset.action==='go'&&['travel','campus'].includes(n.dataset.value)));
+  if(hadTravel||screen==='place'){const mapButton=document.createElement('button');mapButton.dataset.action='go';mapButton.dataset.value='travel';mapButton.textContent='지도에서 다른 장소 고르기';primary.push(mapButton);}
+  primary=primary.filter((n,i,all)=>all.findIndex(x=>x.dataset.action===n.dataset.action&&x.dataset.value===n.dataset.value)===i);
+ }
  if(paceNotice)push(paceNotice);
  // Utility commands are always available in the upper menu instead of the answer list.
  primary=primary.filter(n=>!(n.dataset.action==='go'&&['timetable','schedule','map','phone','discoveries'].includes(n.dataset.value)));
@@ -174,7 +181,7 @@ function novelPresentation(){
  else if(vnView.key!==key)vnView=vnCursors.get(key)??{key,beat:0,choosing:false,page:0,branch:'main'};
  vnModel={beats,primary,aux,plans,title:raw.querySelector('h1')?.textContent??(screen==='dialogue'?nameOf(speaker):'캠퍼스')};
  const notices=Array.from(raw.querySelectorAll('.discovery-notice p')).map(n=>n.textContent.trim());
- app.innerHTML=`<section class="vn-stage" data-vn-screen="${screen}">${sceneVisual()}<nav class="vn-toolbar" aria-label="상단 메뉴">${btn(utilityIcon('phone')+'<span>휴대폰</span>','phone')}${btn(utilityIcon('journal')+'<span>메뉴'+(state.appointments.some(a=>a.status==='offered')?' · 새 제안':'')+'</span>','openQuick')}</nav>${notices.length?`<div class="vn-acquisition"><span>${esc(notices[0])}${notices.length>1?' 외 '+(notices.length-1)+'개':''}</span>${btn('정보 보기','go','discoveries')}</div>`:''}<article class="vn-panel" aria-label="이야기와 선택" tabindex="0"><div class="vn-copy"></div><div class="vn-controls"></div></article></section>`;
+ app.innerHTML=`<section class="vn-stage" data-vn-screen="${screen}">${sceneVisual()}<nav class="vn-toolbar" aria-label="상단 메뉴">${btn(utilityIcon('map')+'<span>지도·이동</span>','go','travel')}${btn(utilityIcon('phone')+'<span>휴대폰</span>','phone')}${btn(utilityIcon('journal')+'<span>메뉴'+(state.appointments.some(a=>a.status==='offered')?' · 새 제안':'')+'</span>','openQuick')}</nav>${notices.length?`<div class="vn-acquisition"><span>${esc(notices[0])}${notices.length>1?' 외 '+(notices.length-1)+'개':''}</span>${btn('정보 보기','go','discoveries')}</div>`:''}<article class="vn-panel" aria-label="이야기와 선택" tabindex="0"><div class="vn-copy"></div><div class="vn-controls"></div></article></section>`;
  drawNovelBeat();
 }
 function drawNovelBeat(){
@@ -191,9 +198,19 @@ function drawNovelBeat(){
  if(vnView.branch!=='main'){
   const back=document.createElement('button');back.dataset.action='vnBranch';back.dataset.value='main';back.textContent='앞의 이야기로 돌아간다.';choices=[...choices,back];
  }
- const group=novelChoicePage(choices,vnView.page);vnView.page=group.page;
+ const overview=['campus','place','buildingDirectory'].includes(screen);
+ const group=overview?{items:choices,page:0,pages:1,more:false}:novelChoicePage(choices,vnView.page);vnView.page=group.page;
+ controls.classList.toggle('exploration-controls',overview);
  controls.innerHTML=`<p class="vn-choice-caption">${vnView.branch==='conversation'?'어떤 이야기를 꺼낼까?':vnView.branch==='plans'?'어떻게 참여할까?':'어떻게 할까?'}${group.more?' · '+(group.page+1)+'/'+group.pages:''}</p><div class="vn-choices"></div>`;
- const container=controls.querySelector('.vn-choices');for(const n of group.items)container.append(n.cloneNode(true));
+ const container=controls.querySelector('.vn-choices');
+ if(overview){
+  container.classList.add('action-overview');
+  for(const section of ['수업','이동·탐색','활동','기타']){
+   const items=group.items.filter(n=>choiceSection(n.dataset.action,n.dataset.value)===section);if(!items.length)continue;
+   const heading=document.createElement('h3');heading.textContent=section;container.append(heading);
+   for(const n of items){const card=n.cloneNode(true),purpose=choicePurpose(n.dataset.action,n.dataset.value);if(items.length===1)card.style.gridColumn='1 / -1';if(purpose){const desc=document.createElement('small');desc.className='choice-purpose';desc.textContent=purpose[1];card.append(desc);}container.append(card);}
+  }
+ }else for(const n of group.items)container.append(n.cloneNode(true));
  if(group.more)container.insertAdjacentHTML('beforeend',btn(`다른 행동 보기 · ${group.page+1}/${group.pages}`,'vnCycle'));
 }
 function unreadMessages(){return state.messages.filter(m=>!m.read).length;}
@@ -302,7 +319,7 @@ function render(){
  if(screen==='clubInterview'){const a=state.clubApplications?.[selectedClub],view=clubInterviewView(state,selectedClub),reason=interviewAvailability(state,selectedClub);app.innerHTML=page('동아리 면접',`<p>${esc(a?.status!=='submitted'?(view?.text??'신청서를 먼저 제출해야 한다.'):(reason??view?.text))}</p><div class="actions">${!reason?view.options.map(o=>btn(o.label,'interviewAnswer',o.id)).join(''):''}${a?.status==='submitted'&&state.location==='hall'&&state.buildingArea?.id!==a.room?btn('안내받은 동아리실로 간다.','interviewTravel',selectedClub):''}${btn('지금은 하던 일로 돌아간다.','go','place')}</div>`,'place');}
  if(screen==='messages')app.innerHTML=page('메시지',state.messages.length?state.messages.map(m=>`<article class="list"><strong>${esc(Object.entries(people).find(([,p])=>p.name===m.from)?nameOf(Object.entries(people).find(([,p])=>p.name===m.from)[0]):m.from)} · ${m.day??1}일차</strong><p>${narrative(m.text)}</p>${m.appointmentId?btn('약속 제안 보기','go','schedule'):''}</article>`).join(''):'<p class="muted">새 메시지가 없습니다.</p>','phone');
  if(screen==='discoveries')app.innerHTML=page('알게 된 정보 · 소지품',`<p class="muted">직접 확인하거나 전해 들은 정보와 실제로 보유한 물건을 구분합니다. 보관 위치를 알았다고 물건을 얻은 것은 아닙니다.</p><h2 class="information-text">◇ 알게 된 정보 · ${state.known.length}개</h2>${state.known.map(x=>{const record=(state.discoveries??[]).find(d=>d.kind==='information'&&d.name===x);return `<article class="list"><strong class="information-text">${esc(x)}</strong><p class="muted">${record?`${record.day}일차 · ${record.phase==='evening'?'저녁':'오후'} · ${esc(locations[record.location]??'활동 중')}에 확인`:'이전 진행에서 확인한 정보'}${record?.action?`<br>행동: ${esc(record.action)}`:''}</p></article>`;}).join('')||'<p class="muted">아직 확인한 정보가 없습니다.</p>'}<h2 class="item-text">▣ 소지품</h2>${(state.inventory??[]).map(i=>`<article class="list item-text">${esc(i.name)} × ${i.quantity}</article>`).join('')||'<p class="muted">획득한 아이템이 없습니다.</p>'}`,'phone');
- if(screen==='map')app.innerHTML=page('교내 지도와 장소',`<p class="muted">교내 공개 길 안내입니다. 건물 안에서 직접 확인한 시설과 동선은 아래에 따로 기록됩니다.</p><h2>교내 길 안내</h2><div class="grid">${Object.entries(locations).filter(([id])=>campusBuildings[id]?.primary).map(([id,label])=>`<button class="card" data-action="visit" data-value="${id}"><strong>${label}</strong>${campusBuildings[id]?.description??'생활과 교류 공간'}${state.location===id?' · 현재 위치':''}</button>`).join('')}</div><h2>건물 내부·주변 생활 공간</h2><div class="grid">${Object.entries(locations).filter(([id])=>!campusBuildings[id]?.primary).map(([id,label])=>`<button class="card" data-action="visit" data-value="${id}"><strong>${label}</strong>${id==='library'?'창조관 내부':id==='dorm'?'명칭·세부 배치 미정':'학교 주변'}${state.location===id?' · 현재 위치':''}</button>`).join('')}</div><h2>직접 알아둔 정보</h2>${state.known.map(x=>`<div class="list">${narrative(x)}</div>`).join('')||'<p>아직 기록된 장소가 없습니다.</p>'}<div class="actions">${btn('학교 길 안내를 확인한다.','go','travel')}</div>`,'phone');
+ if(screen==='map')app.innerHTML=page('캠퍼스 지도 · 장소 이동',travelPage(),'phone');
  if(screen==='journal')app.innerHTML=page('지금까지의 기록',[...state.memory].reverse().map(x=>`<div class="list">${narrative(x)}</div>`).join('')||'<p class="muted">아직 기록이 없습니다.</p>','phone');
  if(screen==='dayEnd'){
   const history=[...state.dayHistory,{day:state.day,choice:state.choice,activities:state.freeDay?.completed??[]}];
@@ -322,7 +339,7 @@ function render(){
   if(hint)app.insertAdjacentHTML('beforeend',`<aside class="opportunity-hint" aria-label="행동 힌트"><div><span>문득 떠오른 생각</span><strong>${esc(hint.title)}</strong><p>${esc(hint.text)}</p><small>관심이 간다면 · ${esc(locations[hint.place])} · 참여 여부는 직접 결정</small></div><div class="hint-actions">${btn('주변 살펴보기','hintExplore')}${btn('지금은 넘어간다','hintDismiss')}</div></aside>`);
  }
 
- if(screen==='travel')applyTravelFilter();
+ if(['travel','map'].includes(screen))applyTravelFilter();
  renderActivityMiniGame();
  if(modelPending){const panel=app.querySelector('.vn-panel');if(panel)panel.innerHTML=`<p role="status" aria-live="polite">잠시 말을 고르고 있다…</p><div class="vn-controls">${btn('기다리지 않고 이어가기','skipModel')}</div>`;}
 }
@@ -585,7 +602,7 @@ function playMiniFeedback(score){
 function travelCategory(id){return campusBuildings[id]?.outdoor?'outdoor':['cafeteria','dorm','cafe','library','hall'].includes(id)?'life':'study';}
 function travelPage(){
  const hints={field:'트랙 · 그늘 벤치',outdoorCourt:'야외 코트 · 가벼운 연습',gym:'실내 코트 · 체력단련실',arts:'강의실 · 합주실 · 무대',music:'중형 연습실',headquarters:'강의실 · 은행 · 편의점',creative:'실습실 · 도서관',academic:'교양 강의실',sculpture:'강의실 · 실습실',baekseok:'채플 · 대형 좌석 공간',cafeteria:'학식당 · 카페 · 조리실',hall:'동아리실 · 공용 회의실',library:'책 · 열람 좌석 · 자료실',cafe:'음료 · 휴식 · 개인 작업',dorm:'현관 안내 · 바깥 쉼터'};
- return `<div class="travel-intro"><p>가고 싶은 곳을 찾아보세요.<br>이동과 짧은 행동은 묶어서 시간이 흐릅니다.</p><span class="travel-current">현재 · ${esc(locations[state.location]??'캠퍼스')}</span></div><label class="travel-search">${utilityIcon('travel')}<input type="search" id="travel-search" aria-label="장소 검색" placeholder="건물이나 공간 이름 검색" value="${esc(travelQuery)}" autocomplete="off"></label><nav class="travel-tabs" aria-label="장소 분류">${[['all','전체'],['outdoor','야외'],['study','강의 · 연습'],['life','생활 · 모임']].map(([id,label])=>`<button data-action="travelFilter" data-value="${id}" aria-pressed="${travelFilter===id}">${label}</button>`).join('')}</nav><span class="travel-count" role="status" aria-live="polite"></span><div class="grid travel-grid">${Object.entries(locations).map(([id,label])=>`<button class="card travel-card" data-category="${travelCategory(id)}" aria-label="${label} 찾아가기" data-action="visit" data-value="${id}" ${id===state.location?'aria-current="location"':''} ${!canSpendTime(state,timeCost(state,'visit',id))?'disabled':''}><span class="destination-icon">${utilityIcon(travelCategory(id)==='outdoor'?'map':travelCategory(id)==='study'?'clubs':'travel')}</span>${id===state.location?'<span class="destination-status">현재 위치</span>':''}<strong>${esc(label)}</strong><small>${esc(hints[id]??'캠퍼스 공간')}</small></button>`).join('')}</div><p class="travel-empty" hidden>조건에 맞는 장소가 없어요. 검색어나 분류를 바꿔보세요.</p>`;
+ return `<div class="travel-intro"><p><strong>지도에서 목적지를 눌러 이동하세요.</strong><br>건물 안의 층·호실은 도착한 뒤 고를 수 있어요.</p><span class="travel-current">현재 · ${esc(locations[state.location]??'캠퍼스')}</span></div><label class="travel-search">${utilityIcon('travel')}<input type="search" id="travel-search" aria-label="장소 검색" placeholder="건물 이름이나 시설 검색" value="${esc(travelQuery)}" autocomplete="off"></label><nav class="travel-tabs" aria-label="장소 분류">${[['all','전체'],['outdoor','야외'],['study','강의 · 연습'],['life','생활 · 모임']].map(([id,label])=>`<button data-action="travelFilter" data-value="${id}" aria-pressed="${travelFilter===id}">${label}</button>`).join('')}</nav><div class="map-key"><span>● 현재 위치</span><span>건물을 누르면 이동</span><small>게임용 배치도 · 실제 지리와 다를 수 있어요</small></div><span class="travel-count" role="status" aria-live="polite"></span><div class="campus-map-scroll" tabindex="0" aria-label="캠퍼스 지도. 좁은 화면에서는 좌우로 움직여 모든 건물을 볼 수 있습니다."><div class="campus-map" aria-label="클릭해서 이동하는 캠퍼스 배치도"><div class="map-avenue" aria-hidden="true"></div><span class="map-campus-label">CAMPUS</span><span class="map-town-label">정문 밖 · 대학가</span>${Object.entries(locations).map(([id,label],index)=>{const pos=campusMapPositions[id]??[index%4+1,Math.floor(index/4)+1];return `<button class="travel-card map-building" style="grid-column:${pos[0]};grid-row:${pos[1]}" data-category="${travelCategory(id)}" aria-label="${label} 찾아가기" data-action="visit" data-value="${id}" ${id===state.location?'aria-current="location"':''} ${!canSpendTime(state,timeCost(state,'visit',id))?'disabled':''}><span class="destination-icon">${utilityIcon(travelCategory(id)==='outdoor'?'map':'clubs')}</span><strong>${esc(label)}</strong><small>${esc(hints[id]??({'market':'식음료 · 생활용품','restaurant':'식사 · 쉬어가기','pub':'저녁 식사 · 모임'}[id]??'캠퍼스 공간'))}</small>${id===state.location?'<span class="map-you">● 여기</span>':''}<span class="map-move">${id===state.location?'주변 보기':'이동 →'}</span></button>`;}).join('')}</div></div><p class="map-scroll-hint">↔ 좁은 화면에서는 지도를 좌우로 밀어보세요.</p><p class="travel-empty" hidden>조건에 맞는 장소가 없어요. 검색어나 분류를 바꿔보세요.</p>`;
 }
 function applyTravelFilter(){
  const cards=[...app.querySelectorAll('.travel-card')],query=travelQuery.trim().toLocaleLowerCase();let visible=0;
