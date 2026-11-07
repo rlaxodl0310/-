@@ -1,3 +1,5 @@
+import {startCombat,planCombat,executeCombat,nextCombatTurn} from './combat.js';
+import {combatSetupPage,combatPlayPage} from './combat-ui.js';
 import {eventCutscene} from './event-cutscenes.js';
 import {personalEventsAt,personalEventRecord,personalEventView,beginPersonalEvent,progressPersonalEvent,pausePersonalEvent,personalEventDefinition} from './personal-events.js';
 import {conversationCast,speakingActor,castPositions} from './dialogue-cast.js';
@@ -54,6 +56,7 @@ import {people,dialogue,respond,groupDialogue,respondGroup,endTopic,openConversa
 import {newGame,newReturningGame,newAfternoonScenario,nextDay,acceptAppointment,cancelAppointment,save,restore} from './simulation.js';
 import {days,schoolDays,locations,availableRoutes,presentPeople,currentSchedule} from './days.js';
 let state=newReturningGame(),screen='opening',selected=null,note='',returnTo='campus',speaker='seoyeon',reply=null,groupLines=[],groupIndex=0,groupAnswered=false,encounter=null;
+let combatActor='taei',combatMore=false,combatError='';
 let registrationDraft=registeredCourseIds(state);
 let travelRegion='north',travelQuery='',travelFilter='all',artAngle='front',iseoAudition=newIseoPreview();
 let gains=[],paceNotice='',weatherReturn='campus',warningScene=null,activityReturn='campus',clubReturn='communityPost',selectedClub=null,communityReturn='campus',communityPhoneReturn='campus',selectedPost=null,feedIds=null,visibleCommentCount=0,communityFilter='all';
@@ -136,7 +139,7 @@ let selectedCommunityEvent=null,buildingFloorView=null;
 let quickReturn=null,quickSnapshot=null,quickTool='';
 const utilityOrigins=new Map();
 const readingSnapshots=new Map();
-const utilityScreens=new Set(['phone','timetable','schedule','messages','map','journal','discoveries','observations','weather','community','communityPost','clubs','travel','menu','quickMenu','reset','peopleRecord','characterArt','iseoDialogue','wallet','shop','enrollment','calendar','fortnightActivity','personalStories','opening']);
+const utilityScreens=new Set(['combatSetup','combat','phone','timetable','schedule','messages','map','journal','discoveries','observations','weather','community','communityPost','clubs','travel','menu','quickMenu','reset','peopleRecord','characterArt','iseoDialogue','wallet','shop','enrollment','calendar','fortnightActivity','personalStories','opening']);
 function rememberReading(){if(vnModel&&!utilityScreens.has(screen))readingSnapshots.set(screen,{screen,note,reply,paceNotice,view:{...vnView}});}
 function plainNode(node){const copy=node.cloneNode(true);if(copy.classList.contains('player-line'))copy.querySelector('span')?.remove();copy.querySelectorAll('.note-label,.time-cost,button').forEach(n=>n.remove());return copy.textContent.replace(/\s+/g,' ').trim();}
 function novelPresentation(){
@@ -239,10 +242,10 @@ function drawNovelBeat(){
 function unreadMessages(){return state.messages.filter(m=>!m.read).length;}
 function newOffers(){return state.appointments.filter(a=>a.status==='offered').length;}
 function quickMenuBody(){
- const groups=[['지금 할 일',[{label:'장소 이동',id:'travel',hint:'건물과 호실 찾기'},{label:'휴대폰',id:'phone',hint:'캠퍼스톡 · 메시지 · 일정',badge:unreadMessages()+newOffers()}]],['학교생활',[...(schoolEnabled(state)?[{label:'시간표 · 출석',id:'timetable',hint:'수업 장소와 출석 확인'},{label:'수강 계획 변경',id:'enrollment',hint:'앞으로 들을 수업 고르기'},{label:'2주 달력',id:'calendar',hint:'날짜별 일상과 주말 계획'}]:[]),{label:'약속',id:'schedule',hint:'제안과 참석 일정',badge:newOffers()},{label:'지도',id:'map',hint:'교내 공간 살펴보기'},{label:'날씨 · 예보',id:'weather',hint:'오늘 날씨와 준비물',action:'openWeather'}]],['내 기록',[{label:'소지금 · 구매 내역',id:'wallet',hint:moneyBalance(state).toLocaleString()+'원'},{label:'정보 · 소지품',id:'discoveries',hint:'발견한 정보와 가진 물건'},{label:'알게 된 사람들',id:'peopleRecord',hint:'만난 사람과 마지막 목격'},{label:'캐릭터 일러스트',id:'characterArt',hint:'정이서 · 외형 미리보기'},{label:'메시지',id:'messages',hint:'받은 연락 확인',badge:unreadMessages()},{label:'개인 이야기 기록',id:'personalStories',hint:'함께한 이야기 · 멈춘 이야기'},{label:'일지',id:'journal',hint:'지나온 선택 돌아보기'}]]];
+ const groups=[['지금 할 일',[{label:'좀비 전투 · 시제품',id:'combatSetup',hint:'방화문 탈출 · 턴제 전투 체험'},{label:'장소 이동',id:'travel',hint:'건물과 호실 찾기'},{label:'휴대폰',id:'phone',hint:'캠퍼스톡 · 메시지 · 일정',badge:unreadMessages()+newOffers()}]],['학교생활',[...(schoolEnabled(state)?[{label:'시간표 · 출석',id:'timetable',hint:'수업 장소와 출석 확인'},{label:'수강 계획 변경',id:'enrollment',hint:'앞으로 들을 수업 고르기'},{label:'2주 달력',id:'calendar',hint:'날짜별 일상과 주말 계획'}]:[]),{label:'약속',id:'schedule',hint:'제안과 참석 일정',badge:newOffers()},{label:'지도',id:'map',hint:'교내 공간 살펴보기'},{label:'날씨 · 예보',id:'weather',hint:'오늘 날씨와 준비물',action:'openWeather'}]],['내 기록',[{label:'소지금 · 구매 내역',id:'wallet',hint:moneyBalance(state).toLocaleString()+'원'},{label:'정보 · 소지품',id:'discoveries',hint:'발견한 정보와 가진 물건'},{label:'알게 된 사람들',id:'peopleRecord',hint:'만난 사람과 마지막 목격'},{label:'캐릭터 일러스트',id:'characterArt',hint:'정이서 · 외형 미리보기'},{label:'메시지',id:'messages',hint:'받은 연락 확인',badge:unreadMessages()},{label:'개인 이야기 기록',id:'personalStories',hint:'함께한 이야기 · 멈춘 이야기'},{label:'일지',id:'journal',hint:'지나온 선택 돌아보기'}]]];
  const lunch=lunchEpisode(state);
  const resume=Object.values(state.activitySessions?.records??{}).filter(r=>r.day===state.day&&['active','paused'].includes(r.status));
- return `<div class="menu-dashboard"><aside class="menu-context"><span class="utility-overline">CAMPUS LIFE</span><div class="menu-avatar">태</div><h2>김태이</h2><p>${esc(locations[state.location]??'캠퍼스')}</p><span class="context-time">${clockLabel(state)}</span><p>${state.day}일차 · ${days[state.day].weekday}</p><div class="context-weather">${weatherNow(state).icon} ${weatherNow(state).name} · ${weatherNow(state).temperature}°C</div><small>다음 행동을 골라보세요.</small></aside><div class="menu-sections">${Object.values(state.personalEvents?.records??{}).filter(r=>r.status!=='completed').map(r=>`<article class="resume-card"><strong>${r.person==='taei'?'김태이':esc(nameOf(r.person))} · 이어가던 이야기</strong><p>현재 같은 장소에서 만났을 때 이어갈 수 있어요.</p>${personalEventsAt(state).some(e=>e.eventId===(r.eventId??r.person))?btn('이어가기','openPersonalEvent',r.eventId??r.person):''}</article>`).join('')}${Object.values(state.supplyAftermath?.records??{}).filter(r=>r.day===state.day&&['active','paused'].includes(r.status)).map(r=>`<article class="resume-card"><span>이어서 할 수 있어요</span><strong>${esc(nameOf(r.person))}과 짧게 함께한 시간</strong>${btn('같이 하던 일을 이어간다.','startSupplyAftermath',r.person)}</article>`).join('')}${everydayEventView(state)?`<article class="resume-card"><span>이어서 볼 수 있어요</span><strong>잠깐 생긴 일</strong>${btn('상황으로 돌아간다.','resumeEveryday')}</article>`:''}${lunch?.status==='active'&&lunch.day===state.day?`<article class="resume-card"><span>이어서 할 수 있어요</span><strong>비 오는 점심시간</strong>${btn('함께하던 일로 돌아간다.','resumeLunch')}</article>`:''}${resume.map(r=>`<article class="resume-card"><span>이어서 할 수 있어요</span><strong>${esc(communityActivityDefinitions[r.postId].title)}</strong><p>${r.spent}/${r.duration}분 참여</p>${activityAvailability(state,r.postId,r).ok?btn('현장에서 이어서 한다.','eventResume',r.key):`<p>${esc(activityAvailability(state,r.postId,r).reason)}</p>`}</article>`).join('')}${groups.map(([title,items],i)=>`<section class="shortcut-section"><h2>${title}</h2><div class="grid shortcut-grid ${i===0?'featured-shortcuts':''}">${items.map(item=>utilityShortcut({...item,style:i===0?'feature':'row'})).join('')}</div></section>`).join('')}</div></div>`;
+ return `<div class="menu-dashboard"><aside class="menu-context"><span class="utility-overline">CAMPUS LIFE</span><div class="menu-avatar">태</div><h2>김태이</h2><p>${esc(locations[state.location]??'캠퍼스')}</p><span class="context-time">${clockLabel(state)}</span><p>${state.day}일차 · ${days[state.day].weekday}</p><div class="context-weather">${weatherNow(state).icon} ${weatherNow(state).name} · ${weatherNow(state).temperature}°C</div><small>다음 행동을 골라보세요.</small></aside><div class="menu-sections">${state.combatTrial?`<article class="resume-card"><strong>방화문 너머로 · 전투 시제품</strong><p>${state.combatTrial.turn}턴 · ${state.combatTrial.phase==='planning'?'행동 선택 중':'결과 확인'}</p>${btn('전투 화면으로 돌아가기','combatResume')}</article>`:''}${Object.values(state.personalEvents?.records??{}).filter(r=>r.status!=='completed').map(r=>`<article class="resume-card"><strong>${r.person==='taei'?'김태이':esc(nameOf(r.person))} · 이어가던 이야기</strong><p>현재 같은 장소에서 만났을 때 이어갈 수 있어요.</p>${personalEventsAt(state).some(e=>e.eventId===(r.eventId??r.person))?btn('이어가기','openPersonalEvent',r.eventId??r.person):''}</article>`).join('')}${Object.values(state.supplyAftermath?.records??{}).filter(r=>r.day===state.day&&['active','paused'].includes(r.status)).map(r=>`<article class="resume-card"><span>이어서 할 수 있어요</span><strong>${esc(nameOf(r.person))}과 짧게 함께한 시간</strong>${btn('같이 하던 일을 이어간다.','startSupplyAftermath',r.person)}</article>`).join('')}${everydayEventView(state)?`<article class="resume-card"><span>이어서 볼 수 있어요</span><strong>잠깐 생긴 일</strong>${btn('상황으로 돌아간다.','resumeEveryday')}</article>`:''}${lunch?.status==='active'&&lunch.day===state.day?`<article class="resume-card"><span>이어서 할 수 있어요</span><strong>비 오는 점심시간</strong>${btn('함께하던 일로 돌아간다.','resumeLunch')}</article>`:''}${resume.map(r=>`<article class="resume-card"><span>이어서 할 수 있어요</span><strong>${esc(communityActivityDefinitions[r.postId].title)}</strong><p>${r.spent}/${r.duration}분 참여</p>${activityAvailability(state,r.postId,r).ok?btn('현장에서 이어서 한다.','eventResume',r.key):`<p>${esc(activityAvailability(state,r.postId,r).reason)}</p>`}</article>`).join('')}${groups.map(([title,items],i)=>`<section class="shortcut-section"><h2>${title}</h2><div class="grid shortcut-grid ${i===0?'featured-shortcuts':''}">${items.map(item=>utilityShortcut({...item,style:i===0?'feature':'row'})).join('')}</div></section>`).join('')}</div></div>`;
 }
 function phoneHomeBody(){
  const lesson=nextLesson(state),weather=weatherNow(state);
@@ -254,6 +257,7 @@ function menuTabs(){return `<nav class="menu-tabs" aria-label="메뉴 탭"><butt
 function resumeQuick(){if(!quickReturn){screen='campus';note='';reply=null;render();return;}screen=quickReturn;note=quickSnapshot?.note??'';reply=quickSnapshot?.reply??null;paceNotice=quickSnapshot?.paceNotice??'';vnResumeView=quickSnapshot?.view??null;quickReturn=null;quickSnapshot=null;quickTool='';if(!utilityScreens.has(screen))readingSnapshots.delete(screen);render();(app.querySelector('.vn-panel')??app.querySelector('h1'))?.focus({preventScroll:true});}
 
 function render(){
+ if(['combatSetup','combat'].includes(screen)){document.body.dataset.utilityScreen='';app.innerHTML=screen==='combat'&&state.combatTrial?combatPlayPage(state,combatActor,combatMore,combatError):combatSetupPage(state);return;}
  document.body.dataset.utilityScreen=['phone','quickMenu','menu'].includes(screen)?screen:'';
  const evening=state.phase==='evening',day=days[state.day],routes=availableRoutes(state);
  if(screen==='campus'){const scene=campusScene(state);app.innerHTML=`<section class="explore"><div class="top"><span class="badge">${timeLabel()}</span><nav>${btn('휴대폰','phone')}${btn('메뉴','go','menu')}</nav></div>${portrait(0)}<div class="prompt scene-prompt"><p>${narrative(scene.text)}</p>${scene.choices.map(c=>btn(narrative(c.label),c.action,c.value)).join('')}</div></section>`;}
@@ -370,10 +374,24 @@ function render(){
  if(modelPending){const panel=app.querySelector('.vn-panel');if(panel)panel.innerHTML=`<p role="status" aria-live="polite">잠시 말을 고르고 있다…</p><div class="vn-controls">${btn('기다리지 않고 이어가기','skipModel')}</div>`;}
 }
 app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b){if(modelPending)return;if(e.target.closest('.vn-copy')&&vnModel&&!vnView.choosing){vnView=advanceNovel(vnView,vnModel.beats.length);drawNovelBeat();}return;}let a=b.dataset.action,v=b.dataset.value;
+ if(a==='go'&&v==='combatSetup'){screen='combatSetup';combatError='';render();window.scrollTo(0,0);return;}
  if(a==='go'&&utilityScreens.has(v)&&v!==screen&&['quickMenu','phone'].includes(screen)&&!b.dataset.navigationBack){utilityOrigins.set(v,screen);}
  if(a==='hintDismiss'){dismissOpportunity(state);render();return;}
  if(a==='hintExplore'){const hint=currentOpportunity(state);if(!hint){render();return;}travelQuery=locations[hint.place]??'';travelRegion=regionForPlace(hint.place);dismissOpportunity(state);rememberReading();screen='travel';render();return;}
  if(a==='mapRegion'){const target=Object.values(mapRegions[travelRegion].links).includes(v)?v:null;if(target){travelRegion=target;travelQuery='';travelFilter='all';render();app.querySelector('[data-action=mapCurrent]')?.focus({preventScroll:true});}return;}
+ if(a.startsWith('combat')){
+  try{combatError='';
+   if(a==='combatSetup'){screen='combatSetup';}
+   if(a==='combatStart'){state=startCombat(state,app.querySelector('#combat-companion')?.value??'student');combatActor='taei';combatMore=false;screen='combat';}
+   if(a==='combatResume')screen='combat';
+   if(a==='combatActor'&&['taei','ally'].includes(v)){combatActor=v;combatMore=false;}
+   if(a==='combatTools')combatMore=!combatMore;
+   if(a==='combatPlan')state=planCombat(state,combatActor,v);
+   if(a==='combatExecute'){state=executeCombat(state);combatMore=false;}
+   if(a==='combatNext'){state=nextCombatTurn(state);combatActor='taei';combatMore=false;}
+   if(a==='combatExit'){screen='quickMenu';quickReturn='campus';quickSnapshot=null;}
+  }catch(error){combatError=error.message;}render();return;
+ }
  if(a==='mapCurrent'){travelRegion=regionForPlace(state.location);travelQuery='';travelFilter='all';render();return;}
  if(a==='travelFilter'){travelFilter=v;applyTravelFilter();return;}
  if(a.startsWith('mini')&&a!=='miniContinue'){handleMiniAction(a);return;}
@@ -573,14 +591,14 @@ render();
 
 // Background residents continue writing while the game is open. This does not advance Tae-i's clock.
 setInterval(()=>{
- if(document.hidden||['menu','quickMenu','reset','characterArt','iseoDialogue','enrollment','opening'].includes(screen))return;
+ if(document.hidden||['combat','combatSetup','menu','quickMenu','reset','characterArt','iseoDialogue','enrollment','opening'].includes(screen))return;
  state=advanceCommunity(state,{ambient:true});
  const live=app.querySelector('.community-live');if(!live)return;
  const count=screen==='community'?visibleCommunityPosts(state).filter(p=>!feedIds?.includes(p.id)&&(communityFilter==='all'||p.kind===communityFilter)).length:Math.max(0,(visibleCommunityPosts(state).find(p=>p.id===selectedPost)?.comments.length??0)-visibleCommentCount);
  live.innerHTML=count?btn(screen==='community'?`새 글 ${count}개 도착 · 확인하기`:`새 댓글 ${count}개 · 확인하기`,'applyCommunityUpdates'):'';
 },15000);
 
-app.addEventListener('keydown',e=>{if(modelPending||e.code!=='Space'||e.target.closest('button,input,textarea,select')||!vnModel||vnView.choosing)return;e.preventDefault();vnView=advanceNovel(vnView,vnModel.beats.length);drawNovelBeat();});
+app.addEventListener('keydown',e=>{if(['combat','combatSetup'].includes(screen)||modelPending||e.code!=='Space'||e.target.closest('button,input,textarea,select')||!vnModel||vnView.choosing)return;e.preventDefault();vnView=advanceNovel(vnView,vnModel.beats.length);drawNovelBeat();});
 
 
 function activeMiniGame(){return screen==='communityActivity'?currentCommunityActivity(state)?.mini:null;}
