@@ -1,3 +1,4 @@
+import {conversationCast,speakingActor,castPositions} from './dialogue-cast.js';
 import {mapEventsAt} from './map-events.js';
 import {placeBackground} from './place-backgrounds.js';
 import {neighborhoodEventsAt,beginNeighborhoodEvent,neighborhoodEventView,resolveNeighborhoodEvent} from './neighborhood-events.js';
@@ -89,6 +90,9 @@ function sceneVisual(){
  const aftermath=screen==='supplyAftermath'?activeSupplyAftermath(state):null;
  const person=aftermath?aftermath.person:lunch?lunch.person:session?.supplyGroup?(supplyPeople(state).includes(session.supplySpeaker)?session.supplySpeaker:supplyPeople(state)[0]??'taei'):session?.postId==='volunteer-recruit'?'yeogyeong':['dialogue','warningShare'].includes(screen)?speaker:screen==='group'?groupLines[groupIndex].person:screen==='encounter'&&encounter?.person?encounter.person:'taei';
  const column=person==='taei'?0:people[person]?.column??0;
+ const cast=conversationCast({scene:screen,speaker,contextPerson:person,groupParticipants:groupLines.map(line=>line.person)});
+ const positions=castPositions(cast.length);
+ const castArt=cast.length?`<div class="dialogue-cast" data-count="${cast.length}" aria-label="이 대화에 함께 있는 인물">${cast.map((id,i)=>`<figure class="cast-member" data-cast-id="${id}" data-speaking="false" style="--cast-x:${positions[i]}%">${portrait(id==='taei'?0:people[id].column)}<figcaption><span>${esc(id==='taei'?'김태이':nameOf(id))}</span><small class="cast-speaking-label">말하는 중</small></figcaption></figure>`).join('')}</div>`:'';
  const cafeCinematic=screen==='cafeOrder';
  const background=placeBackground(state.location);
  const atHome=screen==='dayEnd'&&state.freeDay?.home;
@@ -96,7 +100,7 @@ function sceneVisual(){
  const caption=aftermath?'이어지는 시간':lunch?'비 오는 점심시간':session?communityActivityDefinitions[session.postId].title+' · '+Math.min(session.step+1,3)+'/3':{classLesson:'수업',encounter:'우연한 만남',warningScene:'눈앞의 상황',detail:'활동 준비',result:'활동을 마친 뒤',buildingDirectory:'건물 안에서',dayEnd:'하루의 끝'}[screen]??'캠퍼스의 일상';
  const sceneLocation=atHome?'자취방':session?locations[session.venue.location]:screen==='campus'?'캠퍼스':locations[state.location]??'캠퍼스';
  const detail=session?session.venue.label.replace(sceneLocation,'').replace(/^\s*·?\s*/,''):area?((area.floor==='층 미확정'?'':area.floor+' · ')+area.name):'';
- return `<aside data-district="${surroundingPlaces[state.location]?.region??''}" class="scene-visual ${cafeCinematic?'cafe-cinematic':''}" aria-label="현재 장면">${background&&!atHome?`<div class="place-backdrop" data-background="${state.location}" data-set="${background.set}" style="--bg-x:${background.x}%;--bg-y:${background.y}%;--bg-rows:${background.rows}" role="img" aria-label="${esc(locations[state.location])} 배경 일러스트"></div>`:''}<div class="scene-context"><span class="scene-kicker">${caption}</span><p class="scene-location">${esc(sceneLocation)}${detail?`<small>${esc(detail)}</small>`:''}</p><p class="scene-time"><span>${state.day}일차 · ${clockLabel(state)}</span><span class="scene-weather">${weatherNow(state).icon} ${weatherNow(state).name} · ${weatherNow(state).temperature}°C</span></p></div>${cafeCinematic?'<div class="cafe-cinematic-art" role="img" aria-label="봄빛이 드는 카페 카운터에서 주문하는 김태이와 직원"></div>':!session&&campusBuildings[state.location]?.outdoor&&!background?outdoorScene(state.location):session&&(session.postId==='music-recruit'||communityActivityDefinitions[session.postId]?.physical)?activityScene(session):portrait(column)}<p class="scene-person">${esc(person==='taei'?'김태이':nameOf(person))}</p></aside>`;
+ return `<aside data-district="${surroundingPlaces[state.location]?.region??''}" class="scene-visual ${cast.length?'has-dialogue-cast':''} ${cafeCinematic?'cafe-cinematic':''}" aria-label="현재 장면">${background&&!atHome?`<div class="place-backdrop" data-background="${state.location}" data-set="${background.set}" style="--bg-x:${background.x}%;--bg-y:${background.y}%;--bg-rows:${background.rows}" role="img" aria-label="${esc(locations[state.location])} 배경 일러스트"></div>`:''}<div class="scene-context"><span class="scene-kicker">${caption}</span><p class="scene-location">${esc(sceneLocation)}${detail?`<small>${esc(detail)}</small>`:''}</p><p class="scene-time"><span>${state.day}일차 · ${clockLabel(state)}</span><span class="scene-weather">${weatherNow(state).icon} ${weatherNow(state).name} · ${weatherNow(state).temperature}°C</span></p></div>${castArt|| (cafeCinematic?'<div class="cafe-cinematic-art" role="img" aria-label="봄빛이 드는 카페 카운터에서 주문하는 김태이와 직원"></div>':!session&&campusBuildings[state.location]?.outdoor&&!background?outdoorScene(state.location):session&&(session.postId==='music-recruit'||communityActivityDefinitions[session.postId]?.physical)?activityScene(session):portrait(column))}<p class="scene-person">${esc(person==='taei'?'김태이':nameOf(person))}</p></aside>`;
 }
 function page(title,body,back='campus',backAction='go'){
  if(['quickMenu','menu'].includes(screen)){if(quickReturn){back='';backAction='closeQuick';}body=menuTabs()+body;}
@@ -134,17 +138,17 @@ function plainNode(node){const copy=node.cloneNode(true);if(copy.classList.conta
 function novelPresentation(){
  const raw=app.querySelector('.story-page,.explore,.conversation');
  if(!raw||utilityScreens.has(screen)){vnModel=null;return;}
- const beats=[],push=(text,kind='narrator',who='')=>{for(const part of splitNovelText(text))beats.push({text:part,kind,who});};
+ const beats=[],push=(text,kind='narrator',who='',actor='')=>{for(const part of splitNovelText(text))beats.push({text:part,kind,who,actor});};
  let primary=[],aux=[],plans=[];
  const nodeButtons=nodes=>Array.from(nodes).map(n=>n.cloneNode(true));
  if(screen==='campus'){
   push(raw.querySelector('.prompt>p')?.textContent??'');primary=nodeButtons(raw.querySelectorAll('.prompt button'));
  }else if(screen==='dialogue'||screen==='group'){
   const panel=raw.querySelector('.dialogue-panel');
-  if(panel.querySelector('.player-line'))push(plainNode(panel.querySelector('.player-line')),'player','김태이');
+  if(panel.querySelector('.player-line'))push(plainNode(panel.querySelector('.player-line')),'player','김태이','taei');
   const stage=panel.querySelector(':scope>.muted');if(stage)push(plainNode(stage));
-  const heard=panel.querySelector('.heard-report');if(heard)push(plainNode(heard),'speech',nameOf(speaker));
-  const quote=panel.querySelector('blockquote');if(quote)push(quote.textContent,'speech',screen==='group'?nameOf(groupLines[groupIndex].person):nameOf(speaker));
+  const heard=panel.querySelector('.heard-report');if(heard)push(plainNode(heard),'speech',nameOf(speaker),speaker);
+  const quote=panel.querySelector('blockquote');if(quote)push(quote.textContent,'speech',screen==='group'?nameOf(groupLines[groupIndex].person):nameOf(speaker),screen==='group'?groupLines[groupIndex].person:speaker);
   const follow=panel.querySelector('.inner-line');if(follow)push(plainNode(follow));
   primary=nodeButtons(panel.querySelectorAll('.dialogue-options button'));aux=nodeButtons(panel.querySelectorAll(':scope>.actions button'));
  }else{
@@ -156,7 +160,8 @@ function novelPresentation(){
     if(screen==='classLesson'&&node.matches('.lead'))continue;
     if(screen==='detail'&&node.matches('.muted'))continue;
     if(node.matches('.scene-caption'))continue;
-    push(plainNode(node),node.dataset.voice?'speech':node.matches('.notice')?'warning':'narrator',node.dataset.voice??'');
+    const voice=node.dataset.voice??'',actor=voice==='김태이'?'taei':Object.keys(people).find(id=>nameOf(id)===voice)??'';
+    push(plainNode(node),voice?'speech':node.matches('.notice')?'warning':'narrator',voice,actor);
    }
   }
   primary=nodeButtons(reading.querySelectorAll('button'));
@@ -188,15 +193,19 @@ function novelPresentation(){
  else if(vnView.key!==key)vnView=vnCursors.get(key)??{key,beat:0,choosing:false,page:0,branch:'main'};
  vnModel={beats,primary,aux,plans,title:raw.querySelector('h1')?.textContent??(screen==='dialogue'?nameOf(speaker):'캠퍼스')};
  const notices=Array.from(raw.querySelectorAll('.discovery-notice p')).map(n=>n.textContent.trim());
- app.innerHTML=`<section class="vn-stage" data-vn-screen="${screen}">${sceneVisual()}<nav class="vn-toolbar" aria-label="상단 메뉴">${btn(utilityIcon('map')+'<span>지도·이동</span>','go','travel')}${btn(utilityIcon('phone')+'<span>휴대폰</span>','phone')}${btn(utilityIcon('journal')+'<span>메뉴'+(state.appointments.some(a=>a.status==='offered')?' · 새 제안':'')+'</span>','openQuick')}</nav>${notices.length?`<div class="vn-acquisition"><span>${esc(notices[0])}${notices.length>1?' 외 '+(notices.length-1)+'개':''}</span>${btn('정보 보기','go','discoveries')}</div>`:''}<article class="vn-panel" aria-label="이야기와 선택" tabindex="0"><div class="vn-copy"></div><div class="vn-controls"></div></article></section>`;
+ app.innerHTML=`<section class="vn-stage ${['dialogue','group','warningShare','rainLunch','supplyAftermath'].includes(screen)?'dialogue-stage':''}" data-vn-screen="${screen}">${sceneVisual()}<nav class="vn-toolbar" aria-label="상단 메뉴">${btn(utilityIcon('map')+'<span>지도·이동</span>','go','travel')}${btn(utilityIcon('phone')+'<span>휴대폰</span>','phone')}${btn(utilityIcon('journal')+'<span>메뉴'+(state.appointments.some(a=>a.status==='offered')?' · 새 제안':'')+'</span>','openQuick')}</nav>${notices.length?`<div class="vn-acquisition"><span>${esc(notices[0])}${notices.length>1?' 외 '+(notices.length-1)+'개':''}</span>${btn('정보 보기','go','discoveries')}</div>`:''}<article class="vn-panel" aria-label="이야기와 선택" tabindex="0"><div class="vn-copy"></div><div class="vn-controls"></div></article></section>`;
  drawNovelBeat();
 }
 function drawNovelBeat(){
  if(!vnModel)return;
  vnCursors.set(vnView.key,{...vnView});
  const current=vnModel.beats[Math.min(vnView.beat,vnModel.beats.length-1)],copy=app.querySelector('.vn-copy'),controls=app.querySelector('.vn-controls');if(!copy||!controls)return;
+ const participants=[...app.querySelectorAll('.cast-member')].map(n=>n.dataset.castId);
+ const activeActor=speakingActor(current,participants,participants.find(id=>id!=='taei')??speaker);
+ const castLayer=app.querySelector('.dialogue-cast');if(castLayer)castLayer.dataset.activeActor=activeActor;
+ for(const member of app.querySelectorAll('.cast-member')){const active=member.dataset.castId===activeActor;member.dataset.speaking=String(active);member.classList.toggle('cast-listening',!!activeActor&&!active);}
  for(const node of app.querySelectorAll('.portrait[data-actor]')){
-  const acting=characterActing(state,node.dataset.actor,{scene:screen,text:current.text});node.classList.toggle('expression-portrait',acting.row!==null);node.style.setProperty('--expression',acting.row??0);node.dataset.expression=acting.row??'neutral';node.setAttribute('aria-label',(node.dataset.actor==='taei'?'김태이':nameOf(node.dataset.actor))+' · '+acting.name);
+  const acting=characterActing(state,node.dataset.actor,{scene:screen,text:participants.length&&node.dataset.actor!==activeActor?'':current.text});node.classList.toggle('expression-portrait',acting.row!==null);node.style.setProperty('--expression',acting.row??0);node.dataset.expression=acting.row??'neutral';node.setAttribute('aria-label',(node.dataset.actor==='taei'?'김태이':nameOf(node.dataset.actor))+' · '+acting.name);
  }
  const label=current.who||(current.kind==='outcome'?'그 뒤의 이야기':current.kind==='warning'?'잠깐, 확인할 일':'이야기');
  copy.innerHTML=`<div class="vn-reading-meta"><p class="vn-speaker">${esc(label)}</p><span class="vn-reading-progress" aria-label="문장 진행 ${vnView.beat+1}/${vnModel.beats.length}">${vnView.beat+1} / ${vnModel.beats.length}</span></div><p class="vn-line ${current.kind==='player'?'vn-player':''}">${narrative(current.text)}</p>`;
