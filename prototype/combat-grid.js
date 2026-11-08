@@ -1,3 +1,4 @@
+import {openCombatPackLoot} from './survival-pack.js';
 import {createCombatExtras,settleCombatRewards,combatWaterCount,combatTeamHurt} from './combat-side-missions.js';
 import {combatMissions,combatMissionInfo} from './combat-missions.js';
 import {combatCast,combatName,planCombat,executeCombat,nextCombatTurn} from './combat.js';
@@ -58,14 +59,16 @@ export function gridAct(state,key,action,target){
  }else if(action==='drink'){
   if(combatWaterCount(b)<1)throw new Error('남은 생수가 없어요.');if(b.items.water>0)b.items.water--;else b.stash.items.water--;a.ap--;a.stamina=tacticalClamp(a.stamina+18);a.thirst=tacticalClamp(a.thirst-25);b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name} · 생수 사용`);
  }else if(action==='loot'){
-  const cache=b.supplyCache;if(!cache||cache.recovered||tacticalDistance(a,cache)>1)throw new Error('아직 회수하지 않은 물자 상자 옆으로 이동하세요.');a.ap--;cache.recovered=true;b.frames.push({kind:'guard',unit:key});tacticalRecord(b,'물자를 챙겼다. 주 임무를 클리어하면 붕대 2개와 생수 1병을 확보한다.');
+  const cache=b.supplyCache;if(!cache||cache.recovered||tacticalDistance(a,cache)>1)throw new Error('아직 회수하지 않은 물자 상자 옆으로 이동하세요.');a.ap--;openCombatPackLoot(b);cache.recovered=true;b.frames.push({kind:'guard',unit:key});tacticalRecord(b,b.survivalPack?'상자를 열었다. 원정 가방에서 챙길 물건을 고르세요. 성공 보너스는 임무를 마친 뒤 따로 확인해요.':'물자를 챙겼다. 주 임무를 클리어하면 붕대 2개와 생수 1병을 확보한다.');
+ }else if(action==='eat'||action==='firstaid'){
+  const id=target?.item,allowed=action==='eat'?['food','canned','energybar']:['firstaid'];if(!b.survivalPack||!allowed.includes(id)||!(b.stash.items[id]>0))throw new Error('가방에서 사용할 물건을 확인하세요.');if(action==='firstaid'&&a.wounds<1)throw new Error('치료할 찰과상이 없어요.');b.stash.items[id]--;a.ap--;if(action==='eat'){a.stamina=tacticalClamp(a.stamina+(id==='energybar'?12:16));a.hunger=tacticalClamp(a.hunger-(id==='energybar'?20:id==='canned'?40:30));}else{a.wounds--;a.fear=tacticalClamp(a.fear-10);}b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name} · 가방의 ${action==='eat'?'음식':'구급 파우치'} 사용`);
  }else if(action==='bandage'){
   if((b.stash?.items?.bandage??0)<1||a.wounds<1)throw new Error('보관 중인 붕대와 치료할 찰과상이 필요해요.');b.stash.items.bandage--;a.ap--;a.wounds--;a.fear=tacticalClamp(a.fear-8);b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name} · 붕대로 찰과상을 치료했다. 이미 발생한 부상 기록은 남는다.`);
  }else if(action==='cover'){
   if(b.items.chair<1||a.stamina<5||tacticalDistance(a,target??{})!==1||!tacticalWalkable(b,target.x,target.y,key))throw new Error('인접한 빈 칸에 의자를 놓을 수 있어요.');b.items.chair--;a.ap--;a.stamina-=5;b.noise++;b.cover.push({x:target.x,y:target.y,turns:2});b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name} · 의자로 길 막기`);
  }else if(action==='lure'){
   if(!tacticalLureTargets(s,key).some(p=>p.x===target?.x&&p.y===target?.y))throw new Error('2~5칸 거리의 빈 바닥을 선택하세요. 유인용 빈 병 1개와 스태미나 4가 필요해요.');
-  a.ap--;a.stamina-=4;b.items.lure--;b.noise+=2;b.lure={x:target.x,y:target.y,turns:2};b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name} · 빈 병을 던져 2회 적 턴 동안 소리로 유인한다. 사람과 맞붙은 적은 유인을 무시한다.`);
+  a.ap--;a.stamina-=4;if(b.items.lure>0)b.items.lure--;else b.stash.items.bottle--;b.noise+=2;b.lure={x:target.x,y:target.y,turns:2};b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name} · 빈 병을 던져 2회 적 턴 동안 소리로 유인한다. 사람과 맞붙은 적은 유인을 무시한다.`);
  }else if(action==='rescue'){
   const ally=b.actors.ally;if(key!=='taei'||!ally.down||ally.escaped||b.carrying||tacticalDistance(a,ally)>1||a.stamina<10)throw new Error('쓰러진 동료 옆에서 태이가 부축할 수 있어요.');a.ap--;a.stamina-=10;b.carrying=true;ally.x=a.x;ally.y=a.y;b.frames.push({kind:'guard',unit:key});tacticalRecord(b,'동료를 부축했다. 함께 이동하며 스태미나를 더 사용한다.');
  }else throw new Error('알 수 없는 전투 행동입니다.');
@@ -101,7 +104,7 @@ export function executeGridCombat(state){return executeCombat(state);}
 export function nextGridTurn(state){return nextCombatTurn(state);}
 
 export function tacticalLureTargets(state,key){
- const b=state.combatTrial,a=b?.actors[key];if(b?.version!==2||b.status!=='active'||!a||a.ap<1||a.down||a.escaped||a.stamina<4||!(b.items.lure>0)||key==='ally'&&b.carrying)return [];
+ const b=state.combatTrial,a=b?.actors[key];if(b?.version!==2||b.status!=='active'||!a||a.ap<1||a.down||a.escaped||a.stamina<4||!((b.items.lure??0)+(b.survivalPack?b.stash?.items?.bottle??0:0)>0)||key==='ally'&&b.carrying)return [];
  const out=[];for(let y=1;y<7;y++)for(let x=1;x<12;x++){const d=tacticalDistance(a,{x,y});if(d>=2&&d<=5&&tacticalWalkable(b,x,y,key))out.push({x,y});}return out;
 }
 export function tacticalEnemyIntents(state){

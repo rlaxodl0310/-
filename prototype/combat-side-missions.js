@@ -1,3 +1,4 @@
+import {queueCombatPackRewards,survivalPackItems} from './survival-pack.js';
 import {combatMissionWon} from './combat-missions.js';
 export const combatLootItems={water:{name:'생수',use:'전투 중 스태미나·목마름 회복'},bandage:{name:'붕대',use:'전투 중 찰과상 1회 치료'},parts:{name:'정비 부품',use:'보관용 · 제작 기능은 추후 연결'}};
 export function createCombatExtras(previous,mission){
@@ -16,10 +17,10 @@ export function settleCombatRewards(b){
  const success=combatMissionWon(b),objectives=combatSideMissions(b).map(q=>({id:q.id,label:q.label,status:q.status,reward:q.reward}));
  if(!success){b.rewardResult={settled:true,success:false,objectives,items:[]};return;}
  const key=`mission:${b.runId}`;if(b.stash.claimed.includes(key))return;
- const items=[{id:'parts',quantity:1}];for(const q of objectives)if(q.status==='complete')items.push(...q.reward);
+ const items=[{id:'parts',quantity:1}];if(b.survivalPack&&b.survivalContext?.kind==='supply')items.push({id:'food',quantity:3},{id:'water',quantity:1});for(const q of objectives)if(q.status==='complete')items.push(...q.reward);
  const totals={};for(const item of items)totals[item.id]=(totals[item.id]??0)+item.quantity;
- const granted=Object.entries(totals).map(([id,quantity])=>({id,quantity}));for(const item of granted)b.stash.items[item.id]=(b.stash.items[item.id]??0)+item.quantity;b.stash.claimed.push(key);
+ const granted=Object.entries(totals).map(([id,quantity])=>({id,quantity}));if(!queueCombatPackRewards(b,granted))for(const item of granted)b.stash.items[item.id]=(b.stash.items[item.id]??0)+item.quantity;b.stash.claimed.push(key);
  b.rewardResult={settled:true,success:true,objectives,items:granted};
 }
-export function combatLootLabel(items){return items.map(item=>`${combatLootItems[item.id]?.name??item.id} ×${item.quantity}`).join(' · ');}
+export function combatLootLabel(items){return items.map(item=>`${combatLootItems[item.id]?.name??survivalPackItems[item.id]?.name??item.id} ×${item.quantity}`).join(' · ');}
 export function combatWaterCount(b){return (b?.items?.water??0)+(b?.stash?.items?.water??0);}

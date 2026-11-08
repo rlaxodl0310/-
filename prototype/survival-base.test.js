@@ -1,3 +1,4 @@
+import {combatPackAction,storeAllSurvivalPack} from './survival-pack.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {newGame,save,restore} from './simulation.js';
@@ -6,7 +7,7 @@ import {settleCombatRewards} from './combat-side-missions.js';
 import {startSurvival,survivalAction,scoutSurvivalSite,claimSurvivalBase,buildSurvivalFacility,assignSurvivalJob,finishSurvivalDay,launchSurvivalSortie,returnSurvivalSortie,survivalDefense,survivalNightRisk} from './survival-base.js';
 import {survivalPage} from './survival-ui.js';
 function campaign(){return startSurvival(newGame(),'student',{seed:6});}
-function completedSortie(s,kind,site){s=launchSurvivalSortie(s,kind,site);s.combatTrial.status=kind==='escape'?'escaped':'victory';settleCombatRewards(s.combatTrial);return returnSurvivalSortie(s);}
+function completedSortie(s,kind,site){s=launchSurvivalSortie(s,kind,site);s.combatTrial.status=kind==='escape'?'escaped':'victory';settleCombatRewards(s.combatTrial);if(s.combatTrial.survivalPack?.pending){for(const [id,q] of Object.entries(s.combatTrial.survivalPack.pending.items))for(let i=0;i<q;i++)s=combatPackAction(s,'take',id);}s=returnSurvivalSortie(s);return s.survivalRun.kit?storeAllSurvivalPack(s):s;}
 function candidates(){let s=campaign();s=completedSortie(s,'escape');s=finishSurvivalDay(s);s=completedSortie(s,'escape');return finishSurvivalDay(s);}
 function home(site='arts401'){let s=candidates();s=scoutSurvivalSite(s,site);s=completedSortie(s,'secure',site);return claimSurvivalBase(s,site);}
 function school(s){const c=structuredClone(s);delete c.survivalRun;return c;}
@@ -17,7 +18,7 @@ test('two escaped sorties and day three unlock scouting; claims require real sec
  let s=campaign();assert.throws(()=>scoutSurvivalSite(s,'arts401'));assert.throws(()=>finishSurvivalDay(s));s=candidates();assert.equal(s.survivalRun.day,3);assert.equal(s.survivalRun.stage,'settlement');s=scoutSurvivalSite(s,'arts401');assert.throws(()=>claimSurvivalBase(s,'arts401'));s=completedSortie(s,'secure','arts401');s=claimSurvivalBase(s,'arts401');assert.equal(s.survivalRun.stage,'base');assert.equal(s.survivalRun.base.site,'arts401');assert.equal(s.survivalRun.actions,0);
 });
 test('sortie reserves rather than duplicates resources and restores the previous demo battle',()=>{
- let s=startGridCombat(newGame(),'student');const old=structuredClone(s.combatTrial);s=startSurvival(s);const water=s.survivalRun.resources.water;s=launchSurvivalSortie(s,'escape');assert.equal(s.survivalRun.resources.water,0);assert.equal(s.combatTrial.stash.items.water,water);assert.equal(s.combatTrial.items.water,0);assert.throws(()=>survivalAction(s,'hide'));assert.throws(()=>finishSurvivalDay(s));assert.throws(()=>startGridCombat(s));assert.throws(()=>returnSurvivalSortie(s));s.combatTrial.stash.items.water--;s=returnSurvivalSortie(s,{abandon:true});assert.equal(s.survivalRun.resources.water,water-1);assert.deepEqual(s.combatTrial,old);assert.throws(()=>returnSurvivalSortie(s));
+ let s=startGridCombat(newGame(),'student');const old=structuredClone(s.combatTrial);s=startSurvival(s);const water=s.survivalRun.resources.water+s.survivalRun.kit.items.water,stored=s.survivalRun.resources.water,carried=s.survivalRun.kit.items.water;s=launchSurvivalSortie(s,'escape');assert.equal(s.survivalRun.resources.water,stored);assert.equal(s.combatTrial.stash.items.water,carried);assert.deepEqual(s.survivalRun.kit.items,{});assert.equal(s.combatTrial.items.water,0);assert.throws(()=>survivalAction(s,'hide'));assert.throws(()=>finishSurvivalDay(s));assert.throws(()=>startGridCombat(s));assert.throws(()=>returnSurvivalSortie(s));s.combatTrial.stash.items.water--;s=returnSurvivalSortie(s,{abandon:true});assert.equal(s.survivalRun.resources.water+s.survivalRun.kit.items.water,water-1);assert.deepEqual(s.combatTrial,old);assert.throws(()=>returnSurvivalSortie(s));
 });
 test('success carries combat rewards once; failed missions do not secure sites or grant food',()=>{
  let s=candidates();s=scoutSurvivalSite(s,'library');s=launchSurvivalSortie(s,'secure','library');s.combatTrial.status='failed';s=returnSurvivalSortie(s);assert.equal(s.survivalRun.secured.library,undefined);assert.throws(()=>claimSurvivalBase(s,'library'));
@@ -43,7 +44,7 @@ test('active sortie survives save/load, validates its origin and cannot be aband
  let s=launchSurvivalSortie(campaign(),'escape');s=restore(save(s));assert.equal(s.survivalRun.activeSortie.id,s.combatTrial.survivalSortie);const tampered=structuredClone(s);tampered.combatTrial.survivalSortie=99;assert.throws(()=>returnSurvivalSortie(tampered,{abandon:true}));s.combatTrial.status='escaped';settleCombatRewards(s.combatTrial);assert.throws(()=>returnSurvivalSortie(s,{abandon:true}));s=returnSurvivalSortie(s);assert.equal(s.survivalRun.escapes,1);
 });
 test('search is once a day, role/view changes do not advance school time or reroll supply',()=>{
- let s=campaign();const original=school(s);s=survivalAction(s,'search');assert.equal(s.survivalRun.resources.food,8);assert.throws(()=>survivalAction(s,'search'));const before=save(s);for(let i=0;i<3;i++)survivalPage(s,'base');assert.equal(save(s),before);assert.deepEqual(school(s),original);
+ let s=campaign();const original=school(s);s=survivalAction(s,'search');assert.equal(s.survivalRun.resources.food,6);assert.ok(s.survivalRun.kit.pending.items.food>=2);assert.throws(()=>survivalAction(s,'search'));const before=save(s);for(let i=0;i<3;i++)survivalPage(s,'base');assert.equal(save(s),before);assert.deepEqual(school(s),original);
 });
 test('pre-existing campaign wounds do not count as new combat injuries',async()=>{
  const {combatSideMissions}=await import('./combat-side-missions.js');const {gridAct}=await import('./combat-grid.js');let s=campaign();s.survivalRun.members[0].injury=1;s=launchSurvivalSortie(s,'escape');assert.equal(s.combatTrial.actors.taei.wounds,1);assert.equal(combatSideMissions(s.combatTrial).find(q=>q.id==='unhurt').condition,true);s=gridAct(s,'taei','bandage');assert.equal(s.combatTrial.optional.teamHurt,false);assert.equal(combatSideMissions(s.combatTrial).find(q=>q.id==='unhurt').condition,true);
