@@ -28,3 +28,16 @@ export function interiorBackground(place,area){
  if(index===null)return null;
  const tile=index%9;return {set:index<9?'specialist':'common',index,name:interiorBackgroundNames[index],rows:3,columns:3,x:tile%3*50,y:Math.floor(tile/3)*50};
 }
+
+export function commerceBackground(place,area){
+ const name=area?.name??'';let index=null;
+ if(['market','neighborhoodMart'].includes(place))index=0;
+ else if(place==='restaurant')index=3;
+ else if(place==='cafe')index=4;
+ else if(place==='pub')index=5;
+ else if(/편의점|매점/.test(name))index=place==='cafeteria'?1:0;
+ else if(/식당/.test(name))index=2;
+ else if(/카페/.test(name))index=4;
+ if(index===null)return null;
+ return {set:'commerce',index,name:['편의점','교내 매점','학식당','대학가 밥집','카페','대학가 술집'][index],columns:2,rows:3,x:index%2*100,y:Math.floor(index/2)*50};
+}

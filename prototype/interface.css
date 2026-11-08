@@ -222,3 +222,6 @@ body{background:#e6e7df}.utility-page{border-radius:8px;box-shadow:none;border-c
 
 /* Shared room references selected by room function, not just building. */
 .place-backdrop[data-set=specialist]{background-image:url('../docs/assets/academic-interiors-specialist.png')}.place-backdrop[data-set=common]{background-image:url('../docs/assets/academic-interiors-common.png')}
+
+/* Distinct food and retail interiors, shared by scene and shopping menu. */
+.place-backdrop[data-set=commerce],.shop-room-preview{background-image:url('../docs/assets/commerce-interiors.png');background-size:200% 300%;background-position:var(--bg-x) var(--bg-y);background-repeat:no-repeat}.shop-room-preview{width:100%;max-width:640px;aspect-ratio:3/2;margin:0 auto 20px;border-radius:12px;border:1px solid #b8bcae;box-shadow:0 6px 20px #16252920}

@@ -1,0 +1,25 @@
+import http.server,threading
+from playwright.sync_api import sync_playwright
+from vn_browser_helpers import confirm_returning_plan,choose,open_tool
+class Quiet(http.server.SimpleHTTPRequestHandler):
+ def log_message(self,*args):pass
+server=http.server.ThreadingHTTPServer(('127.0.0.1',0),Quiet);threading.Thread(target=server.serve_forever,daemon=True).start()
+try:
+ with sync_playwright() as p:
+  browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium')
+  for path in ['/prototype/','/demo/campus-demo.html']:
+   for width in [390,1440]:
+    page=browser.new_page(viewport={'width':width,'height':900});errors=[];page.on('pageerror',lambda e:errors.append(str(e)));base=f'http://127.0.0.1:{server.server_port}';page.goto(base+path);confirm_returning_plan(page)
+    for place,room,index in [('market',None,0),('cafeteria','store',1),('cafeteria','dining',2),('restaurant',None,3),('cafe',None,4),('pub',None,5),('headquarters','store',0)]:
+     fixture=page.evaluate("async ({base,place,room})=>{const m=await import(base+'/prototype/simulation.js');const s=m.newReturningGame();s.opening={step:3,done:true};s.academics.registrationPending=false;s.location=place;s.buildingArea=room?{place,id:room}:null;return s;}",{'base':base,'place':place,'room':room})
+     page.evaluate("s=>localStorage.setItem('campus.slot.1',JSON.stringify(s))",fixture);page.reload();page.locator('.opening-tools [data-action="openQuick"]').click();page.locator('[data-action="load"][data-value="1"]').click();page.locator('[data-navigation-back="true"]').click()
+     art=page.locator('.place-backdrop');assert art.get_attribute('data-set')=='commerce';assert art.get_attribute('data-interior')==str(index),(place,room);assert art.evaluate("async n=>{let i=new Image();i.src=getComputedStyle(n).backgroundImage.slice(5,-2);await i.decode();return i.naturalWidth>1000;}")
+     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1')
+     if path=='/prototype/' and width==1440 and place in ['market','restaurant']:page.screenshot(path=f'docs/assets/commerce-{place}-preview.png')
+     if place=='market':
+      open_tool(page,'travel');page.locator('[data-action="visit"][data-value="market"]').click();choose(page,'openShop');assert page.locator('.shop-room-preview').get_attribute('data-commerce')=='0';page.locator('[data-action="shopChoose"][data-value="water"]').click();assert page.locator('.shop-room-preview').count()==1;page.locator('[data-action="shopPay"]').click();assert page.locator('.shop-room-preview').count()==1
+      if path=='/prototype/' and width==390:page.screenshot(path='docs/assets/commerce-purchase-preview.png',full_page=True)
+    assert not errors,errors;page.close()
+  browser.close()
+finally:server.shutdown();server.server_close()
+print('Commerce backgrounds passed: 6 shop types and purchase menu, correct atlas loading, source/offline builds, mobile/desktop')
