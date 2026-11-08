@@ -17,6 +17,9 @@ try:
   for path in ['/prototype/','/demo/campus-demo.html']:
    for width,height in [(390,844),(1440,1000)]:
     page=browser.new_page(viewport={'width':width,'height':height},reduced_motion='reduce');page.set_default_timeout(12000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)));base=f'http://127.0.0.1:{server.server_port}';page.goto(base+path);confirm_returning_plan(page);click(page,'openQuick');click(page,'go','survival');assert '초반 이틀' in page.locator('.shelter-intro').inner_text();assert '윤도겸' not in page.locator('#survival-companion').inner_text();click(page,'survivalStart');start=save_slot(page,1)
+    # Fix this regression scenario to an occupied room; randomized empty rooms have separate coverage.
+    start['survivalRun']['exploration']=page.evaluate("async base=>(await import(base+'/prototype/survival-exploration.js')).createSurvivalExploration(6)",base)
+    page.evaluate("s=>localStorage.setItem('campus.slot.1',JSON.stringify(s))",start);load_campaign(page,1)
     for day in [1,2]:
      click(page,'survivalSortie','escape');assert page.locator('.tactical-board').is_visible();mid=save_slot(page,1);assert mid['survivalRun']['resources']['water']==0;assert mid['combatTrial']['items']['water']==0
      click(page,'combatExit');assert page.locator('.shelter-away').is_visible();load_campaign(page,1);assert page.locator('.shelter-away').is_visible();click(page,'survivalResume')

@@ -78,7 +78,7 @@ function tacticalEnemyPath(b,e,target){
 }
 export function endGridTurn(state){
  const original=state.combatTrial;if(original?.version!==2||original.status!=='active')throw new Error('진행 중인 전투가 없습니다.');const s=structuredClone(state),b=s.combatTrial;b.frames=[];b.log=[];
- if(b.noise>=6&&!b.reinforced){const spawn=[[1,3],[1,4],[2,3],[3,3]].find(([x,y])=>tacticalWalkable(b,x,y));if(spawn){b.enemies.push({id:3,x:spawn[0],y:spawn[1],balance:2,stun:0});b.reinforced=true;b.frames.push({kind:'spawn',unit:'enemy-3'});tacticalRecord(b,'소음을 따라 뒤쪽에 적이 나타났다.');}}
+ if(b.noise>=6&&!b.reinforced){const spawn=[[1,3],[1,4],[2,3],[3,3]].find(([x,y])=>tacticalWalkable(b,x,y));if(spawn){const id=Math.max(0,...b.enemies.map(e=>e.id))+1;b.enemies.push({id,x:spawn[0],y:spawn[1],balance:2,stun:0});b.reinforced=true;b.frames.push({kind:'spawn',unit:'enemy-'+id});tacticalRecord(b,'소음을 따라 뒤쪽에 적이 나타났다.');}}
  for(const e of b.enemies){if(e.balance<=0)continue;if(e.stun>0){e.stun--;continue;}
   const people=Object.values(b.actors).filter(a=>!a.escaped&&!a.down);if(b.protection&&!b.protection.down)people.push(b.protection);
   const candidates=people.map(a=>({a,path:tacticalEnemyPath(b,e,a)})).filter(c=>c.path!==null).sort((x,y)=>(y.a===b.protection?1:0)-(x.a===b.protection?1:0)||x.path.length-y.path.length);const choice=candidates[0];if(!choice)continue;

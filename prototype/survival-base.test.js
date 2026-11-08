@@ -5,7 +5,7 @@ import {startGridCombat} from './combat-grid.js';
 import {settleCombatRewards} from './combat-side-missions.js';
 import {startSurvival,survivalAction,scoutSurvivalSite,claimSurvivalBase,buildSurvivalFacility,assignSurvivalJob,finishSurvivalDay,launchSurvivalSortie,returnSurvivalSortie,survivalDefense,survivalNightRisk} from './survival-base.js';
 import {survivalPage} from './survival-ui.js';
-function campaign(){return startSurvival(newGame());}
+function campaign(){return startSurvival(newGame(),'student',{seed:6});}
 function completedSortie(s,kind,site){s=launchSurvivalSortie(s,kind,site);s.combatTrial.status=kind==='escape'?'escaped':'victory';settleCombatRewards(s.combatTrial);return returnSurvivalSortie(s);}
 function candidates(){let s=campaign();s=completedSortie(s,'escape');s=finishSurvivalDay(s);s=completedSortie(s,'escape');return finishSurvivalDay(s);}
 function home(site='arts401'){let s=candidates();s=scoutSurvivalSite(s,site);s=completedSortie(s,'secure',site);return claimSurvivalBase(s,site);}

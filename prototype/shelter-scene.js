@@ -10,7 +10,7 @@ const shelterArtProps={
 export function shelterSceneView(run){
  if(!run?.base)return null;
  const base=run.base,site=survivalSites[base.site];if(!site)return null;
- return {name:site.name,room:shelterArtRooms[base.site]??0,integrity:base.integrity,used:base.facilities.length,capacity:site.slots,props:base.facilities.filter(id=>shelterArtProps[id]).map(id=>({id,...shelterArtProps[id],...survivalFacilities[id]}))};
+ return {name:site.name,room:site.art??shelterArtRooms[base.site]??0,integrity:base.integrity,used:base.facilities.length,capacity:site.slots,props:base.facilities.filter(id=>shelterArtProps[id]).map(id=>({id,...shelterArtProps[id],...survivalFacilities[id]}))};
 }
 export function renderShelterScene(run,selected='',compact=false){
  const view=shelterSceneView(run);if(!view)return '';
