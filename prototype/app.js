@@ -60,7 +60,7 @@ import {people,dialogue,respond,groupDialogue,respondGroup,endTopic,openConversa
 import {newGame,newReturningGame,newAfternoonScenario,nextDay,acceptAppointment,cancelAppointment,save,restore} from './simulation.js';
 import {days,schoolDays,locations,availableRoutes,presentPeople,currentSchedule} from './days.js';
 let state=newReturningGame(),screen='opening',selected=null,note='',returnTo='campus',speaker='seoyeon',reply=null,groupLines=[],groupIndex=0,groupAnswered=false,encounter=null;
-let shelterTab='overview',shelterError='';
+let shelterTab='overview',shelterError='',shelterSelectedFacility='';
 let combatActor='taei',combatMode='move',combatMore=false,combatError='',combatAnimating=false;
 let registrationDraft=registeredCourseIds(state);
 let travelRegion='north',travelQuery='',travelFilter='all',artAngle='front',iseoAudition=newIseoPreview();
@@ -262,7 +262,7 @@ function menuTabs(){return `<nav class="menu-tabs" aria-label="메뉴 탭"><butt
 function resumeQuick(){if(!quickReturn){screen='campus';note='';reply=null;render();return;}screen=quickReturn;note=quickSnapshot?.note??'';reply=quickSnapshot?.reply??null;paceNotice=quickSnapshot?.paceNotice??'';vnResumeView=quickSnapshot?.view??null;quickReturn=null;quickSnapshot=null;quickTool='';if(!utilityScreens.has(screen))readingSnapshots.delete(screen);render();(app.querySelector('.vn-panel')??app.querySelector('h1'))?.focus({preventScroll:true});}
 
 function render(){
- if(screen==='survival'){document.body.dataset.utilityScreen='';app.innerHTML=survivalPage(state,shelterTab,shelterError);return;}
+ if(screen==='survival'){document.body.dataset.utilityScreen='';app.innerHTML=survivalPage(state,shelterTab,shelterError,shelterSelectedFacility);return;}
  if(['combatSetup','combat'].includes(screen)){const oldView=app.querySelector('.tactical-scroll'),oldScroll=oldView?.scrollLeft??0,oldTop=oldView?.scrollTop??null;document.body.dataset.utilityScreen='';app.innerHTML=screen==='combat'&&state.combatTrial?(state.combatTrial.version===2?combatGridPage(state,combatActor,combatMode,combatMore,combatError,combatAnimating):combatPlayPage(state,combatActor,combatMore,combatError)):combatSetupPage(state);const scroller=app.querySelector('.tactical-scroll');if(scroller){scroller.scrollLeft=oldScroll;const unit=app.querySelector(`[data-unit="${combatActor}"]`);scroller.scrollTop=oldTop??(unit?unit.offsetTop-scroller.clientHeight*.6:0);}return;}
  document.body.dataset.utilityScreen=['phone','quickMenu','menu'].includes(screen)?screen:'';
  const evening=state.phase==='evening',day=days[state.day],routes=availableRoutes(state);
@@ -386,11 +386,12 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
   try{shelterError='';
    if(a==='survivalStart')state=startSurvival(state,app.querySelector('#survival-companion')?.value??'student');
    if(a==='survivalRestart'){state=restartSurvival(state);shelterTab='overview';}
-   if(a==='survivalTab')shelterTab=v;
+   if(a==='survivalTab'){shelterTab=v;shelterSelectedFacility='';}
+   if(a==='survivalInspect')shelterSelectedFacility=v;
    if(a==='survivalAction')state=survivalAction(state,v);
    if(a==='survivalScout')state=scoutSurvivalSite(state,v);
    if(a==='survivalClaim')state=claimSurvivalBase(state,v);
-   if(a==='survivalBuild')state=buildSurvivalFacility(state,v);
+   if(a==='survivalBuild'){state=buildSurvivalFacility(state,v);shelterSelectedFacility=v;}
    if(a==='survivalAssign')state=assignSurvivalJob(state,v,app.querySelector('#survival-role-'+v)?.value??'rest');
    if(a==='survivalNextDay')state=finishSurvivalDay(state);
    if(a==='survivalSortie'||a==='survivalSecure'){state=launchSurvivalSortie(state,a==='survivalSecure'?'secure':v,a==='survivalSecure'?v:undefined);combatActor='taei';combatMode='move';combatError='';combatMore=false;screen='combat';render();return;}
