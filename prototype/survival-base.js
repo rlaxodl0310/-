@@ -1,3 +1,4 @@
+import {scheduleCampIncident,finishCampStories} from './camp-incidents.js';
 import {contact,displayName} from './identity.js';
 import {startGridCombat} from './combat-grid.js';
 import {combatMissionWon} from './combat-missions.js';
@@ -16,11 +17,11 @@ export const survivalJobs={rest:'휴식',watch:'감시',care:'치료',repair:'�
 const survivalClamp=n=>Math.max(0,Math.min(100,Math.round(n)));
 export function survivalCompanions(state){return ['student',...['yeogyeong','seoyeon','soyul','iseo','dogyeom'].filter(id=>contact(state,id).introduced)];}
 export function survivalMemberName(state,member){return member.label??(member.character==='student'?'함께 탈출한 학생':displayName(state,member.character));}
-export function startSurvival(state,ally='student'){
+export function startSurvival(state,ally='student',{seed=Math.floor(Math.random()*4294967296)}={}){
  if(state.survivalRun)throw new Error('이미 진행 중인 생존 기록이 있어요. 저장된 흐름을 이어가세요.');
  if(!survivalCompanions(state).includes(ally))throw new Error('현재 알고 있는 동료를 골라 주세요.');
  const s=structuredClone(state),person=(key,character)=>({key,character,job:'rest',fatigue:15,stress:20,injury:0});
- s.survivalRun={version:1,status:'active',stage:'flight',day:1,actions:3,escapes:0,threat:24,shortage:0,resources:{food:6,water:6,bandage:2,parts:4},members:[person('taei','taei'),person('ally',ally)],scouted:{},secured:{},base:null,searchDay:0,sortieSequence:0,activeSortie:null,completedSorties:[],log:['사태 첫날. 아직 머무를 곳은 없다. 동료와 흩어지지 않고 오늘을 넘기는 것부터 생각한다.'],history:[]};return s;
+ s.survivalRun={version:1,story:{seed:seed>>>0,last:[],checkedDay:0,current:null,pending:[],resolved:[]},status:'active',stage:'flight',day:1,actions:3,escapes:0,threat:24,shortage:0,resources:{food:6,water:6,bandage:2,parts:4},members:[person('taei','taei'),person('ally',ally)],scouted:{},secured:{},base:null,searchDay:0,sortieSequence:0,activeSortie:null,completedSorties:[],log:['사태 첫날. 아직 머무를 곳은 없다. 동료와 흩어지지 않고 오늘을 넘기는 것부터 생각한다.'],history:[]};return s;
 }
 export function restartSurvival(state){
  const r=state.survivalRun;if(!r||r.status!=='overrun'||r.activeSortie)throw new Error('끝난 생존 기록만 새로 시작할 수 있어요.');const s=structuredClone(state),ally=r.members.find(m=>m.key==='ally')?.character??'student';delete s.survivalRun;return startSurvival(s,ally);
@@ -37,11 +38,11 @@ export function survivalAction(state,action){
  else throw new Error('할 수 없는 생존 행동입니다.');return s;
 }
 export function scoutSurvivalSite(state,id){const r0=survivalReady(state,{actions:1});if(r0.stage!=='settlement'||!survivalSites[id]||r0.scouted[id])throw new Error('지금 정찰할 수 있는 거점 후보가 아니에요.');const s=structuredClone(state),r=s.survivalRun;r.actions--;r.scouted[id]=true;r.threat=survivalClamp(r.threat+3);survivalLog(r,`${survivalSites[id].name}의 출입구와 내부 공간을 확인했다. 아직 안전이 확보된 곳은 아니다.`);return s;}
-export function claimSurvivalBase(state,id){const r0=survivalReady(state,{actions:1}),site=survivalSites[id];if(r0.stage!=='settlement'||!site||!r0.scouted[id]||!r0.secured[id])throw new Error('정찰하고 내부 적을 제압한 후보지만 거점으로 삼을 수 있어요.');if(r0.resources.parts<site.cost)throw new Error('출입문을 정리할 부품이 부족해요.');const s=structuredClone(state),r=s.survivalRun;r.actions--;r.resources.parts-=site.cost;r.stage='base';r.base={site:id,integrity:80,facilities:[]};survivalLog(r,`${site.name}을 거점으로 삼았다. 이제 돌아와 쉴 곳이 생겼다.`);return s;}
+export function claimSurvivalBase(state,id){const r0=survivalReady(state,{actions:1}),site=survivalSites[id];if(r0.stage!=='settlement'||!site||!r0.scouted[id]||!r0.secured[id])throw new Error('정찰하고 내부 적을 제압한 후보지만 거점으로 삼을 수 있어요.');if(r0.resources.parts<site.cost)throw new Error('출입문을 정리할 부품이 부족해요.');const s=structuredClone(state),r=s.survivalRun;r.actions--;r.resources.parts-=site.cost;r.stage='base';r.base={site:id,integrity:80,facilities:[]};scheduleCampIncident(r);survivalLog(r,`${site.name}을 거점으로 삼았다. 이제 돌아와 쉴 곳이 생겼다.`);return s;}
 export function buildSurvivalFacility(state,id){const r0=survivalReady(state,{base:true,actions:1}),f=survivalFacilities[id];if(!f||r0.base.facilities.includes(id))throw new Error('이미 설치했거나 없는 시설이에요.');if(r0.base.facilities.length>=survivalSites[r0.base.site].slots)throw new Error('이 거점의 시설 공간이 모두 찼어요.');if(r0.resources.parts<f.cost)throw new Error('공사에 필요한 부품이 부족해요.');const s=structuredClone(state),r=s.survivalRun;r.resources.parts-=f.cost;r.actions--;r.base.facilities.push(id);survivalLog(r,`${f.name}을 설치했다. ${f.effect}`);return s;}
 export function assignSurvivalJob(state,key,job){const r0=survivalReady(state,{base:true}),member=r0.members.find(m=>m.key===key);if(!member||!survivalJobs[job])throw new Error('인원과 역할을 확인하세요.');if(job!=='rest'&&member.fatigue>=80)throw new Error('너무 지쳐 있어 오늘은 쉬어야 해요.');if(job==='care'&&!r0.base.facilities.includes('clinic')||job==='repair'&&!r0.base.facilities.includes('workshop'))throw new Error('그 역할을 위한 시설이 필요해요.');const s=structuredClone(state);s.survivalRun.members.find(m=>m.key===key).job=job;survivalLog(s.survivalRun,`${survivalMemberName(s,member)} · ${survivalJobs[job]} 역할을 맡았다.`);return s;}
 export function finishSurvivalDay(state){
- const r0=survivalReady(state);if(r0.stage==='flight'&&r0.escapes<Math.min(2,r0.day))throw new Error('오늘의 도주 임무를 먼저 넘겨야 해요.');const s=structuredClone(state),r=s.survivalRun,needed=r.members.length,short=r.resources.food<needed||r.resources.water<needed;
+ const r0=survivalReady(state);if(r0.stage==='flight'&&r0.escapes<Math.min(2,r0.day))throw new Error('오늘의 도주 임무를 먼저 넘겨야 해요.');const s=structuredClone(state),r=s.survivalRun,before={...r.resources},nightDay=r.day,needed=r.members.length,short=r.resources.food<needed||r.resources.water<needed;
  r.resources.food=Math.max(0,r.resources.food-needed);r.resources.water=Math.max(0,r.resources.water-needed);r.shortage=short?r.shortage+1:0;const events=[`${needed}명분의 식량과 물을 나눴다.${short?' 배급이 부족했다.':''}`];
  for(const m of r.members){if(m.job!=='rest'&&m.fatigue>=80){m.job='rest';events.push(`${survivalMemberName(s,m)}는 지쳐 쉬기로 했다.`);}}
  const risk=survivalNightRisk(r);
@@ -54,7 +55,9 @@ export function finishSurvivalDay(state){
  r.threat=survivalClamp(r.threat+6-r.members.filter(m=>m.job==='watch').length*5);r.day++;r.actions=3;
  if(r.day>=3&&r.escapes>=2&&!r.base){r.stage='settlement';events.push('도주 동선이 조금 보인다. 이제 빈 강의실을 정찰하고 확보해볼 수 있다.');}
  if(r.shortage>=3||r.threat>=100||r.base?.integrity===0){r.status='overrun';events.push('더는 지금 상태로 버티기 어렵다. 이번 생존 기록은 여기서 끝난다.');}
- survivalLog(r,events.join(' '));return s;
+ events.push(...finishCampStories(r));
+ if(r.threat>=100){r.status='overrun';if(!events.some(e=>e.includes('이번 생존 기록')))events.push('위협을 감당하지 못해 이번 생존 기록이 끝났다.');}
+ r.lastNight={day:nightDay,short,risk,before,after:{...r.resources},events:[...events],failed:r.status!=='active'};scheduleCampIncident(r);survivalLog(r,events.join(' '));return s;
 }
 export function launchSurvivalSortie(state,kind,siteId){
  const r0=survivalReady(state,{actions:1});let mission;
@@ -78,4 +81,9 @@ export function returnSurvivalSortie(state,{abandon=false}={}){
  if(won){if(active.kind==='escape'){r.escapes++;r.threat=survivalClamp(r.threat+4);text='도주로를 넘어 동료와 다시 숨을 돌렸다.';}else if(active.kind==='secure'){r.secured[active.siteId]=true;text=survivalSites[active.siteId].name+' 내부를 확보했다. 출입문을 정리하면 거점으로 삼을 수 있다.';}else if(active.kind==='supply'){r.resources.food+=3;r.resources.water++;text='식량 3과 물 1, 전투 전리품을 가지고 돌아왔다.';}else if(active.kind==='rescue'){const number=r.members.filter(m=>m.key.startsWith('rescued-')).length+1;r.members.push({key:'rescued-'+number,character:'student',label:'구조한 학생 '+number,job:'rest',fatigue:50,stress:40,injury:1});text='부상 학생 1명을 데리고 돌아왔다. 먼저 쉴 자리와 치료가 필요하다.';}else{r.base.integrity=Math.min(100,r.base.integrity+15);r.threat=survivalClamp(r.threat-20);text='주변 접근을 막고 거점 출입문을 다시 정리했다.';}}
  else{r.threat=survivalClamp(r.threat+12);if(r.base)r.base.integrity=Math.max(0,r.base.integrity-8);text='작전을 중단하고 물러났다. 소비한 물자는 돌아오지 않았고, 새로 주울 예정이던 보상도 얻지 못했다.';}
  r.completedSorties.push({id:active.id,kind:active.kind,day:r.day,success:won,siteId:active.siteId});r.activeSortie=null;if(active.previousCombat)s.combatTrial=active.previousCombat;else delete s.combatTrial;survivalLog(r,text);return s;
+}
+
+export function survivalDayPreview(state){
+ try{const next=finishSurvivalDay(state);return {...next.survivalRun.lastNight,nextThreat:next.survivalRun.threat,nextIntegrity:next.survivalRun.base?.integrity??null,canFinish:true};}
+ catch(error){return {canFinish:false,reason:error.message};}
 }

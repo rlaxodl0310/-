@@ -1,3 +1,4 @@
+import {checkCampIncident,resolveCampIncident} from './camp-incidents.js';
 import {startSurvival,restartSurvival,survivalAction,scoutSurvivalSite,claimSurvivalBase,buildSurvivalFacility,assignSurvivalJob,finishSurvivalDay,launchSurvivalSortie,returnSurvivalSortie} from './survival-base.js';
 import {survivalPage} from './survival-ui.js';
 import {combatMissionInfo} from './combat-missions.js';
@@ -395,6 +396,8 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
    if(a==='survivalClaim')state=claimSurvivalBase(state,v);
    if(a==='survivalBuild'){state=buildSurvivalFacility(state,v);shelterSelectedFacility=v;}
    if(a==='survivalAssign')state=assignSurvivalJob(state,v,app.querySelector('#survival-role-'+v)?.value??'rest');
+   if(a==='survivalCheck')state=checkCampIncident(state);
+   if(a==='survivalIncident')state=resolveCampIncident(state,v);
    if(a==='survivalNextDay')state=finishSurvivalDay(state);
    if(a==='survivalSortie'||a==='survivalSecure'){state=launchSurvivalSortie(state,a==='survivalSecure'?'secure':v,a==='survivalSecure'?v:undefined);combatActor='taei';combatMode='move';combatError='';combatMore=false;screen='combat';render();return;}
    if(a==='survivalResume'){if(!state.survivalRun?.activeSortie||state.combatTrial?.survivalSortie!==state.survivalRun.activeSortie.id)throw new Error('연결된 작전을 확인해 주세요.');screen='combat';render();return;}
@@ -421,7 +424,7 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
    const direct={combatGuard:'guard',combatDoor:'door',combatDrink:'drink',combatRescue:'rescue',combatLoot:'loot',combatBandage:'bandage'};
    if(state.combatTrial?.version===2&&(a==='combatTile'||a==='combatEnemy'||a==='combatEndTurn'||direct[a])){
     const scroll=app.querySelector('.tactical-scroll')?.scrollLeft??0;
-    if(a==='combatTile'){const [x,y]=v.split(',').map(Number);if(!['move','cover'].includes(combatMode))throw new Error('공격할 때는 인접한 좀비를 눌러 주세요.');state=gridAct(state,combatActor,combatMode,{x,y});}
+    if(a==='combatTile'){const [x,y]=v.split(',').map(Number);if(!['move','cover','lure'].includes(combatMode))throw new Error('공격할 때는 인접한 좀비를 눌러 주세요.');state=gridAct(state,combatActor,combatMode,{x,y});}
     else if(a==='combatEnemy'){if(!['strike','shove'].includes(combatMode))throw new Error('공격 또는 밀치기를 고른 뒤 좀비를 눌러 주세요.');state=gridAct(state,combatActor,combatMode,{id:Number(v)});}
     else if(a==='combatEndTurn')state=endGridTurn(state);
     else state=gridAct(state,combatActor,direct[a]);

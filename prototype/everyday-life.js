@@ -9,6 +9,17 @@ const everydayEvents=[
  {id:'wet-bench',places:['field','outdoorCourt','cafe'],wet:true,text:'앉으려던 자리 끝이 젖어 있다. 빗물이 가방 끈에 닿기 전에 눈에 들어온다.',choices:[['dry','젖지 않은 안쪽 공간을 확인하고 가방을 옮긴다.','가방을 젖은 자리에서 치우고 마른 쪽에 놓았다. 자리를 잡는 데 조금 신경이 쓰였지만 짐은 젖지 않았다.'],['move','앉는 대신 처마 안쪽에서 잠깐 서서 쉰다.','의자에 짐을 놓지 않고 처마 안쪽으로 움직였다. 비가 떨어지는 방향을 보며 다음 동선을 생각한다.']]},
  {id:'cart-crossing',places:['headquarters','creative','cafeteria','sculpture'],text:'복도 모퉁이에서 물품 카트가 나온다. 서로 지나갈 폭이 좁아 잠깐 걸음을 멈춘다.',choices:[['hold','출입문을 잡고 카트가 먼저 지나가게 한다.','카트가 통로를 빠져나올 때까지 문을 잡았다. 바퀴 소리가 멀어진 뒤 자기 방향으로 돌아섰다.'],['detour','옆 통로로 잠깐 돌아가며 서로 지나갈 공간을 만든다.','급하게 비집고 지나가지 않고 옆으로 돌아갔다. 반대편 통로에서 다시 원래 길에 합류했다.']]}
 ];
+// Short encounters can leave traces on a later day without inventing names or intimacy.
+everydayEvents.push(
+ {id:'order-slip',places:['cafe','cafeteria'],text:'카운터에 놓인 주문표와 방금 불린 메뉴가 다르다. 음료를 집으려던 사람이 손을 멈춘다.',choices:[['check','자기 주문표를 확인하고 직원에게 번호를 다시 묻는다.','자기 번호와 메뉴만 확인했다. 직원이 주문표 두 장을 다시 맞춰 놓고 다음 번호를 불렀다.'],['space','옆으로 비켜 확인할 자리를 만든다.','급하게 물건을 집지 않고 한 걸음 비켰다. 앞사람이 직원과 자기 주문을 확인하는 동안 가방을 고쳐 멨다.']]},
+ {id:'lunch-tray',places:['cafeteria','restaurant'],text:'쟁반 반납대 앞에서 컵 하나가 기울어진다. 뒤따르던 사람이 걸음을 늦추고, 젖은 바닥 쪽으로 시선이 모인다.',choices:[['warn','다가오는 사람에게 젖은 곳을 알려준다.','지나가는 사람에게 바닥을 가리키고 직원에게 위치를 전했다. 청소하는 동안 통로가 잠깐 다른 쪽으로 열렸다.'],['wait','쟁반을 안정적으로 들고 통로가 비기를 기다린다.','컵 위로 무리하게 손을 뻗지 않고 자기 쟁반부터 바로 들었다. 직원이 바닥을 정리한 뒤 차례로 움직였다.']]},
+ {id:'rehearsal-gap',places:['arts','music','gym'],text:'방음문이 잠깐 열리며 같은 마디를 반복하는 소리가 새어 나온다. 안쪽에서 “방금 어디서 박자 놓쳤지?”라는 말이 들린다.',choices:[['listen','문을 막지 않고 잠깐 그 구간을 들어본다.','복도 한쪽에 서서 다음 반복을 들었다. 베이스가 쉬어가는 자리와 보컬이 들어오는 순간이 다르게 들렸다. 자기 곡에도 써볼 만한 여백을 떠올렸다.'],['leave','연습을 방해하지 않고 자기 동선으로 간다.','문 앞을 비워 두고 지나갔다. 조금 뒤 같은 마디가 다시 시작되는 소리가 등 뒤로 멀어졌다.']]},
+ {id:'checkout-space',places:['market','neighborhoodMart'],text:'계산대 앞 손님이 지갑을 찾으며 장바구니를 내려놓는다. 다음 손님이 지나갈 폭이 좁아졌다.',choices:[['clear','자기 물건을 한쪽으로 모아 통로를 비운다.','아직 계산하지 않은 자기 물건만 모아 길을 만들었다. 장바구니를 든 손님이 짧게 고개를 숙이고 먼저 지나갔다.'],['wait','뒤로 한 걸음 물러서 차례를 기다린다.','계산이 끝난 것으로 착각하지 않고 물건을 그대로 챙겼다. 앞 손님이 지갑을 꺼낸 뒤 줄이 다시 움직였다.']]},
+ {id:'paper-followup',places:['hall','academic','arts'],after:{id:'loose-paper',choice:'help'},once:true,text:'지난번 종이가 흩어졌던 테이블에 이번에는 집게가 달린 파일이 놓여 있다. 옆 작은 메모에는 “자료 주워주신 분, 감사합니다”라고 적혀 있다.',choices:[['read','메모를 읽고 지나간 작은 일을 떠올린다.','이름도 묻지 않았던 일이 상대에게는 기억에 남았나 보다. 파일을 건드리지 않고 자기 길로 돌아갔다.'],['leave','지금 하던 일을 계속한다.','집게에 잘 묶인 자료를 보고 걸음을 옮겼다. 그날의 일에 더 개입하지 않아도 흔적은 남아 있었다.']]},
+ {id:'ball-followup',places:['field','outdoorCourt','gym'],after:{id:'rolling-ball',choice:'return'},once:true,text:'공을 돌려줬던 학생이 태이를 알아보고 가볍게 손을 든다. 자기 일행을 가리키며 “다음에 시간 맞으면 같이 해요”라고 덧붙인다.',choices:[['respond','손을 들어 인사하고 오늘은 자기 운동을 이어간다.','그때처럼 공을 가볍게 받아 돌려주고 자기 자리로 갔다. 정식 약속이나 서로의 이름을 안다고 할 정도는 아니지만, 낯선 얼굴 하나가 덜 낯설어졌다.'],['busy','오늘은 시간이 짧다고 말한다.','오늘 동선을 짧게 설명하고 지나갔다. 상대는 고개를 끄덕이고 다시 자기 일행에게 돌아갔다. 거절을 불만으로 받아들이지는 않았다.']]},
+ {id:'printer-followup',places:['library'],after:{id:'printer-check',choice:'notice'},once:true,text:'지난번 경고음이 났던 프린터 옆에 새 이용 안내가 붙어 있다. 문의 데스크에서 돌아온 직원이 시험 출력물을 확인하고 있다.',choices:[['check','바뀐 이용 안내를 읽는다.','같은 오류가 나면 여러 번 누르지 말고 접수해 달라는 안내였다. 이전에 어디로 문의해야 하는지 확인해 둔 일이 새 안내와 연결됐다.'],['pass','지금은 출력할 일이 없어 지나간다.','기계가 작동하는 것만 보고 자기 자리로 갔다. 그날 멈췄던 풍경이 조금 달라져 있었다.']]}
+);
+
 const actionDetails={
  read:['대사의 말끝과 실제 행동이 다른 장면에서 손이 멈춘다.','이전 장면의 작은 물건이 다시 등장해 앞부분을 넘겨본다.','결말을 먼저 단정하지 않고 인물이 알고 있던 정보부터 메모한다.'],
  study:['입력값 하나를 바꾸며 어디서 결과가 달라지는지 확인한다.','오류를 한꺼번에 고치기보다 작은 예제부터 다시 실행한다.','아까 막혔던 부분을 짧게 적어두고 다른 방법을 시도한다.'],
@@ -26,9 +37,10 @@ export function varyEverydayAction(state,{action,text,minute=state.clock.minute,
  const combined=(visits.length?`같은 활동이라도 이번에는 ${detail}`:text+' '+detail)+' '+atmosphere;
  const record={key,day:s.day,minute,location:s.location,action,text:combined,detail};life.history.push(record);life.sequence++;
  const recent=life.history.filter(h=>h.eventId&&h.day===s.day&&Math.abs(s.clock.minute-(h.eventMinute??h.minute))<60);
- const pool=everydayEvents.filter(e=>e.places.includes(s.location)&&(!e.wet||wetWeather(s))&&!life.history.slice(-5).some(h=>h.eventId===e.id));
- if(!life.pending&&!recent.length&&pool.length&&everydayRoll(s)<.38){
-  const event=pool[Math.floor(everydayRoll(s)*pool.length)];record.eventId=event.id;record.eventMinute=s.clock.minute;life.pending={key:'everyday:'+life.sequence,id:event.id,day:s.day,minute:s.clock.minute,location:s.location,text:event.text,choices:event.choices.map(([id,label])=>({id,label})),returnScreen,recordKey:key};
+ const pool=everydayEvents.filter(e=>(!e.after||life.history.some(h=>h.eventId===e.after.id&&h.eventOutcome===e.after.choice&&h.day<s.day&&h.location===s.location))&&(!e.once||!life.history.some(h=>h.eventId===e.id))&&e.places.includes(s.location)&&(!e.wet||wetWeather(s))&&!life.history.slice(-5).some(h=>h.eventId===e.id));
+ const due=pool.filter(e=>e.after);
+ if(!life.pending&&!recent.length&&pool.length&&(due.length||everydayRoll(s)<.38)){
+  const event=due.length?due[0]:pool[Math.floor(everydayRoll(s)*pool.length)];record.eventId=event.id;record.eventMinute=s.clock.minute;life.pending={key:'everyday:'+life.sequence,id:event.id,day:s.day,minute:s.clock.minute,location:s.location,text:event.text,choices:event.choices.map(([id,label])=>({id,label})),returnScreen,recordKey:key};
  }
  s.memory.push(`[${s.day}일차] ${combined}`);return {state:s,text:combined,repeated:false};
 }
