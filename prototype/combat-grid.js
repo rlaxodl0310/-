@@ -1,3 +1,4 @@
+import {createCombatExtras,settleCombatRewards,combatWaterCount} from './combat-side-missions.js';
 import {combatMissions,combatMissionInfo} from './combat-missions.js';
 import {combatCast,combatName,planCombat,executeCombat,nextCombatTurn} from './combat.js';
 export const tacticalMap={width:12,height:8,exit:[[11,3],[11,4]],door:[[10,3],[10,4]],obstacles:[[1,1,'피아노'],[2,1,'피아노'],[1,2,'피아노 의자'],[4,1,'벽'],[4,2,'벽'],[4,6,'벽'],[8,1,'벽'],[8,2,'벽'],[8,6,'벽'],[6,2,'책상'],[6,5,'넘어진 책상'],[7,5,'의자'],[9,1,'화분'],[9,6,'화분'],[11,1,'벽'],[11,2,'벽'],[11,5,'벽'],[11,6,'벽']]};
@@ -15,7 +16,7 @@ export function startGridCombat(state,ally='student',mission='escape'){
  const s=structuredClone(state),member=(id,x,y)=>({id,x,y,stamina:id==='taei'?90:80,fear:id==='taei'?15:30,hunger:20,thirst:20,wounds:0,down:false,escaped:false,guard:false,ap:2});
  s.combatTrial={version:2,mission,status:'active',phase:'planning',turn:1,limit:12,seed:726139,ally,actors:{taei:member('taei',2,4),ally:member(ally,2,5)},enemies:[{id:1,x:6,y:4,balance:2,stun:0},{id:2,x:8,y:3,balance:2,stun:0}],door:0,noise:0,reinforced:false,items:{water:1,chair:1},cover:[],carrying:false,frames:[],history:[],log:['인물을 고른 뒤 파란 칸을 눌러 이동하세요. 한 번에 최대 3칸, 행동력 1을 사용합니다.']};
  if(mission==='protect'){const b=s.combatTrial;b.actors.taei.x=5;b.actors.taei.y=3;b.actors.ally.x=5;b.actors.ally.y=4;b.protection={id:'student',x:6,y:3,wounds:0,down:false,held:0,ap:0};b.enemies=[{id:1,x:9,y:3,balance:2,stun:0},{id:2,x:9,y:4,balance:2,stun:0}];b.log=[combatMissions.protect.description];}
- return s;
+ Object.assign(s.combatTrial,createCombatExtras(state.combatTrial,mission));return s;
 }
 // Breadth-first paths respect furniture, walls, living units and the locked exit.
 export function tacticalPaths(state,key){
@@ -36,7 +37,7 @@ function tacticalWin(b){
 }
 function tacticalRequire(state,key){const b=state.combatTrial,a=b?.actors[key];if(b?.version!==2||b.status!=='active'||b.phase!=='planning'||!a||a.down||a.escaped||a.ap<1||key==='ally'&&b.carrying)throw new Error('지금 행동할 수 있는 인물을 선택하세요.');}
 export function gridAct(state,key,action,target){
- tacticalRequire(state,key);const s=structuredClone(state),b=s.combatTrial,a=b.actors[key],name=combatName(s,a.id);b.frames=[];b.log=[];
+ tacticalRequire(state,key);const s=structuredClone(state),b=s.combatTrial,a=b.actors[key],name=combatName(s,a.id);b.frames=[];b.log=[];if(b.optional&&Object.values(b.actors).some(p=>p.wounds>0))b.optional.teamHurt=true;
  if(action==='move'){
   const path=tacticalPaths(s,key).find(p=>p.x===target?.x&&p.y===target?.y);if(!path)throw new Error('이동 범위의 빈 칸을 선택하세요. 벽이나 다른 인물은 통과할 수 없어요.');
   const from={x:a.x,y:a.y};a.x=path.x;a.y=path.y;a.stamina-=path.cost;a.ap--;b.frames.push({kind:'move',unit:key,from,to:{x:a.x,y:a.y},path:path.path});
@@ -54,13 +55,17 @@ export function gridAct(state,key,action,target){
  }else if(action==='guard'){
   a.ap--;a.guard=true;a.stamina=tacticalClamp(a.stamina+12);a.fear=tacticalClamp(a.fear-6);b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name} · 방어, 스태미나 회복`);
  }else if(action==='drink'){
-  if(b.items.water<1)throw new Error('남은 생수가 없어요.');b.items.water--;a.ap--;a.stamina=tacticalClamp(a.stamina+18);a.thirst=tacticalClamp(a.thirst-25);b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name} · 생수 사용`);
+  if(combatWaterCount(b)<1)throw new Error('남은 생수가 없어요.');if(b.items.water>0)b.items.water--;else b.stash.items.water--;a.ap--;a.stamina=tacticalClamp(a.stamina+18);a.thirst=tacticalClamp(a.thirst-25);b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name} · 생수 사용`);
+ }else if(action==='loot'){
+  const cache=b.supplyCache;if(!cache||cache.recovered||tacticalDistance(a,cache)>1)throw new Error('아직 회수하지 않은 물자 상자 옆으로 이동하세요.');a.ap--;cache.recovered=true;b.frames.push({kind:'guard',unit:key});tacticalRecord(b,'물자를 챙겼다. 주 임무를 클리어하면 붕대 2개와 생수 1병을 확보한다.');
+ }else if(action==='bandage'){
+  if((b.stash?.items?.bandage??0)<1||a.wounds<1)throw new Error('보관 중인 붕대와 치료할 찰과상이 필요해요.');b.stash.items.bandage--;a.ap--;a.wounds--;a.fear=tacticalClamp(a.fear-8);b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name} · 붕대로 찰과상을 치료했다. 이미 발생한 부상 기록은 남는다.`);
  }else if(action==='cover'){
   if(b.items.chair<1||a.stamina<5||tacticalDistance(a,target??{})!==1||!tacticalWalkable(b,target.x,target.y,key))throw new Error('인접한 빈 칸에 의자를 놓을 수 있어요.');b.items.chair--;a.ap--;a.stamina-=5;b.noise++;b.cover.push({x:target.x,y:target.y,turns:2});b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name} · 의자로 길 막기`);
  }else if(action==='rescue'){
   const ally=b.actors.ally;if(key!=='taei'||!ally.down||ally.escaped||b.carrying||tacticalDistance(a,ally)>1||a.stamina<10)throw new Error('쓰러진 동료 옆에서 태이가 부축할 수 있어요.');a.ap--;a.stamina-=10;b.carrying=true;ally.x=a.x;ally.y=a.y;b.frames.push({kind:'guard',unit:key});tacticalRecord(b,'동료를 부축했다. 함께 이동하며 스태미나를 더 사용한다.');
  }else throw new Error('알 수 없는 전투 행동입니다.');
- tacticalWin(b);return s;
+ tacticalWin(b);settleCombatRewards(b);return s;
 }
 function tacticalEnemyPath(b,e,target){
  const queue=[{x:e.x,y:e.y,path:[]}],seen=new Set([tacticalCell(e.x,e.y)]);
@@ -74,7 +79,7 @@ export function endGridTurn(state){
   const people=Object.values(b.actors).filter(a=>!a.escaped&&!a.down);if(b.protection&&!b.protection.down)people.push(b.protection);
   const candidates=people.map(a=>({a,path:tacticalEnemyPath(b,e,a)})).filter(c=>c.path!==null).sort((x,y)=>(y.a===b.protection?1:0)-(x.a===b.protection?1:0)||x.path.length-y.path.length);const choice=candidates[0];if(!choice)continue;
   const path=choice.path.slice(0,2);if(path.length){const from={x:e.x,y:e.y},last=path.at(-1);e.x=last[0];e.y=last[1];b.frames.push({kind:'move',unit:'enemy-'+e.id,from,to:{x:e.x,y:e.y},path});}
-  const target=choice.a;if(tacticalDistance(e,target)===1){const shield=Object.values(b.actors).some(a=>!a.down&&!a.escaped&&a.guard&&tacticalDistance(a,target)<=1);const targetKey=target===b.protection?'protected':target===b.actors.taei?'taei':'ally';const targetName=target===b.protection?'보호 대상':combatName(s,target.id);if(shield){if(target.stamina!==undefined)target.stamina=tacticalClamp(target.stamina-3);tacticalRecord(b,`${targetName} · 접근을 막아냈다`);}else{if(target.stamina!==undefined)target.stamina=tacticalClamp(target.stamina-8);if(target.fear!==undefined)target.fear=tacticalClamp(target.fear+14);target.wounds++;target.down=target.wounds>=3;tacticalRecord(b,`${targetName} · ${target.down?'쓰러짐, 부축 필요':'충돌로 찰과상'}`);}b.frames.push({kind:'strike',unit:'enemy-'+e.id,target:targetKey,hit:!shield,down:target.down});}
+  const target=choice.a;if(tacticalDistance(e,target)===1){const shield=Object.values(b.actors).some(a=>!a.down&&!a.escaped&&a.guard&&tacticalDistance(a,target)<=1);const targetKey=target===b.protection?'protected':target===b.actors.taei?'taei':'ally';const targetName=target===b.protection?'보호 대상':combatName(s,target.id);if(shield){if(target.stamina!==undefined)target.stamina=tacticalClamp(target.stamina-3);tacticalRecord(b,`${targetName} · 접근을 막아냈다`);}else{if(target.stamina!==undefined)target.stamina=tacticalClamp(target.stamina-8);if(target.fear!==undefined)target.fear=tacticalClamp(target.fear+14);target.wounds++;if(b.optional&&target!==b.protection)b.optional.teamHurt=true;target.down=target.wounds>=3;tacticalRecord(b,`${targetName} · ${target.down?'쓰러짐, 부축 필요':'충돌로 찰과상'}`);}b.frames.push({kind:'strike',unit:'enemy-'+e.id,target:targetKey,hit:!shield,down:target.down});}
  }
  for(const a of Object.values(b.actors)){a.guard=false;a.ap=a.down||a.escaped?0:2;a.thirst=tacticalClamp(a.thirst+2);if(b.turn%3===0)a.hunger=tacticalClamp(a.hunger+1);if(a.thirst>=70||a.hunger>=70)a.stamina=tacticalClamp(a.stamina-3);}
  b.cover=b.cover.map(c=>({...c,turns:c.turns-1})).filter(c=>c.turns>0);
@@ -82,7 +87,7 @@ export function endGridTurn(state){
  else{if(b.protection){if(b.protection.down){b.status='failed';tacticalRecord(b,'보호 대상이 쓰러져 임무에 실패했다.');}else b.protection.held++;}tacticalWin(b);
   if(b.status==='active'&&b.turn>=b.limit){b.status='failed';tacticalRecord(b,combatMissionInfo(b).failure);}else if(b.status==='active')b.turn++;
  }
- if(!b.log.length)tacticalRecord(b,'적의 움직임이 멈췄다. 다음 행동을 선택하세요.');return s;
+ if(!b.log.length)tacticalRecord(b,'적의 움직임이 멈췄다. 다음 행동을 선택하세요.');settleCombatRewards(b);return s;
 }
 // Old version-one saves keep their original rules and results.
 export function planGridCombat(state,key,action){return planCombat(state,key,action);}

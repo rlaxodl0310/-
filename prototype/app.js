@@ -390,8 +390,9 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
    if(a==='combatActor'&&['taei','ally'].includes(v)){combatActor=v;combatMode='move';combatMore=false;}
    if(a==='combatMode')combatMode=v;
    if(a==='combatInspect')combatError='보호 대상은 움직일 수 없어요. 옆 칸에서 방어하면 접근 공격을 막을 수 있어요.';
+   if(a==='combatLocateLoot'){const cache=state.combatTrial?.supplyCache,scroller=app.querySelector('.tactical-scroll'),board=app.querySelector('.tactical-board');if(cache&&scroller&&board)scroller.scrollTo({left:(cache.x+.5)*board.clientWidth/12-scroller.clientWidth/2,top:(cache.y+.8)*board.clientHeight/8-scroller.clientHeight*.5,behavior:'smooth'});return;}
    if(a==='combatCenter'){const scroller=app.querySelector('.tactical-scroll'),unit=app.querySelector(`[data-unit="${combatActor}"]`);if(scroller&&unit)scroller.scrollTo({left:unit.offsetLeft-scroller.clientWidth/2,top:unit.offsetTop-scroller.clientHeight*.6,behavior:'smooth'});return;}
-   const direct={combatGuard:'guard',combatDoor:'door',combatDrink:'drink',combatRescue:'rescue'};
+   const direct={combatGuard:'guard',combatDoor:'door',combatDrink:'drink',combatRescue:'rescue',combatLoot:'loot',combatBandage:'bandage'};
    if(state.combatTrial?.version===2&&(a==='combatTile'||a==='combatEnemy'||a==='combatEndTurn'||direct[a])){
     const scroll=app.querySelector('.tactical-scroll')?.scrollLeft??0;
     if(a==='combatTile'){const [x,y]=v.split(',').map(Number);if(!['move','cover'].includes(combatMode))throw new Error('공격할 때는 인접한 좀비를 눌러 주세요.');state=gridAct(state,combatActor,combatMode,{x,y});}
