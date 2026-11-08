@@ -22,7 +22,7 @@ export const gameRoomLayouts={
  creative:[{id:'library',floor:'2층',name:'도서관 출입구',text:'2층 도서관 출입구에서 반납대와 자료실 안내를 확인한다.',provisional:true},gameRoom('art','4층','401','미대 작업실'),...roomSeries(4,[402,403],'미대 강의실'),gameRoom('nursing','5층','503','기본간호 실습실'),gameRoom('room504','5층','504','간호학 강의실'),gameRoom('fashion','6층','601','패션디자인 실습실'),...roomSeries(6,[602,603],'패션디자인 강의실')],
  academic:[gameRoom('store','1층','101','큰 편의점'),...roomSeries(2,[201,202,203],'교양 강의실'),gameRoom('classes','3층','302','교양 강의실'),...roomSeries(3,[301,303],'교양 강의실'),...roomSeries(4,[401,402,403],'교양 강의실')],
  hall:[gameRoom('footballClub','2층','201','축구 동아리실'),gameRoom('clubs','2층','202','봉사단 준비실'),gameRoom('musicClub','2층','203','음악 동아리실'),gameRoom('meeting','2층','204','공용 회의실')],
- sculpture:[gameRoom('store','1층','101','편의점'),gameRoom('facilities','2층','201','공용 학습실'),gameRoom('classes','3층','301','치위생학 강의실'),...roomSeries(3,[302,303],'치위생학 강의실'),...roomSeries(4,[401,402,403],'치위생학 강의실')]
+ sculpture:[gameRoom('dentalPractice','5층','501','치위생 실습실'),gameRoom('store','1층','101','편의점'),gameRoom('facilities','2층','201','공용 학습실'),gameRoom('classes','3층','301','치위생학 강의실'),...roomSeries(3,[302,303],'치위생학 강의실'),...roomSeries(4,[401,402,403],'치위생학 강의실')]
 };
 export function roomFloorLabel(area){const match=area.floor.match(/^(\d+)층/);return match?match[1]+'층':area.floor;}
 export function roomFloorList(building){return [...new Set((building?.areas??[]).map(roomFloorLabel))].sort((a,b)=>(a==='지하'?-1:parseInt(a)||100)-(b==='지하'?-1:parseInt(b)||100));}

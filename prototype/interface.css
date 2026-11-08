@@ -219,3 +219,6 @@ body{background:#e6e7df}.utility-page{border-radius:8px;box-shadow:none;border-c
 @media(max-width:950px){.shelter-visual-layout{grid-template-columns:minmax(0,1fr) 265px;gap:12px}.shelter-scene-card>header{padding:14px}.shelter-scene-card h2{font-size:16px}}
 @media(max-width:750px){.shelter-visual-layout{grid-template-columns:1fr}.shelter-scene-card>header{padding:12px;gap:8px}.shelter-scene-card h2{font-size:15px}.shelter-scene-card header>span{font-size:9px}.shelter-scene-card>footer{font-size:10px;padding:10px 12px;gap:8px;flex-wrap:wrap}.shelter-prop-label{font-size:8px;padding:3px 5px}.shelter-empty-room{font-size:11px;padding:8px 12px}.shelter-empty-room small{font-size:9px}.shelter-scene-card.scene-compact{margin-bottom:14px}}
 @media(prefers-reduced-motion:reduce){.shelter-prop-label{transition:none}.shelter-scene:has(.prop-selected) .prop-selected .shelter-prop-art{animation:none}}
+
+/* Shared room references selected by room function, not just building. */
+.place-backdrop[data-set=specialist]{background-image:url('../docs/assets/academic-interiors-specialist.png')}.place-backdrop[data-set=common]{background-image:url('../docs/assets/academic-interiors-common.png')}
