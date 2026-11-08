@@ -1,4 +1,4 @@
-import {createCombatExtras,settleCombatRewards,combatWaterCount} from './combat-side-missions.js';
+import {createCombatExtras,settleCombatRewards,combatWaterCount,combatTeamHurt} from './combat-side-missions.js';
 import {combatMissions,combatMissionInfo} from './combat-missions.js';
 import {combatCast,combatName,planCombat,executeCombat,nextCombatTurn} from './combat.js';
 export const tacticalMap={width:12,height:8,exit:[[11,3],[11,4]],door:[[10,3],[10,4]],obstacles:[[1,1,'피아노'],[2,1,'피아노'],[1,2,'피아노 의자'],[4,1,'벽'],[4,2,'벽'],[4,6,'벽'],[8,1,'벽'],[8,2,'벽'],[8,6,'벽'],[6,2,'책상'],[6,5,'넘어진 책상'],[7,5,'의자'],[9,1,'화분'],[9,6,'화분'],[11,1,'벽'],[11,2,'벽'],[11,5,'벽'],[11,6,'벽']]};
@@ -11,6 +11,7 @@ function tacticalExit(x,y){return tacticalMap.exit.some(c=>c[0]===x&&c[1]===y);}
 function tacticalOccupied(b,x,y,except){return (b.protection&&!b.protection.down&&b.protection.x===x&&b.protection.y===y)||Object.entries(b.actors).some(([key,a])=>key!==except&&!a.escaped&&!(b.carrying&&key==='ally')&&a.x===x&&a.y===y)||b.enemies.some(e=>e.balance>0&&e.id!==except&&e.x===x&&e.y===y);}
 function tacticalWalkable(b,x,y,except){return !tacticalBlocked(x,y)&&!(b.door<2&&(tacticalDoor(x,y)||tacticalExit(x,y)))&&!tacticalOccupied(b,x,y,except)&&!b.cover?.some(c=>c.x===x&&c.y===y&&c.turns>0);}
 export function startGridCombat(state,ally='student',mission='escape'){
+ if(state.survivalRun?.activeSortie)throw new Error('진행 중인 생존 작전으로 돌아가거나 복귀하세요.');
  if(!combatMissions[mission])throw new Error('임무를 다시 선택해 주세요.');
  if(!combatCast.includes(ally))throw new Error('함께할 인물을 다시 골라 주세요.');
  const s=structuredClone(state),member=(id,x,y)=>({id,x,y,stamina:id==='taei'?90:80,fear:id==='taei'?15:30,hunger:20,thirst:20,wounds:0,down:false,escaped:false,guard:false,ap:2});
@@ -37,7 +38,7 @@ function tacticalWin(b){
 }
 function tacticalRequire(state,key){const b=state.combatTrial,a=b?.actors[key];if(b?.version!==2||b.status!=='active'||b.phase!=='planning'||!a||a.down||a.escaped||a.ap<1||key==='ally'&&b.carrying)throw new Error('지금 행동할 수 있는 인물을 선택하세요.');}
 export function gridAct(state,key,action,target){
- tacticalRequire(state,key);const s=structuredClone(state),b=s.combatTrial,a=b.actors[key],name=combatName(s,a.id);b.frames=[];b.log=[];if(b.optional&&Object.values(b.actors).some(p=>p.wounds>0))b.optional.teamHurt=true;
+ tacticalRequire(state,key);const s=structuredClone(state),b=s.combatTrial,a=b.actors[key],name=combatName(s,a.id);b.frames=[];b.log=[];if(b.optional&&combatTeamHurt(b))b.optional.teamHurt=true;
  if(action==='move'){
   const path=tacticalPaths(s,key).find(p=>p.x===target?.x&&p.y===target?.y);if(!path)throw new Error('이동 범위의 빈 칸을 선택하세요. 벽이나 다른 인물은 통과할 수 없어요.');
   const from={x:a.x,y:a.y};a.x=path.x;a.y=path.y;a.stamina-=path.cost;a.ap--;b.frames.push({kind:'move',unit:key,from,to:{x:a.x,y:a.y},path:path.path});
