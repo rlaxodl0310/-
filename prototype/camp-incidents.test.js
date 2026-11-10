@@ -25,6 +25,6 @@ test('loud shortcut has immediate threat while listening has deferred morale rec
 test('legacy camps can inspect without a charge and new days avoid last two situations',()=>{
  let s=base();delete s.survivalRun.story;const resources=structuredClone(s.survivalRun.resources);s=checkCampIncident(s);assert.deepEqual(s.survivalRun.resources,resources);const first=campIncidentView(s).id;s=finishSurvivalDay(s);const second=campIncidentView(s).id;s=finishSurvivalDay(s);const third=campIncidentView(s).id;assert.equal(new Set([first,second,third]).size,3);
 });
-test('night forecast calls out fatal shortages without advancing either clock',()=>{
- const s=base();s.survivalRun.shortage=2;s.survivalRun.resources.food=0;const before=save(s),p=survivalDayPreview(s);assert.equal(p.failed,true);assert.equal(p.short,true);assert.equal(save(s),before);
+test('night forecast calls out fatal dehydration without advancing either clock',()=>{
+ const s=base();s.survivalRun.shortage=2;s.survivalRun.resources.water=0;s.survivalRun.kit.items.water=0;s.survivalRun.members[0].hydration=0;s.survivalRun.members[0].dryNights=2;const before=save(s),p=survivalDayPreview(s);assert.equal(p.failed,true);assert.equal(p.short,true);assert.equal(save(s),before);
 });

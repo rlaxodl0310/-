@@ -1,3 +1,4 @@
+import {useStoredSurvivalItem,careSurvivalMember} from './survival-pack.js';
 import {initializeSurvivalPack,transferSurvivalPack,takeSurvivalLoot,equipSurvivalLootBag,leaveSurvivalLoot,dropSurvivalPackItem,useSurvivalPackItem,prepareSurvivalPack,storeAllSurvivalPack,combatPackAction} from './survival-pack.js';
 import {survivalRoomCatalog} from './survival-exploration.js';
 import {checkCampIncident,resolveCampIncident} from './camp-incidents.js';
@@ -402,6 +403,8 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
    if(a==='survivalPackBag')state=equipSurvivalLootBag(state,v);
    if(a==='survivalPackLeave')state=leaveSurvivalLoot(state);
    if(a==='survivalPackDrop')state=dropSurvivalPackItem(state,v);
+   if(a==='survivalStoredUse')state=useStoredSurvivalItem(state,v);
+   if(a==='survivalMemberCare'){const [key,kind]=v.split(':');state=careSurvivalMember(state,key,kind);}
    if(a==='survivalPackUse')state=useSurvivalPackItem(state,v);
    if(a==='survivalPackPrepare')state=prepareSurvivalPack(state);
    if(a==='survivalPackStoreAll')state=storeAllSurvivalPack(state);

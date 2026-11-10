@@ -1,3 +1,4 @@
+import {survivalStaminaCap} from './survival-health.js';
 import {openCombatPackLoot} from './survival-pack.js';
 import {createCombatExtras,settleCombatRewards,combatWaterCount,combatTeamHurt} from './combat-side-missions.js';
 import {combatMissions,combatMissionInfo} from './combat-missions.js';
@@ -61,9 +62,9 @@ export function gridAct(state,key,action,target){
  }else if(action==='loot'){
   const cache=b.supplyCache;if(!cache||cache.recovered||tacticalDistance(a,cache)>1)throw new Error('아직 회수하지 않은 물자 상자 옆으로 이동하세요.');a.ap--;openCombatPackLoot(b);cache.recovered=true;b.frames.push({kind:'guard',unit:key});tacticalRecord(b,b.survivalPack?'상자를 열었다. 원정 가방에서 챙길 물건을 고르세요. 성공 보너스는 임무를 마친 뒤 따로 확인해요.':'물자를 챙겼다. 주 임무를 클리어하면 붕대 2개와 생수 1병을 확보한다.');
  }else if(action==='eat'||action==='firstaid'){
-  const id=target?.item,allowed=action==='eat'?['food','canned','energybar']:['firstaid'];if(!b.survivalPack||!allowed.includes(id)||!(b.stash.items[id]>0))throw new Error('가방에서 사용할 물건을 확인하세요.');if(action==='firstaid'&&a.wounds<1)throw new Error('치료할 찰과상이 없어요.');b.stash.items[id]--;a.ap--;if(action==='eat'){a.stamina=tacticalClamp(a.stamina+(id==='energybar'?12:16));a.hunger=tacticalClamp(a.hunger-(id==='energybar'?20:id==='canned'?40:30));}else{a.wounds--;a.fear=tacticalClamp(a.fear-10);}b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name} · 가방의 ${action==='eat'?'음식':'구급 파우치'} 사용`);
+  const id=target?.item,allowed=action==='eat'?['food','canned','energybar']:['firstaid'];if(!b.survivalPack||!allowed.includes(id)||!(b.stash.items[id]>0))throw new Error('가방에서 사용할 물건을 확인하세요.');if(action==='firstaid'&&a.wounds<1)throw new Error('치료할 찰과상이 없어요.');b.stash.items[id]--;a.ap--;if(action==='eat'){a.stamina=tacticalClamp(a.stamina+(id==='energybar'?12:16));a.hunger=tacticalClamp(a.hunger-(id==='energybar'?20:id==='canned'?40:30));}else{a.wounds--;a.fear=tacticalClamp(a.fear-10);if(b.survivalSortie){b.campCare??={};b.campCare[key]='firstaid';}}b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name} · 가방의 ${action==='eat'?'음식':'구급 파우치'} 사용`);
  }else if(action==='bandage'){
-  if((b.stash?.items?.bandage??0)<1||a.wounds<1)throw new Error('보관 중인 붕대와 치료할 찰과상이 필요해요.');b.stash.items.bandage--;a.ap--;a.wounds--;a.fear=tacticalClamp(a.fear-8);b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name} · 붕대로 찰과상을 치료했다. 이미 발생한 부상 기록은 남는다.`);
+  if((b.stash?.items?.bandage??0)<1||a.wounds<1)throw new Error('보관 중인 붕대와 치료할 찰과상이 필요해요.');b.stash.items.bandage--;a.ap--;a.wounds--;a.fear=tacticalClamp(a.fear-8);if(b.survivalSortie){b.campCare??={};b.campCare[key]='bandage';}b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name} · 붕대로 찰과상을 치료했다. 이미 발생한 부상 기록은 남는다.`);
  }else if(action==='cover'){
   if(b.items.chair<1||a.stamina<5||tacticalDistance(a,target??{})!==1||!tacticalWalkable(b,target.x,target.y,key))throw new Error('인접한 빈 칸에 의자를 놓을 수 있어요.');b.items.chair--;a.ap--;a.stamina-=5;b.noise++;b.cover.push({x:target.x,y:target.y,turns:2});b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name} · 의자로 길 막기`);
  }else if(action==='lure'){
@@ -72,6 +73,7 @@ export function gridAct(state,key,action,target){
  }else if(action==='rescue'){
   const ally=b.actors.ally;if(key!=='taei'||!ally.down||ally.escaped||b.carrying||tacticalDistance(a,ally)>1||a.stamina<10)throw new Error('쓰러진 동료 옆에서 태이가 부축할 수 있어요.');a.ap--;a.stamina-=10;b.carrying=true;ally.x=a.x;ally.y=a.y;b.frames.push({kind:'guard',unit:key});tacticalRecord(b,'동료를 부축했다. 함께 이동하며 스태미나를 더 사용한다.');
  }else throw new Error('알 수 없는 전투 행동입니다.');
+ if(b.survivalSortie)a.stamina=Math.min(a.stamina,survivalStaminaCap(100-a.hunger,100-a.thirst));
  tacticalWin(b);settleCombatRewards(b);return s;
 }
 function tacticalEnemyPath(b,e,target){
@@ -89,7 +91,7 @@ export function endGridTurn(state){
   const path=(drawn??choice.path).slice(0,2);if(path.length){const from={x:e.x,y:e.y},last=path.at(-1);e.x=last[0];e.y=last[1];b.frames.push({kind:'move',unit:'enemy-'+e.id,from,to:{x:e.x,y:e.y},path});}
   const target=choice.a;if(drawn===null&&tacticalDistance(e,target)===1){const shield=Object.values(b.actors).some(a=>!a.down&&!a.escaped&&a.guard&&tacticalDistance(a,target)<=1);const targetKey=target===b.protection?'protected':target===b.actors.taei?'taei':'ally';const targetName=target===b.protection?'보호 대상':combatName(s,target.id);if(shield){if(target.stamina!==undefined)target.stamina=tacticalClamp(target.stamina-3);tacticalRecord(b,`${targetName} · 접근을 막아냈다`);}else{if(target.stamina!==undefined)target.stamina=tacticalClamp(target.stamina-8);if(target.fear!==undefined)target.fear=tacticalClamp(target.fear+14);target.wounds++;if(b.optional&&target!==b.protection)b.optional.teamHurt=true;target.down=target.wounds>=3;tacticalRecord(b,`${targetName} · ${target.down?'쓰러짐, 부축 필요':'충돌로 찰과상'}`);}b.frames.push({kind:'strike',unit:'enemy-'+e.id,target:targetKey,hit:!shield,down:target.down});}
  }
- for(const a of Object.values(b.actors)){a.guard=false;a.ap=a.down||a.escaped?0:2;a.thirst=tacticalClamp(a.thirst+2);if(b.turn%3===0)a.hunger=tacticalClamp(a.hunger+1);if(a.thirst>=70||a.hunger>=70)a.stamina=tacticalClamp(a.stamina-3);}
+ for(const a of Object.values(b.actors)){a.guard=false;a.ap=a.down||a.escaped?0:2;a.thirst=tacticalClamp(a.thirst+2);if(b.turn%3===0)a.hunger=tacticalClamp(a.hunger+1);if(a.thirst>=70||a.hunger>=70)a.stamina=tacticalClamp(a.stamina-3);if(b.survivalSortie)a.stamina=Math.min(a.stamina,survivalStaminaCap(100-a.hunger,100-a.thirst));}
  if(b.lure&&--b.lure.turns<=0)b.lure=null;
  b.cover=b.cover.map(c=>({...c,turns:c.turns-1})).filter(c=>c.turns>0);
  if(b.actors.taei.down){b.status='failed';tacticalRecord(b,'태이가 쓰러졌다. 탈출을 이어갈 수 없다.');}

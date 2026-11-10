@@ -1,3 +1,4 @@
+import {feedSurvivalMember,careSurvivalWound} from './survival-health.js';
 // Integer grams and stack counts keep capacity checks deterministic across saves.
 export const survivalBags={
  campus:{name:'통학 백팩',slots:8,maxWeight:8000,description:'수업에 메고 다니던 가방. 가벼운 원정에 쓸 수 있다.'},
@@ -6,12 +7,12 @@ export const survivalBags={
  duffel:{name:'대형 더플백',slots:18,maxWeight:20000,description:'부피 큰 장비까지 담을 수 있는 대용량 가방.'}
 };
 export const survivalPackItems={
- food:{name:'휴대 식량',icon:'▣',category:'식량',weight:300,stack:3,slots:1,use:'태이 피로 −8 · 부담 −2 / 전투 스태미나 +16·배고픔 −30 / 야간 배급 가능'},
- water:{name:'생수 500ml',icon:'◈',category:'식량',weight:550,stack:2,slots:1,use:'태이 피로 −6 / 전투 스태미나 +18 / 야간 배급 가능'},
- canned:{name:'밀봉 통조림',icon:'▤',category:'식량',weight:450,stack:2,slots:1,use:'태이 피로 −12 · 부담 −2 / 전투 스태미나 +16·배고픔 −40 / 야간 식량 1인분'},
- energybar:{name:'에너지바',icon:'▰',category:'식량',weight:60,stack:4,slots:1,use:'태이 피로 −8 / 전투 스태미나 +12 · 배고픔 −20'},
- bandage:{name:'붕대',icon:'✚',category:'의약품',weight:80,stack:4,slots:1,use:'부상 1 치료 · 여력 1 / 전투 행동력 1'},
- firstaid:{name:'구급 파우치',icon:'✚',category:'의약품',weight:450,stack:1,slots:2,use:'부상 1 · 부담 −10 · 여력 1 / 전투 행동력 1'},
+ food:{name:'휴대 식량',icon:'▣',category:'식량',weight:300,stack:3,slots:1,use:'포만감 +35 · 피로 −8 · 부담 −2 / 전투 스태미나 +16·배고픔 −30 / 야간 배급 가능'},
+ water:{name:'생수 500ml',icon:'◈',category:'식량',weight:550,stack:2,slots:1,use:'수분 +40 · 피로 −6 / 전투 스태미나 +18 / 야간 배급 가능'},
+ canned:{name:'밀봉 통조림',icon:'▤',category:'식량',weight:450,stack:2,slots:1,use:'포만감 +45 · 피로 −12 · 부담 −2 / 전투 스태미나 +16·배고픔 −40 / 야간 식량 1인분'},
+ energybar:{name:'에너지바',icon:'▰',category:'식량',weight:60,stack:4,slots:1,use:'포만감 +15 · 피로 −8 / 전투 스태미나 +12 · 배고픔 −20'},
+ bandage:{name:'붕대',icon:'✚',category:'의약품',weight:80,stack:4,slots:1,use:'부상 1 치료 · 상처 관리와 방치 날짜 초기화 · 여력 1 / 전투 행동력 1'},
+ firstaid:{name:'구급 파우치',icon:'✚',category:'의약품',weight:450,stack:1,slots:2,use:'부상 1 · 부담 −10 · 상처 위험 완화와 방치 날짜 초기화 · 여력 1 / 전투 행동력 1'},
  parts:{name:'정비 부품',icon:'⚙',category:'재료',weight:400,stack:3,slots:1,use:'공동 보관함에 옮겨 시설 공사·정비에 사용'},
  tape:{name:'보강 테이프',icon:'▧',category:'도구',weight:200,stack:2,slots:1,use:'거점 문 상태 +6 · 여력 1'},
  repairkit:{name:'휴대 수리 키트',icon:'⚒',category:'도구',weight:700,stack:1,slots:2,use:'거점 문 상태 +18 · 여력 1'},
@@ -73,10 +74,10 @@ export function takeSurvivalLoot(state,id,quantity=1){
 export function equipSurvivalLootBag(state,id){packReady(state);const s=structuredClone(state),r=s.survivalRun,kit=ensureSurvivalPack(r);packSwapBag(kit,id);packHistory(r,`${survivalBags[id].name}으로 짐을 옮겼다. 이전 가방은 발견 장소에 남겨 두었다.`);return s;}
 export function leaveSurvivalLoot(state){packReady(state);const s=structuredClone(state),r=s.survivalRun,kit=ensureSurvivalPack(r);if(!kit.pending)throw new Error('정리할 발견 물자가 없어요.');kit.history.push({day:r.day,source:kit.pending.source,left:structuredClone(kit.pending)});kit.pending=null;packHistory(r,'수색을 마치고 돌아왔다. 챙기지 않은 물자와 가방은 그 자리에 남겼다.');return s;}
 export function dropSurvivalPackItem(state,id){packReady(state);const s=structuredClone(state),r=s.survivalRun,kit=ensureSurvivalPack(r);if(!(kit.items[id]>0))throw new Error('가방에 없는 물건입니다.');kit.items[id]--;packHistory(r,`${survivalPackItems[id].name} 1개를 버렸다. 되찾을 수 없다.`);return s;}
-export function useSurvivalPackItem(state,id){
- packReady(state);const s=structuredClone(state),r=s.survivalRun,kit=ensureSurvivalPack(r);if(!(kit.items[id]>0))throw new Error('가방에 없는 물건입니다.');let effect;
- if(['food','canned','energybar','water'].includes(id)){const m=r.members.find(m=>m.key==='taei');m.fatigue=packClamp(m.fatigue-(id==='water'?6:id==='canned'?12:8));if(id!=='water')m.stress=packClamp(m.stress-2);effect='태이가 먹거나 마시며 피로를 회복했다.';}
- else if(['bandage','firstaid'].includes(id)){const m=r.members.find(m=>m.injury>0);if(!m)throw new Error('치료할 부상자가 없어요.');if(r.actions<1)throw new Error('치료에는 여력 1이 필요해요.');r.actions--;m.injury--;if(id==='firstaid')m.stress=packClamp(m.stress-10);effect='부상자 한 명을 치료했다.';}
+export function useSurvivalPackItem(state,id,memberKey){
+ packReady(state);const s=structuredClone(state),r=s.survivalRun,kit=ensureSurvivalPack(r);if(!(kit.items[id]>0))throw new Error('가방에 없는 물건입니다.');if(memberKey&&!r.members.some(m=>m.key===memberKey))throw new Error('돌볼 인원을 확인하세요.');let effect;
+ if(['food','canned','energybar','water'].includes(id)){const m=r.members.find(m=>m.key===(memberKey??'taei'));feedSurvivalMember(m,id);m.fatigue=packClamp(m.fatigue-(id==='water'?6:id==='canned'?12:8));if(id!=='water')m.stress=packClamp(m.stress-2);effect='선택한 인원이 먹거나 마시며 포만감·수분과 피로를 회복했다.';}
+ else if(['bandage','firstaid'].includes(id)){const m=r.members.find(m=>memberKey?m.key===memberKey&&m.injury>0:m.injury>0);if(!m)throw new Error('치료할 부상자가 없어요.');if(r.actions<1)throw new Error('치료에는 여력 1이 필요해요.');r.actions--;careSurvivalWound(m,r.day,{strong:id==='firstaid'});if(id==='firstaid')m.stress=packClamp(m.stress-10);effect='부상자 한 명을 치료했다.';}
  else if(['repairkit','tape'].includes(id)){if(!r.base||r.base.integrity>=100)throw new Error('보수할 거점 출입문이 필요해요.');if(r.actions<1)throw new Error('보수에는 여력 1이 필요해요.');r.actions--;r.base.integrity=Math.min(100,r.base.integrity+(id==='repairkit'?18:6));effect='출입문을 보수했다.';}
  else throw new Error('이 물건은 보관함에 옮겨 쓰거나 전투 중 사용하세요.');
  kit.items[id]--;packHistory(r,`${survivalPackItems[id].name} 사용 · ${effect}`);return s;
@@ -118,3 +119,17 @@ export function prepareSurvivalPack(state){
  const added=[];for(const [id,target] of Object.entries({water:2,bandage:1,energybar:1})){const stock=packResourceIds.includes(id)?r.resources:kit.stock;let n=0;while((kit.items[id]??0)<target&&(stock[id]??0)>0&&!survivalPackFit(kit.bag,kit.items,id)){stock[id]--;kit.items[id]=(kit.items[id]??0)+1;n++;}if(n)added.push(survivalPackItems[id].name+' '+n);}
  packHistory(r,added.length?'기본 보급품을 준비했다: '+added.join(' · '):'추가로 챙길 수 있는 기본 보급품이 없다. 보관 수량과 가방 공간을 확인하자.');return s;
 }
+
+export function useStoredSurvivalItem(state,id,memberKey){
+ packReady(state);const s=structuredClone(state),r=s.survivalRun,kit=ensureSurvivalPack(r);assertPackExplorationReady(r);
+ const source=packResourceIds.includes(id)?r.resources:kit.stock;if(!(source[id]>0))throw new Error('보관 중인 물품이 없어요.');source[id]--;kit.items[id]=(kit.items[id]??0)+1;
+ const used=useSurvivalPackItem(s,id,memberKey);used.survivalRun.log[0]='보관 물품 사용 · '+used.survivalRun.log[0];return used;
+}
+export function memberSurvivalCareOptions(state,key){
+ const r=state.survivalRun,m=r?.members.find(m=>m.key===key);if(!m)return [];const kit=r.kit;
+ return ['food','water','treat'].map(action=>{const ids=action==='food'?['food','canned','energybar']:action==='water'?['water']:['firstaid','bandage'];let found=null;
+  for(const id of ids){if((kit?.items[id]??0)>0){found={id,source:'bag'};break;}if(!kit?.pending&&((packResourceIds.includes(id)?r.resources[id]:kit?.stock[id])??0)>0){found={id,source:'stock'};break;}}
+  return {action,...found,blocked:r.status!=='active'||!!r.activeSortie||!found||action==='treat'&&(m.injury<1||r.actions<1)};
+ });
+}
+export function careSurvivalMember(state,key,action){const choice=memberSurvivalCareOptions(state,key).find(c=>c.action===action);if(!choice||choice.blocked)throw new Error('사용할 물품과 인원의 상태를 확인하세요.');return choice.source==='bag'?useSurvivalPackItem(state,choice.id,key):useStoredSurvivalItem(state,choice.id,key);}
