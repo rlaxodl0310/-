@@ -246,7 +246,41 @@ body{background:#e6e7df}.utility-page{border-radius:8px;box-shadow:none;border-c
 .event-cutscene-art.composed-cutscene{display:flex;align-items:end;justify-content:center;gap:2%;aspect-ratio:1;background:linear-gradient(145deg,#e2e2dcdf,#afb8b6ed);padding:7% 3% 12%;overflow:hidden}
 .event-cutscene[data-tone="guarded"] .composed-cutscene{background:linear-gradient(145deg,#c1c9cadd,#839396ed);gap:7%}
 .sd-cast-member{margin:0;flex:1;min-width:0;max-width:70%;text-align:center}
-.sd-cast-sprite{aspect-ratio:3 / 4;width:100%;background-image:url('../docs/assets/sd-modular-cast.png');background-size:600% 300%;background-position:var(--sd-column) var(--sd-row);background-repeat:no-repeat}
+.sd-cast-sprite{aspect-ratio:3 / 4;width:100%;background-image:url('../docs/assets/sd-pixel-main-cast.png');background-size:600% 300%;background-position:var(--sd-column) var(--sd-row);background-repeat:no-repeat}
 .event-cutscene .sd-cast-member figcaption{font-size:clamp(9px,1.1vw,12px);width:auto;margin:4px 0 0;padding:3px 4px;overflow-wrap:anywhere;border-radius:6px;background:#233536df}
 .sd-cast-member[data-speaking="true"] .sd-cast-sprite{filter:drop-shadow(0 2px 3px #fff8)}
 .composed-cutscene[data-count="3"]{gap:0;padding-inline:1%}
+
+/* High-school visitor portraits: individual six-pose sheets and three-pose group sheet. */
+.vn-stage .scene-visual .dialogue-cast .cast-member .portrait.fair-cast-portrait[data-actor]{height:70%;aspect-ratio:1;background-size:300% 200%;background-position:var(--fair-x,0%) var(--fair-y,0%);mask-image:linear-gradient(#000 85%,transparent)}
+.fair-cast-portrait[data-actor="jihoo"]{background-image:url('../docs/assets/fair-jihoo-acting.png')}
+.fair-cast-portrait[data-actor="naeun"]{background-image:url('../docs/assets/fair-naeun-acting.png')}
+.fair-cast-portrait[data-actor="dohyun"]{background-image:url('../docs/assets/fair-dohyun-acting.png')}
+.fair-cast-portrait[data-expression="1"],.fair-cast-portrait[data-expression="4"]{--fair-x:50%}
+.fair-cast-portrait[data-expression="2"],.fair-cast-portrait[data-expression="5"]{--fair-x:100%}
+.fair-cast-portrait[data-expression="3"],.fair-cast-portrait[data-expression="4"],.fair-cast-portrait[data-expression="5"]{--fair-y:100%}
+.vn-stage .scene-visual .dialogue-cast .cast-member .fair-cast-portrait:is([data-actor="dayeon"],[data-actor="chaerin"],[data-actor="junseo"]){background-image:url('../docs/assets/fair-extra-acting.png');background-size:300% 300%;background-position:var(--extra-column,0%) var(--extra-row,0%)}
+.fair-cast-portrait[data-actor="chaerin"]{--extra-column:50%}.fair-cast-portrait[data-actor="junseo"]{--extra-column:100%}
+.fair-cast-portrait:is([data-expression="1"],[data-expression="2"]){--extra-row:50%}
+.fair-cast-portrait:is([data-expression="3"],[data-expression="4"]){--extra-row:100%}
+.sd-cast-sprite{image-rendering:pixelated}
+.sd-cast-member[data-sd-atlas="fair"] .sd-cast-sprite{background-image:url('../docs/assets/fair-pixel-cast.png');background-size:300% 300%;aspect-ratio:1}
+.sd-cast-member[data-sd-atlas="fair-extra"] .sd-cast-sprite{background-image:url('../docs/assets/fair-extra-pixel-cast.png');background-size:300% 300%;aspect-ratio:1}
+.fair-profile{width:min(210px,100%);aspect-ratio:2/3;background-size:cover;background-position:center top;border-radius:12px;margin-bottom:12px}
+.fair-profile[data-profile="jihoo"]{background-image:url('../docs/assets/fair-jihoo-concept.png')}
+.fair-profile[data-profile="naeun"]{background-image:url('../docs/assets/fair-naeun-concept.png')}
+.fair-profile[data-profile="dohyun"]{background-image:url('../docs/assets/fair-dohyun-concept.png')}
+.fair-profile[data-profile="dayeon"]{background-image:url('../docs/assets/fair-dayeon-concept.png')}
+.fair-profile[data-profile="chaerin"]{background-image:url('../docs/assets/fair-chaerin-concept.png')}
+.fair-profile[data-profile="junseo"]{background-image:url('../docs/assets/fair-junseo-concept.png')}
+.cast-member:has(.fair-cast-portrait){aspect-ratio:1/1.25}
+.vn-stage .scene-visual .dialogue-cast .cast-member .portrait.fair-cast-portrait[data-actor]{height:80%}
+.cast-member:has(.fair-cast-portrait) figcaption{bottom:0}
+.fair-story-pixel{max-width:420px;width:100%;aspect-ratio:1.08;background-image:url('../docs/assets/fair-pixel-cutscenes.png');background-size:200% 200%;background-position:var(--fair-cg-x) var(--fair-cg-y);image-rendering:pixelated;border-radius:12px;margin:12px 0}
+
+.vn-stage .scene-visual .dialogue-cast .cast-member .portrait.fair-cast-portrait[data-actor="jihoo"]{background-image:url('../docs/assets/fair-jihoo-acting.png');background-size:300% 200%;background-position:var(--fair-x,0%) var(--fair-y,0%);background-repeat:no-repeat}
+.vn-stage .scene-visual .dialogue-cast .cast-member .portrait.fair-cast-portrait[data-actor="naeun"]{background-image:url('../docs/assets/fair-naeun-acting.png');background-size:300% 200%;background-position:var(--fair-x,0%) var(--fair-y,0%);background-repeat:no-repeat}
+.vn-stage .scene-visual .dialogue-cast .cast-member .portrait.fair-cast-portrait[data-actor="dohyun"]{background-image:url('../docs/assets/fair-dohyun-acting.png');background-size:300% 200%;background-position:var(--fair-x,0%) var(--fair-y,0%);background-repeat:no-repeat}
+.vn-stage .scene-visual .dialogue-cast .cast-member .portrait.fair-cast-portrait[data-actor="dayeon"]{background-image:url('../docs/assets/fair-extra-acting.png');background-size:300% 300%;background-position:0% var(--extra-row,0%);background-repeat:no-repeat}
+.vn-stage .scene-visual .dialogue-cast .cast-member .portrait.fair-cast-portrait[data-actor="chaerin"]{background-image:url('../docs/assets/fair-extra-acting.png');background-size:300% 300%;background-position:50% var(--extra-row,0%);background-repeat:no-repeat}
+.vn-stage .scene-visual .dialogue-cast .cast-member .portrait.fair-cast-portrait[data-actor="junseo"]{background-image:url('../docs/assets/fair-extra-acting.png');background-size:300% 300%;background-position:100% var(--extra-row,0%);background-repeat:no-repeat}

@@ -32,7 +32,7 @@ npm start
 ## 서버 없이 실행
 
 이 채팅의 온보딩 UI에서는 로컬 웹 미리보기를 지원하지 않습니다. 미리보기 패널 오류가 게임 코드 오류라는 뜻은 아닙니다.
-다음 명령으로 이미지·스타일·코드를 포함하는 단일 HTML 파일을 만들 수 있습니다.
+다음 명령으로 이미지·스타일·코드를 포함하는 단일 HTML 파일을 만들 수 있습니다. 빌드에는 Pillow의 WebP 지원이 필요합니다 (`python3 -m pip install Pillow`). 원본 PNG는 유지하고, 배포 HTML 안에서만 무손실 WebP가 더 작은 이미지에 사용됩니다. 게임을 실행하는 플레이어는 Python이나 Pillow를 설치할 필요가 없습니다.
 
 ```sh
 python3 prototype/build_standalone.py /tmp/campus-demo.html

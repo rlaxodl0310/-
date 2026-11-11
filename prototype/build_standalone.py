@@ -5,6 +5,10 @@ import sys
 import re
 import zipfile
 import json
+import io
+import hashlib
+import tempfile
+from PIL import Image
 
 root = Path(__file__).resolve().parent
 destination = Path(sys.argv[1]) if len(sys.argv) > 1 else Path('/tmp/campus-demo.html')
@@ -12,15 +16,30 @@ css = (root / 'style.css').read_text() + '\n' + (root / 'interface.css').read_te
 # Embed each asset once; shared CSS references use in-memory Blob URLs.
 # This keeps the offline file small without CSS custom-property data URL limits.
 assets = {}
+asset_mimes = {}
+cache = Path(tempfile.gettempdir()) / 'campus-lossless-assets-v1'
+cache.mkdir(exist_ok=True)
 for filename in sorted(set(re.findall(r"\.\./docs/assets/([^'\")]+)", css))):
-    assets[filename] = base64.b64encode((root.parent / 'docs/assets' / filename).read_bytes()).decode()
+    original = (root.parent / 'docs/assets' / filename).read_bytes()
+    cached = cache / (hashlib.sha256(original).hexdigest() + '.webp')
+    if not cached.exists():
+        # Packaging only: lossless container conversion, no resizing or source edits.
+        with Image.open(io.BytesIO(original)) as art:
+            output = io.BytesIO()
+            art.save(output, format='WEBP', lossless=True, exact=True, method=2,
+                     **({'icc_profile': art.info['icc_profile']} if art.info.get('icc_profile') else {}))
+            cached.write_bytes(output.getvalue())
+    compressed = cached.read_bytes()
+    raw, mime = (compressed, 'image/webp') if len(compressed) < len(original) else (original, 'image/png')
+    assets[filename] = base64.b64encode(raw).decode()
+    asset_mimes[filename] = mime
     css = css.replace('../docs/assets/' + filename, '__CAMPUS_ASSET_' + filename + '__')
-asset_bootstrap = '<script>(()=>{const assets=' + json.dumps(assets) + ';let css=' + json.dumps(css) + ';for(const [name,data] of Object.entries(assets)){const raw=atob(data),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);const url=URL.createObjectURL(new Blob([bytes],{type:"image/png"}));css=css.split("__CAMPUS_ASSET_"+name+"__").join(url);}const style=document.createElement("style");style.textContent=css;document.head.append(style);})();</script>'
+asset_bootstrap = '<script>(()=>{const assets=' + json.dumps(assets) + ';const mimes=' + json.dumps(asset_mimes) + ';let css=' + json.dumps(css) + ';for(const [name,data] of Object.entries(assets)){const raw=atob(data),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);const url=URL.createObjectURL(new Blob([bytes],{type:mimes[name]}));css=css.split("__CAMPUS_ASSET_"+name+"__").join(url);}const style=document.createElement("style");style.textContent=css;document.head.append(style);})();</script>'
 def inline_module(filename):
     source = (root / filename).read_text()
     source = re.sub(r'^import .*?;\n', '', source, flags=re.MULTILINE)
     return re.sub(r'\bexport (?=async function |function |const )', '', source)
-simulation = inline_module('personal-event-presence.js') + '\n' + inline_module('surroundings-data.js') + '\n' + inline_module('wallet.js') + '\n' + inline_module('supply-aftermath.js') + '\n' + inline_module('supply-story.js') + '\n' + inline_module('campus-rooms.js') + '\n' + inline_module('campus-buildings.js') + '\n' + inline_module('timetable.js') + '\n' + inline_module('weather.js') + '\n' + inline_module('discoveries.js') + '\n' + inline_module('warning-records.js') + '\n' + inline_module('event-view.js') + '\n' + inline_module('identity.js') + '\n' + inline_module('npc-state.js') + '\n' + inline_module('social-reasoning.js') + '\n' + inline_module('conversation-continuity.js') + '\n' + inline_module('situational-dialogue.js') + '\n' + inline_module('conversation-scenes.js') + '\n' + inline_module('campus-variation.js') + '\n' + inline_module('days.js') + '\n' + inline_module('dialogue-generator.js') + '\n' + inline_module('dialogue.js') + '\n' + inline_module('event-engine.js') + '\n' + inline_module('social-memory.js') + '\n' + inline_module('appointments.js') + '\n' + inline_module('risk-decisions.js') + '\n' + inline_module('warnings.js') + '\n' + inline_module('simulation.js') + '\n' + inline_module('library-life.js') + '\n' + inline_module('rain-lunch.js') + '\n' + inline_module('encounters.js')
+simulation = inline_module('fair-events.js') + '\n' + inline_module('personal-event-presence.js') + '\n' + inline_module('surroundings-data.js') + '\n' + inline_module('wallet.js') + '\n' + inline_module('supply-aftermath.js') + '\n' + inline_module('supply-story.js') + '\n' + inline_module('campus-rooms.js') + '\n' + inline_module('campus-buildings.js') + '\n' + inline_module('timetable.js') + '\n' + inline_module('weather.js') + '\n' + inline_module('discoveries.js') + '\n' + inline_module('warning-records.js') + '\n' + inline_module('event-view.js') + '\n' + inline_module('identity.js') + '\n' + inline_module('npc-state.js') + '\n' + inline_module('social-reasoning.js') + '\n' + inline_module('conversation-continuity.js') + '\n' + inline_module('situational-dialogue.js') + '\n' + inline_module('conversation-scenes.js') + '\n' + inline_module('campus-variation.js') + '\n' + inline_module('days.js') + '\n' + inline_module('dialogue-generator.js') + '\n' + inline_module('dialogue.js') + '\n' + inline_module('event-engine.js') + '\n' + inline_module('social-memory.js') + '\n' + inline_module('appointments.js') + '\n' + inline_module('risk-decisions.js') + '\n' + inline_module('warnings.js') + '\n' + inline_module('simulation.js') + '\n' + inline_module('library-life.js') + '\n' + inline_module('rain-lunch.js') + '\n' + inline_module('encounters.js')
 app = inline_module('survival-health-ui.js') + '\n' + inline_module('survival-health.js') + '\n' + inline_module('survival-pack.js') + '\n' + inline_module('survival-pack-ui.js') + '\n' + inline_module('survival-exploration-ui.js') + '\n' + inline_module('survival-exploration.js') + '\n' + inline_module('camp-incidents.js') + '\n' + inline_module('shelter-scene.js') + '\n' + inline_module('survival-base.js') + '\n' + inline_module('survival-ui.js') + '\n' + inline_module('combat-loot-ui.js') + '\n' + inline_module('combat-side-missions.js') + '\n' + inline_module('combat-missions.js') + '\n' + inline_module('combat-grid.js') + '\n' + inline_module('combat-grid-ui.js') + '\n' + inline_module('combat.js') + '\n' + inline_module('combat-ui.js') + '\n' + inline_module('event-cutscenes.js') + '\n' + inline_module('dogyeom-events.js') + '\n' + inline_module('personal-followups.js') + '\n' + inline_module('personal-events.js') + '\n' + inline_module('dialogue-cast.js') + '\n' + inline_module('neighborhood-events.js') + '\n' + inline_module('map-events.js') + '\n' + inline_module('place-backgrounds.js') + '\n' + inline_module('surroundings.js') + '\n' + inline_module('region-map.js') + '\n' + inline_module('campus-map.js') + '\n' + inline_module('navigation-copy.js') + '\n' + inline_module('opportunity-hints.js') + '\n' + inline_module('returning-opening.js') + '\n' + inline_module('fortnight-life.js') + '\n' + inline_module('shops.js') + '\n' + inline_module('iseo-preview.js') + '\n' + inline_module('everyday-life.js') + '\n' + inline_module('cafe-life.js') + '\n' + inline_module('character-acting.js') + '\n' + inline_module('outdoor-life.js') + '\n' + inline_module('activity-scene.js') + '\n' + inline_module('vn-flow.js') + '\n' + inline_module('classes.js') + '\n' + inline_module('campus-moments.js') + '\n' + inline_module('free-roam.js') + '\n' + inline_module('community-simulation.js') + '\n' + inline_module('community.js') + '\n' + inline_module('activity-minigame.js') + '\n' + inline_module('physical-activities.js') + '\n' + inline_module('community-activities.js') + '\n' + inline_module('scene-flow.js') + '\n' + inline_module('campus-time.js') + '\n' + inline_module('dialogue-service.js') + '\n' + inline_module('club-admissions.js') + '\n' + inline_module('utility-ui.js') + '\n' + inline_module('app.js')
 html = (root / 'index.html').read_text()
 html = html.replace('<link rel="stylesheet" href="style.css">', asset_bootstrap)

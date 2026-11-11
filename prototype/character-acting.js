@@ -19,6 +19,7 @@ export function characterActing(state,id,{scene='',text='',listening=false,heard
   else if(mood==='bright')feeling='warm';
   else feeling='neutral';
  }
+ if(['jihoo','naeun','dohyun','dayeon','chaerin','junseo'].includes(id)){if((relation.tension??0)>=3)feeling='serious';return {row:({neutral:0,warm:1,happy:1,bashful:2,surprised:3,worried:3,serious:4})[feeling],atlas:'fair',emotion:feeling,name:actingNames[feeling]};}
  if(id==='dogyeom')return {row:({neutral:0,warm:0,worried:1,serious:2,bashful:3,surprised:4,happy:5})[feeling],atlas:'dogyeom',emotion:feeling,name:actingNames[feeling]};
  // Iseo keeps her own three-pose atlas; never index it as the four-person sheet.
  if(id==='iseo')return {row:feeling==='bashful'?2:['happy','warm'].includes(feeling)?1:0,atlas:'iseo',emotion:feeling,name:actingNames[feeling]};

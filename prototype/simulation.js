@@ -1,3 +1,4 @@
+import {prepareFairVisit} from './fair-events.js';
 import {prepareSupplyAftermath} from './supply-aftermath.js';
 import {prepareCampusVariation} from './campus-variation.js';
 import {timetable,registrationCourses} from './timetable.js';
@@ -18,7 +19,7 @@ export function newGame(profile='acquaintance') {
  changeRelationship(s,'soyul','seoyeon',{familiarity:20,trust:12,affection:8});
  if(profile!=='acquaintance')for(const id of Object.keys(s.npcs))changeRelationship(s,id,'taei',profile==='close'?{familiarity:8,trust:5,affection:5}:{familiarity:6,trust:4,affection:0});
  if(profile!=='acquaintance'){for(const id of Object.keys(s.npcs))introduce(s,id,'relationship-demo');s.dialogue.facts={};for(const id of Object.keys(s.npcs))s.dialogue.facts[id]={speech:'casual'};}
- prepareCampusVariation(s);
+ prepareCampusVariation(s);prepareFairVisit(s);
  for(const [id,place] of Object.entries(currentSchedule(s)))s.npcs[id].location=place;
  return s;
 }
@@ -133,7 +134,7 @@ export function restore(raw){
  s.inventory??=[];s.discoveries??=[];const hadSupplyAftermath=!!s.supplyAftermath;prepareSupplyAftermath(s);if(!hadSupplyAftermath&&s.supplyAftermath)for(const [id,place] of Object.entries(currentSchedule(s)))s.npcs[id].location=place;
  for(const record of Object.values(s.activitySessions?.records??{}))if(record.mini?.phase==='running')record.mini.phase='paused';
  if(s.academics.enabled&&!s.campusVariation){s.campusVariation={seed:s.dialogue.generation?.rng??417193,plans:{}};prepareCampusVariation(s);}
- return s;
+ prepareFairVisit(s);return s;
 }
 
 export function newReturningGame(){const s=newGame();s.academics.registrationPending=true;s.academics.catalogVersion=2;s.academics.courseIds=registrationCourses().filter(c=>c.required).map(c=>c.registrationId);s.opening={step:0,done:false};return s;}
