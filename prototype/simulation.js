@@ -1,3 +1,4 @@
+import {initializeCharacterSystem} from './character-stats.js';
 import {prepareFairVisit} from './fair-events.js';
 import {prepareSupplyAftermath} from './supply-aftermath.js';
 import {prepareCampusVariation} from './campus-variation.js';
@@ -137,4 +138,4 @@ export function restore(raw){
  prepareFairVisit(s);return s;
 }
 
-export function newReturningGame(){const s=newGame();s.academics.registrationPending=true;s.academics.catalogVersion=2;s.academics.courseIds=registrationCourses().filter(c=>c.required).map(c=>c.registrationId);s.opening={step:0,done:false};return s;}
+export function newReturningGame(){const s=newGame();initializeCharacterSystem(s);s.academics.registrationPending=true;s.academics.catalogVersion=2;s.academics.courseIds=registrationCourses().filter(c=>c.required).map(c=>c.registrationId);s.opening={step:0,done:false};return s;}

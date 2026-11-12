@@ -1,3 +1,4 @@
+import {characterPresent} from './character-stats.js';
 import {usesSupplyStory} from './supply-story.js';
 import {noteNpcExperience} from './npc-state.js';
 import {changeRelationship,relationship} from './dialogue.js';
@@ -25,6 +26,7 @@ export function evaluateEvents(state,context,rules){
  const s=prepareEvents(structuredClone(state));
  for(const rule of rules){
   if(!rule.stages.includes(s.world.stage)||rule.trigger!==context.trigger||!rule.when(s,context))continue;
+  const required=typeof rule.participants==='function'?rule.participants(s,context):rule.participants??[];if(required.some(id=>!characterPresent(s,id)))continue;
   const id=typeof rule.id==='function'?rule.id(s,context):rule.id;
   const registered=recordEvent(s,{id,kind:rule.kind,participants:typeof rule.participants==='function'?rule.participants(s,context):rule.participants??[],status:'resolved'});
   if(!registered.created)continue;

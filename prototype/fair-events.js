@@ -1,3 +1,4 @@
+import {characterPresent} from './character-stats.js';
 import {contact,displayName,seePeople,introduce} from './identity.js';
 import {relationship,changeRelationship} from './dialogue.js';
 import {advanceFreeTime} from './free-roam.js';
@@ -13,7 +14,7 @@ export const fairStudents={
 export function prepareFairVisit(s){s.fairVisit??={seed:s.campusVariation?.seed??417193};return s;}
 export function fairVisitDay(s){return [4,9,10][(s.fairVisit?.seed??417193)%3];}
 export function fairStudentLocation(s,id){
- if(!fairStudents[id]||s.day!==fairVisitDay(s)||(s.world?.stage??'campus')!=='campus'||s.clock.minute<600||s.clock.minute>=990)return null;
+ if(!characterPresent(s,id)||!fairStudents[id]||s.day!==fairVisitDay(s)||(s.world?.stage??'campus')!=='campus'||s.clock.minute<600||s.clock.minute>=990)return null;
  const reserved=personalEventPosition(s,id);if(reserved)return reserved;
  const phase=Math.min(4,Math.floor((s.clock.minute-600)/90));
  return fairStudents[id].route[phase];

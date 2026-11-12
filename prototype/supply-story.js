@@ -1,3 +1,4 @@
+import {characterPresent} from './character-stats.js';
 import {contact,displayName,introduce,seePeople} from './identity.js';
 import {npcNow,noteNpcExperience} from './npc-state.js';
 import {schoolLocation,preparationLocation} from './timetable.js';
@@ -13,14 +14,14 @@ export function prepareSupplyStory(s){
  for(const id of supplyIds){
   const now=npcNow({...s,phase:'afternoon',clock:{minute:780}},id),strain=s.relations[id+'>yeogyeong']?.tension??0;
   const chance=(id==='yeogyeong'?.95:.64)+(id==='soyul'&&(s.relations['soyul>seoyeon']?.trust??0)>=8?.12:0)-(now.stress>45?.3:0)-(strain>=4?.3:0);
-  const attending=supplyRandom(g)<chance;
+  const attending=supplyRandom(g)<chance&&characterPresent(s,id);
   const join=id==='yeogyeong'?780:supplyRandom(g)<.25?810:780;
   const leave=id==='yeogyeong'?960:[840,900,960][Math.floor(supplyRandom(g)*3)];
   g.plan[id]={attending,join,leave,role:['labels','carry','check'][Math.floor(supplyRandom(g)*3)]};
  }
 }
 function supplyCanAttend(s,id){
- if(schoolLocation(s,id)||preparationLocation(s,id))return false;
+ if(!characterPresent(s,id)||schoolLocation(s,id)||preparationLocation(s,id))return false;
  if((s.appointments??[]).some(a=>a.person===id&&a.kind==='meeting'&&a.status==='pending'&&a.day===s.day&&a.location!=='hall'&&Math.abs(s.clock.minute-(a.minute??900))<=30))return false;
  const lunch=s.rainLunch?.episodes?.[s.rainLunch?.active];return !(lunch?.person===id&&lunch.status==='active'&&lunch.day===s.day&&lunch.location!=='hall');
 }

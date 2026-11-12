@@ -1,3 +1,4 @@
+import {characterPresent} from './character-stats.js';
 import {socialOpinion} from './social-memory.js';
 import {contact} from './identity.js';
 import {socialIntent} from './social-reasoning.js';
@@ -21,6 +22,7 @@ export function joinClub(state,id){
  return s;
 }
 function invitationReady(s,id){
+ if(!characterPresent(s,id))return false;
  const intent=socialIntent(s,id);
  return contact(s,id).introduced&&intent.mode!=='guarded'&&!intent.unresolved&&(s.relations[`${id}>taei`]?.tension??0)<3;
 }

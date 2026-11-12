@@ -1,3 +1,4 @@
+import {enabledAttributes} from './character-stats.js';
 import {ensureSurvivalHealth,survivalCondition,spendSurvivalEffort,careSurvivalWound,advanceSurvivalHealth} from './survival-health.js';
 import {createSurvivalPack,ensureSurvivalPack,assertPackExplorationReady,createPackLoot,consumePackedRations,mountCombatPack,restoreCombatPack} from './survival-pack.js';
 import {survivalRoomCatalog,createSurvivalExploration,ensureSurvivalExploration,survivalSiteObservation,inspectSurvivalRoom,recordSurvivalClearance} from './survival-exploration.js';
@@ -19,7 +20,7 @@ export function survivalMemberName(state,member){return member.label??(member.ch
 export function startSurvival(state,ally='student',{seed=Math.floor(Math.random()*4294967296)}={}){
  if(state.survivalRun)throw new Error('이미 진행 중인 생존 기록이 있어요. 저장된 흐름을 이어가세요.');
  if(!survivalCompanions(state).includes(ally))throw new Error('현재 알고 있는 동료를 골라 주세요.');
- const s=structuredClone(state),person=(key,character)=>({key,character,job:'rest',fatigue:15,stress:20,injury:0,nutrition:80,hydration:80,woundDays:0,woundRisk:0,caredDay:null});
+ const s=structuredClone(state),person=(key,character)=>({key,character,...enabledAttributes(state,character),job:'rest',fatigue:15,stress:20,injury:0,nutrition:80,hydration:80,woundDays:0,woundRisk:0,caredDay:null});
  s.survivalRun={version:1,exploration:createSurvivalExploration(seed),story:{seed:seed>>>0,last:[],checkedDay:0,current:null,pending:[],resolved:[]},status:'active',stage:'flight',day:1,actions:3,escapes:0,threat:24,shortage:0,resources:{food:6,water:6,bandage:2,parts:4},members:[person('taei','taei'),person('ally',ally)],scouted:{},secured:{},base:null,searchDay:0,sortieSequence:0,activeSortie:null,completedSorties:[],log:['사태 첫날. 아직 머무를 곳은 없다. 동료와 흩어지지 않고 오늘을 넘기는 것부터 생각한다.'],history:[]};const kit=s.survivalRun.kit=createSurvivalPack(seed);kit.items={water:2,bandage:1,energybar:1};s.survivalRun.resources.water-=2;s.survivalRun.resources.bandage--;return s;
 }
 export function restartSurvival(state){
@@ -76,7 +77,7 @@ export function launchSurvivalSortie(state,kind,siteId){
  if(r0.members.filter(m=>m.key==='taei'||m.key==='ally').some(m=>survivalCondition(m).critical))throw new Error('원정 인원이 부상을 치료한 뒤 출발해야 해요.');
  const previous=structuredClone(state.combatTrial??null),prepared=structuredClone(state);spendSurvivalEffort(prepared.survivalRun,2,3);prepared.combatTrial={stash:{runs:r0.sortieSequence,items:{water:r0.resources.water,bandage:r0.resources.bandage,parts:r0.resources.parts},claimed:[]}};
  const ally=r0.members.find(m=>m.key==='ally'),s=startGridCombat(prepared,ally.character,mission),r=s.survivalRun;r.actions--;r.sortieSequence++;r.activeSortie={id:r.sortieSequence,kind,siteId:siteId??null,previousCombat:previous};if(r.kit)mountCombatPack(r,s.combatTrial);else{r.resources.water=0;r.resources.bandage=0;r.resources.parts=0;}s.combatTrial.items.water=0;s.combatTrial.survivalSortie=r.activeSortie.id;s.combatTrial.survivalContext={kind,title:kind==='escape'?'흩어지지 말고 빠져나가':kind==='secure'?survivalSites[siteId].name+' 확보':kind==='supply'?'거점 보급 원정':kind==='rescue'?'부상 학생 구조':'거점 주변 방어',location:kind==='secure'?survivalSites[siteId].name:'캠퍼스 생존 작전'};
- for(const key of ['taei','ally']){const member=r.members.find(m=>m.key===key),actor=s.combatTrial.actors[key];ensureSurvivalHealth(member);const condition=survivalCondition(member);actor.stamina=condition.stamina;actor.fear=condition.fear;actor.hunger=100-member.nutrition;actor.thirst=100-member.hydration;actor.wounds=Math.min(2,member.injury);}
+ for(const key of ['taei','ally']){const member=r.members.find(m=>m.key===key),actor=s.combatTrial.actors[key];ensureSurvivalHealth(member);if(member.attributes)actor.attributes={...member.attributes};const condition=survivalCondition(member);actor.stamina=condition.stamina;actor.fear=condition.fear;actor.hunger=100-member.nutrition;actor.thirst=100-member.hydration;actor.wounds=Math.min(2,member.injury);}
  if(kind==='secure'){const room=survivalSiteObservation(r,siteId),spots=[[6,4],[8,3],[9,4],[9,3]];s.combatTrial.reinforced=!!room.reinforced;s.combatTrial.enemies=spots.slice(0,room.occupants).map(([x,y],i)=>({id:i+1,x,y,balance:2,stun:0}));s.combatTrial.log=[`${survivalSites[siteId].name} 내부에서 확인한 감염체 ${room.occupants}마리를 제압해야 한다.`];}
  s.combatTrial.optional.initialWounds=Object.fromEntries(Object.entries(s.combatTrial.actors).map(([key,a])=>[key,a.wounds]));
  survivalLog(r,r.kit?'준비한 가방을 메고 작전에 나섰다. 공동 보관 물자는 두고 간다.':'작전에 나섰다. 창고 물자를 휴대하며, 복귀 전에는 거점 행동을 할 수 없다.');return s;

@@ -1,3 +1,4 @@
+import {characterPresent} from './character-stats.js';
 import {fairStories,fairEventsAt,beginFairEvent,fairEventView,progressFairEvent} from './fair-events.js';
 import {dogyeomStories,dogyeomEventsAt,beginDogyeomEvent,dogyeomEventView,progressDogyeomEvent} from './dogyeom-events.js';
 import {personalFollowups,followupGameOutcome} from './personal-followups.js';
@@ -53,8 +54,9 @@ function followupAvailable(s,id,d,place){
  if(d.person==='iseo')return (personalEventPosition(s,'iseo')??iseoEventLocation(s))===place;
  return contact(s,d.person).introduced&&s.clock.minute<1080&&(personalEventPosition(s,d.person)===place||presentPeople({...s,location:place},place).includes(d.person))&&!npcNow(s,d.person).rushed;
 }
-export function personalEventsAt(s,place=s.location){if(s.academics?.registrationPending||s.freeDay?.home)return [];return [...fairEventsAt(s,place),...dogyeomEventsAt(s,place),...firstPersonalEventsAt(s,place),...Object.entries(personalFollowups).filter(([id,d])=>followupAvailable(s,id,d,place)).map(([eventId,d])=>({eventId,person:d.person,title:d.person==='iseo'&&!contact(s,'iseo').introduced?'다시 마주친 운동복 학생':d.title,resuming:s.personalEvents?.records?.[eventId]?.status==='paused'}))];}
+export function personalEventsAt(s,place=s.location){if(s.academics?.registrationPending||s.freeDay?.home)return [];return [...fairEventsAt(s,place),...dogyeomEventsAt(s,place),...firstPersonalEventsAt(s,place),...Object.entries(personalFollowups).filter(([id,d])=>followupAvailable(s,id,d,place)).map(([eventId,d])=>({eventId,person:d.person,title:d.person==='iseo'&&!contact(s,'iseo').introduced?'다시 마주친 운동복 학생':d.title,resuming:s.personalEvents?.records?.[eventId]?.status==='paused'}))].filter(e=>characterPresent(s,e.person));}
 export function beginPersonalEvent(state,eventId){
+ const candidate=personalEventDefinition(eventId);if(candidate&&!characterPresent(state,candidate.person??eventId))throw new Error('지금 만날 수 없는 인물입니다.');
  if(fairStories[eventId])return beginFairEvent(state,eventId);
  if(dogyeomStories[eventId])return beginDogyeomEvent(state,eventId);
  const d=personalFollowups[eventId];if(!d)return beginFirstPersonalEvent(state,eventId);

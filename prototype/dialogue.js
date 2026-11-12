@@ -1,3 +1,4 @@
+import {characterPresent} from './character-stats.js';
 import {usesGeneratedDialogue,generateDialogueTurn,advanceGeneratedDialogue} from './dialogue-generator.js';
 import {npcNow,conversationExperience} from './npc-state.js';
 import {followupCandidate,rememberConversation} from './conversation-continuity.js';
@@ -251,6 +252,7 @@ function advanceScene(state,id,choice){
 }
 
 export function openConversation(state,id,context=null){
+ if(!characterPresent(state,id))throw new Error('지금 만날 수 없는 인물입니다.');
  if(!contact(state,id).introduced){const s=structuredClone(state);s.contacts??={};s.contacts[id]={...contact(s,id),seen:true,approaches:contact(s,id).approaches+1};return {state:s,result:null};}
  const current=dialogue(state,id),intent=socialIntent(state,id);
  if(current.scene)return {state,result:null};

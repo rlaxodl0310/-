@@ -1,3 +1,4 @@
+import {abilityPenaltyFactors} from './character-stats.js';
 // Positive meters: full stomach / hydration fall as supplies run short.
 const healthClamp=n=>Math.max(0,Math.min(100,Math.round(n)));
 export function survivalHealth(member){
@@ -7,11 +8,11 @@ export function ensureSurvivalHealth(member){Object.assign(member,survivalHealth
 export function survivalStaminaCap(nutrition,hydration){return 100-(nutrition<=15?20:nutrition<=35?10:0)-(hydration<=15?30:hydration<=35?15:0);}
 export function survivalCondition(member){
  const h=survivalHealth(member),food=h.nutrition<=15?12:h.nutrition<=35?6:0,water=h.hydration<=15?20:h.hydration<=35?10:0,wound=h.woundRisk>=80?15:h.woundRisk>=50?7:0;
- const staminaCap=survivalStaminaCap(h.nutrition,h.hydration);
- return {...h,staminaCap,stamina:Math.min(staminaCap,Math.max(10,100-Math.floor(member.fatigue/2)-food-water-wound)),fear:Math.min(90,15+Math.floor(member.stress/2)+Math.floor((food+water)/2)+Math.floor(wound/2)),critical:member.injury>=3||h.woundRisk>=80||h.hydration===0&&h.dryNights>=3||h.nutrition===0&&h.starveNights>=5,warning:[h.nutrition<=35?'식량 부족':null,h.hydration<=35?'수분 부족':null,h.woundRisk>=50?'상처 악화 위험':null].filter(Boolean)};
+ const staminaCap=survivalStaminaCap(h.nutrition,h.hydration),f=abilityPenaltyFactors(member);
+ return {...h,staminaCap,stamina:Math.min(staminaCap,Math.max(10,100-Math.floor(member.fatigue/2)-Math.round(((food+water)*f.endurance+wound)*f.mentality))),fear:Math.min(90,15+Math.floor(member.stress/2)+Math.floor((food+water)/2)+Math.floor(wound/2)),critical:member.injury>=3||h.woundRisk>=80||h.hydration===0&&h.dryNights>=3||h.nutrition===0&&h.starveNights>=5,warning:[h.nutrition<=35?'식량 부족':null,h.hydration<=35?'수분 부족':null,h.woundRisk>=50?'상처 악화 위험':null].filter(Boolean)};
 }
 export function spendSurvivalEffort(run,food=3,water=5,keys=['taei','ally']){
- for(const m of run.members.filter(m=>keys.includes(m.key))){ensureSurvivalHealth(m);m.nutrition=healthClamp(m.nutrition-food);m.hydration=healthClamp(m.hydration-water);const c=survivalCondition(m);if(c.nutrition<=35||c.hydration<=35){m.fatigue=healthClamp(m.fatigue+(c.nutrition<=15?4:c.nutrition<=35?2:0)+(c.hydration<=15?6:c.hydration<=35?3:0));m.stress=healthClamp(m.stress+(c.nutrition<=35?2:0)+(c.hydration<=35?3:0));}}
+ for(const m of run.members.filter(m=>keys.includes(m.key))){ensureSurvivalHealth(m);m.nutrition=healthClamp(m.nutrition-food);m.hydration=healthClamp(m.hydration-water);const c=survivalCondition(m);if(c.nutrition<=35||c.hydration<=35){const f=abilityPenaltyFactors(m);m.fatigue=healthClamp(m.fatigue+((c.nutrition<=15?4:c.nutrition<=35?2:0)+(c.hydration<=15?6:c.hydration<=35?3:0))*f.endurance);m.stress=healthClamp(m.stress+((c.nutrition<=35?2:0)+(c.hydration<=35?3:0))*f.endurance);}}
 }
 export function feedSurvivalMember(member,id){
  ensureSurvivalHealth(member);if(id==='water')member.hydration=healthClamp(member.hydration+40);else member.nutrition=healthClamp(member.nutrition+({food:35,canned:45,energybar:15}[id]??0));
@@ -24,7 +25,7 @@ export function advanceSurvivalHealth(run,foodCount,waterCount,day){
  for(let i=0;i<order.length;i++){
   const m=ensureSurvivalHealth(order[i]),fed=i<foodCount,drank=i<waterCount;m.nutrition=healthClamp(m.nutrition-22+(fed?40:0));m.hydration=healthClamp(m.hydration-28+(drank?48:0));
   const foodPenalty=m.nutrition<=15?10:m.nutrition<=35?5:0,waterPenalty=m.hydration<=15?16:m.hydration<=35?8:0;
-  m.fatigue=healthClamp(m.fatigue+foodPenalty+waterPenalty);m.stress=healthClamp(m.stress+Math.ceil(foodPenalty/2)+Math.ceil(waterPenalty/2));
+  const factors=abilityPenaltyFactors(m);m.fatigue=healthClamp(m.fatigue+(foodPenalty+waterPenalty)*factors.endurance);m.stress=healthClamp(m.stress+(Math.ceil(foodPenalty/2)+Math.ceil(waterPenalty/2))*factors.endurance);
   m.starveNights=m.nutrition===0?m.starveNights+1:0;m.dryNights=m.hydration===0?m.dryNights+1:0;
   if(m.key==='taei'&&(m.dryNights>=3||m.starveNights>=5)){run.status='overrun';events.push('태이가 장기간의 '+(m.dryNights>=3?'수분 고갈':'영양 고갈')+'로 더는 움직일 수 없다. 이번 생존 기록이 끝났다.');}
   if(!fed||!drank)events.push(`${m.key} · ${!fed?'식량 부족 ':''}${!drank?'물 부족 ':''}(포만감 ${m.nutrition} · 수분 ${m.hydration}).`);
