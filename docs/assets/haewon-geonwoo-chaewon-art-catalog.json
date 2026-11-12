@@ -1,0 +1,307 @@
+{
+  "status": "review-assets-not-runtime-events",
+  "characters": {
+    "haewon": "장해원",
+    "geonwoo": "이건우",
+    "chaewon": "문채원"
+  },
+  "scenes": [
+    {
+      "id": "haewon-profiles-1",
+      "character": "haewon",
+      "title": "기본 프로필",
+      "type": "profiles",
+      "sheet": "haewon-geonwoo-chaewon-profiles.png",
+      "column": 0,
+      "row": 0,
+      "columns": 3,
+      "rows": 1
+    },
+    {
+      "id": "geonwoo-profiles-1",
+      "character": "geonwoo",
+      "title": "기본 프로필",
+      "type": "profiles",
+      "sheet": "haewon-geonwoo-chaewon-profiles.png",
+      "column": 1,
+      "row": 0,
+      "columns": 3,
+      "rows": 1
+    },
+    {
+      "id": "chaewon-profiles-1",
+      "character": "chaewon",
+      "title": "기본 프로필",
+      "type": "profiles",
+      "sheet": "haewon-geonwoo-chaewon-profiles.png",
+      "column": 2,
+      "row": 0,
+      "columns": 3,
+      "rows": 1
+    },
+    {
+      "id": "haewon-expressions-1",
+      "character": "haewon",
+      "title": "친근한 경청",
+      "type": "expressions",
+      "sheet": "haewon-geonwoo-chaewon-expressions.png",
+      "column": 0,
+      "row": 0,
+      "columns": 3,
+      "rows": 3
+    },
+    {
+      "id": "geonwoo-expressions-1",
+      "character": "geonwoo",
+      "title": "어색한 미소",
+      "type": "expressions",
+      "sheet": "haewon-geonwoo-chaewon-expressions.png",
+      "column": 1,
+      "row": 0,
+      "columns": 3,
+      "rows": 3
+    },
+    {
+      "id": "chaewon-expressions-1",
+      "character": "chaewon",
+      "title": "정중한 응대",
+      "type": "expressions",
+      "sheet": "haewon-geonwoo-chaewon-expressions.png",
+      "column": 2,
+      "row": 0,
+      "columns": 3,
+      "rows": 3
+    },
+    {
+      "id": "haewon-expressions-2",
+      "character": "haewon",
+      "title": "정보 설명",
+      "type": "expressions",
+      "sheet": "haewon-geonwoo-chaewon-expressions.png",
+      "column": 0,
+      "row": 1,
+      "columns": 3,
+      "rows": 3
+    },
+    {
+      "id": "geonwoo-expressions-2",
+      "character": "geonwoo",
+      "title": "소탈한 웃음",
+      "type": "expressions",
+      "sheet": "haewon-geonwoo-chaewon-expressions.png",
+      "column": 1,
+      "row": 1,
+      "columns": 3,
+      "rows": 3
+    },
+    {
+      "id": "chaewon-expressions-2",
+      "character": "chaewon",
+      "title": "안도",
+      "type": "expressions",
+      "sheet": "haewon-geonwoo-chaewon-expressions.png",
+      "column": 2,
+      "row": 1,
+      "columns": 3,
+      "rows": 3
+    },
+    {
+      "id": "haewon-expressions-3",
+      "character": "haewon",
+      "title": "보고 전 망설임",
+      "type": "expressions",
+      "sheet": "haewon-geonwoo-chaewon-expressions.png",
+      "column": 0,
+      "row": 2,
+      "columns": 3,
+      "rows": 3
+    },
+    {
+      "id": "geonwoo-expressions-3",
+      "character": "geonwoo",
+      "title": "방어적인 태도",
+      "type": "expressions",
+      "sheet": "haewon-geonwoo-chaewon-expressions.png",
+      "column": 1,
+      "row": 2,
+      "columns": 3,
+      "rows": 3
+    },
+    {
+      "id": "chaewon-expressions-3",
+      "character": "chaewon",
+      "title": "억눌린 분노",
+      "type": "expressions",
+      "sheet": "haewon-geonwoo-chaewon-expressions.png",
+      "column": 2,
+      "row": 2,
+      "columns": 3,
+      "rows": 3
+    },
+    {
+      "id": "haewon-cutscenes-1",
+      "character": "haewon",
+      "title": "캠퍼스 정보 정리",
+      "type": "cutscenes",
+      "sheet": "haewon-geonwoo-chaewon-cutscenes.png",
+      "column": 0,
+      "row": 0,
+      "columns": 3,
+      "rows": 2
+    },
+    {
+      "id": "geonwoo-cutscenes-1",
+      "character": "geonwoo",
+      "title": "계단에서 짐 나르기",
+      "type": "cutscenes",
+      "sheet": "haewon-geonwoo-chaewon-cutscenes.png",
+      "column": 1,
+      "row": 0,
+      "columns": 3,
+      "rows": 2
+    },
+    {
+      "id": "chaewon-cutscenes-1",
+      "character": "chaewon",
+      "title": "커피 내주기",
+      "type": "cutscenes",
+      "sheet": "haewon-geonwoo-chaewon-cutscenes.png",
+      "column": 2,
+      "row": 0,
+      "columns": 3,
+      "rows": 2
+    },
+    {
+      "id": "haewon-cutscenes-2",
+      "character": "haewon",
+      "title": "전달을 고민하는 순간",
+      "type": "cutscenes",
+      "sheet": "haewon-geonwoo-chaewon-cutscenes.png",
+      "column": 0,
+      "row": 1,
+      "columns": 3,
+      "rows": 2
+    },
+    {
+      "id": "geonwoo-cutscenes-2",
+      "character": "geonwoo",
+      "title": "닫힌 문 앞 제지",
+      "type": "cutscenes",
+      "sheet": "haewon-geonwoo-chaewon-cutscenes.png",
+      "column": 1,
+      "row": 1,
+      "columns": 3,
+      "rows": 2
+    },
+    {
+      "id": "chaewon-cutscenes-2",
+      "character": "chaewon",
+      "title": "흐트러진 카운터 정리",
+      "type": "cutscenes",
+      "sheet": "haewon-geonwoo-chaewon-cutscenes.png",
+      "column": 2,
+      "row": 1,
+      "columns": 3,
+      "rows": 2
+    },
+    {
+      "id": "haewon-pixel-scenes-1",
+      "character": "haewon",
+      "title": "휴대폰과 메모 비교",
+      "type": "pixel-scenes",
+      "sheet": "haewon-geonwoo-chaewon-pixel-scenes.png",
+      "column": 0,
+      "row": 0,
+      "columns": 3,
+      "rows": 3
+    },
+    {
+      "id": "geonwoo-pixel-scenes-1",
+      "character": "geonwoo",
+      "title": "식료품 상자 운반",
+      "type": "pixel-scenes",
+      "sheet": "haewon-geonwoo-chaewon-pixel-scenes.png",
+      "column": 1,
+      "row": 0,
+      "columns": 3,
+      "rows": 3
+    },
+    {
+      "id": "chaewon-pixel-scenes-1",
+      "character": "chaewon",
+      "title": "컵과 받침 정렬",
+      "type": "pixel-scenes",
+      "sheet": "haewon-geonwoo-chaewon-pixel-scenes.png",
+      "column": 2,
+      "row": 0,
+      "columns": 3,
+      "rows": 3
+    },
+    {
+      "id": "haewon-pixel-scenes-2",
+      "character": "haewon",
+      "title": "알림에 놀라기",
+      "type": "pixel-scenes",
+      "sheet": "haewon-geonwoo-chaewon-pixel-scenes.png",
+      "column": 0,
+      "row": 1,
+      "columns": 3,
+      "rows": 3
+    },
+    {
+      "id": "geonwoo-pixel-scenes-2",
+      "character": "geonwoo",
+      "title": "웃으며 신발끈 묶기",
+      "type": "pixel-scenes",
+      "sheet": "haewon-geonwoo-chaewon-pixel-scenes.png",
+      "column": 1,
+      "row": 1,
+      "columns": 3,
+      "rows": 3
+    },
+    {
+      "id": "chaewon-pixel-scenes-2",
+      "character": "chaewon",
+      "title": "완성한 라테에 만족",
+      "type": "pixel-scenes",
+      "sheet": "haewon-geonwoo-chaewon-pixel-scenes.png",
+      "column": 2,
+      "row": 1,
+      "columns": 3,
+      "rows": 3
+    },
+    {
+      "id": "haewon-pixel-scenes-3",
+      "character": "haewon",
+      "title": "메시지 앞 망설임",
+      "type": "pixel-scenes",
+      "sheet": "haewon-geonwoo-chaewon-pixel-scenes.png",
+      "column": 0,
+      "row": 2,
+      "columns": 3,
+      "rows": 3
+    },
+    {
+      "id": "geonwoo-pixel-scenes-3",
+      "character": "geonwoo",
+      "title": "문 앞에서 멈춰 세우기",
+      "type": "pixel-scenes",
+      "sheet": "haewon-geonwoo-chaewon-pixel-scenes.png",
+      "column": 1,
+      "row": 2,
+      "columns": 3,
+      "rows": 3
+    },
+    {
+      "id": "chaewon-pixel-scenes-3",
+      "character": "chaewon",
+      "title": "쏟아진 컵에 답답함",
+      "type": "pixel-scenes",
+      "sheet": "haewon-geonwoo-chaewon-pixel-scenes.png",
+      "column": 2,
+      "row": 2,
+      "columns": 3,
+      "rows": 3
+    }
+  ]
+}
