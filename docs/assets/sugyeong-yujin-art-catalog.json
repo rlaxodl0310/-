@@ -1,0 +1,229 @@
+{
+  "status": "review-assets-not-runtime-events",
+  "characters": {
+    "sugyeong": "임수경",
+    "yujin": "백유진"
+  },
+  "scenes": [
+    {
+      "id": "sugyeong-1-1",
+      "character": "sugyeong",
+      "title": "경청",
+      "sheet": "sugyeong-yujin-expressions.png",
+      "column": 0,
+      "row": 0,
+      "columns": 4,
+      "rows": 2,
+      "type": "expression"
+    },
+    {
+      "id": "sugyeong-1-2",
+      "character": "sugyeong",
+      "title": "안도",
+      "sheet": "sugyeong-yujin-expressions.png",
+      "column": 1,
+      "row": 0,
+      "columns": 4,
+      "rows": 2,
+      "type": "expression"
+    },
+    {
+      "id": "sugyeong-1-3",
+      "character": "sugyeong",
+      "title": "단호한 설명",
+      "sheet": "sugyeong-yujin-expressions.png",
+      "column": 2,
+      "row": 0,
+      "columns": 4,
+      "rows": 2,
+      "type": "expression"
+    },
+    {
+      "id": "sugyeong-1-4",
+      "character": "sugyeong",
+      "title": "책임의 부담",
+      "sheet": "sugyeong-yujin-expressions.png",
+      "column": 3,
+      "row": 0,
+      "columns": 4,
+      "rows": 2,
+      "type": "expression"
+    },
+    {
+      "id": "yujin-1-5",
+      "character": "yujin",
+      "title": "반가운 인사",
+      "sheet": "sugyeong-yujin-expressions.png",
+      "column": 0,
+      "row": 1,
+      "columns": 4,
+      "rows": 2,
+      "type": "expression"
+    },
+    {
+      "id": "yujin-1-6",
+      "character": "yujin",
+      "title": "장난스러운 자신감",
+      "sheet": "sugyeong-yujin-expressions.png",
+      "column": 1,
+      "row": 1,
+      "columns": 4,
+      "rows": 2,
+      "type": "expression"
+    },
+    {
+      "id": "yujin-1-7",
+      "character": "yujin",
+      "title": "경계",
+      "sheet": "sugyeong-yujin-expressions.png",
+      "column": 2,
+      "row": 1,
+      "columns": 4,
+      "rows": 2,
+      "type": "expression"
+    },
+    {
+      "id": "yujin-1-8",
+      "character": "yujin",
+      "title": "머뭇거림",
+      "sheet": "sugyeong-yujin-expressions.png",
+      "column": 3,
+      "row": 1,
+      "columns": 4,
+      "rows": 2,
+      "type": "expression"
+    },
+    {
+      "id": "sugyeong-2-1",
+      "character": "sugyeong",
+      "title": "예약 열쇠 전달",
+      "sheet": "sugyeong-yujin-cutscenes.png",
+      "column": 0,
+      "row": 0,
+      "columns": 2,
+      "rows": 2,
+      "type": "cutscene"
+    },
+    {
+      "id": "yujin-2-2",
+      "character": "yujin",
+      "title": "근무 후 간식",
+      "sheet": "sugyeong-yujin-cutscenes.png",
+      "column": 1,
+      "row": 0,
+      "columns": 2,
+      "rows": 2,
+      "type": "cutscene"
+    },
+    {
+      "id": "sugyeong-2-3",
+      "character": "sugyeong",
+      "title": "닫힌 문과 배급 고민",
+      "sheet": "sugyeong-yujin-cutscenes.png",
+      "column": 0,
+      "row": 1,
+      "columns": 2,
+      "rows": 2,
+      "type": "cutscene"
+    },
+    {
+      "id": "yujin-2-4",
+      "character": "yujin",
+      "title": "물자 앞에서 주위를 살피기",
+      "sheet": "sugyeong-yujin-cutscenes.png",
+      "column": 1,
+      "row": 1,
+      "columns": 2,
+      "rows": 2,
+      "type": "cutscene"
+    },
+    {
+      "id": "sugyeong-3-1",
+      "character": "sugyeong",
+      "title": "열쇠 정리",
+      "sheet": "sugyeong-yujin-pixel-scenes.png",
+      "column": 0,
+      "row": 0,
+      "columns": 4,
+      "rows": 2,
+      "type": "pixel-sd"
+    },
+    {
+      "id": "sugyeong-3-2",
+      "character": "sugyeong",
+      "title": "흩날리는 서류",
+      "sheet": "sugyeong-yujin-pixel-scenes.png",
+      "column": 1,
+      "row": 0,
+      "columns": 4,
+      "rows": 2,
+      "type": "pixel-sd"
+    },
+    {
+      "id": "sugyeong-3-3",
+      "character": "sugyeong",
+      "title": "짧은 차 한 잔",
+      "sheet": "sugyeong-yujin-pixel-scenes.png",
+      "column": 2,
+      "row": 0,
+      "columns": 4,
+      "rows": 2,
+      "type": "pixel-sd"
+    },
+    {
+      "id": "sugyeong-3-4",
+      "character": "sugyeong",
+      "title": "단호한 출입 안내",
+      "sheet": "sugyeong-yujin-pixel-scenes.png",
+      "column": 3,
+      "row": 0,
+      "columns": 4,
+      "rows": 2,
+      "type": "pixel-sd"
+    },
+    {
+      "id": "yujin-3-5",
+      "character": "yujin",
+      "title": "활발한 인사",
+      "sheet": "sugyeong-yujin-pixel-scenes.png",
+      "column": 0,
+      "row": 1,
+      "columns": 4,
+      "rows": 2,
+      "type": "pixel-sd"
+    },
+    {
+      "id": "yujin-3-6",
+      "character": "yujin",
+      "title": "행복한 간식",
+      "sheet": "sugyeong-yujin-pixel-scenes.png",
+      "column": 1,
+      "row": 1,
+      "columns": 4,
+      "rows": 2,
+      "type": "pixel-sd"
+    },
+    {
+      "id": "yujin-3-7",
+      "character": "yujin",
+      "title": "물품 카트 운반",
+      "sheet": "sugyeong-yujin-pixel-scenes.png",
+      "column": 2,
+      "row": 1,
+      "columns": 4,
+      "rows": 2,
+      "type": "pixel-sd"
+    },
+    {
+      "id": "yujin-3-8",
+      "character": "yujin",
+      "title": "문 너머 살피기",
+      "sheet": "sugyeong-yujin-pixel-scenes.png",
+      "column": 3,
+      "row": 1,
+      "columns": 4,
+      "rows": 2,
+      "type": "pixel-sd"
+    }
+  ]
+}
