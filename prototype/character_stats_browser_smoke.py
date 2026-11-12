@@ -13,7 +13,7 @@ try:
    for width in [390,1440]:
     page=browser.new_page(viewport={'width':width,'height':900},reduced_motion='reduce');page.set_default_timeout(10000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(base+path);confirm_returning_plan(page)
     page.evaluate("s=>localStorage.setItem('campus.slot.1',JSON.stringify(s))",fixture);page.reload();page.locator('.opening-tools [data-action="openQuick"]').click();page.locator('[data-action="load"][data-value="1"]').click();page.locator('[data-navigation-back]').first.click()
-    open_tool(page,'characterStats');assert page.locator('[data-stats-character]').count()==1;assert page.locator('.ability-grid dt').all_text_contents()==['힘','민첩','체력','인내','정신력'];assert '정이서' not in page.locator('#app').inner_text();assert page.locator('.ability-card').inner_text().count('/10')==5
+    open_tool(page,'characterStats');assert page.locator('[data-stats-character]').count()==1;assert page.locator('.ability-grid dt').all_text_contents()==['힘','민첩','체력','인내','정신력'];assert '정이서' not in page.locator('#app').inner_text();assert page.locator('.ability-grid small').all_text_contents()==['/18','/20','/46','/38','/42']
     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1');page.locator('summary').click();assert '성인 남성 평균2~5' in page.locator('#app').inner_text();page.locator('summary').click()
     if path=='/prototype/':page.screenshot(path=f'/tmp/character-stats-{width}.png',full_page=True)
     page.locator('[data-navigation-back]').first.click();page.locator('[data-action="go"][data-value="combatSetup"]').click();page.locator('[data-action="combatStart"]').click()

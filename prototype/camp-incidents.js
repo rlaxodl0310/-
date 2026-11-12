@@ -38,7 +38,7 @@ export function checkCampIncident(state){
 }
 function applyCampChange(r,change={}){
  for(const [key,value] of Object.entries(change)){
-  if(key==='stress'||key==='fatigue')for(const m of r.members)m[key]=incidentClamp(m[key]+value);
+  if(key==='stress'||key==='fatigue')for(const m of r.members.filter(m=>!['away','departed'].includes(m.mind?.state)))m[key]=incidentClamp(m[key]+value);
   else if(key==='threat')r.threat=incidentClamp(r.threat+value);
   else r.resources[key]=Math.max(0,r.resources[key]+value);
  }

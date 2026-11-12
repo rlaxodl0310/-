@@ -1,3 +1,4 @@
+import {gainCharacterPractice} from './character-stats.js';
 import {usesSupplyStory,prepareSupplyStory,supplyIntro,supplyPeople,supplyStage,progressSupplyStory,finishSupplyPlayer} from './supply-story.js';
 import {needsActivityMiniGame,createActivityMiniGame} from './activity-minigame.js';
 import {physicalActivityDefinitions,preparePhysicalActivity,physicalActivityStage,performPhysicalAction,physicalActivityOutcome} from './physical-activities.js';
@@ -118,6 +119,7 @@ export function progressCommunityActivity(state,choice){
   else if(def.physical){
    s.freeDay??={completed:[],settled:false};s.freeDay.completed.push({id:r.routeId,start:r.startedAt,end:s.clock.minute,activeMinutes:r.spent});s.lastResult='';
   }else s=finishFreeActivity(s,r.routeId,r.route,{start:r.startedAt,activeMinutes:r.spent});r=currentCommunityActivity(s);r.status='completed';r.finishedAt=s.clock.minute;
+  if(def.physical&&['basketball','carryRelay'].includes(def.route)){gainCharacterPractice(s,'taei','vitality',3);gainCharacterPractice(s,'taei',def.route==='basketball'?'agility':'strength',2);}
   if(!r.supplyGroup)s.lastResult+=' '+communityActivityOutcome(r);
   r.result=s.lastResult;s.memory.push(`[${s.day}일차] ${def.title} 공개 체험을 마쳤다. 가입 여부는 아직 별개다.`);
  }

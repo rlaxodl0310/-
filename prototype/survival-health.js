@@ -12,7 +12,7 @@ export function survivalCondition(member){
  return {...h,staminaCap,stamina:Math.min(staminaCap,Math.max(10,100-Math.floor(member.fatigue/2)-Math.round(((food+water)*f.endurance+wound)*f.mentality))),fear:Math.min(90,15+Math.floor(member.stress/2)+Math.floor((food+water)/2)+Math.floor(wound/2)),critical:member.injury>=3||h.woundRisk>=80||h.hydration===0&&h.dryNights>=3||h.nutrition===0&&h.starveNights>=5,warning:[h.nutrition<=35?'식량 부족':null,h.hydration<=35?'수분 부족':null,h.woundRisk>=50?'상처 악화 위험':null].filter(Boolean)};
 }
 export function spendSurvivalEffort(run,food=3,water=5,keys=['taei','ally']){
- for(const m of run.members.filter(m=>keys.includes(m.key))){ensureSurvivalHealth(m);m.nutrition=healthClamp(m.nutrition-food);m.hydration=healthClamp(m.hydration-water);const c=survivalCondition(m);if(c.nutrition<=35||c.hydration<=35){const f=abilityPenaltyFactors(m);m.fatigue=healthClamp(m.fatigue+((c.nutrition<=15?4:c.nutrition<=35?2:0)+(c.hydration<=15?6:c.hydration<=35?3:0))*f.endurance);m.stress=healthClamp(m.stress+((c.nutrition<=35?2:0)+(c.hydration<=35?3:0))*f.endurance);}}
+ for(const m of run.members.filter(m=>keys.includes(m.key)&&!['away','departed'].includes(m.mind?.state))){ensureSurvivalHealth(m);m.nutrition=healthClamp(m.nutrition-food);m.hydration=healthClamp(m.hydration-water);const c=survivalCondition(m);if(c.nutrition<=35||c.hydration<=35){const f=abilityPenaltyFactors(m);m.fatigue=healthClamp(m.fatigue+((c.nutrition<=15?4:c.nutrition<=35?2:0)+(c.hydration<=15?6:c.hydration<=35?3:0))*f.endurance);m.stress=healthClamp(m.stress+((c.nutrition<=35?2:0)+(c.hydration<=35?3:0))*f.endurance);}}
 }
 export function feedSurvivalMember(member,id){
  ensureSurvivalHealth(member);if(id==='water')member.hydration=healthClamp(member.hydration+40);else member.nutrition=healthClamp(member.nutrition+({food:35,canned:45,energybar:15}[id]??0));
@@ -21,7 +21,7 @@ export function careSurvivalWound(member,day,{strong=false,reduce=1}={}){
  ensureSurvivalHealth(member);member.injury=Math.max(0,member.injury-reduce);member.woundDays=0;member.woundRisk=member.injury>0?healthClamp(member.woundRisk-(strong?40:20)):0;member.caredDay=day;
 }
 export function advanceSurvivalHealth(run,foodCount,waterCount,day){
- const events=[],order=run.members.map((_,i)=>run.members[(i+day%run.members.length)%run.members.length]);
+ const events=[],present=run.members.filter(m=>!['away','departed'].includes(m.mind?.state)),order=present.map((_,i)=>present[(i+day%present.length)%present.length]);
  for(let i=0;i<order.length;i++){
   const m=ensureSurvivalHealth(order[i]),fed=i<foodCount,drank=i<waterCount;m.nutrition=healthClamp(m.nutrition-22+(fed?40:0));m.hydration=healthClamp(m.hydration-28+(drank?48:0));
   const foodPenalty=m.nutrition<=15?10:m.nutrition<=35?5:0,waterPenalty=m.hydration<=15?16:m.hydration<=35?8:0;
