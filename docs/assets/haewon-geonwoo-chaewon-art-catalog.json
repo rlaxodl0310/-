@@ -15,7 +15,8 @@
       "column": 0,
       "row": 0,
       "columns": 3,
-      "rows": 1
+      "rows": 1,
+      "revisionStatus": "latest-profile-draft"
     },
     {
       "id": "geonwoo-profiles-1",
@@ -26,7 +27,8 @@
       "column": 1,
       "row": 0,
       "columns": 3,
-      "rows": 1
+      "rows": 1,
+      "revisionStatus": "latest-profile-draft"
     },
     {
       "id": "chaewon-profiles-1",
@@ -37,7 +39,8 @@
       "column": 2,
       "row": 0,
       "columns": 3,
-      "rows": 1
+      "rows": 1,
+      "revisionStatus": "latest-profile-draft"
     },
     {
       "id": "haewon-expressions-1",
@@ -48,7 +51,8 @@
       "column": 0,
       "row": 0,
       "columns": 3,
-      "rows": 3
+      "rows": 3,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "geonwoo-expressions-1",
@@ -59,7 +63,8 @@
       "column": 1,
       "row": 0,
       "columns": 3,
-      "rows": 3
+      "rows": 3,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "chaewon-expressions-1",
@@ -70,7 +75,8 @@
       "column": 2,
       "row": 0,
       "columns": 3,
-      "rows": 3
+      "rows": 3,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "haewon-expressions-2",
@@ -81,7 +87,8 @@
       "column": 0,
       "row": 1,
       "columns": 3,
-      "rows": 3
+      "rows": 3,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "geonwoo-expressions-2",
@@ -92,7 +99,8 @@
       "column": 1,
       "row": 1,
       "columns": 3,
-      "rows": 3
+      "rows": 3,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "chaewon-expressions-2",
@@ -103,7 +111,8 @@
       "column": 2,
       "row": 1,
       "columns": 3,
-      "rows": 3
+      "rows": 3,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "haewon-expressions-3",
@@ -114,7 +123,8 @@
       "column": 0,
       "row": 2,
       "columns": 3,
-      "rows": 3
+      "rows": 3,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "geonwoo-expressions-3",
@@ -125,7 +135,8 @@
       "column": 1,
       "row": 2,
       "columns": 3,
-      "rows": 3
+      "rows": 3,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "chaewon-expressions-3",
@@ -136,7 +147,8 @@
       "column": 2,
       "row": 2,
       "columns": 3,
-      "rows": 3
+      "rows": 3,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "haewon-cutscenes-1",
@@ -147,7 +159,8 @@
       "column": 0,
       "row": 0,
       "columns": 3,
-      "rows": 2
+      "rows": 2,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "geonwoo-cutscenes-1",
@@ -158,7 +171,8 @@
       "column": 1,
       "row": 0,
       "columns": 3,
-      "rows": 2
+      "rows": 2,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "chaewon-cutscenes-1",
@@ -169,7 +183,8 @@
       "column": 2,
       "row": 0,
       "columns": 3,
-      "rows": 2
+      "rows": 2,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "haewon-cutscenes-2",
@@ -180,7 +195,8 @@
       "column": 0,
       "row": 1,
       "columns": 3,
-      "rows": 2
+      "rows": 2,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "geonwoo-cutscenes-2",
@@ -191,7 +207,8 @@
       "column": 1,
       "row": 1,
       "columns": 3,
-      "rows": 2
+      "rows": 2,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "chaewon-cutscenes-2",
@@ -202,7 +219,8 @@
       "column": 2,
       "row": 1,
       "columns": 3,
-      "rows": 2
+      "rows": 2,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "haewon-pixel-scenes-1",
@@ -213,7 +231,8 @@
       "column": 0,
       "row": 0,
       "columns": 3,
-      "rows": 3
+      "rows": 3,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "geonwoo-pixel-scenes-1",
@@ -224,7 +243,8 @@
       "column": 1,
       "row": 0,
       "columns": 3,
-      "rows": 3
+      "rows": 3,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "chaewon-pixel-scenes-1",
@@ -235,7 +255,8 @@
       "column": 2,
       "row": 0,
       "columns": 3,
-      "rows": 3
+      "rows": 3,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "haewon-pixel-scenes-2",
@@ -246,7 +267,8 @@
       "column": 0,
       "row": 1,
       "columns": 3,
-      "rows": 3
+      "rows": 3,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "geonwoo-pixel-scenes-2",
@@ -257,7 +279,8 @@
       "column": 1,
       "row": 1,
       "columns": 3,
-      "rows": 3
+      "rows": 3,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "chaewon-pixel-scenes-2",
@@ -268,7 +291,8 @@
       "column": 2,
       "row": 1,
       "columns": 3,
-      "rows": 3
+      "rows": 3,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "haewon-pixel-scenes-3",
@@ -279,7 +303,8 @@
       "column": 0,
       "row": 2,
       "columns": 3,
-      "rows": 3
+      "rows": 3,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "geonwoo-pixel-scenes-3",
@@ -290,7 +315,8 @@
       "column": 1,
       "row": 2,
       "columns": 3,
-      "rows": 3
+      "rows": 3,
+      "revisionStatus": "previous-face-design-awaiting-update"
     },
     {
       "id": "chaewon-pixel-scenes-3",
@@ -301,12 +327,13 @@
       "column": 2,
       "row": 2,
       "columns": 3,
-      "rows": 3
+      "rows": 3,
+      "revisionStatus": "previous-face-design-awaiting-update"
     }
   ],
   "faceDesign": {
-    "haewon": "짧고 둥근 얼굴·도톰한 볼·넓은 눈 간격·둥근 눈·짧고 작은 코·작은 입",
-    "geonwoo": "넓고 짧은 얼굴·부드러운 사각 턱·굵고 낮은 일자 눈썹·작은 무쌍 눈·넓은 코·두꺼운 목",
-    "chaewon": "긴 타원과 직사각 사이 얼굴·긴 중안부·가깝고 처진 눈·낮은 일자 눈썹·긴 코·넓고 평평한 입"
+    "haewon": "부드러운 하트형 얼굴·맑고 둥근 눈·가는 안경·작은 코·밝은 미소",
+    "geonwoo": "건장한 골격·자연스럽게 정돈된 턱선·가로로 긴 눈·단정한 눈썹·곧은 코",
+    "chaewon": "균형 잡힌 타원형 얼굴·살짝 처진 긴 눈매·섬세한 눈썹·부드러운 입술"
   }
 }
