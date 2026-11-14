@@ -9,7 +9,8 @@ export function combatTeamHurt(b){return !!b.optional?.teamHurt||Object.entries(
 export function combatSideMissions(b){
  if(!b?.optional)return [];
  const mission=b.mission??'escape',special=mission==='protect'?{id:'ward',label:'보호 대상 추가 부상 없이 지키기',condition:(b.protection?.wounds??0)===0,progress:`추가 부상 ${b.protection?.wounds??0}회 · 0회 목표`,reward:[{id:'bandage',quantity:1}]}:mission==='eliminate'?{id:'quick',label:'6턴 이내 복도 확보',condition:b.turn<=6,progress:`현재 ${b.turn}/6턴`,reward:[{id:'parts',quantity:3}]}:{id:'quiet',label:'증원을 부르지 않고 탈출',condition:b.noise<6&&!b.reinforced,progress:`소음 ${b.noise}/6 미만`,reward:[{id:'parts',quantity:2}]};
- const specs=[{id:'cache',label:'연습실 구석 물자 회수',condition:!!b.supplyCache?.recovered,progress:b.supplyCache?.recovered?'회수 완료 · 클리어하면 확보':'상자에 인접해 회수 · 행동력 1',reward:[{id:'bandage',quantity:2},{id:'water',quantity:1}]},special,{id:'unhurt',label:'아군 둘 다 새 부상 없이 완료',condition:!combatTeamHurt(b),progress:combatTeamHurt(b)?'부상 발생 · 이번 임무 달성 불가':'무부상 유지 중',reward:[{id:'water',quantity:1}]}];
+ const specs=[{id:'cache',label:b.clinic?'보건실 물자함 확인':'연습실 구석 물자 회수',condition:!!b.supplyCache?.recovered,progress:b.supplyCache?.recovered?'회수 완료 · 클리어하면 확보':'상자에 인접해 회수 · 행동력 1',reward:[{id:'bandage',quantity:2},{id:'water',quantity:1}]},special,{id:'unhurt',label:'아군 둘 다 새 부상 없이 완료',condition:!combatTeamHurt(b),progress:combatTeamHurt(b)?'부상 발생 · 이번 임무 달성 불가':'무부상 유지 중',reward:[{id:'water',quantity:1}]}];
+ if(b.clinic)specs.push({id:'clinicStudent',label:'보건실에 남은 학생과 함께 복귀',condition:b.clinic.rescued,progress:b.clinic.rescued?'학생 동행 중 · 탈출하면 구조':b.clinic.canRescue?'학생 옆에서 동행 돕기 · 행동력 1 / 스태미나 8':'거점 수용 인원 부족 · 구조 선택 불가',reward:[]});
  return specs.map(q=>({...q,status:combatMissionWon(b)?q.condition?'complete':'missed':b.status==='failed'?'lost':q.id==='cache'?'pending':q.condition?'pending':'missed'}));
 }
 export function settleCombatRewards(b){

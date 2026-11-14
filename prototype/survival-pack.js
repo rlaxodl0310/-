@@ -92,7 +92,7 @@ export function consumePackedRations(run,needed){
 // A sortie has exclusive ownership of its carried items until return.
 export function mountCombatPack(run,battle){const kit=run.kit;if(!kit)return;assertPackExplorationReady(run);if(survivalBagStats(kit.bag,kit.items).over)throw new Error('가방의 칸이나 무게를 초과했어요. 출발 전에 정리하세요.');battle.stash.items={...kit.items};battle.survivalPack={bag:kit.bag,seed:kit.seed,sequence:kit.sequence,pending:null};kit.items={};}
 export function restoreCombatPack(run,battle){if(!battle.survivalPack||!run.kit)return false;run.kit.items={...battle.stash.items};run.kit.bag=battle.survivalPack.bag;run.kit.seed=battle.survivalPack.seed;run.kit.sequence=battle.survivalPack.sequence;return true;}
-export function openCombatPackLoot(battle){if(!battle.survivalPack)return;const p=battle.survivalPack;if(p.pending)throw new Error('먼저 발견 물자를 정리하세요.');p.pending=createPackLoot(p,'연습실 구석 물자 상자','combat');}
+export function openCombatPackLoot(battle){if(!battle.survivalPack)return;const p=battle.survivalPack;if(p.pending)throw new Error('먼저 발견 물자를 정리하세요.');p.pending=battle.clinic?{id:++p.sequence,source:'보건실 약품·비상식량 보관함',items:{bandage:3,firstaid:1,food:2,water:1},bags:[]}:createPackLoot(p,'연습실 구석 물자 상자','combat');}
 export function queueCombatPackRewards(battle,items){
  if(!battle.survivalPack)return false;const p=battle.survivalPack;p.pending??={id:++p.sequence,source:'임무 확보 물자',items:{},bags:[]};
  for(const item of items)p.pending.items[item.id]=(p.pending.items[item.id]??0)+item.quantity;return true;

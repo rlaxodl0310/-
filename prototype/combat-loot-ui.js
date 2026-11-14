@@ -3,7 +3,7 @@ const lootEsc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'
 export function combatExtrasPanel(b){
  const quests=combatSideMissions(b);if(!quests.length)return '';
  const completed=quests.filter(q=>q.status==='complete').length;
- return `<details class="tactical-sidequests"><summary>서브미션 · 선택 목표 ${b.status==='active'?'':completed+'/3'}<small>놓쳐도 주 임무 성공 가능 · 달성하면 추가 전리품</small></summary>${quests.map(q=>`<article data-sidequest="${q.id}" data-side-status="${q.status}"><strong>${q.status==='complete'?'✓ ':q.status==='missed'?'— ':''}${q.label}</strong><p>${b.status==='failed'?'임무 실패 · 보상 없음':q.progress}</p><span>보너스 · ${combatLootLabel(q.reward)}</span>${b.status==='active'&&q.id==='cache'&&!b.supplyCache?.recovered?'<button data-action="combatLocateLoot">상자 위치 보기</button>':''}</article>`).join('')}</details>`;
+ return `<details class="tactical-sidequests"><summary>서브미션 · 선택 목표 ${b.status==='active'?'':completed+'/'+quests.length}<small>놓쳐도 주 임무 성공 가능 · 달성하면 추가 전리품</small></summary>${quests.map(q=>`<article data-sidequest="${q.id}" data-side-status="${q.status}"><strong>${q.status==='complete'?'✓ ':q.status==='missed'?'— ':''}${q.label}</strong><p>${b.status==='failed'?'임무 실패 · 보상 없음':q.progress}</p><span>${q.reward.length?'보너스 · '+combatLootLabel(q.reward):'구조 성공 시 거점 인원에 합류'}</span>${b.status==='active'&&q.id==='cache'&&!b.supplyCache?.recovered?'<button data-action="combatLocateLoot">상자 위치 보기</button>':''}</article>`).join('')}</details>`;
 }
 export function combatStashPanel(b){
  if(!b?.stash||b.survivalPack)return '';
