@@ -30,3 +30,19 @@ test('expired, departed, completed or unrelated interactions have no scene',()=>
  for(const [id,choice,place] of fixtures){const s=fixture(id,choice,place),r=s.personalEvents.records[id];assert.equal(eventCutscene(s,'place',{kind:'speech'}),null);assert.equal(eventCutscene(s,'personalEvent',{kind:'narrator'}),null);if(id!=='taei')assert.equal(eventCutscene(s,'personalEvent',{kind:'speech',actor:'taei'}),null);r.status='completed';assert.equal(eventCutscene(s,'personalEvent',{kind:'speech'}),null);r.status='active';r.until=s.clock.minute-1;assert.equal(eventCutscene(s,'personalEvent',{kind:'speech'}),null);delete r.until;s.location='elsewhere';assert.equal(eventCutscene(s,'personalEvent',{kind:'speech'}),null);}
  for(const [id,choice,place] of [['seoyeon:2','paper','cafe'],['iseo:2','playful','gym'],['dogyeom','pass','gym'],['soyul','listen','library'],['taei','plan','arts']])assert.equal(eventCutscene(fixture(id,choice,place),'personalEvent',{kind:'speech'}),null);
 });
+
+// CG display follows real choices, rather than a global art toggle.
+test('Iseo walk CG only belongs to the just-completed dry-weather walk',()=>{
+ const s=fixture('iseo','introduce','gym'),r=s.personalEvents.records.iseo;
+ Object.assign(r,{status:'completed',choices:['introduce','chat'],completedDay:s.day,completedMinute:s.clock.minute});
+ const beat={kind:'speech',actor:'iseo'},before=save(s);
+ assert.equal(eventCutscene(s,'personalEvent',beat).id,'iseo-walk');assert.equal(save(s),before);
+ for(const modify of [x=>x.clock.minute++,x=>x.location='library',x=>x.personalEvents.records.iseo.choices=['introduce','pace'],x=>x.personalEvents.records.iseo.completedDay--,x=>x.weather.days[x.day][x.phase]='rain']){const x=structuredClone(s);modify(x);assert.equal(eventCutscene(x,'personalEvent',beat),null);}
+ assert.equal(eventCutscene(s,'personalEvent',{kind:'speech',actor:'taei'}),null);
+});
+test('volleyball CG requires actual gym practice, hides before and after its reply, and expires',()=>{
+ const s=fixture('iseo:4','feed','gym'),r=s.personalEvents.records['iseo:4'];r.until=s.clock.minute+20;
+ for(const choice of ['feed','watch']){r.choices=[choice];assert.equal(eventCutscene(s,'personalEvent',{kind:'speech',actor:'iseo'}).id,'iseo-volleyball');}
+ for(const modify of [x=>x.personalEvents.records['iseo:4'].stage=0,x=>x.personalEvents.records['iseo:4'].status='completed',x=>x.clock.minute+=21,x=>x.location='field']){const x=structuredClone(s);modify(x);assert.equal(eventCutscene(x,'personalEvent',{kind:'speech',actor:'iseo'}),null);}
+ assert.equal(eventCutscene(s,'personalEvent',{kind:'speech',actor:'taei'}),null);
+});

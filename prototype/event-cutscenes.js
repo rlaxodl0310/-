@@ -1,3 +1,4 @@
+import {wetWeather} from './weather.js';
 import {presentPeople} from './days.js';
 import {displayName,contact} from './identity.js';
 import {characterActing} from './character-acting.js';
@@ -24,6 +25,10 @@ export function eventCutscene(state,screen,beat={},context={}){
  let ids=[],kind='conversation',activeActor=context.activeActor??beat.actor;
  if(screen==='personalEvent'){
   const r=state.personalEvents?.records?.[state.personalEvents?.active];
+  if(r?.person==='iseo'&&r.day===state.day&&r.location===state.location&&beat.actor==='iseo'){
+   if(r.eventId==='iseo'&&r.status==='completed'&&r.choices?.at(-1)==='chat'&&r.completedDay===state.day&&r.completedMinute===state.clock.minute&&!wetWeather(state))return {id:'iseo-walk',kind:'illustration',label:'운동을 마치고, 잠깐 함께 걷는 길'};
+   if(r.eventId==='iseo:4'&&r.status==='active'&&r.stage===1&&state.location==='gym'&&state.clock.minute<=r.until&&['feed','watch'].includes(r.choices?.[0]))return {id:'iseo-volleyball',kind:'illustration',label:'공을 기다리는 자세'};
+  }
   if(!r||r.status!=='active'||r.stage!==1||r.day!==state.day||r.location!==state.location||!r.last||(Number.isFinite(r.until)&&state.clock.minute>r.until))return null;
   if(r.person!=='taei'&&(beat.actor==='taei'||beat.who==='김태이'))return null;
   const first=r.choices?.[0],place=state.location;

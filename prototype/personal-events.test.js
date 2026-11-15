@@ -9,3 +9,16 @@ test('bond and mood change reactions and intrusive solutions are not the best ou
 test('Iseo meets through her workout route and learns names only through an actual introduction choice',()=>{let s=ready('iseo');assert.equal(iseoEventLocation(s),'gym');assert.ok(!s.contacts.iseo);const events=personalEventsAt(s);assert.ok(events.some(e=>e.person==='iseo'&&e.title==='운동을 마친 학생'));s=beginPersonalEvent(s,'iseo');assert.equal(displayName(s,'iseo'),'흰 집업을 입은 단발머리 학생');s=progressPersonalEvent(s,'listen');assert.equal(s.contacts.iseo.introduced,false);assert.ok(personalEventView(s).options.some(x=>x[0]==='names'));s=progressPersonalEvent(s,'names');assert.equal(displayName(s,'iseo'),'정이서');assert.equal(s.contacts.iseo.details.major,'태권도과');assert.equal(s.contacts.iseo.playerSeniorityKnown,false);});
 test('an interrupted reservation cannot be overrun without resuming',()=>{let s=beginPersonalEvent(ready('seoyeon'),'seoyeon');s=progressPersonalEvent(s,'ask');s.clock.minute+=10;assert.throws(()=>progressPersonalEvent(s,'boundary'));s=pausePersonalEvent(s);s=beginPersonalEvent(s,'seoyeon');s=progressPersonalEvent(s,'boundary');assert.equal(personalEventRecord(s).status,'completed');});
 test('stale locations and invalid choices reject without mutation; later references are sourced and limited',()=>{let s=beginPersonalEvent(ready('soyul'),'soyul');s.location='market';const original=save(s);assert.throws(()=>progressPersonalEvent(s,'listen'));assert.equal(save(s),original);s=complete('soyul','permission','wait');assert.equal(personalEventGreeting(s,'soyul'),'');s.day=2;assert.match(personalEventGreeting(s,'soyul'),/지난번|그때/);assert.equal(personalEventGreeting(s,'soyul'),'');});
+
+test('Iseo volleyball requires the earlier chapter and later real gym meeting, saves both steps and completes once',()=>{
+ let s=ready('iseo');s.day=5;s.clock.minute=960;
+ assert.throws(()=>beginPersonalEvent(s,'iseo:4'));
+ s.personalEvents={active:null,records:{'iseo:3':{eventId:'iseo:3',person:'iseo',status:'completed',completedDay:5,choices:['music','thanks']}}};
+ s.contacts.iseo={introduced:true,nameLevel:'full'};
+ assert.throws(()=>beginPersonalEvent(s,'iseo:4'));
+ s.day=6;s.location='field';assert.throws(()=>beginPersonalEvent(s,'iseo:4'));s.location='gym';
+ const prior=save(s.personalEvents.records['iseo:3']);s=beginPersonalEvent(s,'iseo:4');s=progressPersonalEvent(s,'watch');
+ assert.equal(s.clock.minute,970);s=restore(save(s));assert.equal(personalEventRecord(s).choices[0],'watch');
+ s=progressPersonalEvent(s,'finish');assert.equal(s.clock.minute,990);assert.equal(personalEventRecord(s).status,'completed');assert.equal(save(s.personalEvents.records['iseo:3']),prior);
+ assert.throws(()=>progressPersonalEvent(s,'finish'));assert.ok(!personalEventsAt(s).some(e=>e.eventId==='iseo:4'));
+});
