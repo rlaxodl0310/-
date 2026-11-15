@@ -17,7 +17,7 @@ export function resolveSurvivalAutonomy(state,day){
   mind.exposure=fear>=55?Math.min(20,mind.exposure+(55-stats.endurance)/25):Math.max(0,mind.exposure-2);
   if(fear<45){if(mind.state!=='steady')events.push(`${name} · 안전하게 쉬며 조금씩 안정을 되찾았다.`);mind.state='steady';continue;}
   mind.state='shaken';if(mind.exposure<4)continue;
-  const relation=run.parties?.bonds?.[member.recruitId]??state.relations?.[`${member.character}>taei`]??{},trust=relation.trust??0,affection=relation.affection??0;
+  const relation=run.parties?.bonds?.[member.recruitId??'member:'+member.key]??state.relations?.[`${member.character}>taei`]??{},trust=relation.trust??0,affection=relation.affection??0;
   const support=Math.min(.2,Math.max(0,trust)*.004+Math.max(0,affection)*.002);
   const risk=Math.max(.02,Math.min(.85,(fear-40)/100+mind.exposure*.025-(stats.endurance+stats.mentality)*.007-support));
   if(mindRoll(run.exploration?.seed??state.characterSystem.seed,day,member.key,'risk')/4294967296>=risk)continue;

@@ -1,3 +1,4 @@
+import {finishSupplyDebate} from './supply-debate.js';
 import {ensureSurvivalParties,currentSurvivalMembers,playerSurvivalParty,survivalResidentCapacity,resolveSurvivalPartyMissions} from './survival-parties.js';
 import {refreshSurvivalAdvice} from './survival-advice.js';
 import {shopSorties,prepareShopBattle,shopAftermath} from './shop-sorties.js';
@@ -111,6 +112,7 @@ export function returnSurvivalSortie(state,{abandon=false}={}){
  else{r.threat=survivalClamp(r.threat+12);if(r.base)r.base.integrity=Math.max(0,r.base.integrity-8);text=packed?'작전을 중단하고 물러났다. 가방에 이미 챙긴 물자는 가져왔지만 임무 보너스는 얻지 못했다.':'작전을 중단하고 물러났다. 소비한 물자는 돌아오지 않았고, 새로 주울 예정이던 보상도 얻지 못했다.';}
  if(!won&&shopSorties[active.kind])text+=' '+shopAftermath(result,false,(rosterName(s,result)));
  if(active.kind==='clinic'){r.clinicOutcome={day:r.day,success:won,rescued:won&&result.clinic.rescued};text+=' '+clinicAftermath(result,won,(rosterName(s,result)));}
+ text+=' '+finishSupplyDebate(s,result,won);
  r.completedSorties.push({id:active.id,kind:active.kind,day:r.day,success:won,siteId:active.siteId});r.activeSortie=null;if(active.previousCombat)s.combatTrial=active.previousCombat;else delete s.combatTrial;survivalLog(r,text);return refreshSurvivalAdvice(s);
 }
 

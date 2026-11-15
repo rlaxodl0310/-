@@ -1,3 +1,4 @@
+import {supplyDebriefPanel} from './supply-debate-ui.js';
 import {survivalPartiesPage} from './survival-parties-ui.js';
 import {survivalResidentCapacity,currentSurvivalMembers} from './survival-parties.js';
 import {survivalAdviceView,survivalAdviceName} from './survival-advice.js';
@@ -42,5 +43,5 @@ export function survivalPage(state,tab='overview',error='',selectedFacility='',e
   body=(r.base?renderShelterScene(r,selectedFacility,true):'')+renderSurvivalVitals(state)+incidentPanel+report+body+next;
  }
 
- return `<section class="shelter-shell">${head}${top}${error?`<p class="shelter-error" role="alert">${shelterEsc(error)}</p>`:''}<section class="shelter-last" aria-live="polite">${shelterEsc(r.log.join(' '))}</section>${pack&&!busy&&tab!=='bag'?`<aside class="pack-shortcut"><span>${pack.stats.name} · ${pack.stats.usedSlots}/${pack.stats.slots}칸 · ${(pack.stats.weight/1000).toFixed(2)}kg${pack.pending?' · 발견 물자 정리 필요':''}</span>${shelterButton(pack.pending?'발견 물자 확인':'가방 열기','survivalTab','bag')}</aside>`:''}${tab==='overview'?advicePanel:''}${body}<p class="shelter-note">생존 흐름 시제품 · 학교생활 기록과 분리됩니다. 탐색 가능한 16개 공간의 상태는 플레이마다 달라져요. 일부 원정은 공통 전투 배치를 사용하며, 보건실·매점·편의점은 별도 배치로 진행해요.</p></section>`;
+ return `<section class="shelter-shell">${head}${top}${error?`<p class="shelter-error" role="alert">${shelterEsc(error)}</p>`:''}<section class="shelter-last" aria-live="polite">${shelterEsc(r.log.join(' '))}</section>${pack&&!busy&&tab!=='bag'?`<aside class="pack-shortcut"><span>${pack.stats.name} · ${pack.stats.usedSlots}/${pack.stats.slots}칸 · ${(pack.stats.weight/1000).toFixed(2)}kg${pack.pending?' · 발견 물자 정리 필요':''}</span>${shelterButton(pack.pending?'발견 물자 확인':'가방 열기','survivalTab','bag')}</aside>`:''}${tab==='overview'?advicePanel+supplyDebriefPanel(state):''}${body}<p class="shelter-note">생존 흐름 시제품 · 학교생활 기록과 분리됩니다. 탐색 가능한 16개 공간의 상태는 플레이마다 달라져요. 일부 원정은 공통 전투 배치를 사용하며, 보건실·매점·편의점은 별도 배치로 진행해요.</p></section>`;
 }

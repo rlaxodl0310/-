@@ -1,3 +1,4 @@
+import {supplyDebatePending} from './supply-debate.js';
 import {refreshSurvivalAdvice} from './survival-advice.js';
 import {feedSurvivalMember,careSurvivalWound} from './survival-health.js';
 // Integer grams and stack counts keep capacity checks deterministic across saves.
@@ -100,7 +101,7 @@ export function queueCombatPackRewards(battle,items){
 }
 function combatPackReady(state){const b=state.combatTrial;if(!b?.survivalPack)throw new Error('이번 전투에는 원정 가방이 없어요.');return b;}
 export function combatPackAction(state,action,id){
- const s=structuredClone(state),b=combatPackReady(s),meta=b.survivalPack,container={...meta,items:b.stash.items};
+ if(supplyDebatePending(state.combatTrial))throw new Error('동료들과 구조 요청에 대한 결정을 마친 뒤 물자를 정리하세요.');const s=structuredClone(state),b=combatPackReady(s),meta=b.survivalPack,container={...meta,items:b.stash.items};
  const reach=b.status!=='active'||!meta.pending?.position&&!b.supplyCache?.recovered||Object.values(b.actors).some(a=>!a.down&&!a.escaped&&Math.abs(a.x-(meta.pending?.position??b.supplyCache).x)+Math.abs(a.y-(meta.pending?.position??b.supplyCache).y)<=1);
  if(['take','bag'].includes(action)&&!reach)throw new Error('회수한 물자 상자 옆으로 돌아가야 더 챙길 수 있어요.');
  if(action==='take')packTakeLoot(container,id,1);

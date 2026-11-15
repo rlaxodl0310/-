@@ -1,4 +1,4 @@
-import {currentSurvivalMembers} from './survival-parties.js';
+import {currentSurvivalMembers,survivalResidentCapacity} from './survival-parties.js';
 import {survivalCondition} from './survival-health.js';
 import {displayName} from './identity.js';
 // Deterministic party deliberation: only observed shared supplies/health are used.
@@ -32,14 +32,19 @@ export function survivalAdviceOptions(state){
  }
  if(unready&&(food<n||water<n)&&r.searchDay!==r.day)add('search','rations',3,160,`${n}명이 나눌 식량 ${food}인분 · 물 ${water}개. 먼 원정은 무리지만, 가까이 남은 물자가 있는지부터 살펴보자.`);
  if(unready&&!tired&&!options.length)add('rest','exhaustion',3,180,'지금 원정 인원의 몸 상태로는 먼 길을 나서기 어려워. 안전한 곳에 머물며 회복할 방법부터 찾자.');
+ if(r.base&&!unready&&r.members.filter(m=>m.mind?.state!=='departed').length<survivalResidentCapacity(r))for(const speaker of speakers){
+  const memory=speaker.supplyMemories?.slice().reverse().find(m=>(m.stance==='rescue'||m.choice==='mark')&&r.supplyStories?.sites?.[m.site]?.status!=='rescued'&&r.supplyStories?.sites?.[m.site]&&r.shopVisits?.[m.site]!==r.day);
+  if(memory){const place=memory.site==='kiosk'?'매점':'편의점';options.push({kind:memory.site,need:'rescue-request:'+memory.site,level:1,score:88,reason:'지난번 '+place+'에서 구조 요청을 들었지. '+(memory.choice==='mark'?'준비해서 다시 오자고 했어.':'아직 그 학생과 함께 돌아오는 것까지 확인하지 못했어.')+' 지금 가능한지 동선을 다시 살펴보자.',target:null,requestedBy:speaker.key,label:place+'에 남겨 둔 구조 요청 다시 확인'});}
+ }
  const heard=(r.advice?.history??[]).filter(h=>['accepted','deferred'].includes(h.status)&&h.day===r.day);
- return speakers.flatMap(speaker=>options.map(o=>{
+ return speakers.flatMap(speaker=>options.filter(o=>!o.requestedBy||o.requestedBy===speaker.key).map(o=>{
   const phase=o.kind==='care'?'treat':o.need==='wounds'?'medicine':o.need;
   const key=`${r.day}:${o.need}:${phase}:${o.target??'party'}:${o.level}`;
   const risk=speaker.stress>=55?{rest:12,kiosk:8,convenience:-18}:{};
-  const score=o.score+(advicePreferences[speaker.character]?.[o.kind]??0)+(risk[o.kind]??0)+(speaker.key===o.target?8:0);
-  const relation=r.parties?.bonds?.[speaker.recruitId]??state.relations?.[speaker.character+'>taei'],opening=(relation?.tension??0)>=4?'의견이 다를 수 있지만, 이건 확인했으면 해. ':speaker.character==='soyul'?'내 생각에는… ':speaker.character==='yeogyeong'?'남은 것부터 확인해봤어. ':speaker.character==='dogyeom'?'다음에 뭘 할지 생각해봤는데, ':'';
-  return {...o,key,phase,score,speaker:speaker.key,text:opening+o.reason};
+  const memory=speaker.supplyMemories?.at(-1),learned=memory?.harm&&memory.choice==='rescue'?{convenience:-10,rest:6,kiosk:6}:{};
+  const score=o.score+(learned[o.kind]??0)+(advicePreferences[speaker.character]?.[o.kind]??0)+(risk[o.kind]??0)+(speaker.key===o.target?8:0);
+  const relation=r.parties?.bonds?.[speaker.recruitId??'member:'+speaker.key]??state.relations?.[speaker.character+'>taei'],opening=(relation?.tension??0)>=4?'의견이 다를 수 있지만, 이건 확인했으면 해. ':speaker.character==='soyul'?'내 생각에는… ':speaker.character==='yeogyeong'?'남은 것부터 확인해봤어. ':speaker.character==='dogyeom'?'다음에 뭘 할지 생각해봤는데, ':'';
+  return {...o,key,phase,score,speaker:speaker.key,text:(memory?.harm&&memory.choice==='rescue'?'지난 원정에서 다친 일도 있으니, 이번에는 돌아올 길까지 생각했으면 해. ':'')+opening+o.reason};
  })).filter(o=>!heard.some(h=>h.need===o.need&&h.phase===o.phase&&h.target===o.target&&h.level>=o.level)).sort((a,b)=>b.score-a.score||a.speaker.localeCompare(b.speaker)||a.kind.localeCompare(b.kind));
 }
 export function refreshSurvivalAdvice(state){

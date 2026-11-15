@@ -1,3 +1,4 @@
+import {decideSupplyDebate,supplyDebatePending} from './supply-debate.js';
 import {sixPartyRoute} from './survival-parties-fixtures.js';
 import {combatPackAction} from './survival-pack.js';
 import test from 'node:test';
@@ -52,7 +53,7 @@ test('off-party residents do not speak for the current party and a departed memb
 });
 
 test('all six party members can really recover the shop cache and escape against live enemies',()=>{
- let s=launchSurvivalSortie(fillPlayer(colony(6)),'kiosk');for(const [key,action,target] of sixPartyRoute)s=key==='end'?endGridTurn(s):key==='packLeave'?combatPackAction(s,'leave'):gridAct(s,key,action,target);assert.equal(s.combatTrial.status,'escaped');assert.equal(s.combatTrial.turn,5);assert.ok(Object.values(s.combatTrial.actors).every(a=>a.escaped));s=returnSurvivalSortie(restore(save(s)));assert.equal(currentSurvivalMembers(s.survivalRun).length,6);assert.equal(s.survivalRun.members.find(m=>m.key==='member-4').injury,1);
+ let s=launchSurvivalSortie(fillPlayer(colony(6)),'kiosk');for(const [key,action,target] of sixPartyRoute){s=key==='end'?endGridTurn(s):key==='packLeave'?combatPackAction(s,'leave'):gridAct(s,key,action,target);if(supplyDebatePending(s.combatTrial))s=decideSupplyDebate(s,'withdraw');}assert.equal(s.combatTrial.status,'escaped');assert.equal(s.combatTrial.turn,5);assert.ok(Object.values(s.combatTrial.actors).every(a=>a.escaped));s=returnSurvivalSortie(restore(save(s)));assert.equal(currentSurvivalMembers(s.survivalRun).length,6);assert.equal(s.survivalRun.members.find(m=>m.key==='member-4').injury,1);
 });
 test('background failure, unavailable duties and camp capacity have real consequences',()=>{
  let s=colony(3);s=createSurvivalParty(s,'ally','위험 보급팀');s.survivalRun.threat=99;s=dispatchSurvivalParty(s,'party-2','supply');const food=s.survivalRun.resources.food;const reports=resolveSurvivalPartyMissions(s);assert.equal(reports.length,1);assert.equal(s.survivalRun.parties.reports[0].success,false);assert.equal(s.survivalRun.resources.food,food);assert.equal(s.survivalRun.members[1].injury,1);assert.throws(()=>dispatchSurvivalParty({...s,survivalRun:{...s.survivalRun,resources:{food:0,water:0}}},'party-2','guard'));

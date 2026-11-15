@@ -31,6 +31,7 @@ def route(page,steps,resume=False):
    elif action in ['strike','shove']:click(page,'combatMode',action);click(page,'combatEnemy',str(target['id']))
    else:click(page,{'door':'combatDoor','guard':'combatGuard','loot':'combatLoot'}[action])
   page.wait_for_function("document.querySelector('.tactical-board')?.dataset.busy==='false'");assert page.locator('.tactical-error').count()==0
+  if page.locator('.supply-debate').count():click(page,'combatSupplyDecision','withdraw')
   if resume and key=='packLeave':save_slot(page);load(page,combat=True)
 try:
  with sync_playwright() as p:

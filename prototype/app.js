@@ -1,3 +1,4 @@
+import {decideSupplyDebate,discussSupplyAftermath,supplyDebatePending} from './supply-debate.js';
 import {ensureSurvivalParties,createSurvivalParty,moveSurvivalPartyMember,renameSurvivalParty,dissolveSurvivalParty,meetSurvivalResident,meetSurvivalRecruit,discussSurvivalRecruit,inviteSurvivalRecruit,dispatchSurvivalParty} from './survival-parties.js';
 import {refreshSurvivalAdvice,survivalAdviceView,respondSurvivalAdvice,survivalAdviceTab} from './survival-advice.js';
 import {characterStatsContent} from './character-stats-ui.js';
@@ -402,6 +403,7 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
    if(a==='survivalTab'){shelterTab=v;shelterSelectedFacility='';if(v==='parties')ensureSurvivalParties(state);}
    if(a==='survivalInspect')shelterSelectedFacility=v;
    if(a==='survivalAction'){state=survivalAction(state,v);if(v==='search')shelterTab='bag';}
+   if(a==='survivalSupplyDebrief'){const [id,reply]=v.split('|');state=discussSupplyAftermath(state,id,reply);}
    if(a==='survivalPartyMeet')state=meetSurvivalRecruit(state);
    if(a==='survivalPartyResident')state=meetSurvivalResident(state,v);
    if(a==='survivalPartyRevisit')state=meetSurvivalRecruit(state,app.querySelector('#party-revisit')?.value);
@@ -449,23 +451,26 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
  if(a.startsWith('combat')){
   if(combatAnimating)return;
   try{combatError='';
+   if(a==='combatSupplyDecision'){state=decideSupplyDebate(state,v);render();return;}
    if(a==='combatSetup'){if(state.survivalRun?.activeSortie){screen='survival';render();return;}screen='combatSetup';}
    if(a==='combatStart'){state=startGridCombat(state,app.querySelector('#combat-companion')?.value??'student',app.querySelector('[name="combat-mission"]:checked')?.value??'escape');combatActor='taei';combatMode='move';combatMore=false;screen='combat';}
    if(a==='combatResume'){if(!Object.hasOwn(state.combatTrial?.actors??{},combatActor))combatActor='taei';screen='combat';}
    if(a==='combatActor'&&Object.hasOwn(state.combatTrial?.actors??{},v)){combatActor=v;combatMode='move';combatMore=false;}
    if(a==='combatMode')combatMode=v;
    if(a==='combatInspect')combatError='보호 대상은 움직일 수 없어요. 옆 칸에서 방어하면 접근 공격을 막을 수 있어요.';
+   if(a==='combatLocateSupplyStudent'){const student=state.combatTrial?.supplyDebate?.student,scroller=app.querySelector('.tactical-scroll'),board=app.querySelector('.tactical-board');if(student&&scroller&&board)scroller.scrollTo({left:(student.x+.5)*board.clientWidth/12-scroller.clientWidth/2,top:(student.y+.5)*board.clientHeight/8-scroller.clientHeight*.5});return;}
    if(a==='combatLocateLoot'){const cache=state.combatTrial?.supplyCache,scroller=app.querySelector('.tactical-scroll'),board=app.querySelector('.tactical-board');if(cache&&scroller&&board)scroller.scrollTo({left:(cache.x+.5)*board.clientWidth/12-scroller.clientWidth/2,top:(cache.y+.8)*board.clientHeight/8-scroller.clientHeight*.5,behavior:'smooth'});return;}
    if(a==='combatCenter'){const scroller=app.querySelector('.tactical-scroll'),unit=app.querySelector(`[data-unit="${combatActor}"]`);if(scroller&&unit)scroller.scrollTo({left:unit.offsetLeft-scroller.clientWidth/2,top:unit.offsetTop-scroller.clientHeight*.6,behavior:'smooth'});return;}
-   const direct={combatShopReserve:'shopReserve',combatClinicRescue:'clinicRescue',combatPackEat:'eat',combatPackAid:'firstaid',combatGuard:'guard',combatDoor:'door',combatDrink:'drink',combatRescue:'rescue',combatLoot:'loot',combatBandage:'bandage'};
+   const direct={combatSupplyRescue:'supplyRescue',combatShopReserve:'shopReserve',combatClinicRescue:'clinicRescue',combatPackEat:'eat',combatPackAid:'firstaid',combatGuard:'guard',combatDoor:'door',combatDrink:'drink',combatRescue:'rescue',combatLoot:'loot',combatBandage:'bandage'};
    if(state.combatTrial?.version===2&&(a==='combatTile'||a==='combatEnemy'||a==='combatEndTurn'||direct[a])){
-    const scroll=app.querySelector('.tactical-scroll')?.scrollLeft??0;
+    const wasDebating=supplyDebatePending(state.combatTrial),scroll=app.querySelector('.tactical-scroll')?.scrollLeft??0;
     if(a==='combatTile'){const [x,y]=v.split(',').map(Number);if(!['move','cover','lure'].includes(combatMode))throw new Error('공격할 때는 인접한 좀비를 눌러 주세요.');state=gridAct(state,combatActor,combatMode,{x,y});}
     else if(a==='combatEnemy'){if(!['strike','shove'].includes(combatMode))throw new Error('공격 또는 밀치기를 고른 뒤 좀비를 눌러 주세요.');state=gridAct(state,combatActor,combatMode,{id:Number(v)});}
     else if(a==='combatEndTurn')state=endGridTurn(state);
     else state=gridAct(state,combatActor,direct[a],a==='combatPackEat'||a==='combatPackAid'?{item:v}:undefined);
     combatAnimating=true;render();const scroller=app.querySelector('.tactical-scroll');if(scroller)scroller.scrollLeft=scroll;
     try{await animateGridCombat(app,state.combatTrial.frames);}finally{combatAnimating=false;render();const next=app.querySelector('.tactical-scroll');if(next)next.scrollLeft=scroll;}
+    if(!wasDebating&&supplyDebatePending(state.combatTrial))app.querySelector('.supply-debate')?.scrollIntoView({block:'start'});
     return;
    }
    if(a==='combatPackTake')state=combatPackAction(state,'take',v);

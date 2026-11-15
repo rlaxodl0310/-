@@ -8,6 +8,7 @@ import {shopSorties} from './shop-sorties.js';
 function baseCombatMissionInfo(b){if(b?.shop){const d=shopSorties[b.shop.kind];return {label:d.name+' 보급',title:d.title,description:d.description,goal:'식품 진열대 확인 → 동행 인원 모두 탈출',failure:'태이가 쓰러지거나 12번째 적 턴까지 탈출하지 못하면 실패',success:d.name+' 원정 완료'};}if(b?.clinic)return {label:'보건실 보급',title:'보건실에 남은 사람',description:'물자함을 확인하고 두 사람 모두 탈출한다. 학생 구조는 선택이다.',goal:'보건실 물자함 확인 → 두 사람 모두 탈출',failure:'태이가 쓰러지거나 12번째 적 턴까지 탈출하지 못하면 실패',success:'보건실 원정 완료'};return combatMissions[b?.mission]??combatMissions.escape;}
 export function combatMissionWon(b){return b?.status==='escaped'||b?.status==='victory';}
 export function combatMissionProgress(b){
+ if(b?.supplyDebate?.choice==='rescue')return `창고 학생 ${b.supplyDebate.rescued?'동행 중':'동행 도움 필요'} · 탈출 ${Object.values(b.actors).filter(a=>a.escaped).length}/${Object.keys(b.actors).length}명`;
  if(b?.shop)return `진열대 ${b.supplyCache.recovered?'확인':'미확인'} · 안쪽 보관함 ${b.shop.extra.recovered?'확인':'선택 목표'} · 탈출 ${Object.values(b.actors).filter(a=>a.escaped).length}/${Object.keys(b.actors).length}명`;
  if(b?.clinic)return `물자함 ${b.supplyCache.recovered?'확인':'미확인'} · 학생 ${b.clinic.rescued?'동행 중':b.clinic.canRescue?'구조 선택 가능':'거점 자리 부족'} · 탈출 ${Object.values(b.actors).filter(a=>a.escaped).length}/${Object.keys(b.actors).length}명`;
  if(b?.mission==='eliminate'){const pending=b.noise>=6&&!b.reinforced?1:0;return `제압 ${b.enemies.filter(e=>e.balance<=0).length}/${b.enemies.length+pending}${pending?' · 소음으로 추가 적 접근 중':''}`;}
@@ -15,4 +16,4 @@ export function combatMissionProgress(b){
  return `방화문 ${b?.door??0}/2 · 탈출 ${Object.values(b?.actors??{}).filter(a=>a.escaped).length}/${Object.keys(b.actors).length}명`;
 }
 
-export function combatMissionInfo(b){const info=baseCombatMissionInfo(b);return b?.partyId?Object.fromEntries(Object.entries(info).map(([k,v])=>[k,typeof v==='string'?v.replace(/두 사람 모두|둘 다|두 사람/g,'파티 전원'):v])):info;}
+export function combatMissionInfo(b){const info=baseCombatMissionInfo(b);if(b?.supplyDebate?.choice==='rescue')info.goal='창고 학생 동행 도움 → 파티 전원 탈출';return b?.partyId?Object.fromEntries(Object.entries(info).map(([k,v])=>[k,typeof v==='string'?v.replace(/두 사람 모두|둘 다|두 사람/g,'파티 전원'):v])):info;}

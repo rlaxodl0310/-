@@ -30,6 +30,7 @@ try:
        elif action=='shove':click(page,'combatMode','shove');click(page,'combatEnemy',str(target['id']))
        else:click(page,{'guard':'combatGuard','loot':'combatLoot','shopReserve':'combatShopReserve','door':'combatDoor'}[action])
       page.wait_for_function("document.querySelector('.tactical-board')?.dataset.busy==='false'");assert page.locator('.tactical-error').count()==0
+      if page.locator('.supply-debate').count():click(page,'combatSupplyDecision','withdraw')
       if key!='end' and rest[0] in ['loot','shopReserve']:
        click(page,'combatPackTake','food' if rest[0]=='loot' else 'canned');click(page,'combatPackLeave')
        if rest[0]=='shopReserve':mid=save_slot(page);assert mid['combatTrial']['shop']['extra']['recovered'];load(page);click(page,'survivalResume')

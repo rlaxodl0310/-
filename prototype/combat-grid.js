@@ -1,3 +1,4 @@
+import {beginSupplyDebate,supplyDebatePending,escortSupplyStudent,supplyRescueRequired} from './supply-debate.js';
 import {openShopReserve} from './shop-sorties.js';
 import {canRescueClinicStudent} from './clinic-mission.js';
 import {enabledAttributes,entityAbilities,abilityPenaltyFactors,attributeEffortCost,attributeMoveRange,attributeAttackChance,attributeFearLoad} from './character-stats.js';
@@ -15,7 +16,7 @@ export function tacticalBattleMap(b){return b?.map??tacticalMap;}
 export function tacticalBlocked(x,y,b){return !Number.isInteger(x)||!Number.isInteger(y)||x<=0||x>=12||y<=0||y>=7||tacticalBattleMap(b).obstacles.some(c=>c[0]===x&&c[1]===y);}
 function tacticalDoor(x,y,b){return tacticalBattleMap(b).door.some(c=>c[0]===x&&c[1]===y);}
 function tacticalExit(x,y,b){return tacticalBattleMap(b).exit.some(c=>c[0]===x&&c[1]===y);}
-function tacticalOccupied(b,x,y,except){return (b.clinic&&!b.clinic.rescued&&b.clinic.student.x===x&&b.clinic.student.y===y)||(b.protection&&!b.protection.down&&b.protection.x===x&&b.protection.y===y)||Object.entries(b.actors).some(([key,a])=>key!==except&&!a.escaped&&!(b.carrying&&key===carriedCombatKey(b))&&a.x===x&&a.y===y)||b.enemies.some(e=>e.balance>0&&e.id!==except&&e.x===x&&e.y===y);}
+function tacticalOccupied(b,x,y,except){return (b.supplyDebate?.choice==='rescue'&&!b.supplyDebate.rescued&&b.supplyDebate.student.x===x&&b.supplyDebate.student.y===y)||(b.clinic&&!b.clinic.rescued&&b.clinic.student.x===x&&b.clinic.student.y===y)||(b.protection&&!b.protection.down&&b.protection.x===x&&b.protection.y===y)||Object.entries(b.actors).some(([key,a])=>key!==except&&!a.escaped&&!(b.carrying&&key===carriedCombatKey(b))&&a.x===x&&a.y===y)||b.enemies.some(e=>e.balance>0&&e.id!==except&&e.x===x&&e.y===y);}
 function tacticalWalkable(b,x,y,except){return !tacticalBlocked(x,y,b)&&!(b.door<2&&(tacticalDoor(x,y,b)||tacticalExit(x,y,b)))&&!tacticalOccupied(b,x,y,except)&&!b.cover?.some(c=>c.x===x&&c.y===y&&c.turns>0);}
 export function startGridCombat(state,ally='student',mission='escape'){
  if(state.survivalRun?.activeSortie)throw new Error('진행 중인 생존 작전으로 돌아가거나 복귀하세요.');
@@ -42,9 +43,9 @@ function tacticalWin(b){
  if(b.status!=='active')return;
  if(b.mission==='protect'){if(b.protection.down){b.status='failed';tacticalRecord(b,'보호 대상이 쓰러졌다.');}else if(b.protection.held>=4){b.status='victory';tacticalRecord(b,'구조 준비가 끝났다. 부상 학생을 지켜냈다.');}return;}
  if(b.mission==='eliminate'){if(b.enemies.every(e=>e.balance<=0)&&!(b.noise>=6&&!b.reinforced)){b.status='victory';tacticalRecord(b,'주변의 모든 적을 제압하고 복도를 확보했다.');}return;}
- if((!(b.clinic||b.shop)||b.supplyCache.recovered)&&Object.values(b.actors).every(a=>a.escaped)){b.status='escaped';tacticalRecord(b,'파티 전원이 방화문 너머로 탈출했다.');}
+ if(!supplyRescueRequired(b)&&(!(b.clinic||b.shop)||b.supplyCache.recovered)&&Object.values(b.actors).every(a=>a.escaped)){b.status='escaped';tacticalRecord(b,'파티 전원이 방화문 너머로 탈출했다.');}
 }
-function tacticalRequire(state,key){const b=state.combatTrial,a=b?.actors[key];if(b?.version!==2||b.status!=='active'||b.phase!=='planning'||!a||a.down||a.escaped||a.ap<1||key===carriedCombatKey(b)&&b.carrying)throw new Error('지금 행동할 수 있는 인물을 선택하세요.');}
+function tacticalRequire(state,key){const b=state.combatTrial;if(supplyDebatePending(b))throw new Error('구조 요청을 두고 동료들과 다음 행동을 먼저 정하세요.');const a=b?.actors[key];if(b?.version!==2||b.status!=='active'||b.phase!=='planning'||!a||a.down||a.escaped||a.ap<1||key===carriedCombatKey(b)&&b.carrying)throw new Error('지금 행동할 수 있는 인물을 선택하세요.');}
 export function gridAct(state,key,action,target){
  tacticalRequire(state,key);const s=structuredClone(state),b=s.combatTrial,a=b.actors[key],name=a.label??combatName(s,a.id);b.frames=[];b.log=[];if(b.optional&&combatTeamHurt(b))b.optional.teamHurt=true;
  if(action==='move'){
@@ -52,7 +53,7 @@ export function gridAct(state,key,action,target){
   const from={x:a.x,y:a.y};a.x=path.x;a.y=path.y;a.stamina-=path.cost;a.ap--;b.frames.push({kind:'move',unit:key,from,to:{x:a.x,y:a.y},path:path.path});
   if(b.carrying&&key==='taei'){b.actors[carriedCombatKey(b)].x=a.x;b.actors[carriedCombatKey(b)].y=a.y;}
   tacticalRecord(b,`${name} · ${path.path.length}칸 이동`);
-  if((!b.mission||b.mission==='escape')&&tacticalExit(a.x,a.y,b)){if((b.clinic||b.shop)&&!b.supplyCache.recovered)throw new Error('먼저 물자함을 확인하세요. 물건은 필요한 만큼만 챙겨도 돼요.');a.escaped=true;if(b.carrying&&key==='taei')b.actors[carriedCombatKey(b)].escaped=true;tacticalRecord(b,`${name} · 계단으로 탈출`);}
+  if((!b.mission||b.mission==='escape')&&tacticalExit(a.x,a.y,b)){if((b.clinic||b.shop)&&!b.supplyCache.recovered)throw new Error('먼저 물자함을 확인하세요. 물건은 필요한 만큼만 챙겨도 돼요.');if(supplyRescueRequired(b))throw new Error('구조하기로 정한 학생에게 먼저 동행을 도와 주세요.');a.escaped=true;if(b.carrying&&key==='taei')b.actors[carriedCombatKey(b)].escaped=true;tacticalRecord(b,`${name} · 계단으로 탈출`);}
  }else if(action==='strike'||action==='shove'){
   const e=tacticalTargets(s,key).find(e=>e.id===target?.id),cost=attributeEffortCost(a,action==='strike'?16:10);if(!e)throw new Error('상하좌우로 붙어 있는 적을 선택하세요.');if(a.stamina<cost)throw new Error('스태미나가 부족해요. 방어하거나 물을 마셔 주세요.');
   if(key!=='taei'&&(attributeFearLoad(a)>=70||a.id==='soyul'&&action==='strike'&&b.noise>=6)){a.ap--;a.guard=true;a.fear=tacticalClamp(a.fear-5);b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name}: 가까이 가는 건 무리예요. 여기서 막을게요.`);return s;}
@@ -76,6 +77,8 @@ export function gridAct(state,key,action,target){
  }else if(action==='lure'){
   if(!tacticalLureTargets(s,key).some(p=>p.x===target?.x&&p.y===target?.y))throw new Error('2~5칸 거리의 빈 바닥을 선택하세요. 유인용 빈 병 1개와 스태미나 4가 필요해요.');
   a.ap--;a.stamina-=4;if(b.items.lure>0)b.items.lure--;else b.stash.items.bottle--;b.noise+=2;b.lure={x:target.x,y:target.y,turns:2};b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name} · 빈 병을 던져 2회 적 턴 동안 소리로 유인한다. 사람과 맞붙은 적은 유인을 무시한다.`);
+ }else if(action==='supplyRescue'){
+  escortSupplyStudent(b,a);b.frames.push({kind:'guard',unit:key});
  }else if(action==='shopReserve'){
   openShopReserve(b,a);b.frames.push({kind:'guard',unit:key});tacticalRecord(b,'안쪽 보관함을 열었다. 소음 +4. 가방에 챙길 물건을 고르세요.');
  }else if(action==='clinicRescue'){
@@ -85,6 +88,7 @@ export function gridAct(state,key,action,target){
   const found=Object.entries(b.actors).find(([k,p])=>k!=='taei'&&p.down&&!p.escaped&&tacticalDistance(a,p)<=1),ally=found?.[1];if(key!=='taei'||!ally||!ally.down||ally.escaped||b.carrying||tacticalDistance(a,ally)>1||a.stamina<10)throw new Error('쓰러진 동료 옆에서 태이가 부축할 수 있어요.');a.ap--;a.stamina-=10;b.carrying=true;b.carriedKey=found[0];ally.x=a.x;ally.y=a.y;b.frames.push({kind:'guard',unit:key});tacticalRecord(b,'동료를 부축했다. 함께 이동하며 스태미나를 더 사용한다.');
  }else throw new Error('알 수 없는 전투 행동입니다.');
  if(b.survivalSortie)a.stamina=Math.min(a.stamina,survivalStaminaCap(100-a.hunger,100-a.thirst));
+ if(action==='loot')beginSupplyDebate(s);
  tacticalWin(b);settleCombatRewards(b);return s;
 }
 function tacticalEnemyPath(b,e,target){
@@ -93,7 +97,7 @@ function tacticalEnemyPath(b,e,target){
  return null;
 }
 export function endGridTurn(state){
- const original=state.combatTrial;if(original?.version!==2||original.status!=='active')throw new Error('진행 중인 전투가 없습니다.');const s=structuredClone(state),b=s.combatTrial;b.frames=[];b.log=[];
+ const original=state.combatTrial;if(supplyDebatePending(original))throw new Error('구조 요청에 어떻게 대응할지 먼저 정하세요.');if(original?.version!==2||original.status!=='active')throw new Error('진행 중인 전투가 없습니다.');const s=structuredClone(state),b=s.combatTrial;b.frames=[];b.log=[];
  if(b.noise>=6&&!b.reinforced){const spawn=[[1,3],[1,4],[2,3],[3,3]].find(([x,y])=>tacticalWalkable(b,x,y));if(spawn){const id=Math.max(0,...b.enemies.map(e=>e.id))+1;b.enemies.push({id,x:spawn[0],y:spawn[1],balance:2,stun:0});b.reinforced=true;b.frames.push({kind:'spawn',unit:'enemy-'+id});tacticalRecord(b,'소음을 따라 뒤쪽에 적이 나타났다.');}}
  for(const e of b.enemies){if(e.balance<=0)continue;if(e.stun>0){e.stun--;continue;}
   const people=Object.values(b.actors).filter(a=>!a.escaped&&!a.down);if(b.protection&&!b.protection.down)people.push(b.protection);
@@ -121,7 +125,7 @@ export function tacticalLureTargets(state,key){
  const out=[];for(let y=1;y<7;y++)for(let x=1;x<12;x++){const d=tacticalDistance(a,{x,y});if(d>=2&&d<=5&&tacticalWalkable(b,x,y,key))out.push({x,y});}return out;
 }
 export function tacticalEnemyIntents(state){
- if(state.combatTrial?.version!==2||state.combatTrial.status!=='active')return [];
+ if(state.combatTrial?.version!==2||state.combatTrial.status!=='active'||supplyDebatePending(state.combatTrial))return [];
  const predicted=endGridTurn(state).combatTrial,ids=[...new Set(predicted.frames.filter(f=>f.unit?.startsWith('enemy-')).map(f=>f.unit))];
  return ids.map(unit=>({unit,path:predicted.frames.find(f=>f.unit===unit&&f.kind==='move')?.path??[],attack:predicted.frames.find(f=>f.unit===unit&&f.kind==='strike')?.target??null,spawn:predicted.frames.some(f=>f.unit===unit&&f.kind==='spawn')}));
 }
