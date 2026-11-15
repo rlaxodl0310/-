@@ -10,14 +10,14 @@ export function resolveSurvivalAutonomy(state,day){
  if(!state.characterSystem)return [];
  const run=state.survivalRun,events=[];
  for(const member of run.members){
-  const mind=member.mind=survivalMind(member);if(mind.lastDay>=day||mind.state==='departed')continue;mind.lastDay=day;
+  const mind=member.mind=survivalMind(member);if(member.deployment||mind.lastDay>=day||mind.state==='departed')continue;mind.lastDay=day;
   const name=member.label??displayName(state,member.character),stats=entityAbilities(member),fear=survivalCondition(member).fear;
   if(mind.state==='away'){mind.state='shaken';mind.exposure=Math.max(0,mind.exposure-1);events.push(`${name} · 연락 없이 떠났다가 돌아왔다. 당분간 혼자 맡기는 일은 재고해야 한다.`);continue;}
   // Sustained fear, not one unlucky click. Low endurance builds exposure faster.
   mind.exposure=fear>=55?Math.min(20,mind.exposure+(55-stats.endurance)/25):Math.max(0,mind.exposure-2);
   if(fear<45){if(mind.state!=='steady')events.push(`${name} · 안전하게 쉬며 조금씩 안정을 되찾았다.`);mind.state='steady';continue;}
   mind.state='shaken';if(mind.exposure<4)continue;
-  const relation=state.relations?.[`${member.character}>taei`]??{},trust=relation.trust??0,affection=relation.affection??0;
+  const relation=run.parties?.bonds?.[member.recruitId]??state.relations?.[`${member.character}>taei`]??{},trust=relation.trust??0,affection=relation.affection??0;
   const support=Math.min(.2,Math.max(0,trust)*.004+Math.max(0,affection)*.002);
   const risk=Math.max(.02,Math.min(.85,(fear-40)/100+mind.exposure*.025-(stats.endurance+stats.mentality)*.007-support));
   if(mindRoll(run.exploration?.seed??state.characterSystem.seed,day,member.key,'risk')/4294967296>=risk)continue;
@@ -37,7 +37,7 @@ export function resolveSurvivalAutonomy(state,day){
 }
 export function growSurvivalAbilities(state){
  if(!state.characterSystem)return;
- for(const member of state.survivalRun.members){if(!survivalMemberAvailable(member))continue;
+ for(const member of state.survivalRun.members){if(member.deployment||!survivalMemberAvailable(member))continue;
   const c=survivalCondition(member);if(c.critical||c.nutrition<=35||c.hydration<=35||member.fatigue>=80)continue;
   if(member.job==='repair')gainCharacterPractice(state,member.character,'strength',2);
   if(member.job==='watch')gainCharacterPractice(state,member.character,'agility',2);

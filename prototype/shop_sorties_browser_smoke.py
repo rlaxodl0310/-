@@ -1,3 +1,4 @@
+from vn_browser_helpers import legacy_survival_fixture
 """Run both authored shop routes through real controls, including offline/mobile."""
 import http.server,threading,json,subprocess
 from playwright.sync_api import sync_playwright
@@ -19,7 +20,7 @@ try:
   for path in ['/prototype/','/demo/campus-demo.html']:
    for width,height in [(390,844),(1440,1000)]:
     for kind in ['kiosk','convenience']:
-     page=browser.new_page(viewport={'width':width,'height':height},reduced_motion='reduce');page.set_default_timeout(12000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(f'http://127.0.0.1:{server.server_port}'+path);confirm_returning_plan(page);click(page,'openQuick');click(page,'go','survival');click(page,'survivalStart');s=save_slot(page);s['survivalRun'].update({'day':4,'stage':'base','base':{'site':'arts401','integrity':80,'exposure':0,'facilities':[]}});page.evaluate("s=>localStorage.setItem('campus.slot.1',JSON.stringify(s))",s);load(page);click(page,'survivalShopBrief',kind);assert page.locator('.shop-briefing').is_visible();click(page,'survivalSortie',kind);assert page.locator('[data-encounter="shop"]').is_visible()
+     page=browser.new_page(viewport={'width':width,'height':height},reduced_motion='reduce');page.set_default_timeout(12000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(f'http://127.0.0.1:{server.server_port}'+path);confirm_returning_plan(page);click(page,'openQuick');click(page,'go','survival');click(page,'survivalStart');legacy_survival_fixture(page);s=save_slot(page);s['survivalRun'].update({'day':4,'stage':'base','base':{'site':'arts401','integrity':80,'exposure':0,'facilities':[]}});page.evaluate("s=>localStorage.setItem('campus.slot.1',JSON.stringify(s))",s);load(page);click(page,'survivalShopBrief',kind);assert page.locator('.shop-briefing').is_visible();click(page,'survivalSortie',kind);assert page.locator('[data-encounter="shop"]').is_visible()
      if path=='/prototype/':page.screenshot(path=f'/workspace/work/{kind}-{width}.png',full_page=True)
      for key,*rest in routes[kind]:
       if key=='end':click(page,'combatEndTurn')

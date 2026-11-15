@@ -1,3 +1,4 @@
+from vn_browser_helpers import legacy_survival_fixture
 """Exercise the authored clinic route through actual controls on desktop and mobile."""
 import http.server,threading,json,re
 from pathlib import Path
@@ -21,7 +22,7 @@ try:
   browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium')
   for path in ['/prototype/','/demo/campus-demo.html']:
    for width,height in [(390,844),(1440,1000)]:
-    page=browser.new_page(viewport={'width':width,'height':height},reduced_motion='reduce');page.set_default_timeout(15000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(f'http://127.0.0.1:{server.server_port}'+path);confirm_returning_plan(page);click(page,'openQuick');click(page,'go','survival');click(page,'survivalStart');s=save_slot(page)
+    page=browser.new_page(viewport={'width':width,'height':height},reduced_motion='reduce');page.set_default_timeout(15000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(f'http://127.0.0.1:{server.server_port}'+path);confirm_returning_plan(page);click(page,'openQuick');click(page,'go','survival');click(page,'survivalStart');legacy_survival_fixture(page);s=save_slot(page)
     s['survivalRun'].update({'day':4,'stage':'base','base':{'site':'arts401','integrity':80,'exposure':0,'facilities':[]}})
     page.evaluate("s=>localStorage.setItem('campus.slot.1',JSON.stringify(s))",s);load(page);click(page,'survivalClinicBrief');assert page.locator('.clinic-briefing').is_visible();assert '학생을 받을 수' in page.locator('.clinic-briefing').inner_text();click(page,'survivalSortie','clinic');assert page.locator('[data-encounter="clinic"]').is_visible();assert page.locator('.clinic-student-marker').count()==1
     page.screenshot(path=f'/workspace/work/clinic-start-{width}.png',full_page=True)

@@ -1,3 +1,4 @@
+import {ensureSurvivalParties,createSurvivalParty,moveSurvivalPartyMember,renameSurvivalParty,dissolveSurvivalParty,meetSurvivalResident,meetSurvivalRecruit,discussSurvivalRecruit,inviteSurvivalRecruit,dispatchSurvivalParty} from './survival-parties.js';
 import {refreshSurvivalAdvice,survivalAdviceView,respondSurvivalAdvice,survivalAdviceTab} from './survival-advice.js';
 import {characterStatsContent} from './character-stats-ui.js';
 import {fairVisitDay} from './fair-events.js';
@@ -396,11 +397,21 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
   if(combatAnimating)return;
   try{shelterError='';
    if(a==='survivalAdviceAccept'||a==='survivalAdviceDefer'){const advice=survivalAdviceView(state);state=respondSurvivalAdvice(state,v,a==='survivalAdviceAccept'?'accept':'defer');if(a==='survivalAdviceAccept')shelterTab=survivalAdviceTab(advice.kind);}
-   if(a==='survivalStart')state=startSurvival(state,app.querySelector('#survival-companion')?.value??'student');
+   if(a==='survivalStart')state=startSurvival(state,'solo');
    if(a==='survivalRestart'){state=restartSurvival(state);shelterTab='overview';}
-   if(a==='survivalTab'){shelterTab=v;shelterSelectedFacility='';}
+   if(a==='survivalTab'){shelterTab=v;shelterSelectedFacility='';if(v==='parties')ensureSurvivalParties(state);}
    if(a==='survivalInspect')shelterSelectedFacility=v;
    if(a==='survivalAction'){state=survivalAction(state,v);if(v==='search')shelterTab='bag';}
+   if(a==='survivalPartyMeet')state=meetSurvivalRecruit(state);
+   if(a==='survivalPartyResident')state=meetSurvivalResident(state,v);
+   if(a==='survivalPartyRevisit')state=meetSurvivalRecruit(state,app.querySelector('#party-revisit')?.value);
+   if(a==='survivalPartyTalk')state=discussSurvivalRecruit(state,v);
+   if(a==='survivalPartyInvite')state=inviteSurvivalRecruit(state,app.querySelector('#party-invite-target')?.value);
+   if(a==='survivalPartyCreate')state=createSurvivalParty(state,app.querySelector('#party-new-member')?.value,app.querySelector('#party-new-name')?.value);
+   if(a==='survivalPartyMove')state=moveSurvivalPartyMember(state,v,app.querySelector('#party-destination-'+v)?.value);
+   if(a==='survivalPartyRename')state=renameSurvivalParty(state,v,app.querySelector('#party-name-'+v)?.value);
+   if(a==='survivalPartyDissolve')state=dissolveSurvivalParty(state,v);
+   if(a==='survivalPartyDispatch')state=dispatchSurvivalParty(state,v,app.querySelector('#party-mission-'+v)?.value);
    if(a==='survivalPackInit')state=initializeSurvivalPack(state);
    if(a==='survivalPackTake')state=transferSurvivalPack(state,'take',v);
    if(a==='survivalPackStore')state=transferSurvivalPack(state,'store',v);
@@ -425,7 +436,7 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
    if(a==='survivalShopBrief'){shelterTab=v;render();return;}
    if(a==='survivalClinicBrief'){shelterTab='clinic';render();return;}
    if(a==='survivalSortie'||a==='survivalSecure'){state=launchSurvivalSortie(state,a==='survivalSecure'?'secure':v,a==='survivalSecure'?v:undefined);combatActor='taei';combatMode='move';combatError='';combatMore=false;screen='combat';render();return;}
-   if(a==='survivalResume'){if(!state.survivalRun?.activeSortie||state.combatTrial?.survivalSortie!==state.survivalRun.activeSortie.id)throw new Error('연결된 작전을 확인해 주세요.');screen='combat';render();return;}
+   if(a==='survivalResume'){if(!state.survivalRun?.activeSortie||state.combatTrial?.survivalSortie!==state.survivalRun.activeSortie.id)throw new Error('연결된 작전을 확인해 주세요.');if(!Object.hasOwn(state.combatTrial?.actors??{},combatActor))combatActor='taei';screen='combat';render();return;}
    if(a==='survivalReturn'||a==='survivalAbort'){state=returnSurvivalSortie(state,{abandon:a==='survivalAbort'});shelterTab='overview';}
    if(a==='survivalExit'){screen='quickMenu';quickReturn='campus';quickSnapshot=null;render();return;}
   }catch(error){shelterError=error.message;}state=refreshSurvivalAdvice(state);screen='survival';render();return;
@@ -440,8 +451,8 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
   try{combatError='';
    if(a==='combatSetup'){if(state.survivalRun?.activeSortie){screen='survival';render();return;}screen='combatSetup';}
    if(a==='combatStart'){state=startGridCombat(state,app.querySelector('#combat-companion')?.value??'student',app.querySelector('[name="combat-mission"]:checked')?.value??'escape');combatActor='taei';combatMode='move';combatMore=false;screen='combat';}
-   if(a==='combatResume')screen='combat';
-   if(a==='combatActor'&&['taei','ally'].includes(v)){combatActor=v;combatMode='move';combatMore=false;}
+   if(a==='combatResume'){if(!Object.hasOwn(state.combatTrial?.actors??{},combatActor))combatActor='taei';screen='combat';}
+   if(a==='combatActor'&&Object.hasOwn(state.combatTrial?.actors??{},v)){combatActor=v;combatMode='move';combatMore=false;}
    if(a==='combatMode')combatMode=v;
    if(a==='combatInspect')combatError='보호 대상은 움직일 수 없어요. 옆 칸에서 방어하면 접근 공격을 막을 수 있어요.';
    if(a==='combatLocateLoot'){const cache=state.combatTrial?.supplyCache,scroller=app.querySelector('.tactical-scroll'),board=app.querySelector('.tactical-board');if(cache&&scroller&&board)scroller.scrollTo({left:(cache.x+.5)*board.clientWidth/12-scroller.clientWidth/2,top:(cache.y+.8)*board.clientHeight/8-scroller.clientHeight*.5,behavior:'smooth'});return;}

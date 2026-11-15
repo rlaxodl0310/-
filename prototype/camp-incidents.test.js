@@ -3,7 +3,7 @@ import {newGame,save,restore} from './simulation.js';
 import {startSurvival,finishSurvivalDay,survivalDayPreview,launchSurvivalSortie} from './survival-base.js';
 import {campIncidentView,checkCampIncident,resolveCampIncident} from './camp-incidents.js';
 import {survivalPage} from './survival-ui.js';
-function base(id='locker'){const s=startSurvival(newGame());Object.assign(s.survivalRun,{stage:'base',day:4,actions:3,base:{site:'library',integrity:80,facilities:[]},threat:20});s.survivalRun.resources={food:20,water:20,parts:10,bandage:2};s.survivalRun.story={seed:123,last:[],checkedDay:4,current:{id,day:4},pending:[],resolved:[]};return s;}
+function base(id='locker'){const s=startSurvival(newGame(),'student');Object.assign(s.survivalRun,{stage:'base',day:4,actions:3,base:{site:'library',integrity:80,facilities:[]},threat:20});s.survivalRun.resources={food:20,water:20,parts:10,bandage:2};s.survivalRun.story={seed:123,last:[],checkedDay:4,current:{id,day:4},pending:[],resolved:[]};return s;}
 test('camp preview is pure, predicts real night and includes one-time delayed choices',()=>{
  let s=resolveCampIncident(base(),'quiet');assert.equal(s.survivalRun.resources.parts,9);assert.equal(s.survivalRun.actions,2);assert.equal(s.survivalRun.resources.water,20);
  const before=save(s),p=survivalDayPreview(s);for(let i=0;i<3;i++){survivalPage(s);campIncidentView(s);}assert.equal(save(s),before);

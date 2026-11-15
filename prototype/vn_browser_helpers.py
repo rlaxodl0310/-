@@ -47,3 +47,18 @@ def finish_school_morning(page):
         choose(page,'classTravel')
         choose(page,'classPrepare')
         choose(page,'classChoice')
+
+
+def legacy_survival_fixture(page):
+    """Load an old consenting two-person campaign; fresh play now starts solo."""
+    import copy
+    def press(action,value=None):
+        page.locator(f'[data-action="{action}"]'+(f'[data-value="{value}"]' if value is not None else '')).first.click()
+    press('openQuick');press('quickTab','save');press('save','3')
+    state=page.evaluate("JSON.parse(localStorage.getItem('campus.slot.3'))")
+    run=state['survivalRun']
+    if len(run['members'])==1:
+        companion=copy.deepcopy(run['members'][0]);companion.update({'key':'ally','character':'student','attributes':{'strength':4,'agility':4,'vitality':4,'endurance':4,'mentality':4}});run['members'].append(companion)
+    run.pop('parties',None)
+    page.evaluate("s=>localStorage.setItem('campus.slot.3',JSON.stringify(s))",state)
+    page.reload();page.locator('.opening-tools [data-action="openQuick"]').click();press('load','3');press('quickTab','tools');press('go','survival')

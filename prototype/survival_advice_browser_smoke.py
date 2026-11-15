@@ -1,3 +1,4 @@
+from vn_browser_helpers import legacy_survival_fixture
 """Verify party suggestions, response memory and actual preparation/care controls."""
 import http.server,threading
 from playwright.sync_api import sync_playwright
@@ -19,7 +20,7 @@ try:
   browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium')
   for path in ['/prototype/','/demo/campus-demo.html']:
    for width,height in [(390,844),(1440,1000)]:
-    page=browser.new_page(viewport={'width':width,'height':height},reduced_motion='reduce');page.set_default_timeout(12000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(f'http://127.0.0.1:{server.server_port}'+path);confirm_returning_plan(page);click(page,'openQuick');click(page,'go','survival');click(page,'survivalStart');base=save_slot(page)
+    page=browser.new_page(viewport={'width':width,'height':height},reduced_motion='reduce');page.set_default_timeout(12000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(f'http://127.0.0.1:{server.server_port}'+path);confirm_returning_plan(page);click(page,'openQuick');click(page,'go','survival');click(page,'survivalStart');legacy_survival_fixture(page);base=save_slot(page)
     # Old save initializes a proposal on entering camp; same needs, different preferences.
     for person,target in [('soyul','kiosk'),('dogyeom','convenience')]:
      s=scenario(base);s['survivalRun']['resources']['food']=0;s['survivalRun']['members'][1]['character']=person;load(page,s);card=page.locator('.party-advice');assert card.get_attribute('data-advice-kind')==target;assert '2명이' in card.inner_text();before=save_slot(page);click(page,'survivalAdviceAccept');assert page.locator('.shop-briefing').is_visible();accepted=save_slot(page);assert accepted['survivalRun']['actions']==before['survivalRun']['actions'];assert accepted['survivalRun']['activeSortie'] is None;assert accepted['survivalRun']['advice']['history'][-1]['status']=='accepted'

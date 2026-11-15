@@ -1,17 +1,18 @@
+import {currentSurvivalMembers} from './survival-parties.js';
 import {survivalCondition} from './survival-health.js';
 import {displayName} from './identity.js';
 // Deterministic party deliberation: only observed shared supplies/health are used.
 const advicePreferences={yeogyeong:{care:14,clinic:12,kiosk:8},seoyeon:{care:10,rest:10},soyul:{rest:16,kiosk:12,convenience:-16},iseo:{convenience:10},dogyeom:{convenience:16,kiosk:-4}};
 export const survivalAdviceLabels={clinic:'보건실에서 치료 물자 찾기',kiosk:'교내 매점에서 식량·물 보급',convenience:'편의점에서 식량·물 보급',care:'부상자부터 치료하기',eat:'가진 음식부터 나누기',drink:'가진 물부터 마시기',rest:'몸을 숨기고 쉬기',search:'주변 물자부터 살펴보기'};
 export function survivalAdviceName(state,member){return member?.label??(member?.character==='student'?'함께 있는 학생':displayName(state,member?.character));}
-function advicePresent(r){return r.members.filter(m=>!['away','departed'].includes(m.mind?.state));}
-function adviceContext(r){return JSON.stringify({day:r.day,actions:r.actions,resources:r.resources,items:r.kit?.items,stock:r.kit?.stock,pending:!!r.kit?.pending,stage:r.stage,base:r.base,visits:r.shopVisits,clinic:r.clinicOutcome,search:r.searchDay,sorties:r.sortieSequence,active:!!r.activeSortie,members:r.members.map(m=>({key:m.key,character:m.character,injury:m.injury,woundRisk:m.woundRisk,nutrition:m.nutrition,hydration:m.hydration,fatigue:m.fatigue,stress:m.stress,mind:m.mind?.state}))});}
+function advicePresent(r){return r.members.filter(m=>!m.deployment&&!['away','departed'].includes(m.mind?.state));}
+function adviceContext(r){return JSON.stringify({day:r.day,actions:r.actions,resources:r.resources,items:r.kit?.items,stock:r.kit?.stock,pending:!!r.kit?.pending,stage:r.stage,base:r.base,visits:r.shopVisits,clinic:r.clinicOutcome,search:r.searchDay,sorties:r.sortieSequence,active:!!r.activeSortie,groups:r.parties?.groups,members:r.members.map(m=>({key:m.key,character:m.character,injury:m.injury,woundRisk:m.woundRisk,nutrition:m.nutrition,hydration:m.hydration,fatigue:m.fatigue,stress:m.stress,mind:m.mind?.state}))});}
 function adviceSupply(r,id){return (r.resources[id]??0)+(r.kit?.items[id]??0)+(r.kit?.stock[id]??0);}
 export function survivalAdviceOptions(state){
  const r=state.survivalRun;if(!r||r.status!=='active'||r.activeSortie||r.kit?.pending||r.actions<1||r.advice?.pause===adviceContext(r))return [];
  const people=advicePresent(r),n=people.length,food=adviceSupply(r,'food')+adviceSupply(r,'canned'),water=adviceSupply(r,'water'),meds=adviceSupply(r,'bandage')+adviceSupply(r,'firstaid');
- const speakers=people.filter(m=>m.key!=='taei'&&m.mind?.state!=='panic');if(!speakers.length)return [];
- const party=r.members.filter(m=>['taei','ally'].includes(m.key)&&m.mind?.state!=='departed'),unready=party.some(m=>survivalCondition(m).critical||m.fatigue>=80||['panic','away'].includes(m.mind?.state)),options=[];
+ const speakers=(r.parties?currentSurvivalMembers(r):people).filter(m=>!m.deployment&&!['away','departed'].includes(m.mind?.state)&&m.key!=='taei'&&m.mind?.state!=='panic');if(!speakers.length)return [];
+ const party=currentSurvivalMembers(r).filter(m=>m.mind?.state!=='departed'),unready=party.some(m=>survivalCondition(m).critical||m.fatigue>=80||['panic','away'].includes(m.mind?.state)),options=[];
  const add=(kind,need,level,score,reason,target)=>options.push({kind,need,level,score,reason,target:target?.key??null,label:survivalAdviceLabels[kind]});
  const injured=people.filter(m=>m.injury>0).sort((a,b)=>(b.woundRisk??0)-(a.woundRisk??0)||b.injury-a.injury),patient=injured[0];
  if(patient){const c=survivalCondition(patient),name=survivalAdviceName(state,patient),level=c.critical?3:c.woundRisk>=50||patient.injury>=2?2:1;
@@ -37,7 +38,7 @@ export function survivalAdviceOptions(state){
   const key=`${r.day}:${o.need}:${phase}:${o.target??'party'}:${o.level}`;
   const risk=speaker.stress>=55?{rest:12,kiosk:8,convenience:-18}:{};
   const score=o.score+(advicePreferences[speaker.character]?.[o.kind]??0)+(risk[o.kind]??0)+(speaker.key===o.target?8:0);
-  const relation=state.relations?.[speaker.character+'>taei'],opening=(relation?.tension??0)>=4?'의견이 다를 수 있지만, 이건 확인했으면 해. ':speaker.character==='soyul'?'내 생각에는… ':speaker.character==='yeogyeong'?'남은 것부터 확인해봤어. ':speaker.character==='dogyeom'?'다음에 뭘 할지 생각해봤는데, ':'';
+  const relation=r.parties?.bonds?.[speaker.recruitId]??state.relations?.[speaker.character+'>taei'],opening=(relation?.tension??0)>=4?'의견이 다를 수 있지만, 이건 확인했으면 해. ':speaker.character==='soyul'?'내 생각에는… ':speaker.character==='yeogyeong'?'남은 것부터 확인해봤어. ':speaker.character==='dogyeom'?'다음에 뭘 할지 생각해봤는데, ':'';
   return {...o,key,phase,score,speaker:speaker.key,text:opening+o.reason};
  })).filter(o=>!heard.some(h=>h.need===o.need&&h.phase===o.phase&&h.target===o.target&&h.level>=o.level)).sort((a,b)=>b.score-a.score||a.speaker.localeCompare(b.speaker)||a.kind.localeCompare(b.kind));
 }

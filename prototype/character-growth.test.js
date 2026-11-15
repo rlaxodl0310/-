@@ -7,7 +7,7 @@ import {resolveSurvivalAutonomy,survivalMemberAvailable} from './survival-autono
 import {characterStatsContent} from './character-stats-ui.js';
 import {careSurvivalMember} from './survival-pack.js';
 const all=n=>({strength:n,agility:n,vitality:n,endurance:n,mentality:n});
-function camp(seed=1){let s=initializeCharacterSystem(newGame(),{seed});s=startSurvival(s);s.survivalRun.stage='settlement';s.survivalRun.day=3;return s;}
+function camp(seed=1){let s=initializeCharacterSystem(newGame(),{seed});s=startSurvival(s,'student');s.survivalRun.stage='settlement';s.survivalRun.day=3;return s;}
 test('global caps and personal potentials differ, growth respects limits and survives save',()=>{
  assert.deepEqual(normalizeAbilities(all(99)),{strength:20,agility:20,vitality:50,endurance:50,mentality:50});
  for(const id of characterAbilityIds){const p=characterPotential(id);assert.ok(p.strength<=20&&p.agility<=20&&p.vitality<=50&&p.endurance<=50&&p.mentality<=50);}
