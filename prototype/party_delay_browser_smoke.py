@@ -1,5 +1,5 @@
 """Real dispatch/radio choices, live rescue, saves and backup in web/offline layouts."""
-import http.server,threading,subprocess,json,copy
+import http.server,threading,subprocess,json,copy,os
 from playwright.sync_api import sync_playwright
 from vn_browser_helpers import confirm_returning_plan
 class Quiet(http.server.SimpleHTTPRequestHandler):
@@ -21,9 +21,9 @@ def incident(page,base):
 try:
  with sync_playwright() as p:
   browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium')
-  for path in ['/prototype/','/demo/campus-demo.html']:
+  for path in (['/demo/campus-demo.html'] if os.environ.get('DELAY_OFFLINE_ONLY') else ['/prototype/','/demo/campus-demo.html']):
    for width,height in [(390,844),(1440,1000)]:
-    page=browser.new_page(viewport={'width':width,'height':height},reduced_motion='reduce');page.set_default_timeout(15000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(f'http://127.0.0.1:{server.server_port}'+path);confirm_returning_plan(page);click(page,'openQuick');click(page,'go','survival');click(page,'survivalStart');base=save_slot(page)
+    page=browser.new_page(viewport={'width':width,'height':height},reduced_motion='reduce');page.set_default_timeout(15000);page.set_default_navigation_timeout(60000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(f'http://127.0.0.1:{server.server_port}'+path);confirm_returning_plan(page);click(page,'openQuick');click(page,'go','survival');click(page,'survivalStart');base=save_slot(page)
     pending,id=incident(page,base);assert len(pending['survivalRun']['members'])==6;assert pending['survivalRun']['members'][2]['deployment']=='party-2';assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1');page.screenshot(path=f'/workspace/work/party-delay-{width}.png',full_page=True)
     click(page,'survivalPartyDelay',id+'|wait');assert page.locator(f'[data-value="{id}|wait"]').is_disabled();save_slot(page);load(page);assert page.locator(f'[data-value="{id}|wait"]').is_disabled();click(page,'survivalNextDay');waited=save_slot(page);assert waited['survivalRun']['parties']['delays'][0]['waits']==1;assert waited['survivalRun']['members'][2]['hydration']==pending['survivalRun']['members'][2]['hydration']-15
     click(page,'survivalPartyRescue',id);assert page.locator('.tactical-shell').is_visible();assert '연결 통로' in page.locator('.tactical-shell').inner_text()

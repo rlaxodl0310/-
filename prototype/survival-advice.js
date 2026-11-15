@@ -1,3 +1,4 @@
+import {refreshSurvivalThinking} from './survival-thinking.js';
 import {currentSurvivalMembers,survivalResidentCapacity} from './survival-parties.js';
 import {survivalCondition} from './survival-health.js';
 import {displayName} from './identity.js';
@@ -50,10 +51,10 @@ export function survivalAdviceOptions(state){
 export function refreshSurvivalAdvice(state){
  const r=state.survivalRun;if(!r)return state;
  const options=survivalAdviceOptions(state),best=options[0]??null,s=structuredClone(state),a=s.survivalRun.advice??={version:1,sequence:0,current:null,history:[]};
- if(!best){a.current=null;return s;}
- if(a.current?.key===best.key&&a.current.speaker===best.speaker&&a.current.kind===best.kind){a.current={...a.current,...best,alternatives:[...new Set(options.filter(o=>o.kind!==best.kind).map(o=>o.label))].slice(0,2)};return s;}
+ if(!best){a.current=null;return refreshSurvivalThinking(s);}
+ if(a.current?.key===best.key&&a.current.speaker===best.speaker&&a.current.kind===best.kind){a.current={...a.current,...best,alternatives:[...new Set(options.filter(o=>o.kind!==best.kind).map(o=>o.label))].slice(0,2)};return refreshSurvivalThinking(s);}
  a.sequence++;a.current={...best,id:String(a.sequence),day:r.day,alternatives:[...new Set(options.filter(o=>o.kind!==best.kind).map(o=>o.label))].slice(0,2)};
- return s;
+ return refreshSurvivalThinking(s);
 }
 export function survivalAdviceView(state){
  const r=state.survivalRun;if(!r?.advice?.current)return null;

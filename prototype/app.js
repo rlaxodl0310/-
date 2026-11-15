@@ -1,3 +1,5 @@
+import {respondSurvivalThinking} from './survival-thinking.js';
+import {executeSurvivalThinking} from './survival-thinking-actions.js';
 import {decidePartyDelay} from './party-delay.js';
 import {decideSupplyDebate,discussSupplyAftermath,supplyDebatePending} from './supply-debate.js';
 import {ensureSurvivalParties,createSurvivalParty,moveSurvivalPartyMember,renameSurvivalParty,dissolveSurvivalParty,meetSurvivalResident,meetSurvivalRecruit,discussSurvivalRecruit,inviteSurvivalRecruit,dispatchSurvivalParty} from './survival-parties.js';
@@ -404,6 +406,8 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
    if(a==='survivalTab'){shelterTab=v;shelterSelectedFacility='';if(v==='parties')ensureSurvivalParties(state);}
    if(a==='survivalInspect')shelterSelectedFacility=v;
    if(a==='survivalAction'){state=survivalAction(state,v);if(v==='search')shelterTab='bag';}
+   if(a==='survivalThinkingReply'){const [id,reply]=v.split('|');state=respondSurvivalThinking(state,id,reply);}
+   if(a==='survivalThinkingAct'){state=executeSurvivalThinking(state,v);if(state.survivalRun.kit?.pending)shelterTab='bag';if(state.survivalRun.activeSortie){combatActor='taei';combatMode='move';combatError='';combatMore=false;screen='combat';render();return;}}
    if(a==='survivalPartyDelay'){const [id,choice]=v.split('|');state=decidePartyDelay(state,id,choice,app.querySelector('#delay-backup-'+id)?.value);}
    if(a==='survivalPartyRescue'){state=launchSurvivalSortie(state,'partyRescue',v);combatActor='taei';combatMode='move';combatError='';combatMore=false;screen='combat';render();return;}
    if(a==='survivalSupplyDebrief'){const [id,reply]=v.split('|');state=discussSupplyAftermath(state,id,reply);}
