@@ -23,6 +23,12 @@
     {
       "image": "chaewon-drinks-event.png",
       "title": "음료 하나 골라봐요"
+    },
+    {
+      "image": "chaewon-seoyeon-walk.png",
+      "title": "서연과 나란히 걷는 길",
+      "event": "chaewon:seoyeon",
+      "choice": "walk"
     }
   ],
   "sd": {
@@ -41,5 +47,6 @@
       "운동복"
     ]
   },
-  "usage": "캐릭터 일러스트 메뉴 미리보기. 실제 등장 이벤트에는 아직 연결하지 않음."
+  "usage": "게임 캐릭터 일러스트 메뉴 및 실제 개인 이벤트 3개(첫 만남, 이서와 운동 정리, 서연과 휴식). 서연과 걷는 CG는 해당 이벤트의 walk 선택에서 표시.",
+  "portrait": "chaewon-fullbody.png"
 }

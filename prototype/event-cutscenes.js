@@ -1,9 +1,10 @@
+import {chaewonEventsAt} from './chaewon-events.js';
 import {wetWeather} from './weather.js';
 import {presentPeople} from './days.js';
 import {displayName,contact} from './identity.js';
 import {characterActing} from './character-acting.js';
 // Presentation only: no recruitment, relationship changes, RNG or time advancement.
-const sdActorOrder=['taei','yeogyeong','seoyeon','soyul','iseo','dogyeom','jihoo','naeun','dohyun','dayeon','chaerin','junseo'];
+const sdActorOrder=['taei','yeogyeong','seoyeon','soyul','iseo','dogyeom','jihoo','naeun','dohyun','dayeon','chaerin','junseo','chaewon'];
 function sdRelation(state,from,to){return state.relations?.[`${from}>${to}`]??{};}
 function sdGuarded(state,id,ids){return ids.some(other=>other!==id&&((sdRelation(state,id,other).tension??0)>=3||(sdRelation(state,other,id).tension??0)>=3));}
 export function composeCutscene(state,ids,{kind='conversation',text='',emotion,activeActor}={}){
@@ -15,7 +16,7 @@ export function composeCutscene(state,ids,{kind='conversation',text='',emotion,a
   const known=id==='taei'||contact(state,id).introduced,relation=sdRelation(state,id,'taei');
   const friendly=known&&(id==='taei'||((relation.familiarity??0)>=6&&(relation.trust??0)>=4));
   const row=sdGuarded(state,id,actors)?2:friendly&&['happy','warm'].includes(acting.emotion)?1:0;
-  const index=sdActorOrder.indexOf(id),atlas=index<6?'main':index<9?'fair':'fair-extra';
+  const index=sdActorOrder.indexOf(id),atlas=id==='chaewon'?'chaewon':index<6?'main':index<9?'fair':'fair-extra';
   return {id,atlas,column:index<6?index:(index-6)%3,row,label:displayName(state,id),reaction:row===2?'경계하는 반응':row===1?'편안한 반응':'조심스럽게 반응',speaking:id===activeActor};
  });
  return {id:`composed:${kind}:${actors.join(':')}`,kind,cast,tense,label:tense?'말 사이에 남은 거리':kind==='music'?'한 구절을 나눈 순간':kind==='exercise'?'잠깐 호흡을 고르는 순간':kind==='snack'?'간식을 사이에 둔 반응':'같은 자리, 서로 다른 반응'};
@@ -25,6 +26,7 @@ export function eventCutscene(state,screen,beat={},context={}){
  let ids=[],kind='conversation',activeActor=context.activeActor??beat.actor;
  if(screen==='personalEvent'){
   const r=state.personalEvents?.records?.[state.personalEvents?.active];
+  if(r?.person==='chaewon'){if(!chaewonEventsAt(state).some(e=>e.eventId===r.eventId))return null;if(r.status!=='active'||r.stage!==1||r.day!==state.day||r.location!==state.location||state.clock.minute>r.until||!r.last||!r.participants?.includes(beat.actor))return null;if(r.eventId==='chaewon:seoyeon'&&r.choices?.[0]==='walk'&&!wetWeather(state))return {id:'chaewon-together',kind:'illustration',label:'서로의 속도로, 나란히 걷는 길'};return composeCutscene(state,['taei',...r.participants],{kind:'conversation',text:beat.text,activeActor:beat.actor});}
   if(r?.person==='iseo'&&r.day===state.day&&r.location===state.location&&beat.actor==='iseo'){
    if(r.eventId==='iseo'&&r.status==='completed'&&r.choices?.at(-1)==='chat'&&r.completedDay===state.day&&r.completedMinute===state.clock.minute&&!wetWeather(state))return {id:'iseo-walk',kind:'illustration',label:'운동을 마치고, 잠깐 함께 걷는 길'};
    if(r.eventId==='iseo:4'&&r.status==='active'&&r.stage===1&&state.location==='gym'&&state.clock.minute<=r.until&&['feed','watch'].includes(r.choices?.[0]))return {id:'iseo-volleyball',kind:'illustration',label:'공을 기다리는 자세'};
