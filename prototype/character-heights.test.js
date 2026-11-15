@@ -6,7 +6,7 @@ import {introduce} from './identity.js';
 import {characterVisual} from './character-visuals.js';
 function ready(){const s=newAfternoonScenario('close');s.clock.minute=780;s.location='hall';return s;}
 test('confirmed heights are exact and proposals stay separate from game facts',()=>{
- const expected={taei:179,seoha:167,doyun:182,nakyeong:161,haerin:163,subin:172,yeogyeong:162,seoyeon:160,soyul:165,iseo:158,chaewon:164};for(const [id,cm] of Object.entries(expected))assert.equal(characterHeightCm(id),cm);assert.equal(characterHeightCm('dogyeom'),null);assert.equal(characterHeightCm('naeun'),null);assert.equal(characterHeightCm('missing'),null);assert.equal(Object.keys(characterHeightProfiles).length,18);
+ const expected={taei:179,seoha:167,doyun:182,nakyeong:161,haerin:163,subin:172,yeogyeong:162,seoyeon:160,soyul:165,iseo:158,chaewon:164};for(const [id,cm] of Object.entries(expected))assert.equal(characterHeightCm(id),cm);assert.equal(characterHeightCm('dogyeom'),null);assert.equal(characterHeightCm('naeun'),null);assert.equal(characterHeightCm('missing'),null);assert.equal(Object.keys(characterHeightProfiles).length,19);
  assert.equal(characterVisual('seoyeon').heightScale,160/183);assert.equal(characterHeightScale('iseo')/characterHeightScale('taei'),158/179);
 });
 test('height queries and viewing cannot modify ability rolls, growth, relationships, time or legacy saves',()=>{

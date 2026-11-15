@@ -1,6 +1,7 @@
 export const clubRoster=['yeogyeong','seoyeon','soyul'];
 // Canonical identities stay internal; player-facing labels come from learned facts.
 export const identities={
+ nursingStudent:{name:'백지안',given:'지안',description:'가는 안경테를 쓴 긴 옆머리의 학생'},
  chaewon:{name:'유채원',given:'채원',description:'운동 가방을 멘 차분한 단발머리 학생'},
  jihoo:{name:'서지후',given:'지후',description:'회색 후드집업을 입은 교복 학생'},
  naeun:{name:'이나은',given:'나은',description:'둥근 안경을 쓴 교복 학생'},

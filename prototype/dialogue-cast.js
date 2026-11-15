@@ -1,5 +1,5 @@
 // Presentation only: actor IDs never replace the player's learned display names.
-const illustratedActors=new Set(['taei','chaewon','yeogyeong','seoyeon','soyul','iseo','dogyeom','jihoo','naeun','dohyun','dayeon','chaerin','junseo']);
+const illustratedActors=new Set(['taei','nursingStudent','chaewon','yeogyeong','seoyeon','soyul','iseo','dogyeom','jihoo','naeun','dohyun','dayeon','chaerin','junseo']);
 export function conversationCast({scene,speaker,groupParticipants=[],contextPerson,contextParticipants=[]}={}){
  const ids=scene==='group'?['taei',...groupParticipants]:['dialogue','warningShare','rainLunch','supplyAftermath','personalEvent'].includes(scene)?['taei',contextPerson??speaker,...contextParticipants]:[];
  return [...new Set(ids)].filter(id=>illustratedActors.has(id)).slice(0,3);

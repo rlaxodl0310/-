@@ -1,15 +1,48 @@
 {
-  "name": null,
+  "name": "백지안",
   "age": 22,
   "major": "간호학과",
   "year": null,
   "heightCm": null,
   "face": "가는 금속테 안경, 차분한 긴 눈매, 긴 앞머리와 옆머리, 입가의 작은 점",
   "outfit": "짧은 H핏 치마, 검정 스타킹, 재킷 안에 아이보리 나시",
-  "status": "외형 시안. 이름·성격·키·학년·스탯·실제 만남 이벤트 미정.",
+  "status": "이름은 사용자 위임으로 백지안. 학년·키·세부 성격 미정. 도서관 첫 만남과 다음 날 카페 이벤트 실제 연결. 집 휴대폰 CG는 갤러리 시안.",
   "files": [
     "nursing-student-face.png",
-    "nursing-student-fullbody.png"
+    "nursing-student-fullbody.png",
+    "nursing-student-no-jacket.png",
+    "nursing-student-sd.png",
+    "nursing-student-library.png",
+    "nursing-student-rest.png",
+    "nursing-student-home.png",
+    "nursing-student-transparent.png"
   ],
-  "proportions": "전신에서 머리 크기를 줄여 자연스러운 성인 체형 비율로 수정"
+  "proportions": "두상을 작게 유지하며 어깨·팔·허리·허벅지 선을 조금 더 가늘게 조정한 성인 체형",
+  "sd": {
+    "file": "nursing-student-sd.png",
+    "columns": 3,
+    "rows": 2,
+    "cell": 512,
+    "columnOrder": [
+      "기본",
+      "웃음",
+      "경계"
+    ],
+    "rowOrder": [
+      "재킷",
+      "나시"
+    ]
+  },
+  "events": [
+    "nursing-student:book",
+    "nursing-student:break"
+  ],
+  "stats": {
+    "힘": 2,
+    "민첩": 3,
+    "체력": 4,
+    "인내": 4,
+    "정신력": 5
+  },
+  "portrait": "nursing-student-transparent.png"
 }

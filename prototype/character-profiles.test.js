@@ -5,7 +5,7 @@ import {newAfternoonScenario,save,restore} from './simulation.js';
 import {fairVisitDay,fairStudentLocation} from './fair-events.js';
 import {beginPersonalEvent,progressPersonalEvent} from './personal-events.js';
 import {characterHeightCatalog} from './character-heights.js';
-test('all 18 named characters have ages and all six high-school seniors are 19',()=>{assert.equal(Object.keys(characterAges).length,18);for(const id of fairStudentAgeIds)assert.equal(characterAge(id),19);assert.equal(characterAge('taei'),23);assert.equal(characterAge('chaewon'),21);assert.equal(characterAge('missing'),null);assert.equal((characterHeightCatalog().match(/profile-age/g)??[]).length,18);});
+test('all 19 named characters have ages and all six high-school seniors are 19',()=>{assert.equal(Object.keys(characterAges).length,19);for(const id of fairStudentAgeIds)assert.equal(characterAge(id),19);assert.equal(characterAge('taei'),23);assert.equal(characterAge('chaewon'),21);assert.equal(characterAge('missing'),null);assert.equal((characterHeightCatalog().match(/profile-age/g)??[]).length,19);});
 test('each fair student actually speaks and records age 19 only on the introduction choice',()=>{
  for(const id of fairStudentAgeIds){let s=newAfternoonScenario('close');s.day=fairVisitDay(s);s.clock.minute=610;s.location=fairStudentLocation(s,id);assert.ok(s.location);assert.equal(knownCharacterAge(s,id),null);s=beginPersonalEvent(s,id+':fair:1');s=progressPersonalEvent(s,'help');assert.equal(knownCharacterAge(s,id),null);s=progressPersonalEvent(s,'names');assert.equal(s.contacts[id].details.age,19);assert.match(s.personalEvents.records[id+':fair:1'].last.text,/열아홉 살/);assert.equal(knownCharacterAge(restore(save(s)),id),19);}
 });

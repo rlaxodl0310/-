@@ -1,3 +1,4 @@
+import {nursingStudentEventsAt} from './nursing-student-events.js';
 import {chaewonEventsAt} from './chaewon-events.js';
 import {wetWeather} from './weather.js';
 import {presentPeople} from './days.js';
@@ -22,6 +23,7 @@ export function composeCutscene(state,ids,{kind='conversation',text='',emotion,a
  return {id:`composed:${kind}:${actors.join(':')}`,kind,cast,tense,label:tense?'말 사이에 남은 거리':kind==='music'?'한 구절을 나눈 순간':kind==='exercise'?'잠깐 호흡을 고르는 순간':kind==='snack'?'간식을 사이에 둔 반응':'같은 자리, 서로 다른 반응'};
 }
 export function eventCutscene(state,screen,beat={},context={}){
+ if(screen==='personalEvent'){const r=state.personalEvents?.records?.[state.personalEvents?.active];if(r?.person==='nursingStudent'&&r.status==='active'&&r.day===state.day&&r.location===state.location&&state.clock.minute<=r.until&&['speech','narrator'].includes(beat.kind)&&beat.actor!=='taei'&&nursingStudentEventsAt(state).some(e=>e.eventId===r.eventId))return {id:r.eventId.endsWith(':book')?'nursing-library':'nursing-rest',kind:'illustration',label:r.eventId.endsWith(':book')?'책갈피가 꽂힌 쪽':'다 읽지 않아도 되는 날'};}
  if(beat.kind!=='speech')return null;
  let ids=[],kind='conversation',activeActor=context.activeActor??beat.actor;
  if(screen==='personalEvent'){

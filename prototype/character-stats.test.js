@@ -14,8 +14,8 @@ import {startSurvival} from './survival-base.js';
 import {startGridCombat,tacticalPaths,gridAct,tacticalMoveCost} from './combat-grid.js';
 const all=n=>({strength:n,agility:n,vitality:n,endurance:n,mentality:n});
 function fresh(seed=1){return initializeCharacterSystem(newGame(),{seed});}
-test('18 profiles have bounded physical abilities; stronger totals mean rarer appearance, not a sex multiplier',()=>{
- assert.equal(characterAbilityIds.length,18);for(const id of characterAbilityIds){const stats=characterAbilities(id);assert.equal(Object.keys(stats).length,5);assert.ok(Object.values(stats).every(n=>Number.isInteger(n)&&n>=1&&n<=10));}
+test('19 profiles have bounded physical abilities; stronger totals mean rarer appearance, not a sex multiplier',()=>{
+ assert.equal(characterAbilityIds.length,19);for(const id of characterAbilityIds){const stats=characterAbilities(id);assert.equal(Object.keys(stats).length,5);assert.ok(Object.values(stats).every(n=>Number.isInteger(n)&&n>=1&&n<=10));}
  assert.ok(characterAbilities('taei').strength>5);assert.ok(characterAbilities('taei').agility>5);assert.ok(characterAbilities('iseo').agility>4);
  const levels=[all(2),all(4),all(5),all(6),all(8)].map(rarityForAbilities);assert.deepEqual(levels.map(x=>x.tier),[0,1,2,3,4]);for(let i=1;i<levels.length;i++)assert.ok(levels[i].probability<levels[i-1].probability);
 });

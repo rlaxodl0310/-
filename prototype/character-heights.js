@@ -10,6 +10,7 @@ import {dogyeomLocation} from './dogyeom-events.js';
 import {advanceFreeTime} from './free-roam.js';
 // Canonical stature is presentation data, separate from abilities and saved appearance rolls.
 export const characterHeightProfiles={
+ nursingStudent:{name:'백지안',cm:null},
  taei:{name:'김태이',cm:179},seoha:{name:'윤서하',cm:167},doyun:{name:'박도윤',cm:182},nakyeong:{name:'최나경',cm:161},haerin:{name:'문해린',cm:163},subin:{name:'오수빈',cm:172},
  yeogyeong:{name:'차여경',cm:162},seoyeon:{name:'한서연',cm:160},soyul:{name:'박소율',cm:165},iseo:{name:'정이서',cm:158},chaewon:{name:'유채원',cm:164},
  dogyeom:{name:'윤도겸',cm:183,proposed:true},jihoo:{name:'서지후',cm:176,proposed:true},naeun:{name:'이나은',cm:163,proposed:true},dohyun:{name:'권도현',cm:181,proposed:true},dayeon:{name:'강다연',cm:165,proposed:true},chaerin:{name:'오채린',cm:161,proposed:true},junseo:{name:'신준서',cm:173,proposed:true}
@@ -30,4 +31,4 @@ export function askCharacterHeight(state,id){
  const s=advanceFreeTime(state,2),height=characterHeightCm(id);s.contacts[id].details={...s.contacts[id].details,heightCm:height};s.contacts[id].heightSource={kind:'direct-conversation',day:s.day,minute:s.clock.minute,location:s.location};
  const text=`${displayName(s,id)}: “저 ${height}cm예요.”`;s.memory.push(`[${s.day}일차] 키를 물어보자 ${text}`);return {state:s,text};
 }
-export function characterHeightCatalog(){return `<section class="height-catalog" aria-label="캐릭터 키 설정"><h2>캐릭터 기본 설정</h2><p>이름·키·나이·기본 스탯 설정이에요. 스탯은 힘 / 민첩 / 체력 / 인내 / 정신력 순서예요. 실제 진행에서 알아낸 정보와는 별개예요.</p><div class="height-roster">${Object.entries(characterHeightProfiles).map(([id,p])=>`<div data-height-character="${id}"><strong>${p.name}</strong><span>${p.cm}cm${p.proposed?' · 제안':''}</span><span class="profile-age">${characterAge(id)}살</span><span class="profile-base-stats" aria-label="힘 민첩 체력 인내 정신력">${Object.values(characterAbilities(id)).join(' / ')}</span></div>`).join('')}</div></section>`;}
+export function characterHeightCatalog(){return `<section class="height-catalog" aria-label="캐릭터 키 설정"><h2>캐릭터 기본 설정</h2><p>이름·키·나이·기본 스탯 설정이에요. 스탯은 힘 / 민첩 / 체력 / 인내 / 정신력 순서예요. 실제 진행에서 알아낸 정보와는 별개예요.</p><div class="height-roster">${Object.entries(characterHeightProfiles).map(([id,p])=>`<div data-height-character="${id}"><strong>${p.name}</strong><span>${p.cm===null?'키 미정':p.cm+'cm'}${p.proposed?' · 제안':''}</span><span class="profile-age">${characterAge(id)}살</span><span class="profile-base-stats" aria-label="힘 민첩 체력 인내 정신력">${Object.values(characterAbilities(id)).join(' / ')}</span></div>`).join('')}</div></section>`;}
