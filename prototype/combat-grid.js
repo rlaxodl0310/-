@@ -1,3 +1,4 @@
+import {openShopReserve} from './shop-sorties.js';
 import {canRescueClinicStudent} from './clinic-mission.js';
 import {enabledAttributes,entityAbilities,abilityPenaltyFactors,attributeEffortCost,attributeMoveRange,attributeAttackChance,attributeFearLoad} from './character-stats.js';
 import {survivalStaminaCap} from './survival-health.js';
@@ -40,7 +41,7 @@ function tacticalWin(b){
  if(b.status!=='active')return;
  if(b.mission==='protect'){if(b.protection.down){b.status='failed';tacticalRecord(b,'보호 대상이 쓰러졌다.');}else if(b.protection.held>=4){b.status='victory';tacticalRecord(b,'구조 준비가 끝났다. 부상 학생을 지켜냈다.');}return;}
  if(b.mission==='eliminate'){if(b.enemies.every(e=>e.balance<=0)&&!(b.noise>=6&&!b.reinforced)){b.status='victory';tacticalRecord(b,'주변의 모든 적을 제압하고 복도를 확보했다.');}return;}
- if((!b.clinic||b.supplyCache.recovered)&&Object.values(b.actors).every(a=>a.escaped)){b.status='escaped';tacticalRecord(b,'둘 다 방화문 너머로 탈출했다.');}
+ if((!(b.clinic||b.shop)||b.supplyCache.recovered)&&Object.values(b.actors).every(a=>a.escaped)){b.status='escaped';tacticalRecord(b,'둘 다 방화문 너머로 탈출했다.');}
 }
 function tacticalRequire(state,key){const b=state.combatTrial,a=b?.actors[key];if(b?.version!==2||b.status!=='active'||b.phase!=='planning'||!a||a.down||a.escaped||a.ap<1||key==='ally'&&b.carrying)throw new Error('지금 행동할 수 있는 인물을 선택하세요.');}
 export function gridAct(state,key,action,target){
@@ -50,7 +51,7 @@ export function gridAct(state,key,action,target){
   const from={x:a.x,y:a.y};a.x=path.x;a.y=path.y;a.stamina-=path.cost;a.ap--;b.frames.push({kind:'move',unit:key,from,to:{x:a.x,y:a.y},path:path.path});
   if(b.carrying&&key==='taei'){b.actors.ally.x=a.x;b.actors.ally.y=a.y;}
   tacticalRecord(b,`${name} · ${path.path.length}칸 이동`);
-  if((!b.mission||b.mission==='escape')&&tacticalExit(a.x,a.y,b)){if(b.clinic&&!b.supplyCache.recovered)throw new Error('먼저 보건실 물자함을 확인하세요. 물건은 필요한 만큼만 챙겨도 돼요.');a.escaped=true;if(b.carrying&&key==='taei')b.actors.ally.escaped=true;tacticalRecord(b,`${name} · 계단으로 탈출`);}
+  if((!b.mission||b.mission==='escape')&&tacticalExit(a.x,a.y,b)){if((b.clinic||b.shop)&&!b.supplyCache.recovered)throw new Error('먼저 물자함을 확인하세요. 물건은 필요한 만큼만 챙겨도 돼요.');a.escaped=true;if(b.carrying&&key==='taei')b.actors.ally.escaped=true;tacticalRecord(b,`${name} · 계단으로 탈출`);}
  }else if(action==='strike'||action==='shove'){
   const e=tacticalTargets(s,key).find(e=>e.id===target?.id),cost=attributeEffortCost(a,action==='strike'?16:10);if(!e)throw new Error('상하좌우로 붙어 있는 적을 선택하세요.');if(a.stamina<cost)throw new Error('스태미나가 부족해요. 방어하거나 물을 마셔 주세요.');
   if(key==='ally'&&(attributeFearLoad(a)>=70||a.id==='soyul'&&action==='strike'&&b.noise>=6)){a.ap--;a.guard=true;a.fear=tacticalClamp(a.fear-5);b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name}: 가까이 가는 건 무리예요. 여기서 막을게요.`);return s;}
@@ -74,6 +75,8 @@ export function gridAct(state,key,action,target){
  }else if(action==='lure'){
   if(!tacticalLureTargets(s,key).some(p=>p.x===target?.x&&p.y===target?.y))throw new Error('2~5칸 거리의 빈 바닥을 선택하세요. 유인용 빈 병 1개와 스태미나 4가 필요해요.');
   a.ap--;a.stamina-=4;if(b.items.lure>0)b.items.lure--;else b.stash.items.bottle--;b.noise+=2;b.lure={x:target.x,y:target.y,turns:2};b.frames.push({kind:'guard',unit:key});tacticalRecord(b,`${name} · 빈 병을 던져 2회 적 턴 동안 소리로 유인한다. 사람과 맞붙은 적은 유인을 무시한다.`);
+ }else if(action==='shopReserve'){
+  openShopReserve(b,a);b.frames.push({kind:'guard',unit:key});tacticalRecord(b,'안쪽 보관함을 열었다. 소음 +4. 가방에 챙길 물건을 고르세요.');
  }else if(action==='clinicRescue'){
   if(!canRescueClinicStudent(b,a))throw new Error('학생 옆에서 행동력 1과 스태미나 8이 필요해요. 거점의 빈 자리도 확인하세요.');
   a.ap--;a.stamina-=8;b.clinic.rescued=true;b.clinic.escort=key;tacticalRecord(b,'학생이 일어나 일행을 따라온다. 두 사람 모두 탈출해야 함께 거점으로 돌아갈 수 있다.');
