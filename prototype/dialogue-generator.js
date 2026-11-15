@@ -1,3 +1,7 @@
+import {conversationDisposition,briefExchangeLine} from './social-conversation.js';
+import {advanceFreeTime} from './free-roam.js';
+import {presentPeople} from './days.js';
+import {spokenTopicClause} from './conversation-voice.js';
 import {supplyAftermathMemory} from './supply-aftermath.js';
 import {supplyConversationMemory} from './supply-story.js';
 import {normalizeNpcAddress} from './identity.js';
@@ -6,12 +10,12 @@ import {npcNow,conversationExperience} from './npc-state.js';
 // A semantic planner + small Korean clause grammar. No complete response lookup table.
 const dialogueSubjects={
  yeogyeong:[
-  {id:'startle',name:'놀랐을 때 드러나는 마음',subject:'깜짝 놀랐을 때는',detail:['먼저 숨을 고르는 것','괜찮은지 주변을 확인하는 것','무섭다고 솔직히 말하는 것'],want:['놀랐다고 너무 놀리지는 않았으면 좋겠','무서워도 내 생각을 끝까지 말했으면 좋겠'],question:['저 놀란 거 얼굴에 다 보였죠?','선배도 갑자기 큰 소리 나면 놀라요?'],observations:['아까 문 닫히는 소리에 깜짝 놀랐어요. 눈이 엄청 커졌죠… 저 겁이 좀 많아요.','차분해 보인다는 말은 듣는데, 무서우면 얼굴에 바로 티가 나요.'],continuations:['괜찮은 척해도 표정이 먼저 대답해버려요. 너무 놀리지는 말고요.','조금 놀랐지만, 숨 고르고 제가 하던 일은 마저 하려고요.'],answers:[{label:'놀랄 수 있죠. 잠깐 숨 돌려요.',reply:['네. 잠깐만요… 이제 괜찮아요. 기다려줘서 고마워요.']},{label:'무서워도 하던 일은 끝내려고 하네요.',reply:['무섭다고 제 생각까지 없는 건 아니니까요. 천천히 하면 돼요.']}]},
+  {id:'startle',name:'놀랐을 때 드러나는 마음',subject:'깜짝 놀랐을 때는',detail:['먼저 숨을 고르는 것','괜찮은지 주변을 확인하는 것','무섭다고 솔직히 말하는 것'],want:['놀랐다고 너무 놀리지는 않았으면 좋겠','무서워도 내 생각을 끝까지 말했으면 좋겠'],question:['저 많이 놀랐죠… 티 났죠?','선배도 갑자기 큰 소리 나면 놀라요?'],observations:['아까 문 닫히는 소리에 깜짝 놀랐어요. 눈이 엄청 커졌죠… 저 겁이 좀 많아요.','차분해 보인다는 말은 듣는데, 무서우면 얼굴에 바로 티가 나요.'],continuations:['안 놀란 척해도 다 티 나요. 그러니까 너무 놀리진 마요.','조금 놀랐지만, 숨 고르고 제가 하던 일은 마저 하려고요.'],answers:[{label:'놀랄 수 있죠. 잠깐 숨 돌려요.',reply:['네. 잠깐만요… 이제 괜찮아요. 기다려줘서 고마워요.']},{label:'무서워도 하던 일은 끝내려고 하네요.',reply:['무섭긴 한데, 하던 건 해야죠. 좀 천천히 하면 돼요.']}]},
   {id:'checking',name:'확인을 멈추는 기준',subject:'확인을 멈출 때는',detail:['한 번 더 보는 것','다른 사람 눈으로 보는 것','틀린 부분만 표시해두는 것'],want:['나중에도 설명할 수 있으면 좋겠','내가 놓친 게 없었으면 좋겠','같이 보는 사람이 부담스럽지 않았으면 좋겠'],question:['선배는 어디까지 보면 됐다고 생각하세요?','같은 걸 다시 보면 더 헷갈릴 때 없어요?','맡겼으면 다시 안 보는 게 맞을까요?']},
   {id:'roles',name:'일을 나누는 방식',subject:'일을 나눌 때는',detail:['처음에 맡을 범위를 정하는 것','중간에 서로 묻는 것','끝낸 걸 다른 사람에게 넘기는 것'],want:['부탁하는 말부터 편하게 했으면 좋겠','확인하는 사람이 따로 있어도 괜찮았으면 좋겠','누가 뭘 맡았는지 서로 알았으면 좋겠'],question:['선배는 부탁받는 쪽이 편해요, 부탁하는 쪽이 편해요?','도와준다고 하면 어디까지 맡겨도 되는 걸까요?','자꾸 확인하면 못 믿는 것처럼 들릴까요?']}
  ],
  seoyeon:[
-  {id:'self-directed',name:'직접 준비해서 배우고 싶은 일',subject:'해보고 싶은 일이 생기면',detail:['레슨 비용을 직접 마련하는 것','내가 쓸 시간과 비용을 먼저 정하는 것','작게 시작해서 꾸준히 배우는 것'],want:['제가 고른 일은 제가 준비해서 해봤으면 좋겠','남이 정해준 것보다 제가 원하는 걸 해봤으면 좋겠'],question:['선배는 해보고 싶은 게 생기면 어떻게 시작해요?','시간과 비용을 들여서라도 배우고 싶은 게 있어요?'],observations:['저는 해보고 싶다는 마음이 들면 필요한 돈부터 직접 마련해요. 피겨나 양궁 같은 것도 레슨을 받아볼 만큼요.','조용하다고 하고 싶은 게 없는 건 아니에요. 배우고 싶으면 비용과 시간을 제가 준비해서 해보려고 해요.'],continuations:['도움을 거절하는 건 아니에요. 다만 뭘 할지는 제가 정하고 싶어요.','마음먹은 건 실행할 방법부터 찾아봐요. 무조건 급하게 시작한다는 뜻은 아니고요.'],answers:[{label:'뭘 배우든 직접 선택하고 준비하는 게 중요하군요.',reply:['네. 제가 원해서 시작한 일이라는 게 중요해요. 그만큼 제 몫도 감수하고요.']},{label:'비용이나 일정이 맞지 않으면 어떻게 해요?',reply:['시기를 조정하거나 조금 더 모아요. 하고 싶은 마음까지 남한테 맡기지는 않으려고요.']}]},
+  {id:'self-directed',name:'직접 준비해서 배우고 싶은 일',subject:'해보고 싶은 일이 생기면',detail:['레슨 비용을 직접 마련하는 것','내가 쓸 시간과 비용을 먼저 정하는 것','작게 시작해서 꾸준히 배우는 것'],want:['하고 싶은 건 직접 해봤으면 좋겠','남이 하라는 것보다 제가 하고 싶은 걸 해봤으면 좋겠'],question:['선배는 해보고 싶은 게 생기면 어떻게 시작해요?','시간과 비용을 들여서라도 배우고 싶은 게 있어요?'],observations:['저는 뭐 배우고 싶으면 레슨비부터 모아요. 피겨든 양궁이든, 궁금하면 해봐야죠.','말을 많이 안 하는 거지, 하고 싶은 건 많아요. 돈이랑 시간 맞춰서 하나씩 해보는 거죠.'],continuations:['도와주면 고맙죠. 그래도 뭘 할지는 제가 고를래요.','하고 싶으면 어떻게든 해볼 방법을 찾아요. 그렇다고 무작정 시작하진 않고요.'],answers:[{label:'하고 싶은 건 꼭 해보는 편이네요.',reply:['네. 제가 하고 싶어서 하는 거니까요. 힘든 것도 제 몫이고요.']},{label:'돈이나 시간이 안 되면요?',reply:['좀 미루거나 돈을 더 모으죠. 그렇다고 하고 싶은 걸 남이 정해줄 순 없잖아요.']}]},
   {id:'rest',name:'쉬는 시간의 약속',subject:'쉬는 시간을 정할 때는',detail:['그냥 아무것도 안 하는 것','답장을 조금 늦게 하는 것','먼저 오늘은 어렵다고 말하는 것'],want:['쉬는 시간을 설명하지 않아도 됐으면 좋겠','만나는 게 할 일처럼 느껴지지는 않았으면 좋겠','혼자 있고 싶다는 말을 편하게 했으면 좋겠'],question:['선배는 약속 없는 시간이 생기면 뭐부터 해요?','혼자 있고 싶다는 말 들으면 서운할 것 같아요?','쉴 때도 뭘 해야 할 것 같은 때 없어요?']},
   {id:'taste',name:'취향과 선택',subject:'취향대로 고를 때는',detail:['늘 고르던 걸 다시 고르는 것','이름보다 안에 든 걸 보는 것','가끔 실패할 걸 알고 골라보는 것'],want:['남이 좋다는 것보다 내가 편한 걸 골랐으면 좋겠','고르는 데 시간을 너무 쓰지는 않았으면 좋겠','괜찮은 척하고 끝까지 버티지는 않았으면 좋겠'],question:['선배는 익숙한 걸 골라요, 새로운 걸 골라요?','별로인 걸 골랐을 때 끝까지 해보는 편이에요?','취향이 다르면 같이 고르는 게 더 어렵지 않아요?']}
  ],
@@ -57,7 +61,8 @@ function generatedMemory(s,id){
  if(id==='yeogyeong'&&work&&!work.supplyGroup)candidates.push({id:'volunteer',text:work.choices.some(c=>c.id==='carry')?'같이 상자 옮기면서 통로부터 비웠잖아요.':'같이 물품 수량을 맞춰봤잖아요.'});
  return candidates;
 }
-export function generateDialogueTurn(s,id,{action='greet',topic=null,playerLine='',turn=0,prompt='',focus=null}={}){
+export function generateDialogueTurn(s,id,{action='greet',topic=null,playerLine='',turn=0,prompt='',focus=null,entry=null}={}){
+ entry=entry??s.dialogue?.sessions?.[`${s.day}:${s.phase}:${id}`]?.entry??null;if(entry?.firstExchange)entry={...entry,stage:'brief',canInitiate:false,canContinue:false,budget:2};
  const store=generationStore(s),status=npcNow(s,id);
  const intentState=socialIntent(s,id),safe=intentState.feelsSafe;
  const guarded=intentState.mode==='guarded';
@@ -78,28 +83,28 @@ export function generateDialogueTurn(s,id,{action='greet',topic=null,playerLine=
  ];
  const acknowledgments={
   greet:['아, 네.','잠깐만요.','아, 선배.'],
-  listen:['그렇게 들어주시니까 말하기는 좀 편하네요.','말로 꺼내보니까 조금 다르게 들리네요.','바로 답을 정해주지 않아서 좋아요.'],
-  why:['왜 그러냐고 하면…','저도 그게 좀 궁금했어요.','잘 설명할 수 있을지는 모르겠는데요.'],
-  suggest:['그렇게 해볼 수도 있겠네요.','그 말은 조금 생각해보고 싶어요.','바로 그러겠다고는 못 하겠는데, 무슨 뜻인지는 알겠어요.'],
-  share:['그런 마음으로 작업하는 거군요.','선배 얘기 들으니까 조금 연결되는 게 있네요.','처음부터 잘 들려줘야 한다고 생각하면 힘들겠네요.'],
-  switch:['다른 얘기 해도 좋아요.','잠깐 화제를 바꿔볼까요.','그럼 이 얘기는 잠깐 내려놓고요.'],
+  listen:['그러니까요.','음, 그러게요.','네. 아, 그리고요.'],
+  why:['음…','왜냐면요,','아, 그건요.','그러니까,','저는요,','꼭 그런 건 아닌데,','잠깐만요.','생각해보면,','아, 뭐랄까.','그러게요.','그게요,','아, 네.'],
+  suggest:['그것도 괜찮겠네요.','음, 한번 해볼까요.','바로 하겠다고는 못 하겠는데, 무슨 말인지는 알겠어요.'],
+  share:['그런 노래를 쓰고 싶은 거구나.','선배도 그런 고민 하는군요.','처음부터 잘하려면 어렵죠.'],
+  switch:['그럼 다른 얘기 할까요?','아, 그러고 보니.','그 얘기는 나중에 마저 하고요.'],
   about:['아, 전공이요?','아직 그 얘기를 안 했네요.','저는요,'],
   introduce:['아, 이제 알겠어요.','그렇군요. 알려줘서 고마워요.','이름만 듣고는 몰랐어요.'],
   leave:['네, 나중에 봬요.','오늘은 여기까지 얘기해요.','들어줘서 고마워요.']
  };
  let chosen;
- for(let attempt=0;attempt<24;attempt++){
+ for(let attempt=0;attempt<96;attempt++){
   const intent=action==='leave'?'close':weightedDialoguePart(store,candidates);
   const detail=action==='why'&&focus?.topic===subject.id?focus.detail:selectDialoguePart(store,subject.detail),want=selectDialoguePart(store,subject.want),question=selectDialoguePart(store,subject.question);
   const acknowledgment=selectDialoguePart(store,acknowledgments[action]??acknowledgments.greet);
   let clauses=[acknowledgment],memory=null;
   if(action==='answer'&&focus?.answerReply)clauses=[selectDialoguePart(store,focus.answerReply)];
-  if(action==='disagree')clauses=[selectDialoguePart(store,{yeogyeong:['아, 그쪽으로 생각한 거였어요? 그럼 제가 너무 빨리 정했네요.','저는 조금 다른데, 왜 그렇게 말했는지는 알겠어요.'],seoyeon:['그 이유는 이해해요. 그래도 제 생각은 분명해요. 제가 해보고 싶은 건 제가 정하고 싶어요.','저랑은 조금 다르네요. 이유는 듣고, 제 선택도 이야기할게요.'],soyul:['…그렇게도 볼 수 있겠네요. 저는 다른 데가 먼저 보여서.','같아야 하는 건 아니니까요. 저는 제 생각을 조금 더 정리해볼게요.']}[id])];
+  if(action==='disagree')clauses=[selectDialoguePart(store,{yeogyeong:['아, 선배는 그렇게 생각해요? 저는 좀 다른데.','무슨 말인지는 알겠어요. 그래도 저는 다르게 해보고 싶어요.'],seoyeon:['그럴 수도 있죠. 그래도 저는 제가 하고 싶은 대로 해볼래요.','저랑은 좀 다르네요. 왜 그렇게 생각했어요?'],soyul:['…그럴 수도 있겠네요. 전 다른 게 먼저 보였는데.','생각이 꼭 같을 필요는 없죠. 저는 조금 더 고민해볼래요.']}[id])];
   if(intent==='close')clauses.push(selectDialoguePart(store,['다음에는 선배 얘기도 들어요.','붙잡지는 않을게요.','하던 일 마저 하고 갈게요.']));
   else if(intent==='defer'){
-   clauses.push(`${status.next??'다음 일정'}에 가야 해서 지금은 길게 말하기 어려워요.`);
+   clauses.push(`저 지금 ${status.next??'다음 수업'} 가야 해요. 늦겠다.`);
    clauses.push(selectDialoguePart(store,['인사만 하고 나중에 이어가도 될까요?','급한 얘기면 하나만 듣고 갈게요.','나중에 시간 있을 때 다시 말 걸어주세요.']));
-  }else if(intent==='boundary')clauses.push(selectDialoguePart(store,['지금은 제 생각을 더 설명하고 싶지 않아요.','지금 바로 편하게 얘기하기는 어려워요.','그 얘기를 아무 일 없던 것처럼 넘기지는 못하겠어요.']),selectDialoguePart(store,['조금 시간을 주세요.','오늘은 여기까지만 하면 좋겠어요.']));
+  }else if(intent==='boundary')clauses.push(selectDialoguePart(store,['지금은 그 얘기 안 하고 싶어요.','오늘은 좀 혼자 있고 싶어요.','아까 그 일은 아직 마음에 걸려요.']),selectDialoguePart(store,['조금 시간을 주세요.','오늘은 여기까지만 하면 좋겠어요.']));
   else {
    if(subject.observations&&action!=='why'){
     if(!['answer','disagree'].includes(action))clauses.push(selectDialoguePart(store,subject.observations));
@@ -107,14 +112,12 @@ export function generateDialogueTurn(s,id,{action='greet',topic=null,playerLine=
     else if(action==='answer')clauses.push(selectDialoguePart(store,subject.continuations));
     else if(action!=='disagree')clauses.push(selectDialoguePart(store,subject.continuations),question);
    } else {
-   if(intent==='limit')clauses.push(status.fatigue>=50?'오늘은 좀 지쳐서 길게 대답하기가 어렵네요.':'지금은 머릿속이 복잡해서 하나씩만 이야기하고 싶어요.');
-   if(intent==='reflect'||intent==='disclose')clauses.push(selectDialoguePart(store,[`${subject.subject} ${detail}부터 해보면 어떨까 싶어요.`,`${subject.subject} ${detail} 정도면 시작할 수 있지 않을까요?`,`${subject.subject} ${detail}도 방법이겠지만, 그게 늘 편한 건 아닐 것 같아요.`]));
-   if(intent==='wonder')clauses.push(`${subject.subject} ${detail}부터 해보는 게 나을까요? 생각만 하고 아직 결론은 못 내렸어요.`);
-   if(intent==='disclose')clauses.push(`${want}어요. 말처럼 쉽지는 않지만요.`);
-   if(intent==='ask-back')clauses.push(selectDialoguePart(store,[`${subject.subject} 저는 ${detail} 쪽으로 마음이 가요.`,`${subject.subject} ${detail}부터 생각하게 돼요. 선배는 다를 수도 있겠지만요.`,`${subject.subject} ${detail} 말고도 다른 방법이 있을 것 같기는 해요.`]));
-   if(action==='why')clauses.push(`그러면 ${want.replace(/좋겠$/, '좋을 것 같')}아서요.`);
+   if(intent==='limit')clauses.push(status.fatigue>=50?'오늘 좀 피곤하네요. 잠깐만 얘기해도 될까요?':'지금 머리가 좀 복잡해요.');
+   clauses.push(spokenTopicClause(subject,detail,{why:action==='why'}));
+   if(intent==='disclose'&&action!=='why')clauses.push(selectDialoguePart(store,['말은 이렇게 해도 잘 안 될 때도 있어요.','저도 매번 그러는 건 아니고요.','가끔은 그냥 되는 대로 하죠.']));
+   if(intent==='wonder')clauses.push(selectDialoguePart(store,['아직 잘 모르겠어요.','괜찮으려나 싶기도 하고요.','해봐야 알겠죠.']));
    if(memories.length&&dialogueRandom(store)<0.45){memory=selectDialoguePart(store,memories);clauses.push(memory.text);}
-   if(intent!=='limit'||safe)clauses.push(question);
+   if((intent==='ask-back'||intent==='wonder'||action==='why')&&(intent!=='limit'||safe))clauses.push(question);
    else clauses.push(selectDialoguePart(store,['지금은 가벼운 얘기면 좋겠어요.','조금 정리하고 다시 이야기하면 안 될까요?']));
   }
   }
@@ -127,17 +130,25 @@ export function generateDialogueTurn(s,id,{action='greet',topic=null,playerLine=
   chosen={text,requiredPrefix,intent,topic:subject.id,topicName:subject.name,detail,memoryIds:memory?[memory.id]:[],signature,answers:subject.answers??[]};
   if(!previous.some(p=>p.text===text||p.signature===signature))break;
  }
- const closed=action==='leave';
+ const disposition=entry?conversationDisposition(s,id):null,brief=!!entry&&entry.stage==='brief',atLimit=!!entry&&turn>=(entry.budget??disposition.budget)-1,departed=!!entry&&(!presentPeople(s,s.location).includes(id)||status.rushed||disposition.mustGo);
+ if(entry?.firstExchange&&action==='greet'&&!['boundary','defer'].includes(chosen.intent))chosen.text=briefExchangeLine(entry.purpose,'greet');
+ else if(brief&&!['boundary','defer'].includes(chosen.intent))chosen.text=action==='about'?({yeogyeong:'저 간호학과예요. 그럼 먼저 가볼게요.',seoyeon:'저 치위생과예요. 그럼 먼저 가볼게요.',soyul:'치위생과예요. 저 이제 가봐야 해서요.'}[id]):briefExchangeLine(entry.purpose,action);
+ if(entry?.initiated&&action==='greet'&&!['boundary','defer'].includes(chosen.intent))chosen.text=entry.line;
+ if(action==='invite-continue')chosen.text=({yeogyeong:'벌써 가요? 바쁜 거 아니면 조금만 더 있다 가도 돼요?',seoyeon:'시간 괜찮으면 조금만 더 얘기하다 갈래요? 안 되면 다음에 봐도 되고요.',soyul:'저기… 조금만 더 있어도 돼요? 아, 가야 하면 괜찮고요.'})[id];
+ if(departed)chosen.text='저 이제 가봐야겠어요. 다음에 뵐게요.';
+ else if(atLimit&&action!=='invite-continue')chosen.text=brief?'네. 고마워요. 그럼 먼저 가볼게요.':'얘기하다 보니까 시간이 꽤 갔네요. 저 이제 가봐야겠어요. 다음에 마저 해요.';
+ const closed=action==='leave'||action==='leave-final'||departed||atLimit&&action!=='invite-continue'||brief&&action==='introduce';if(brief&&!['boundary','defer'].includes(chosen.intent))chosen.intent=closed?'close':'brief-exchange';
+
  const limited=['boundary','defer'].includes(chosen.intent);
  const available=limited?[
   {id:'listen',kind:'listen',label:'알겠어요. 지금은 붙잡지 않을게요.'}
  ]:[
   {id:'listen',kind:'listen',label:'그 얘기 조금 더 들어도 돼요?'},
-  {id:'why',kind:'why',label:'어떤 점 때문에 그렇게 생각했어요?'},
-  {id:'suggest',kind:'suggest',label:'바로 결정하지 말고, 작은 것부터 해보는 건 어때요?'},
+  {id:'why',kind:'why',label:'왜요? 뭐가 마음에 걸려요?'},
+  {id:'suggest',kind:'suggest',label:'일단 조금만 해보면 어때요?'},
   {id:'share',kind:'share',label:'나도 내 이야기를 곡으로 남기려는데, 어떻게 전할지 고민해요.'},
-  {id:'switch',kind:'switch',label:'그 얘기는 잠깐 두고, 다른 이야기도 해볼까요?'},
-  {id:'disagree',kind:'disagree',label:'나는 조금 다르게 생각해요. 내 생각도 말해볼게요.'}
+  {id:'switch',kind:'switch',label:'그러고 보니, 다른 것도 물어봐도 돼요?'},
+  {id:'disagree',kind:'disagree',label:'나는 좀 다른데. 이렇게 해보면 어때요?'}
  ];
  if(!s.contacts[id]?.playerSeniorityKnown&&!limited)available.push({id:'introduce',kind:'introduce',label:'저는 스물셋이고 보컬 전공 2학년이에요. 군대 다녀와서 복학했어요.'});
  if(!s.contacts[id]?.details?.major&&!limited)available.push({id:'about',kind:'about',label:'그러고 보니 어느 과 다녀요? 아직 못 물어봤네요.'});
@@ -145,9 +156,11 @@ export function generateDialogueTurn(s,id,{action='greet',topic=null,playerLine=
  if(!limited&&status.bandwidth==='open'&&subject.answers&&!['answer','disagree'].includes(action)){const index=Math.floor(dialogueRandom(store)*subject.answers.length);options.push({id:'answer'+index,kind:'answer',label:subject.answers[index].label,answerReply:subject.answers[index].reply});}
  const pool=[...available];while(pool.length&&options.length<(limited?1:2)){const index=Math.floor(dialogueRandom(store)*pool.length);options.push(pool.splice(index,1)[0]);}
  options.push({id:'leave',kind:'leave',label:'그럼 다음에 또 이야기해요.'});
- store.sequence++;store.recent[id]=[...previous,{text:chosen.text,signature:chosen.signature,topic:chosen.topic}].slice(-16);
+ if(brief&&!closed){options.splice(0,options.length,{id:'listen',kind:'listen',label:'네. 그럼 먼저 갈게요.'},...(!s.contacts[id]?.playerSeniorityKnown?[{id:'introduce',kind:'introduce',label:'저는 스물셋이고 보컬 전공 2학년이에요. 군대 다녀와서 복학했어요.'}]:[]),{id:'leave',kind:'leave',label:'좋은 하루 보내세요.'});}
+ if(action==='invite-continue'&&!closed)options.splice(0,options.length,{id:'stay',kind:'stay',label:'응. 조금 더 얘기하다 가요.'},{id:'leave-final',kind:'leave-final',label:'오늘은 가봐야 해요. 다음에 마저 얘기해요.'});
+ store.sequence++;store.recent[id]=[...previous,{text:chosen.text,signature:chosen.signature,topic:chosen.topic}].slice(-32);
  const response={person:id,day:s.day,phase:s.phase,minute:status.minute,choice:'gen:'+action,playerLine,text:chosen.text,stage:status.cue,scene:true,leave:closed,generated:true,requiredPrefix:chosen.requiredPrefix,plan:chosen,options:closed?[]:options,turnId:store.sequence};
- const session={generated:true,closed,finished:false,node:'generated',turn:turn+1,topic:chosen.topic,response};
+ const session={entry,generated:true,closed,finished:false,node:'generated',turn:turn+1,topic:chosen.topic,response};
  s.dialogue.sessions??={};s.dialogue.sessions[`${s.day}:${s.phase}:${id}`]=session;
  s.dialogue.generatedVisits??={};s.dialogue.generatedVisits[id]={day:s.day,minute:status.minute};
  s.dialogue.history.push(response);
@@ -157,7 +170,10 @@ export function advanceGeneratedDialogue(s,id,choice){
  const session=s.dialogue.sessions?.[`${s.day}:${s.phase}:${id}`];
  const option=session?.response.options.find(o=>o.id===choice);
  if(!session?.generated||session.closed||!option)throw new Error('현재 대화에서 고를 수 없는 말입니다.');
+ if(session.entry){const advanced=advanceFreeTime(s,2);Object.assign(s,advanced);}
  const store=generationStore(s);
+ if(option.kind==='leave'&&session.entry&&!session.entry.offeredContinue&&conversationDisposition(s,id).canContinue&&session.turn<(session.entry.budget??6)&&presentPeople(s,s.location).includes(id))return {result:generateDialogueTurn(s,id,{action:'invite-continue',entry:{...session.entry,offeredContinue:true},topic:session.topic,playerLine:option.label,turn:session.turn}),delta:{}};
+ if(option.kind==='stay'&&session.entry)session.entry.budget=Math.min(10,(session.entry.budget??6)+3);
  if(option.kind==='about'){s.contacts[id].details??={};s.contacts[id].details.major={yeogyeong:'간호학과',seoyeon:'치위생과',soyul:'치위생과'}[id];}
  if(option.kind==='introduce')s.contacts[id].playerSeniorityKnown=true;
  if(option.kind==='share'){store.sharedWork??=[];if(!store.sharedWork.includes(id))store.sharedWork.push(id);}
@@ -169,7 +185,7 @@ export function advanceGeneratedDialogue(s,id,choice){
  }
  const limited=['boundary','defer'].includes(session.response.plan.intent);
  const action=limited?'leave':option.kind;
- return {result:generateDialogueTurn(s,id,{action,topic:option.kind==='switch'?selectDialoguePart(store,[...dialogueSubjects[id],...everydaySubjects[id]].filter(t=>t.id!==session.topic)).id:session.topic,playerLine:option.label,turn:session.turn,focus:{...session.response.plan,answerReply:option.answerReply}}),delta};
+ return {result:generateDialogueTurn(s,id,{action,topic:option.kind==='switch'?selectDialoguePart(store,[...dialogueSubjects[id],...everydaySubjects[id]].filter(t=>t.id!==session.topic)).id:session.topic,playerLine:option.label,turn:session.turn,focus:{...session.response.plan,answerReply:option.answerReply},entry:session.entry}),delta};
 }
 export function canGenerateReencounter(s,id){
  if(!usesGeneratedDialogue(s))return false;

@@ -11,8 +11,8 @@ function thinkingStep(kind,label,target=null,site=null){return {kind,label,targe
 export function thinkingConsent(state,plan){
  const r=state.survivalRun,field=plan.steps.some(q=>q.kind==='sortie'),roster=currentSurvivalMembers(r);
  if(!field)return [];
- return roster.filter(m=>m.key!=='taei'&&!['away','departed','panic'].includes(m.mind?.state)).map(m=>{const c=survivalCondition(m),b=thinkingBond(state,m),reason=!thinkingAvailable(m)||m.partyConsent===false?'지금 함께 출발할 상태가 아니에요.':c.critical||m.fatigue>=80?'먼저 치료하고 쉬어야 해요.':(b.tension??0)>=12?'지난 일에 대한 불편함부터 이야기하고 싶어요.':(m.stress>=75||c.fear>=65)&&(b.trust??0)<20?'지금은 그 위험을 감수할 자신이 없어요. 잠깐 쉬고 다시 정해요.':null;
-  return {key:m.key,name:partyMemberName(state,m),agrees:!reason,line:reason??(m.key===plan.speaker?'내가 제안한 일인 만큼 준비를 확인하고 함께할게요.':'지금 몸 상태와 동선이라면 함께 준비해볼 수 있어요.')};});
+ return roster.filter(m=>m.key!=='taei'&&!['away','departed','panic'].includes(m.mind?.state)).map(m=>{const c=survivalCondition(m),b=thinkingBond(state,m),reason=!thinkingAvailable(m)||m.partyConsent===false?'지금은 같이 못 가요.':c.critical||m.fatigue>=80?'상처부터 치료하고 좀 쉬어야겠어요.':(b.tension??0)>=12?'그 일 때문에 아직 좀 불편해요. 지금은 같이 못 나가겠어요.':(m.stress>=75||c.fear>=65)&&(b.trust??0)<20?'지금은 너무 무서워요. 조금만 쉬었다 가면 안 돼요?':null;
+  return {key:m.key,name:partyMemberName(state,m),agrees:!reason,line:reason??(m.key===plan.speaker?'제가 먼저 꺼낸 얘기니까 저도 같이 갈게요.':'저도 갈게요. 가기 전에 물만 좀 챙기고요.')};});
 }
 export function thinkingMemory(member){
  const own=member.thinkingMemories?.slice().reverse().find(e=>e.goal!=='prepare');if(own)return own.success?'지난번에 세운 계획을 실제로 마쳤던 경험이 있어.':'지난 계획을 마치지 못한 일이 있어서, 이번에는 중간에 돌아올 기준도 정하고 싶어.';
@@ -48,14 +48,26 @@ export function survivalThinkingCandidates(state,member){
  return options.filter(o=>!completed.some(p=>p.speaker===member.key&&p.goal===o.goal&&p.day===r.day&&['completed','deferred','failed'].includes(p.status))).sort((a,b)=>b.score-a.score||a.goal.localeCompare(b.goal));
 }
 function thinkingSay(state,plan,topic){
- const r=state.survivalRun,m=r.members.find(m=>m.key===plan.speaker),seed=[r.exploration?.seed,r.day,m.key,plan.goal,topic,plan.revision??0].join(':'),pick=arr=>arr[thinkingHash(seed)%arr.length],bond=thinkingBond(state,m),memory=thinkingMemory(m);
- const name=partyMemberName(state,m),evidence=plan.evidence.split(name+'의').join('내'),sequence=plan.steps.map(q=>q.target===m.key?q.label.split(name+'부터').join('내가 먼저').split(name+'의').join('내'):q.label).join(' 다음에 ');
- const opening=(bond.tension??0)>=4?'의견이 다를 수 있지만, 지금 본 걸 이야기할게. ':m.character==='yeogyeong'?(r.threat>=45||plan.steps.some(q=>q.kind==='sortie')?pick(['조금 무섭기는 해. 먼저 안전하게 할 수 있는 순서부터 보자. ','나 겁먹은 거 얼굴에 다 보이지… 그래도 준비할 건 같이 정하고 싶어. ']):pick(['천천히 확인하고 같이 정하고 싶어. ','내 생각을 먼저 이야기해볼게. '])):m.character==='seoyeon'?pick(['내가 해보고 싶은 건 이거야. 필요한 준비부터 정해봤어. ','하고 싶다고 마음먹었으니, 내가 할 수 있는 일부터 해보려고 해. ']):m.character==='soyul'?pick(['내 생각에는… ','조금 걱정되는데, ']):m.character==='dogyeom'?pick(['다음 동선을 생각해봤어. ','이 순서로 움직이면 어떨까. ']):pick(['지금 상황을 보고 생각해봤어. ','다음 일을 같이 정하고 싶어. ','내가 먼저 확인하고 싶은 게 있어. ']);
- if(topic==='why')return opening+evidence+'. '+(memory?memory+' ':'')+'그래서 '+sequence+' 순서로 해보고 싶어.';
- if(topic==='risk')return pick(['걱정되는 점부터 말할게. ','계획대로 안 될 경우도 생각했어. ','가능한 일과 위험한 점을 나눠보면, '])+plan.risk+' '+plan.uncertainty;
- if(topic==='accepted')return pick(['좋아. 첫 단계부터 확인하자. ','그럼 이 순서로 준비해보자. ','함께 정했으니 하나씩 해보자. '])+'실제로 마친 일만 확인하고 다음 단계로 넘어갈게.';
- if(topic==='deferred')return pick(['알겠어. 오늘은 같은 일로 재촉하지 않을게. ','지금은 다른 일이 먼저구나. 다음 상황을 보고 다시 생각할게. ']);
- return opening+evidence+'. '+(memory?memory+' ':'')+pick(['이 계획은 어때?','이 순서로 해보면 어떨까?','가능한지 같이 생각해줄래?']);
+ const r=state.survivalRun,m=r.members.find(m=>m.key===plan.speaker),seed=[r.exploration?.seed,r.day,m.key,plan.goal,topic,plan.revision??0].join(':'),pick=arr=>arr[thinkingHash(seed)%arr.length],bond=thinkingBond(state,m),kind=plan.goal.split(':')[0],patient=r.members.find(m=>m.key===plan.steps.find(q=>q.target)?.target),name=patient?.key===m.key?'나':partyMemberName(state,patient),memory=m.thinkingMemories?.slice().reverse().find(e=>e.goal!=='prepare');
+ const asks={
+  recover:()=>{const q=plan.steps.map(q=>q.kind),items=[];if(q.includes('drink'))items.push('물 좀 마시고');if(q.includes('eat'))items.push('뭐라도 먹고');if(q.includes('treat'))items.push('상처도 좀 보자');return (patient?.key===m.key?'나 먼저 ':name+', ')+items.join(', ')+(q.includes('treat')?'.':' 나서 움직이자.');},
+  rest:()=>patient?.key===m.key?'나 좀 쉬었다 가면 안 될까? 지금은 너무 힘들어.':'우리 좀 쉬었다 가자. '+name+'도 많이 지쳐 보이는데.',
+  supply:()=>{const site=plan.goal.endsWith('convenience')?'편의점':'매점',food=thinkingSupply(r,'food')+thinkingSupply(r,'canned'),water=thinkingSupply(r,'water');return (food<r.members.filter(m=>!m.deployment).length?'먹을 게 너무 없어. ':water<r.members.filter(m=>!m.deployment).length?'물이 얼마 안 남았어. ':'먹을 거 있을 때 좀 더 챙겨두자. ')+site+' 한번 가볼까?';},
+  medicine:()=> '붕대가 없네. '+(patient?.key===m.key?'나 이 상처 그냥 두기는 좀 그런데. ':'다친 사람도 있는데. ')+'보건실에 가보면 좀 있지 않을까?',
+  rescue:()=> '아직 못 돌아왔다잖아. 안에서 버티고 있다는데, 우리가 데리러 가면 안 될까?',
+  watch:()=> '오늘은 내가 주변 살필게. 다들 쉬는 동안 누군가는 봐야 하잖아.',
+  search:()=> '멀리 나가기 전에 이 근처부터 좀 뒤져볼까? 쓸 만한 게 남아 있을지도 모르잖아.',
+  prepare:()=> '가기 전에 가방 좀 보자. 물이랑 필요한 건 챙겼어?'
+ };
+ const reasons={recover:'이 상태로 계속 움직이면 더 힘들잖아. 먹고 상처부터 보고 가도 안 늦어.',rest:'지금 무리했다가 밖에서 못 움직이면 어떡해. 조금만 쉬었다 가자.',supply:'끼니때 다 돼서 나가려면 급해지잖아. 미리 좀 챙겨두고 싶어.',medicine:'계속 내버려 두면 덧날까 봐. 치료할 건 있어야지.',rescue:'안에서 기다리고 있을 거 아냐. 어떻게 돌아올지는 우리가 가서 도와줄 수도 있고.',watch:'문 앞에 뭐가 와도 모르고 자면 안 되잖아. 오늘은 내가 볼게.',search:'지금 멀리 갔다가 더 지칠까 봐. 가까운 데 먼저 보고 싶어.',prepare:'막상 나가서 없으면 곤란하잖아. 지금 한번 보자는 거지.'};
+ const risks={recover:'물건은 쓰면 그만큼 없어지니까, 다른 사람 몫도 봐야지. 상처가 심하면 붕대만 감고 바로 나가지는 말고.',rest:'쉬는 동안 먹을 게 늘지는 않으니까, 좀 나아지면 보급은 가야 해.',supply:plan.goal.endsWith('convenience')?'안쪽까지 욕심내진 말자. 소리 크게 나면 뭐가 몰려올지 모르니까.':'매점도 비어 있다는 보장은 없잖아. 위험하면 물건은 두고 나오자.',medicine:'물건이 얼마나 남았는지는 가봐야 알지. 우리 상태도 보고 가자.',rescue:'우리까지 갇히면 안 되니까 돌아올 길은 남겨둬야 해. 힘들면 다른 팀에 부탁할 수도 있고.',watch:'나도 너무 졸리면 말할게. 혼자 버티다 놓치는 것보단 낫잖아.',search:'필요한 게 꼭 있지는 않을 거야. 없으면 오래 헤매지는 말자.',prepare:'다 챙겼다고 안전한 건 아니지. 나가서 위험하면 바로 돌아오자.'};
+ if(topic==='accepted')return kind==='watch'?'알겠어. 오늘은 내가 볼게. 내일 교대할지는 그때 얘기하자.':kind==='recover'?(plan.steps[0]?.kind==='drink'?'응. 그럼 물부터 좀 꺼내줄래?':plan.steps[0]?.kind==='eat'?'응. 먹을 거 좀 꺼내자.':'응. 그럼 붕대 좀 꺼내줄래?'):kind==='rest'?'고마워. 잠깐만 숨 좀 돌릴게.':pick(['좋아. 그럼 같이 해보자.','응. 필요한 거 챙기고 움직이자.','그렇게 하자. 무리는 하지 말고.']);
+ if(topic==='deferred')return pick(['응, 알겠어. 그럼 그 일부터 하자.','그래. 지금 당장 해야 하는 건 아니니까.','알겠어. 나중에 다시 얘기하자.']);
+ if(topic==='risk')return risks[kind]??'상황이 어떻게 될지는 모르지. 무리하지는 말자.';
+ const badMemory=memory&&!memory.success?'지난번에 생각대로 안 됐잖아. 이번엔 무리하지 말고. ':'';
+ if(topic==='why')return badMemory+(reasons[kind]??'그쪽이 나을 것 같아서. 네 생각은 어때?');
+ const opening=(bond.tension??0)>=4?'그 일은 아직 마음에 걸리는데… ':m.character==='yeogyeong'&&(r.threat>=45||plan.steps.some(q=>q.kind==='sortie'))?pick(['좀 무섭긴 한데… ','괜찮으려나. 그래도 ']):m.character==='soyul'?pick(['저기… ','음, ']):m.character==='dogyeom'?pick(['있잖아, ','그럼 ']):'';
+ return opening+badMemory+(asks[kind]?.()??'우리 다음엔 뭐 할까?');
 }
 export function thinkingPlanLine(state,plan,topic='proposal'){return thinkingSay(state,plan,topic);}
 function thinkingObservation(r){return {day:r.day,sequence:r.sortieSequence,food:thinkingSupply(r,'food')+thinkingSupply(r,'canned'),water:thinkingSupply(r,'water'),meds:thinkingSupply(r,'bandage')+thinkingSupply(r,'firstaid'),searchDay:r.searchDay,restSequence:r.restSequence??0,members:Object.fromEntries(r.members.map(m=>[m.key,{hydration:m.hydration,nutrition:m.nutrition,injury:m.injury,fatigue:m.fatigue,stress:m.stress,caredDay:m.caredDay}]))};}
@@ -107,7 +119,7 @@ export function respondSurvivalThinking(state,id,reply){
  const s=structuredClone(state),r=s.survivalRun,p=r.thinking.plans.find(p=>p.id===id),m=r.members.find(m=>m.key===p.speaker);let text;
  if(['why','risk','companions'].includes(reply)){
   const key=r.day+':'+p.revision+':'+reply;if(p.questions.includes(key))throw new Error('이 계획에 대해서는 이미 들은 이야기예요.');p.questions.push(key);
-  if(reply==='companions'){const voices=thinkingConsent(s,p);if(!voices.length)text='이 단계는 거점에서 할 수 있는 일이야. 밖으로 나갈 계획이 생기면 실제 출발 인원에게 다시 물어보자.';else{for(const voice of voices)p.dialogue.push({speaker:voice.key,text:voice.line});text='함께 출발할 사람들의 현재 뜻을 확인했다. 몸 상태나 편성이 달라지면 다시 확인한다.';}}
+  if(reply==='companions'){const voices=thinkingConsent(s,p);if(!voices.length)text='이건 여기서 하면 되니까. 나중에 나갈 때 다른 사람들한테도 물어보자.';else{for(const voice of voices)p.dialogue.push({speaker:voice.key,text:voice.line});text='함께 출발할 사람들의 현재 뜻을 확인했다. 몸 상태나 편성이 달라지면 다시 확인한다.';}}
   else text=thinkingSay(s,p,reply);
  }else if(reply==='accept'){
   if(p.status!=='proposed')throw new Error('이미 함께 진행하기로 한 계획이에요.');const refusal=thinkingConsent(s,p).find(v=>!v.agrees);if(refusal)throw new Error(refusal.name+': '+refusal.line);p.status='accepted';p.observation=thinkingObservation(r);text=thinkingSay(s,p,'accepted');
@@ -115,7 +127,7 @@ export function respondSurvivalThinking(state,id,reply){
  else if(reply==='alternative'){
   if(p.status!=='proposed'||(p.alternativesUsed??0)>=2)throw new Error('진행 중인 계획은 먼저 마치거나 미뤄 주세요. 다른 방법은 한 계획에서 두 번까지 살펴볼 수 있어요.');
   const option=survivalThinkingCandidates(s,m).filter(o=>o.goal!==p.goal).sort((a,b)=>Number(a.steps.some(q=>q.kind==='sortie'))-Number(b.steps.some(q=>q.kind==='sortie'))||b.score-a.score)[0];
-  if(!option)throw new Error('지금 확인된 조건에서는 다른 실행 방법을 찾지 못했어. 몸 상태나 물자가 달라지면 다시 생각해보자.');const old=p.label;Object.assign(p,option);p.revision++;p.alternativesUsed=(p.alternativesUsed??0)+1;p.alternativeChosen=true;text=old+' 대신 '+p.label+'부터 하자는 거야. '+thinkingSay(s,p,'why');
+  if(!option)throw new Error('지금 확인된 조건에서는 다른 실행 방법을 찾지 못했어. 몸 상태나 물자가 달라지면 다시 생각해보자.');const old=p.label;Object.assign(p,option);p.revision++;p.alternativesUsed=(p.alternativesUsed??0)+1;p.alternativeChosen=true;text=thinkingSay(s,p,'proposal')+' '+thinkingSay(s,p,'why');
  }else throw new Error('대화 방법을 확인하세요.');
  p.dialogue.push({speaker:reply==='companions'?'narrator':m.key,text});p.dialogue=p.dialogue.slice(-18);r.log=[text];return refreshSurvivalThinking(s);
 }

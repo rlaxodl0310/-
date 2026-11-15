@@ -1,3 +1,4 @@
+import {conversationPurpose,proactiveGreeting} from './social-conversation.js';
 import {personalEventGreeting} from './personal-events.js';
 import {aftermathObservation,aftermathGreeting} from './supply-aftermath.js';
 import {rainLunchOffer,beginRainLunch,passRainLunch} from './rain-lunch.js';
@@ -114,6 +115,11 @@ export function arrive(state,location,spot='entry'){
  if(person&&!contact(s,person).introduced&&location==='library'&&person==='yeogyeong'){encounter.action='떨어진 종이를 주워 건넨다. “여기 떨어뜨리셨어요.”';encounter.prefix='아, 감사합니다. ';}
  if(person&&!contact(s,person).introduced&&/아직 사진/.test(encounter.action)){encounter.action='길을 막지 않게 옆으로 비켜서며 가볍게 인사한다. “안녕하세요.”';encounter.prefix='안녕하세요. ';}
  if(person&&!contact(s,person).introduced&&/앉아도|가방을 놓/.test(encounter.action)){encounter.action='상대의 공간을 침범하지 않게 멈춰서 가볍게 인사한다. “안녕하세요.”';encounter.prefix='안녕하세요. ';}
+ if(person&&!contact(s,person).introduced){
+  if(/앉아도|가방을 놓|가볍게 인사|사진 고르|사진 보고/.test(encounter.action)){encounter.action='빈 의자에서 한 걸음 떨어져 묻는다. “혹시 이 자리 비었어요?”';encounter.prefix='';}
+  if(/건네|주워/.test(encounter.action)){const item=/영수증/.test(encounter.action)?'영수증':/필통/.test(encounter.action)?'필통':/펜/.test(encounter.action)?'펜':/종이|인쇄물/.test(encounter.action)?'종이':'물건';encounter.action=item+'을 건네며 말한다. “이거 떨어뜨리셨어요.”';encounter.prefix='';}
+ }
+ if(person){const opening=!meeting&&!continuation&&!resuming&&!encounter.condition?proactiveGreeting(s,person):null;encounter.socialEntry={purpose:conversationPurpose(encounter.action),firstExchange:!contact(s,person).introduced,location:s.location,startedAt:s.clock.minute};if(opening){encounter.text='지나가던 중 상대가 먼저 알아보고 걸음을 멈춘다. “'+opening.line+'”';encounter.action='걸음을 멈추고 잠깐 이야기한다.';encounter.prefix='';Object.assign(encounter.socialEntry,opening);s.dialogue.socialOpenings??={};s.dialogue.socialOpenings[person]={day:s.day,minute:s.clock.minute,location:s.location};}}
  if(location==='library'&&person)encounter.text+=libraryGreeting(s,person);
  if(person)encounter.text+=aftermathGreeting(s,person)+personalEventGreeting(s,person);
  encounter.text+=' '+aftermathObservation(s,location);
@@ -133,7 +139,7 @@ export function resolveEncounter(state,encounter,engage){
  const firstExchange=!contact(s,encounter.person).introduced;
  introduce(s,encounter.person,'incidental-exchange');
  // The interaction comes from the encountered action, not a character-selection menu.
- const opened=openConversation(s,encounter.person,{encounter:encounter.action});
+ const opened=openConversation(s,encounter.person,{encounter:encounter.action,socialEntry:encounter.socialEntry??{purpose:conversationPurpose(encounter.action),firstExchange,location:s.location,startedAt:s.clock.minute}});
  const next=dialogue(opened.state,encounter.person);
  const response=opened.result?opened:next.scene?{state:opened.state,result:{text:next.opening,stage:next.stage}}:next.options.some(o=>o.id==='personal')?respond(opened.state,encounter.person,'personal'):{state:opened.state,result:{text:next.opening,stage:next.stage}};
  response.result={...response.result,requiredPrefix:firstExchange?`저는 ${s.npcs[encounter.person].name}이에요. `:'',playerLine:encounter.action+(firstExchange?' “아, 저는 김태이예요. 이번에 복학했어요.”':''),text:(firstExchange?`저는 ${s.npcs[encounter.person].name}이에요. `:'')+(socialIntent(s,encounter.person).mode==='guarded'?'':encounter.prefix??'')+response.result.text};

@@ -1,9 +1,10 @@
+import {conversationDisposition,conversationPurpose} from './social-conversation.js';
 import {characterPresent} from './character-stats.js';
 import {usesGeneratedDialogue,generateDialogueTurn,advanceGeneratedDialogue} from './dialogue-generator.js';
 import {npcNow,conversationExperience} from './npc-state.js';
 import {followupCandidate,rememberConversation} from './conversation-continuity.js';
 import {photoReport,showcaseReport,scheduledEvent,learnEvent} from './event-view.js';
-import {contact,firstContact,respondIntroduction,normalizeNpcAddress} from './identity.js';
+import {contact,introduce,firstContact,respondIntroduction,normalizeNpcAddress} from './identity.js';
 import {sceneKey,sceneNodes,scenePrompt} from './conversation-scenes.js';
 import {socialIntent} from './social-reasoning.js';
 export const people={
@@ -41,8 +42,11 @@ function rawGroupDialogue(s){
  ];
 }
 export function respondGroup(state,choice){
- if(!['wait','include','speakFor'].includes(choice))throw new Error('알 수 없는 대답입니다.');
+ if(!['wait','include','speakFor','names'].includes(choice))throw new Error('알 수 없는 대답입니다.');
  const s=structuredClone(state),close=s.dialogue?.facts?.soyul?.speech==='casual';
+ const familiar=['seoyeon','soyul'].every(id=>contact(s,id).introduced&&relationship(s,id).familiarity>=3&&relationship(s,id).trust>=2);
+ if(choice==='names'){for(const id of ['seoyeon','soyul'])introduce(s,id,'group-introduction');const lines=[{person:'seoyeon',text:'네, 맞아요. 저는 한서연이에요.'},{person:'soyul',text:'저는 박소율이에요. 안녕하세요.'}];s.dialogue.history.push({person:'group',choice,day:s.day,phase:s.phase,lines});return {state:s,lines};}
+ if(!familiar&&choice==='include'){const lines=[{person:'soyul',text:'아, 죄송해요. 저희끼리 얘기하던 게 있어서요.'},{person:'seoyeon',text:'길 막았죠? 저희 조금 비킬게요.'}];s.dialogue.history.push({person:'group',choice,day:s.day,phase:s.phase,lines});return {state:s,lines};}
  const repeated=s.dialogue.history.some(h=>h.person==='group'&&(h.day??1)===(s.day??1)&&h.phase===s.phase&&h.choice===choice);
  let lines;
  if(choice==='wait'){
@@ -206,7 +210,7 @@ function beginScene(state,id,choice,initiated=false,context=null){
  const current=dialogue(state,id);
  if(current.scene||!current.options.some(o=>o.id===choice))throw new Error('지금 나누던 이야기에 먼저 답해주세요.');
  const s=structuredClone(state);ensureConversations(s);
- if(usesGeneratedDialogue(s)){const result=generateDialogueTurn(s,id,{action:'greet',prompt:context?.encounter??'',playerLine:initiated?'':current.options.find(o=>o.id===choice).label});return {state:s,result};}
+ if(usesGeneratedDialogue(s)){const result=generateDialogueTurn(s,id,{action:'greet',entry:{...conversationDisposition(s,id),...(context?.socialEntry??{}),purpose:context?.socialEntry?.purpose??conversationPurpose(context?.encounter??''),location:s.location,startedAt:s.clock.minute},prompt:context?.encounter??'',playerLine:initiated?'':current.options.find(o=>o.id===choice).label});return {state:s,result};}
  const key=sceneKey(s,id),intent=socialIntent(s,id),prior=s.dialogue.sessions[key];
  const continuation=followupCandidate(s,id);
  const session={...(continuation?{episode:continuation.episode}:{}),node:continuation?'start':prior?.lastNode??'start',closed:false,casual:s.dialogue.facts?.[id]?.speech==='casual',variant:continuation?'followup':intent.mode==='guarded'?'guarded':'normal'};
@@ -265,4 +269,4 @@ export function openConversation(state,id,context=null){
 
 export function dialogue(s,id){const view=rawDialogue(s,id);return {...view,opening:normalizeNpcAddress(s,id,view.opening)};}
 
-export function groupDialogue(s){return rawGroupDialogue(s).map(line=>({...line,text:normalizeNpcAddress(s,line.person,line.text)}));}
+export function groupDialogue(s){const lines=rawGroupDialogue(s);if(!['seoyeon','soyul'].every(id=>contact(s,id).introduced&&relationship(s,id).familiarity>=3&&relationship(s,id).trust>=2))lines[lines.length-1]={person:lines.at(-1).person,text:'아, 지나가시려던 거예요? 저희가 길을 막았죠.'};return lines.map(line=>({...line,text:normalizeNpcAddress(s,line.person,line.text)}));}

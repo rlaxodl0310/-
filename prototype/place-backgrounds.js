@@ -41,3 +41,9 @@ export function commerceBackground(place,area){
  if(index===null)return null;
  return {set:'commerce',index,name:['편의점','교내 매점','학식당','대학가 밥집','카페','대학가 술집'][index],columns:2,rows:3,x:index%2*100,y:Math.floor(index/2)*50};
 }
+
+// Native sheet sizes; a tile is a complete scene, not a portrait-shaped texture.
+export const backgroundSheets={campus:{width:1536,height:1024,columns:3,rows:3},life:{width:1672,height:941,columns:3,rows:3},surroundings:{width:1448,height:1086,columns:3,rows:4},specialist:{width:1261,height:1247,columns:3,rows:3},common:{width:1263,height:1246,columns:3,rows:3},commerce:{width:1254,height:1254,columns:2,rows:3}};
+export function backdropGeometry(background){const sheet=backgroundSheets[background?.set];if(!sheet)return null;return {width:sheet.width/sheet.columns,height:sheet.height/sheet.rows,ratio:(sheet.width/sheet.columns)/(sheet.height/sheet.rows)};}
+export function backdropFit(background,width,height){const g=backdropGeometry(background);if(!g)return null;const scale=Math.max(0,Math.min(width/g.width,height*.72/g.height,1.6));return {width:g.width*scale,height:g.height*scale,scale};}
+export function backdropVariables(background){const g=backdropGeometry(background);return g?`--scene-ratio:${g.ratio};--scene-max-width:${g.width*1.6}px;--scene-height-width:${g.ratio*72}dvh`:'';}

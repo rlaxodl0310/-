@@ -16,7 +16,7 @@ export function dialogueServiceContext(s,id,result){
   state:{mood:status.mood,bandwidth:status.bandwidth},relationship:{...s.relations[`${id}>taei`]},
   known:{playerIntroduced:!!s.contacts[id]?.introduced,playerSeniorityKnown:!!s.contacts[id]?.playerSeniorityKnown,playerWork:heardWork?'본인의 이야기를 곡으로 남기려는 보컬 전공 복학생':null,preferences:{...facts},sharedSupplies:supplyConversationMemory(s,id),supplyFollowup:supplyAftermathMemory(s,id),sharedLunch:ownLunch?{day:ownLunch.day,walked:ownLunch.walked,ate:ownLunch.ate,actions:ownLunch.choices}:null},
   history,playerLine:String(result.playerLine??'').slice(0,300),
-  constraints:{intent:result.plan.intent,topic:result.plan.topicName,detail:result.plan.detail,closing:!!result.leave},
+  constraints:{socialStage:s.dialogue?.sessions?.[`${s.day}:${s.phase}:${id}`]?.entry?.stage??null,briefExchangeOnly:s.dialogue?.sessions?.[`${s.day}:${s.phase}:${id}`]?.entry?.stage==='brief',spokenStyle:'한국어 일상 대화. 짧은 문장과 자연스러운 호흡. 상대가 방금 한 말에 먼저 답한다. 과도한 상담 말투, 자신의 성격 설명, 게임 수치·행동력·판정·관찰 결과 설명을 대사에 넣지 않는다. 존댓말/반말 합의와 캐릭터별 말투는 유지한다.',intent:result.plan.intent,topic:result.plan.topicName,detail:result.plan.detail,closing:!!result.leave},
   draft:result.text};
 }
 export function applyServiceDialogue(s,id,turnId,text){

@@ -1,3 +1,4 @@
+import {expirePersonalPresence} from './personal-event-presence.js';
 import {characterPresent} from './character-stats.js';
 import {advanceSupplyAftermath,supplyAftermathMemory} from './supply-aftermath.js';
 import {advanceSupplyWorld} from './supply-story.js';
@@ -32,7 +33,7 @@ export function advanceFreeTime(state,minutes,{activeChoice=null,travelling=fals
  if(!Number.isInteger(minutes)||minutes<0)throw new Error('올바르지 않은 소요 시간입니다.');
  let s=structuredClone(state);const end=(s.clock?.minute??780)+minutes;
  if(end>1320)throw new Error('오늘은 너무 늦어집니다. 짧은 행동을 하거나 귀가할 수 있습니다.');
- const before=s.clock?.minute??780;s.clock={minute:end};recordMissedLessons(s,before,end);advanceSupplyWorld(s,before,end);advanceSupplyAftermath(s,before,end);applyCampusMoments(s,before,end,{travelling});s.phase=end>=1080?'evening':'afternoon';
+ const before=s.clock?.minute??780;s.clock={minute:end};recordMissedLessons(s,before,end);advanceSupplyWorld(s,before,end);advanceSupplyAftermath(s,before,end);applyCampusMoments(s,before,end,{travelling});s.phase=end>=1080?'evening':'afternoon';expirePersonalPresence(s);
  s=settleFreeWorld(s,activeChoice);
  for(const [id,place] of Object.entries(currentSchedule(s)))s.npcs[id].location=place;
  return s;

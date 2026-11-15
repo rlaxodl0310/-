@@ -19,7 +19,7 @@ export function beginSupplyDebate(state){
   const cautionedBy=prior?.choice==='rescue'&&prior.harm?prior.heard?.find(h=>h.stance==='withdraw'&&actors.some(([k])=>k===h.key)):null;
   const score=20-(context.enemies>=3?8:0)-(context.canHouse?0:25)+(cautionedBy?-6:0)+(supplyRescueBias[m.character]??0)+Math.min(10,(bond.trust??0)*.1+(bond.affection??0)*.05)-(food<n||water<n?18:0)-(wounded.length?20:0)-(a.wounds>0?15:0)-(a.fear>=50?15:0)-(friend?12:0)-(r.threat>=75?10:0)-(prior?.harm&&prior.choice==='rescue'?12:0),stance=score>=12?'rescue':score<=0?'withdraw':'mark';
   const fact=(cautionedBy?'지난번 '+cautionedBy.name+'의 돌아올 길에 대한 걱정도 생각나. ':'')+(friend?`${friend[1].label??partyMemberName(state,r.members.find(m=>m.key===friend[0]))}도 다쳤어. `:a.wounds>0?'지금 내 상처도 신경 쓰여. ':water<n||food<n?'우리가 휴대한 먹을 것과 물도 넉넉하지 않아. ':'');
-  const line=stance==='rescue'?fact+'그래도 저 안에서 도와달라고 하잖아. 길을 확인해서 함께 데리고 나가자.':stance==='withdraw'?fact+'지금 더 들어가다 우리까지 못 돌아오면 안 돼. 이번에는 먼저 돌아가자.':fact+'지금 무작정 들어가기보다 물을 남기고 위치부터 기록하자. 준비해서 다시 확인할 수 있어.';
+  const line=stance==='rescue'?fact+'그래도 저기 사람이 있잖아. 데리고 나가자.':stance==='withdraw'?fact+'더 들어갔다가 우리도 갇히면 어떡해. 일단 돌아가자.':fact+'물이라도 두고 가자. 여기 어딘지 적어 놓고, 사람 더 데려오면 되잖아.';
   return {key,character:m.character,name:a.label??partyMemberName(state,m),stance,line,score,initialWounds:a.wounds};
  });
  b.supplyDebate={version:1,id:b.shop.kind+':'+r.activeSortie.id,site:b.shop.kind,phase:'decision',choice:null,reason:null,student:{x:7,y:2},rescued:false,context,opinions,initialWounds:Object.fromEntries(Object.entries(b.actors).map(([k,a])=>[k,a.wounds])),previousMark:r.supplyStories?.sites?.[b.shop.kind]?.status==='marked',promiseWitnesses:r.supplyStories?.sites?.[b.shop.kind]?.promiseWitnesses??[]};
@@ -51,11 +51,11 @@ export function finishSupplyDebate(state,b,won){
  if(saved){const number=r.members.filter(m=>m.key.startsWith('rescued-')).length+1;r.members.push({key:'rescued-'+number,partyConsent:false,character:'student',label:(e.site==='kiosk'?'매점':'편의점')+' 창고에서 구조한 학생',job:'rest',fatigue:50,stress:40,injury:1,nutrition:35,hydration:35,woundDays:0,woundRisk:0,caredDay:null});}
  const newInjuries=Object.entries(b.actors).filter(([k,a])=>a.wounds>(e.initialWounds[k]??0)),harm=!won||newInjuries.length>0,keptPromise=saved&&e.previousMark,record={id:e.id,site:e.site,day:r.day,choice:e.choice,reason:e.reason,success:won,rescued:saved,newInjuries:newInjuries.map(([k])=>k),harm,keptPromise,debrief:null,reactions:[]};
  for(const opinion of e.opinions){const m=r.members.find(m=>m.key===opinion.key);if(!m)continue;let tone='understood',delta={familiarity:1},line;
-  if(saved){if(harm){tone='concern';line='데리고 돌아온 건 다행이야. 그래도 새로 다친 사람이 있으니, 다음에는 들어가기 전에 돌아올 길까지 맞춰두자.';if(opinion.stance==='withdraw')delta.tension=1;}else{line=opinion.stance==='withdraw'?'나는 위험하다고 봤지만, 무사히 데리고 돌아온 결과는 인정해. 걱정했던 점도 다음에 같이 확인하자.':'함께 데리고 돌아와서 다행이야. 우리가 정한 일을 실제로 끝냈네.';delta.trust=1;}if(keptPromise&&e.promiseWitnesses.includes(m.key)){line='전에 준비해서 다시 오자고 했던 말을 지켰네. '+line;delta.trust=(delta.trust??0)+1;}}
-  else if(e.choice==='rescue'){tone='concern';line='도우려던 이유는 알겠어. 하지만 이번에는 함께 돌아오는 것까지 확인하지 못했어. 우리 상태부터 돌보고 다시 계획하자.';if(opinion.stance==='withdraw'&&harm)delta.tension=1;}
-  else if(e.choice==='mark'){line='지금 가능한 만큼 돕고 다시 준비하자는 말은 기억할게. 위치만 적어 두고 끝내지 않도록 다음 동선을 같이 정하자.';}
-  else if(opinion.stance==='rescue'){tone='unresolved';line=e.context.wounded||e.context.water<e.context.size||e.context.food<e.context.size?'두고 나온 건 마음에 걸려. 그래도 우리 상태와 배급부터 지키자고 한 이유는 이해했어.':'나는 도울 수 있다고 봤어. 왜 돌아가야 했는지 다음에 서로의 기준을 조금 더 이야기하고 싶어.';}
-  else line='우리 안전과 배급부터 보자는 선택은 이해했어. 남은 구조 요청을 잊지는 말자.';
+  if(saved){if(harm){tone='concern';line='데리고 나온 건 다행인데, 우리도 다쳤잖아. 다음엔 빠져나올 길부터 보고 들어가자.';if(opinion.stance==='withdraw')delta.tension=1;}else{line=opinion.stance==='withdraw'?'난 위험할 줄 알았어. 그래도 다 같이 돌아와서 다행이야. 진짜로.':'다 같이 돌아왔네. 아… 이제 좀 마음 놓인다.';delta.trust=1;}if(keptPromise&&e.promiseWitnesses.includes(m.key)){line='전에 준비해서 다시 오자고 했던 말을 지켰네. '+line;delta.trust=(delta.trust??0)+1;}}
+  else if(e.choice==='rescue'){tone='concern';line='도와주고 싶었던 건 알아. 그래도 데리고 못 나왔잖아. 일단 우리부터 좀 추스르자.';if(opinion.stance==='withdraw'&&harm)delta.tension=1;}
+  else if(e.choice==='mark'){line='다시 오자고 한 거, 잊지 말자. 물만 두고 끝내면 안 되잖아.';}
+  else if(opinion.stance==='rescue'){tone='unresolved';line=e.context.wounded||e.context.water<e.context.size||e.context.food<e.context.size?'두고 나온 건 마음에 걸려. 그래도 우리 상태와 배급부터 지키자고 한 이유는 이해했어.':'나는 데리고 올 수 있을 줄 알았어. 아까 왜 돌아가자고 한 거야? 좀 얘기해줄래?';}
+  else line='우리도 살아야지. 그래도 거기 사람 있던 건 잊지 말자.';
   if(!e.choice){delta={};tone='unfinished';line='목소리는 들었지만 함께 결정을 내리기 전에 원정을 중단했네. 다음에는 상황부터 다시 확인하자.';}
   applyDebateBond(state,m,delta);const memory={id:e.id,site:e.site,day:r.day,choice:e.choice,reason:e.reason,stance:opinion.stance,heard:e.opinions.filter(o=>o.key!==m.key).map(o=>({key:o.key,name:o.name,stance:o.stance})),harm,rescued:saved,tone,source:'witnessed',line};m.supplyMemories=[...(m.supplyMemories??[]),memory].slice(-12);record.reactions.push({key:m.key,name:opinion.name,stance:opinion.stance,tone,line});
  }
