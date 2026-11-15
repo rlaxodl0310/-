@@ -1,0 +1,16 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {characterAges,characterAge,knownCharacterAge,fairStudentAgeIds} from './character-profiles.js';
+import {characterAbilities,characterPotential,savedCharacterAbilities,initializeCharacterSystem,characterPresent} from './character-stats.js';
+import {newAfternoonScenario,save,restore} from './simulation.js';
+import {fairVisitDay,fairStudentLocation} from './fair-events.js';
+import {beginPersonalEvent,progressPersonalEvent} from './personal-events.js';
+import {characterHeightCatalog} from './character-heights.js';
+test('all 18 named characters have ages and all six high-school seniors are 19',()=>{assert.equal(Object.keys(characterAges).length,18);for(const id of fairStudentAgeIds)assert.equal(characterAge(id),19);assert.equal(characterAge('taei'),23);assert.equal(characterAge('chaewon'),21);assert.equal(characterAge('missing'),null);assert.equal((characterHeightCatalog().match(/profile-age/g)??[]).length,18);});
+test('each fair student actually speaks and records age 19 only on the introduction choice',()=>{
+ for(const id of fairStudentAgeIds){let s=newAfternoonScenario('close');s.day=fairVisitDay(s);s.clock.minute=610;s.location=fairStudentLocation(s,id);assert.ok(s.location);assert.equal(knownCharacterAge(s,id),null);s=beginPersonalEvent(s,id+':fair:1');s=progressPersonalEvent(s,'help');assert.equal(knownCharacterAge(s,id),null);s=progressPersonalEvent(s,'names');assert.equal(s.contacts[id].details.age,19);assert.match(s.personalEvents.records[id+':fair:1'].last.text,/열아홉 살/);assert.equal(knownCharacterAge(restore(save(s)),id),19);}
+});
+test('legacy learned school grade resolves the new age without revealing an unknown person or altering the save',()=>{const s=newAfternoonScenario();s.contacts.jihoo={introduced:true,details:{school:'천안 해솔고등학교',grade:3}};const before=save(s);assert.equal(knownCharacterAge(s,'jihoo'),19);assert.equal(knownCharacterAge(s,'taei'),23);assert.equal(knownCharacterAge(s,'seoyeon'),null);assert.equal(save(s),before);s.contacts.jihoo.introduced=false;assert.equal(knownCharacterAge(s,'jihoo'),null);});
+test('Chaewon gets her own athletic baseline and potential while old characters and saved growth remain intact',()=>{
+ assert.deepEqual(Object.values(characterAbilities('chaewon')),[5,5,7,6,5]);assert.deepEqual(Object.values(characterPotential('chaewon')),[15,15,44,42,38]);assert.deepEqual(Object.values(characterAbilities('iseo')),[5,7,7,5,5]);assert.deepEqual(Object.values(characterAbilities('taei')),[7,9,8,6,7]);
+ const s=newAfternoonScenario();initializeCharacterSystem(s);const prior=structuredClone(s.characterSystem);delete s.characterSystem.profiles.chaewon;delete s.characterSystem.initialProfiles.chaewon;delete s.characterSystem.presence.chaewon;assert.equal(savedCharacterAbilities(s,'chaewon').strength,5);assert.equal(characterPresent(s,'chaewon'),true);const before=save(s);savedCharacterAbilities(s,'chaewon');assert.equal(save(s),before);s.characterSystem.profiles.chaewon={strength:8,agility:7,vitality:12,endurance:9,mentality:8};assert.equal(savedCharacterAbilities(restore(save(s)),'chaewon').strength,8);assert.deepEqual(s.characterSystem.profiles.taei,prior.profiles.taei);
+});

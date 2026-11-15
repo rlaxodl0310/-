@@ -1,0 +1,15 @@
+{
+  "name": null,
+  "age": 22,
+  "major": "간호학과",
+  "year": null,
+  "heightCm": null,
+  "face": "가는 금속테 안경, 차분한 긴 눈매, 긴 앞머리와 옆머리, 입가의 작은 점",
+  "outfit": "짧은 H핏 치마, 검정 스타킹, 재킷 안에 아이보리 나시",
+  "status": "외형 시안. 이름·성격·키·학년·스탯·실제 만남 이벤트 미정.",
+  "files": [
+    "nursing-student-face.png",
+    "nursing-student-fullbody.png"
+  ],
+  "proportions": "전신에서 머리 크기를 줄여 자연스러운 성인 체형 비율로 수정"
+}

@@ -45,9 +45,9 @@ export function progressFairEvent(state,choice){
   const text=guarded?'제 얘기를 끝까지 들어주셨으면 좋겠어요. 제가 직접 확인할게요.':choice==='listen'?(rel.familiarity>=4?'아까는 말이 좀 꼬였죠. 이번에는 제가 원하는 것부터 말해볼게요.':'답을 대신 정해달라는 건 아니에요. 잠깐 정리하면서 말해도 괜찮아요?'):r.episode===1?p.reply:p.followReply;
   rec.last={player:option[1],text,emotion:guarded?'serious':choice==='listen'?'neutral':'happy'};rec.stage=1;changeRelationship(s,r.person,'taei',choice==='dismiss'?{tension:3,trust:-1}:{familiarity:2,trust:1});
  }else{
-  if(choice==='names'){introduce(s,r.person,'fair-conversation');s.contacts[r.person].details={school:'천안 해솔고등학교',grade:3};}
+  if(choice==='names'){introduce(s,r.person,'fair-conversation');s.contacts[r.person].details={school:'천안 해솔고등학교',grade:3,age:19};}
   const guarded=relationship(s,r.person).tension>=3;
-  rec.last={player:option[1],text:choice==='names'?`저는 ${p.name}예요. 해솔고 3학년이고요. 오늘 박람회 보러 왔어요.`:guarded?'저는 이제 따로 둘러볼게요. 집합 시간은 지켜야 해서요.':'도움 고마워요. 저는 남은 부스 좀 보고 갈게요.',emotion:guarded?'serious':choice==='names'?'neutral':'warm'};
+  rec.last={player:option[1],text:choice==='names'?`저는 ${p.name}예요. 열아홉 살이고 해솔고 3학년이에요. 오늘 박람회 보러 왔어요.`:guarded?'저는 이제 따로 둘러볼게요. 집합 시간은 지켜야 해서요.':'도움 고마워요. 저는 남은 부스 좀 보고 갈게요.',emotion:guarded?'serious':choice==='names'?'neutral':'warm'};
   rec.status='completed';rec.completedDay=s.day;rec.completedMinute=s.clock.minute;rec.result='짧은 교류를 마치고 각자 관람으로 돌아갔다. '+(guarded?'서로 거리를 두기로 했다.':'');s.memory.push(`[${s.day}일차] ${displayName(s,r.person)} · ${fairStories[r.eventId].title}: ${rec.result}`);s.lastResult=rec.result;
  }
  seePeople(s,[r.person]);s.pace={count:0,seen:{}};return s;

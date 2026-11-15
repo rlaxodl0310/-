@@ -1,7 +1,8 @@
+import {characterAge} from './character-profiles.js';
 import {contact,displayName} from './identity.js';
 import {presentPeople} from './days.js';
 import {personalEventPosition} from './personal-event-presence.js';
-import {characterPresent} from './character-stats.js';
+import {characterPresent,characterAbilities} from './character-stats.js';
 import {relationship} from './dialogue.js';
 import {chaewonLocation} from './chaewon-events.js';
 import {iseoEventLocation} from './personal-events.js';
@@ -29,4 +30,4 @@ export function askCharacterHeight(state,id){
  const s=advanceFreeTime(state,2),height=characterHeightCm(id);s.contacts[id].details={...s.contacts[id].details,heightCm:height};s.contacts[id].heightSource={kind:'direct-conversation',day:s.day,minute:s.clock.minute,location:s.location};
  const text=`${displayName(s,id)}: “저 ${height}cm예요.”`;s.memory.push(`[${s.day}일차] 키를 물어보자 ${text}`);return {state:s,text};
 }
-export function characterHeightCatalog(){return `<section class="height-catalog" aria-label="캐릭터 키 설정"><h2>캐릭터 키</h2><p>외형 설정 미리보기예요. 실제 진행에서 알아낸 인물 정보와는 별개예요.</p><div class="height-roster">${Object.entries(characterHeightProfiles).map(([id,p])=>`<div data-height-character="${id}"><strong>${p.name}</strong><span>${p.cm}cm${p.proposed?' · 제안':''}</span></div>`).join('')}</div></section>`;}
+export function characterHeightCatalog(){return `<section class="height-catalog" aria-label="캐릭터 키 설정"><h2>캐릭터 기본 설정</h2><p>이름·키·나이·기본 스탯 설정이에요. 스탯은 힘 / 민첩 / 체력 / 인내 / 정신력 순서예요. 실제 진행에서 알아낸 정보와는 별개예요.</p><div class="height-roster">${Object.entries(characterHeightProfiles).map(([id,p])=>`<div data-height-character="${id}"><strong>${p.name}</strong><span>${p.cm}cm${p.proposed?' · 제안':''}</span><span class="profile-age">${characterAge(id)}살</span><span class="profile-base-stats" aria-label="힘 민첩 체력 인내 정신력">${Object.values(characterAbilities(id)).join(' / ')}</span></div>`).join('')}</div></section>`;}
