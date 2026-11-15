@@ -44,5 +44,7 @@
     "인내": 4,
     "정신력": 5
   },
-  "portrait": "nursing-student-transparent.png"
+  "portrait": "nursing-student-transparent.png",
+  "housing": "원룸 자취방",
+  "homeScene": "작은 원룸의 싱글 침대에 누워 나시와 돌핀팬츠 차림으로 휴대폰을 보는 장면. 소파 없음."
 }
