@@ -1,3 +1,4 @@
+import {refreshSurvivalAdvice} from './survival-advice.js';
 // Camp-only stories. Scheduling occurs on actions, never on rendering or loading.
 const incidentClamp=n=>Math.max(0,Math.min(100,n));
 const campIncidentDefinitions={
@@ -34,7 +35,7 @@ export function campIncidentView(state){
 }
 export function checkCampIncident(state){
  const r=state.survivalRun;if(!r?.base||r.status!=='active'||r.activeSortie)throw new Error('거점에 돌아와 주변을 살펴보세요.');
- const s=structuredClone(state);scheduleCampIncident(s.survivalRun);return s;
+ const s=structuredClone(state);scheduleCampIncident(s.survivalRun);return refreshSurvivalAdvice(s);
 }
 function applyCampChange(r,change={}){
  for(const [key,value] of Object.entries(change)){
@@ -52,7 +53,7 @@ export function resolveCampIncident(state,id){
  applyCampChange(r,choice.now);
  if(choice.later)story.pending.push({day:r.day+1,title:view.title,change:choice.later});
  story.resolved.push({day:r.day,id:view.id,choice:id});story.current=null;
- const text=`${view.title} · ${choice.outcome}${choice.effect?' ('+choice.effect+')':''}`;r.log=[text];r.history.push({day:r.day,text});return s;
+ const text=`${view.title} · ${choice.outcome}${choice.effect?' ('+choice.effect+')':''}`;r.log=[text];r.history.push({day:r.day,text});return refreshSurvivalAdvice(s);
 }
 export function finishCampStories(r){
  const story=r.story;if(!story)return [];

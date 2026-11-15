@@ -1,3 +1,4 @@
+import {refreshSurvivalAdvice} from './survival-advice.js';
 import {shopSorties,prepareShopBattle,shopAftermath} from './shop-sorties.js';
 import {prepareClinicBattle,clinicAftermath} from './clinic-mission.js';
 import {survivalMind,survivalMemberAvailable,resolveSurvivalAutonomy,growSurvivalAbilities} from './survival-autonomy.js';
@@ -24,7 +25,7 @@ export function startSurvival(state,ally='student',{seed=Math.floor(Math.random(
  if(state.survivalRun)throw new Error('이미 진행 중인 생존 기록이 있어요. 저장된 흐름을 이어가세요.');
  if(!survivalCompanions(state).includes(ally))throw new Error('현재 알고 있는 동료를 골라 주세요.');
  const s=structuredClone(state),person=(key,character)=>({key,character,...enabledAttributes(state,character),job:'rest',fatigue:15,stress:20,injury:0,nutrition:80,hydration:80,woundDays:0,woundRisk:0,caredDay:null});
- s.survivalRun={version:1,exploration:createSurvivalExploration(seed),story:{seed:seed>>>0,last:[],checkedDay:0,current:null,pending:[],resolved:[]},status:'active',stage:'flight',day:1,actions:3,escapes:0,threat:24,shortage:0,resources:{food:6,water:6,bandage:2,parts:4},members:[person('taei','taei'),person('ally',ally)],scouted:{},secured:{},base:null,searchDay:0,sortieSequence:0,activeSortie:null,completedSorties:[],log:['사태 첫날. 아직 머무를 곳은 없다. 동료와 흩어지지 않고 오늘을 넘기는 것부터 생각한다.'],history:[]};const kit=s.survivalRun.kit=createSurvivalPack(seed);kit.items={water:2,bandage:1,energybar:1};s.survivalRun.resources.water-=2;s.survivalRun.resources.bandage--;return s;
+ s.survivalRun={version:1,exploration:createSurvivalExploration(seed),story:{seed:seed>>>0,last:[],checkedDay:0,current:null,pending:[],resolved:[]},status:'active',stage:'flight',day:1,actions:3,escapes:0,threat:24,shortage:0,resources:{food:6,water:6,bandage:2,parts:4},members:[person('taei','taei'),person('ally',ally)],scouted:{},secured:{},base:null,searchDay:0,sortieSequence:0,activeSortie:null,completedSorties:[],log:['사태 첫날. 아직 머무를 곳은 없다. 동료와 흩어지지 않고 오늘을 넘기는 것부터 생각한다.'],history:[]};const kit=s.survivalRun.kit=createSurvivalPack(seed);kit.items={water:2,bandage:1,energybar:1};s.survivalRun.resources.water-=2;s.survivalRun.resources.bandage--;return refreshSurvivalAdvice(s);
 }
 export function restartSurvival(state){
  const r=state.survivalRun;if(!r||r.status!=='overrun'||r.activeSortie)throw new Error('끝난 생존 기록만 새로 시작할 수 있어요.');const s=structuredClone(state),ally=r.members.find(m=>m.key==='ally')?.character??'student';delete s.survivalRun;return startSurvival(s,ally);
@@ -38,20 +39,20 @@ export function survivalAction(state,action){
  if(action==='hide'){r.actions--;r.threat=survivalClamp(r.threat-10);for(const m of r.members.filter(m=>!['away','departed'].includes(survivalMind(m).state))){m.fatigue=survivalClamp(m.fatigue-12);m.stress=survivalClamp(m.stress-8);if(m.mind?.state==='panic'){m.mind.state='shaken';m.mind.exposure=Math.max(0,m.mind.exposure-2);}}survivalLog(r,'소리를 줄이고 잠깐 몸을 숨겼다. 위협과 피로가 조금 가라앉았다.');}
  else if(action==='search'){if(r.searchDay===r.day)throw new Error('오늘 주변에서 안전하게 살필 곳은 이미 확인했어요.');assertPackExplorationReady(r);r.actions--;r.searchDay=r.day;r.threat=survivalClamp(r.threat+5);const kit=ensureSurvivalPack(r);kit.pending=createPackLoot(kit,r.base?'거점 주변 보관함':r.exploration?.here?survivalSites[r.exploration.here].name+' 주변 가방':'도주로 옆 남겨진 가방');survivalLog(r,'주변에서 식량과 생활 물자를 발견했다. 가방의 칸과 무게를 확인하고 가져갈 물건을 골라야 한다.');}
  else if(action==='treat'){const patient=r.members.find(m=>m.injury>0&&!['away','departed'].includes(survivalMind(m).state));if(!patient||r.resources.bandage<1)throw new Error('치료할 부상자와 붕대가 필요해요.');r.actions--;r.resources.bandage--;careSurvivalWound(patient,r.day);survivalLog(r,`${survivalMemberName(s,patient)}에게 붕대를 사용했다.`);}
- else throw new Error('할 수 없는 생존 행동입니다.');spendSurvivalEffort(r,action==='hide'?1:3,action==='hide'?2:5);return s;
+ else throw new Error('할 수 없는 생존 행동입니다.');spendSurvivalEffort(r,action==='hide'?1:3,action==='hide'?2:5);return refreshSurvivalAdvice(s);
 }
 export function scoutSurvivalSite(state,id){
  const r0=survivalReady(state,{actions:1});assertPackExplorationReady(r0);const seen=survivalSiteObservation(r0,id);if(r0.stage!=='settlement'||!survivalSites[id]||seen&&(seen.occupants>0||seen.confirmed))throw new Error('이미 확인한 상태예요. 감염체가 있으면 제압하거나 다른 공간을 찾아보세요.');
  const s=structuredClone(state),r=s.survivalRun;r.actions--;spendSurvivalEffort(r,4,6);const room=inspectSurvivalRoom(r,id);r.threat=survivalClamp(r.threat+3);
- survivalLog(r,`${survivalSites[id].name}까지 이동해 내부를 살폈다. ${room.occupants?`감염체 ${room.occupants}마리가 공간을 차지하고 있다. 싸우지 않고 다른 공간을 찾아도 된다.`:'감염체는 보이지 않는다. 문과 복도 상태를 확인했으니 전투 없이 거점을 준비할 수 있다.'} 문 상태 ${room.integrity}/100 · 복도 노출 ${room.exposure===0?'낮음':room.exposure===6?'보통':'높음'}.`);return s;
+ survivalLog(r,`${survivalSites[id].name}까지 이동해 내부를 살폈다. ${room.occupants?`감염체 ${room.occupants}마리가 공간을 차지하고 있다. 싸우지 않고 다른 공간을 찾아도 된다.`:'감염체는 보이지 않는다. 문과 복도 상태를 확인했으니 전투 없이 거점을 준비할 수 있다.'} 문 상태 ${room.integrity}/100 · 복도 노출 ${room.exposure===0?'낮음':room.exposure===6?'보통':'높음'}.`);return refreshSurvivalAdvice(s);
 }
 export function claimSurvivalBase(state,id){
  const r0=survivalReady(state,{actions:1});assertPackExplorationReady(r0);const site=survivalSites[id],room=survivalSiteObservation(r0,id);if(r0.stage!=='settlement'||!site||!r0.scouted[id]||!r0.secured[id]||!room||room.occupants>0)throw new Error('직접 확인해 비어 있거나, 감염체를 제압한 공간만 거점으로 삼을 수 있어요.');
  if(r0.members.filter(m=>survivalMind(m).state!=='departed').length>site.capacity)throw new Error('함께 지낼 인원을 수용하기에는 공간이 작아요.');
- if(r0.resources.parts<site.cost)throw new Error('출입문을 정리할 부품이 부족해요.');const s=structuredClone(state),r=s.survivalRun;r.actions--;r.resources.parts-=site.cost;r.stage='base';r.base={site:id,integrity:room.integrity,exposure:room.exposure,facilities:[]};ensureSurvivalExploration(r).here=id;scheduleCampIncident(r);survivalLog(r,`${site.name}을 거점으로 삼았다. 확인한 문 상태와 복도 노출을 바탕으로 보강이 필요하다.`);return s;
+ if(r0.resources.parts<site.cost)throw new Error('출입문을 정리할 부품이 부족해요.');const s=structuredClone(state),r=s.survivalRun;r.actions--;r.resources.parts-=site.cost;r.stage='base';r.base={site:id,integrity:room.integrity,exposure:room.exposure,facilities:[]};ensureSurvivalExploration(r).here=id;scheduleCampIncident(r);survivalLog(r,`${site.name}을 거점으로 삼았다. 확인한 문 상태와 복도 노출을 바탕으로 보강이 필요하다.`);return refreshSurvivalAdvice(s);
 }
-export function buildSurvivalFacility(state,id){const r0=survivalReady(state,{base:true,actions:1}),f=survivalFacilities[id];if(!f||r0.base.facilities.includes(id))throw new Error('이미 설치했거나 없는 시설이에요.');if(r0.base.facilities.length>=survivalSites[r0.base.site].slots)throw new Error('이 거점의 시설 공간이 모두 찼어요.');if(r0.resources.parts<f.cost)throw new Error('공사에 필요한 부품이 부족해요.');const s=structuredClone(state),r=s.survivalRun;r.resources.parts-=f.cost;r.actions--;r.base.facilities.push(id);spendSurvivalEffort(r,4,6,['taei']);survivalLog(r,`${f.name}을 설치했다. ${f.effect}`);return s;}
-export function assignSurvivalJob(state,key,job){const r0=survivalReady(state,{base:true}),member=r0.members.find(m=>m.key===key);if(!member||!survivalJobs[job])throw new Error('인원과 역할을 확인하세요.');if(job!=='rest'&&(!survivalMemberAvailable(member)||member.fatigue>=80||survivalCondition(member).critical||survivalCondition(member).nutrition<=15||survivalCondition(member).hydration<=15))throw new Error('지치거나 몸 상태가 나빠 오늘은 쉬고 먹거나 치료해야 해요.');if(job==='care'&&!r0.base.facilities.includes('clinic')||job==='repair'&&!r0.base.facilities.includes('workshop'))throw new Error('그 역할을 위한 시설이 필요해요.');const s=structuredClone(state);s.survivalRun.members.find(m=>m.key===key).job=job;survivalLog(s.survivalRun,`${survivalMemberName(s,member)} · ${survivalJobs[job]} 역할을 맡았다.`);return s;}
+export function buildSurvivalFacility(state,id){const r0=survivalReady(state,{base:true,actions:1}),f=survivalFacilities[id];if(!f||r0.base.facilities.includes(id))throw new Error('이미 설치했거나 없는 시설이에요.');if(r0.base.facilities.length>=survivalSites[r0.base.site].slots)throw new Error('이 거점의 시설 공간이 모두 찼어요.');if(r0.resources.parts<f.cost)throw new Error('공사에 필요한 부품이 부족해요.');const s=structuredClone(state),r=s.survivalRun;r.resources.parts-=f.cost;r.actions--;r.base.facilities.push(id);spendSurvivalEffort(r,4,6,['taei']);survivalLog(r,`${f.name}을 설치했다. ${f.effect}`);return refreshSurvivalAdvice(s);}
+export function assignSurvivalJob(state,key,job){const r0=survivalReady(state,{base:true}),member=r0.members.find(m=>m.key===key);if(!member||!survivalJobs[job])throw new Error('인원과 역할을 확인하세요.');if(job!=='rest'&&(!survivalMemberAvailable(member)||member.fatigue>=80||survivalCondition(member).critical||survivalCondition(member).nutrition<=15||survivalCondition(member).hydration<=15))throw new Error('지치거나 몸 상태가 나빠 오늘은 쉬고 먹거나 치료해야 해요.');if(job==='care'&&!r0.base.facilities.includes('clinic')||job==='repair'&&!r0.base.facilities.includes('workshop'))throw new Error('그 역할을 위한 시설이 필요해요.');const s=structuredClone(state);s.survivalRun.members.find(m=>m.key===key).job=job;survivalLog(s.survivalRun,`${survivalMemberName(s,member)} · ${survivalJobs[job]} 역할을 맡았다.`);return refreshSurvivalAdvice(s);}
 export function finishSurvivalDay(state,{preview=false}={}){
  const r0=survivalReady(state);assertPackExplorationReady(r0);if(r0.stage==='flight'&&r0.escapes<Math.min(2,r0.day))throw new Error('오늘의 도주 임무를 먼저 넘겨야 해요.');const s=structuredClone(state),r=s.survivalRun,before={...r.resources},nightDay=r.day,present=r.members.filter(m=>!['away','departed'].includes(survivalMind(m).state)),needed=present.length;const packedRations=consumePackedRations(r,needed),foodCount=Math.min(needed,r.resources.food),waterCount=Math.min(needed,r.resources.water),short=foodCount<needed||waterCount<needed;
  r.resources.food=Math.max(0,r.resources.food-needed);r.resources.water=Math.max(0,r.resources.water-needed);r.shortage=short?r.shortage+1:0;const events=[...(packedRations.length?['배급을 위해 가방/비축 식품에서 '+packedRations.join(' · ')+'을 꺼냈다.']:[]),`${needed}명분의 식량과 물을 나눴다.${short?' 배급이 부족했다.':''}`];
@@ -70,7 +71,7 @@ export function finishSurvivalDay(state,{preview=false}={}){
  if(r.threat>=100||r.base?.integrity===0){r.status='overrun';events.push('더는 지금 상태로 버티기 어렵다. 이번 생존 기록은 여기서 끝난다.');}
  events.push(...finishCampStories(r));
  if(r.threat>=100){r.status='overrun';if(!events.some(e=>e.includes('이번 생존 기록')))events.push('위협을 감당하지 못해 이번 생존 기록이 끝났다.');}
- r.lastNight={day:nightDay,short,risk,before,after:{...r.resources},events:[...events],healthAfter:r.members.map(m=>({key:m.key,...survivalCondition(m),injury:m.injury})),failed:r.status!=='active'};scheduleCampIncident(r);survivalLog(r,events.join(' '));return s;
+ r.lastNight={day:nightDay,short,risk,before,after:{...r.resources},events:[...events],healthAfter:r.members.map(m=>({key:m.key,...survivalCondition(m),injury:m.injury})),failed:r.status!=='active'};scheduleCampIncident(r);survivalLog(r,events.join(' '));return refreshSurvivalAdvice(s);
 }
 export function launchSurvivalSortie(state,kind,siteId){
  const r0=survivalReady(state,{actions:1});assertPackExplorationReady(r0);let mission;
@@ -89,7 +90,7 @@ export function launchSurvivalSortie(state,kind,siteId){
  if(shopSorties[kind]){prepareShopBattle(s.combatTrial,kind);r.shopVisits??={};r.shopVisits[kind]=r.day;}
  if(kind==='clinic'){prepareClinicBattle(s.combatTrial,r.members.filter(m=>survivalMind(m).state!=='departed').length<survivalSites[r.base.site].capacity);s.combatTrial.survivalContext={kind,title:'보건실에 남은 사람',location:'보건실'};}
  s.combatTrial.optional.initialWounds=Object.fromEntries(Object.entries(s.combatTrial.actors).map(([key,a])=>[key,a.wounds]));
- survivalLog(r,r.kit?'준비한 가방을 메고 작전에 나섰다. 공동 보관 물자는 두고 간다.':'작전에 나섰다. 창고 물자를 휴대하며, 복귀 전에는 거점 행동을 할 수 없다.');return s;
+ survivalLog(r,r.kit?'준비한 가방을 메고 작전에 나섰다. 공동 보관 물자는 두고 간다.':'작전에 나섰다. 창고 물자를 휴대하며, 복귀 전에는 거점 행동을 할 수 없다.');return refreshSurvivalAdvice(s);
 }
 export function returnSurvivalSortie(state,{abandon=false}={}){
  const r0=state.survivalRun,active=r0?.activeSortie,b=state.combatTrial;if(!active||b?.survivalSortie!==active.id||b.version!==2)throw new Error('이 생존 기록에 연결된 작전이 아니에요.');if(b.status==='active'&&!abandon)throw new Error('작전을 마치거나 실패로 중단해야 복귀할 수 있어요.');
@@ -105,7 +106,7 @@ export function returnSurvivalSortie(state,{abandon=false}={}){
  else{r.threat=survivalClamp(r.threat+12);if(r.base)r.base.integrity=Math.max(0,r.base.integrity-8);text=packed?'작전을 중단하고 물러났다. 가방에 이미 챙긴 물자는 가져왔지만 임무 보너스는 얻지 못했다.':'작전을 중단하고 물러났다. 소비한 물자는 돌아오지 않았고, 새로 주울 예정이던 보상도 얻지 못했다.';}
  if(!won&&shopSorties[active.kind])text+=' '+shopAftermath(result,false,survivalMemberName(s,r.members.find(m=>m.key==='ally')));
  if(active.kind==='clinic'){r.clinicOutcome={day:r.day,success:won,rescued:won&&result.clinic.rescued};text+=' '+clinicAftermath(result,won,survivalMemberName(s,r.members.find(m=>m.key==='ally')));}
- r.completedSorties.push({id:active.id,kind:active.kind,day:r.day,success:won,siteId:active.siteId});r.activeSortie=null;if(active.previousCombat)s.combatTrial=active.previousCombat;else delete s.combatTrial;survivalLog(r,text);return s;
+ r.completedSorties.push({id:active.id,kind:active.kind,day:r.day,success:won,siteId:active.siteId});r.activeSortie=null;if(active.previousCombat)s.combatTrial=active.previousCombat;else delete s.combatTrial;survivalLog(r,text);return refreshSurvivalAdvice(s);
 }
 
 export function survivalDayPreview(state){

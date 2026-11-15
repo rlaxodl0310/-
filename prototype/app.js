@@ -1,3 +1,4 @@
+import {refreshSurvivalAdvice,survivalAdviceView,respondSurvivalAdvice,survivalAdviceTab} from './survival-advice.js';
 import {characterStatsContent} from './character-stats-ui.js';
 import {fairVisitDay} from './fair-events.js';
 import {useStoredSurvivalItem,careSurvivalMember} from './survival-pack.js';
@@ -390,10 +391,11 @@ function render(){
  if(modelPending){const panel=app.querySelector('.vn-panel');if(panel)panel.innerHTML=`<p role="status" aria-live="polite">잠시 말을 고르고 있다…</p><div class="vn-controls">${btn('기다리지 않고 이어가기','skipModel')}</div>`;}
 }
 app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b){if(modelPending)return;if(e.target.closest('.vn-copy')&&vnModel&&!vnView.choosing){vnView=advanceNovel(vnView,vnModel.beats.length);drawNovelBeat();}return;}let a=b.dataset.action,v=b.dataset.value;
- if(a==='go'&&v==='survival'){const last=survivalRoomCatalog[state.survivalRun?.exploration?.here];if(last){shelterExploreBuilding=last.building;shelterExploreFloor=last.floor;}screen='survival';shelterError='';render();window.scrollTo(0,0);return;}
+ if(a==='go'&&v==='survival'){state=refreshSurvivalAdvice(state);const last=survivalRoomCatalog[state.survivalRun?.exploration?.here];if(last){shelterExploreBuilding=last.building;shelterExploreFloor=last.floor;}screen='survival';shelterError='';render();window.scrollTo(0,0);return;}
  if(a.startsWith('survival')){
   if(combatAnimating)return;
   try{shelterError='';
+   if(a==='survivalAdviceAccept'||a==='survivalAdviceDefer'){const advice=survivalAdviceView(state);state=respondSurvivalAdvice(state,v,a==='survivalAdviceAccept'?'accept':'defer');if(a==='survivalAdviceAccept')shelterTab=survivalAdviceTab(advice.kind);}
    if(a==='survivalStart')state=startSurvival(state,app.querySelector('#survival-companion')?.value??'student');
    if(a==='survivalRestart'){state=restartSurvival(state);shelterTab='overview';}
    if(a==='survivalTab'){shelterTab=v;shelterSelectedFacility='';}
@@ -426,7 +428,7 @@ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)
    if(a==='survivalResume'){if(!state.survivalRun?.activeSortie||state.combatTrial?.survivalSortie!==state.survivalRun.activeSortie.id)throw new Error('연결된 작전을 확인해 주세요.');screen='combat';render();return;}
    if(a==='survivalReturn'||a==='survivalAbort'){state=returnSurvivalSortie(state,{abandon:a==='survivalAbort'});shelterTab='overview';}
    if(a==='survivalExit'){screen='quickMenu';quickReturn='campus';quickSnapshot=null;render();return;}
-  }catch(error){shelterError=error.message;}screen='survival';render();return;
+  }catch(error){shelterError=error.message;}state=refreshSurvivalAdvice(state);screen='survival';render();return;
  }
  if(a==='go'&&v==='combatSetup'){if(state.survivalRun?.activeSortie){screen='survival';shelterError='진행 중인 생존 작전을 먼저 마치세요.';render();return;}screen='combatSetup';combatError='';render();window.scrollTo(0,0);return;}
  if(a==='go'&&utilityScreens.has(v)&&v!==screen&&['quickMenu','phone'].includes(screen)&&!b.dataset.navigationBack){utilityOrigins.set(v,screen);}
