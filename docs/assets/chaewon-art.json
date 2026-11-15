@@ -1,0 +1,45 @@
+{
+  "character": "유채원",
+  "age": 21,
+  "hair": "평소에는 차분한 검은 단발, 바람이 불 때만 머리끝이 흩날림",
+  "outfits": {
+    "image": "gym-student-outfits.png",
+    "columns": 2,
+    "rows": 1,
+    "order": [
+      "평상복",
+      "운동복"
+    ]
+  },
+  "cutscenes": [
+    {
+      "image": "chaewon-breeze-event.png",
+      "title": "운동 후, 바람 부는 길"
+    },
+    {
+      "image": "chaewon-training-event.png",
+      "title": "오늘의 마지막 세트"
+    },
+    {
+      "image": "chaewon-drinks-event.png",
+      "title": "음료 하나 골라봐요"
+    }
+  ],
+  "sd": {
+    "image": "chaewon-sd.png",
+    "columns": 3,
+    "rows": 2,
+    "cellWidth": 512,
+    "cellHeight": 512,
+    "columnsInOrder": [
+      "기본",
+      "웃음",
+      "경계"
+    ],
+    "rowsInOrder": [
+      "평상복",
+      "운동복"
+    ]
+  },
+  "usage": "캐릭터 일러스트 메뉴 미리보기. 실제 등장 이벤트에는 아직 연결하지 않음."
+}
