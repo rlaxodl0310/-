@@ -1,7 +1,8 @@
+import {characterPersonalities} from './character-personality.js';
 import {currentSurvivalMembers,partyMemberName} from './survival-parties.js';
 import {survivalCondition} from './survival-health.js';
 // Local utility planner. Traits are tuning weights, never invented biography or hidden world facts.
-const thinkingProfiles={yeogyeong:{care:12,safety:12,risk:3},seoyeon:{care:14,safety:5,risk:0},soyul:{care:5,safety:14,risk:-16},iseo:{care:3,safety:7,risk:6},dogyeom:{care:2,safety:3,risk:14}};
+const thinkingProfiles={yeogyeong:characterPersonalities.yeogyeong.planning,seoyeon:characterPersonalities.seoyeon.planning,soyul:{care:5,safety:14,risk:-16},iseo:{care:3,safety:7,risk:6},dogyeom:{care:2,safety:3,risk:14}};
 export function thinkingHash(value){let h=2166136261;for(const c of String(value))h=Math.imul(h^c.charCodeAt(0),16777619)>>>0;return h;}
 export function thinkingSupply(r,id){return (r.resources[id]??0)+(r.kit?.items[id]??0)+(r.kit?.stock[id]??0);}
 export function thinkingBond(state,m){return state.survivalRun.parties?.bonds?.[m.recruitId??'member:'+m.key]??state.relations?.[m.character+'>taei']??{};}
@@ -49,7 +50,7 @@ export function survivalThinkingCandidates(state,member){
 function thinkingSay(state,plan,topic){
  const r=state.survivalRun,m=r.members.find(m=>m.key===plan.speaker),seed=[r.exploration?.seed,r.day,m.key,plan.goal,topic,plan.revision??0].join(':'),pick=arr=>arr[thinkingHash(seed)%arr.length],bond=thinkingBond(state,m),memory=thinkingMemory(m);
  const name=partyMemberName(state,m),evidence=plan.evidence.split(name+'의').join('내'),sequence=plan.steps.map(q=>q.target===m.key?q.label.split(name+'부터').join('내가 먼저').split(name+'의').join('내'):q.label).join(' 다음에 ');
- const opening=(bond.tension??0)>=4?'의견이 다를 수 있지만, 지금 본 걸 이야기할게. ':m.character==='soyul'?pick(['내 생각에는… ','조금 걱정되는데, ']):m.character==='dogyeom'?pick(['다음 동선을 생각해봤어. ','이 순서로 움직이면 어떨까. ']):pick(['지금 상황을 보고 생각해봤어. ','다음 일을 같이 정하고 싶어. ','내가 먼저 확인하고 싶은 게 있어. ']);
+ const opening=(bond.tension??0)>=4?'의견이 다를 수 있지만, 지금 본 걸 이야기할게. ':m.character==='yeogyeong'?(r.threat>=45||plan.steps.some(q=>q.kind==='sortie')?pick(['조금 무섭기는 해. 먼저 안전하게 할 수 있는 순서부터 보자. ','나 겁먹은 거 얼굴에 다 보이지… 그래도 준비할 건 같이 정하고 싶어. ']):pick(['천천히 확인하고 같이 정하고 싶어. ','내 생각을 먼저 이야기해볼게. '])):m.character==='seoyeon'?pick(['내가 해보고 싶은 건 이거야. 필요한 준비부터 정해봤어. ','하고 싶다고 마음먹었으니, 내가 할 수 있는 일부터 해보려고 해. ']):m.character==='soyul'?pick(['내 생각에는… ','조금 걱정되는데, ']):m.character==='dogyeom'?pick(['다음 동선을 생각해봤어. ','이 순서로 움직이면 어떨까. ']):pick(['지금 상황을 보고 생각해봤어. ','다음 일을 같이 정하고 싶어. ','내가 먼저 확인하고 싶은 게 있어. ']);
  if(topic==='why')return opening+evidence+'. '+(memory?memory+' ':'')+'그래서 '+sequence+' 순서로 해보고 싶어.';
  if(topic==='risk')return pick(['걱정되는 점부터 말할게. ','계획대로 안 될 경우도 생각했어. ','가능한 일과 위험한 점을 나눠보면, '])+plan.risk+' '+plan.uncertainty;
  if(topic==='accepted')return pick(['좋아. 첫 단계부터 확인하자. ','그럼 이 순서로 준비해보자. ','함께 정했으니 하나씩 해보자. '])+'실제로 마친 일만 확인하고 다음 단계로 넘어갈게.';

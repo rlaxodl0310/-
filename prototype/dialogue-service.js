@@ -1,9 +1,10 @@
+import {characterPersonalities} from './character-personality.js';
 import {supplyAftermathMemory} from './supply-aftermath.js';
 import {supplyConversationMemory} from './supply-story.js';
 import {npcNow} from './npc-state.js';
 const serviceProfiles={
- yeogyeong:'차여경, 21세 간호학과 학생이자 봉사단 재무부장. 귀여운 인상. 확인하는 일을 중요하게 여기지만 자기 일과 결정권을 존중받고 싶다.',
- seoyeon:'한서연, 21세 치위생과 학생. 차분한 말투와 목소리, 친화력이 좋고 사회생활에 능숙하다. 친절함이 무조건적인 동의는 아니다.',
+ yeogyeong:'21세 간호학과 학생이자 봉사단 재무부장. '+characterPersonalities.yeogyeong.summary+' 확인하는 일을 중요하게 여기지만 자기 일과 결정권을 존중받고 싶다.',
+ seoyeon:'21세 치위생과 학생. '+characterPersonalities.seoyeon.summary+' 친화력이 좋고 사회생활에 능숙하다. 구체적인 직업·레슨 일정·실력은 미정이다. 친절함이 무조건적인 동의는 아니다.',
  soyul:'박소율, 21세 치위생과 학생. 차가운 인상과 달리 부끄러움과 쑥스러움이 많다. 조용해도 자기 생각과 선택권이 있다.'
 };
 export function dialogueServiceContext(s,id,result){

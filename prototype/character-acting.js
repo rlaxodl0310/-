@@ -1,3 +1,4 @@
+import {personalityReaction} from './character-personality.js';
 import {npcNow} from './npc-state.js';
 const actingCore=new Set(['yeogyeong','seoyeon','soyul']);
 const actingNames={neutral:'차분히 듣는 표정',warm:'편안한 미소',worried:'걱정하며 생각하는 표정',serious:'진지한 표정',bashful:'쑥스러운 표정',surprised:'놀란 표정',happy:'즐거운 표정'};
@@ -23,6 +24,8 @@ export function characterActing(state,id,{scene='',text='',listening=false,heard
  if(id==='dogyeom')return {row:({neutral:0,warm:0,worried:1,serious:2,bashful:3,surprised:4,happy:5})[feeling],atlas:'dogyeom',emotion:feeling,name:actingNames[feeling]};
  // Iseo keeps her own three-pose atlas; never index it as the four-person sheet.
  if(id==='iseo')return {row:feeling==='bashful'?2:['happy','warm'].includes(feeling)?1:0,atlas:'iseo',emotion:feeling,name:actingNames[feeling]};
+ const fearReaction=personalityReaction(id,{text:source});
+ if(fearReaction.visible&&!['surprised','worried'].includes(feeling))feeling='surprised';
  const extra={bashful:0,surprised:1,happy:2};
- return {row:extra[feeling]??({warm:0,worried:1,serious:2}[feeling]??null),atlas:Object.hasOwn(extra,feeling)?'extra':'base',emotion:feeling,name:actingNames[feeling]};
+ return {row:extra[feeling]??({warm:0,worried:1,serious:2}[feeling]??null),atlas:Object.hasOwn(extra,feeling)?'extra':'base',emotion:feeling,name:fearReaction.visible?'겁먹어 눈과 입에 놀란 기색이 드러나는 표정':actingNames[feeling],fearReaction};
 }

@@ -3,7 +3,7 @@ import {currentSurvivalMembers,survivalResidentCapacity} from './survival-partie
 import {survivalCondition} from './survival-health.js';
 import {displayName} from './identity.js';
 // Deterministic party deliberation: only observed shared supplies/health are used.
-const advicePreferences={yeogyeong:{care:14,clinic:12,kiosk:8},seoyeon:{care:10,rest:10},soyul:{rest:16,kiosk:12,convenience:-16},iseo:{convenience:10},dogyeom:{convenience:16,kiosk:-4}};
+const advicePreferences={yeogyeong:{care:14,clinic:12,kiosk:16,convenience:-12,rest:8},seoyeon:{care:10,rest:4},soyul:{rest:16,kiosk:12,convenience:-16},iseo:{convenience:10},dogyeom:{convenience:16,kiosk:-4}};
 export const survivalAdviceLabels={clinic:'보건실에서 치료 물자 찾기',kiosk:'교내 매점에서 식량·물 보급',convenience:'편의점에서 식량·물 보급',care:'부상자부터 치료하기',eat:'가진 음식부터 나누기',drink:'가진 물부터 마시기',rest:'몸을 숨기고 쉬기',search:'주변 물자부터 살펴보기'};
 export function survivalAdviceName(state,member){return member?.label??(member?.character==='student'?'함께 있는 학생':displayName(state,member?.character));}
 function advicePresent(r){return r.members.filter(m=>!m.deployment&&!['away','departed'].includes(m.mind?.state));}
@@ -44,7 +44,7 @@ export function survivalAdviceOptions(state){
   const risk=speaker.stress>=55?{rest:12,kiosk:8,convenience:-18}:{};
   const memory=speaker.supplyMemories?.at(-1),learned=memory?.harm&&memory.choice==='rescue'?{convenience:-10,rest:6,kiosk:6}:{};
   const score=o.score+(learned[o.kind]??0)+(advicePreferences[speaker.character]?.[o.kind]??0)+(risk[o.kind]??0)+(speaker.key===o.target?8:0);
-  const relation=r.parties?.bonds?.[speaker.recruitId??'member:'+speaker.key]??state.relations?.[speaker.character+'>taei'],opening=(relation?.tension??0)>=4?'의견이 다를 수 있지만, 이건 확인했으면 해. ':speaker.character==='soyul'?'내 생각에는… ':speaker.character==='yeogyeong'?'남은 것부터 확인해봤어. ':speaker.character==='dogyeom'?'다음에 뭘 할지 생각해봤는데, ':'';
+  const relation=r.parties?.bonds?.[speaker.recruitId??'member:'+speaker.key]??state.relations?.[speaker.character+'>taei'],opening=(relation?.tension??0)>=4?'의견이 다를 수 있지만, 이건 확인했으면 해. ':speaker.character==='soyul'?'내 생각에는… ':speaker.character==='yeogyeong'?'조금 무섭지만, 안전하게 할 수 있는 일부터 확인해봤어. ':speaker.character==='seoyeon'?'나는 이걸 해보고 싶어. 필요한 준비부터 생각해봤어. ':speaker.character==='dogyeom'?'다음에 뭘 할지 생각해봤는데, ':'';
   return {...o,key,phase,score,speaker:speaker.key,text:(memory?.harm&&memory.choice==='rescue'?'지난 원정에서 다친 일도 있으니, 이번에는 돌아올 길까지 생각했으면 해. ':'')+opening+o.reason};
  })).filter(o=>!heard.some(h=>h.need===o.need&&h.phase===o.phase&&h.target===o.target&&h.level>=o.level)).sort((a,b)=>b.score-a.score||a.speaker.localeCompare(b.speaker)||a.kind.localeCompare(b.kind));
 }
