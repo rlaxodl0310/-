@@ -1,3 +1,4 @@
+import {preparePartyRescueBattle,finishPartyRescue} from './party-delay.js';
 import {finishSupplyDebate} from './supply-debate.js';
 import {ensureSurvivalParties,currentSurvivalMembers,playerSurvivalParty,survivalResidentCapacity,resolveSurvivalPartyMissions} from './survival-parties.js';
 import {refreshSurvivalAdvice} from './survival-advice.js';
@@ -68,7 +69,7 @@ export function finishSurvivalDay(state,{preview=false}={}){
  }
  for(const m of present){m.fatigue=survivalClamp(m.fatigue+(m.job==='rest'?-10:12)+(r.base?.facilities.includes('beds')?-8:0)+(!r.base?8:0));m.stress=survivalClamp(m.stress-3+(r.base&&risk>=25?10:0));}
  const healthEvents=advanceSurvivalHealth(r,foodCount,waterCount,nightDay);events.push(...healthEvents.map(text=>text.replace(/^(taei|ally|rescued-\d+) · /,(_,key)=>survivalMemberName(s,r.members.find(m=>m.key===key))+' · ')));
- events.push(...resolveSurvivalPartyMissions(s));
+ events.push(...resolveSurvivalPartyMissions(s,{advanceDelays:true}));
  growSurvivalAbilities(s);if(!preview)events.push(...resolveSurvivalAutonomy(s,nightDay));
  r.threat=survivalClamp(r.threat+6-present.filter(m=>survivalMemberAvailable(m)&&m.job==='watch').length*5);r.day++;r.actions=3;
  if(r.day>=3&&r.escapes>=2&&!r.base){r.stage='settlement';events.push('도주 동선이 조금 보인다. 이제 빈 강의실을 정찰하고 확보해볼 수 있다.');}
@@ -79,7 +80,8 @@ export function finishSurvivalDay(state,{preview=false}={}){
 }
 export function launchSurvivalSortie(state,kind,siteId){
  const r0=survivalReady(state,{actions:1});assertPackExplorationReady(r0);let mission;
- if(kind==='escape'){if(r0.stage!=='flight')throw new Error('도주 단계에서 진행하는 임무예요.');mission='escape';}
+ if(kind==='partyRescue'){const e=r0.parties?.delays?.find(e=>e.id===siteId);if(!r0.base||e?.status!=='pending')throw new Error('진행 중인 귀환 지연 요청을 선택하세요.');mission='protect';}
+ else if(kind==='escape'){if(r0.stage!=='flight')throw new Error('도주 단계에서 진행하는 임무예요.');mission='escape';}
  else if(kind==='secure'){const room=survivalSiteObservation(r0,siteId);if(r0.stage!=='settlement'||!survivalSites[siteId]||!r0.scouted[siteId]||r0.secured[siteId]||!room||room.occupants===0)throw new Error('정찰한 미확보 후보지를 선택하세요.');mission='eliminate';}
  else if(shopSorties[kind]){if(!r0.base)throw new Error('거점을 확보한 뒤 보급 원정을 떠날 수 있어요.');if(r0.shopVisits?.[kind]===r0.day)throw new Error('오늘 이 장소로 가는 원정은 이미 시작했어요. 다음 날 다시 살펴보세요.');mission='escape';}
  else if(kind==='clinic'){if(!r0.base)throw new Error('거점을 확보한 뒤 보건실로 출발할 수 있어요.');if(r0.clinicOutcome?.rescued)throw new Error('보건실 학생은 이미 구조했어요. 다른 보급 원정을 선택하세요.');mission='escape';}
@@ -95,6 +97,7 @@ export function launchSurvivalSortie(state,kind,siteId){
  if(kind==='secure'){const room=survivalSiteObservation(r,siteId),spots=[[6,4],[8,3],[9,4],[9,3]];s.combatTrial.reinforced=!!room.reinforced;s.combatTrial.enemies=spots.slice(0,room.occupants).map(([x,y],i)=>({id:i+1,x,y,balance:2,stun:0}));s.combatTrial.log=[`${survivalSites[siteId].name} 내부에서 확인한 감염체 ${room.occupants}마리를 제압해야 한다.`];}
  if(shopSorties[kind]){prepareShopBattle(s.combatTrial,kind);r.shopVisits??={};r.shopVisits[kind]=r.day;}
  if(kind==='clinic'){prepareClinicBattle(s.combatTrial,r.members.filter(m=>survivalMind(m).state!=='departed').length<survivalResidentCapacity(r));s.combatTrial.survivalContext={kind,title:'보건실에 남은 사람',location:'보건실'};}
+ if(kind==='partyRescue'){const e=r.parties.delays.find(e=>e.id===siteId);e.status='direct';e.choices.push({choice:'direct',day:r.day});preparePartyRescueBattle(s.combatTrial,e);}
  s.combatTrial.optional.initialWounds=Object.fromEntries(Object.entries(s.combatTrial.actors).map(([key,a])=>[key,a.wounds]));
  survivalLog(r,r.kit?'준비한 가방을 메고 작전에 나섰다. 공동 보관 물자는 두고 간다.':'작전에 나섰다. 창고 물자를 휴대하며, 복귀 전에는 거점 행동을 할 수 없다.');return refreshSurvivalAdvice(s);
 }
@@ -108,7 +111,8 @@ export function returnSurvivalSortie(state,{abandon=false}={}){
  if(won&&shopSorties[active.kind]&&(!result.shop||!result.supplyCache.recovered||!Object.values(result.actors).every(a=>a.escaped)))throw new Error('식품 진열대 확인과 동행 인원의 탈출을 먼저 완료하세요.');
  if(won&&active.kind==='clinic'&&(!result.clinic||!result.supplyCache.recovered||!Object.values(result.actors).every(a=>a.escaped)))throw new Error('보건실 물자함 확인과 파티 전원의 탈출을 먼저 완료하세요.');
  if(won&&active.kind==='clinic'&&result.clinic.rescued){if(r.members.filter(m=>survivalMind(m).state!=='departed').length>=survivalResidentCapacity(r))throw new Error('구조한 학생을 받을 거점 공간이 부족해요.');const number=r.members.filter(m=>m.key.startsWith('rescued-')).length+1;r.members.push({key:'rescued-'+number,...(r.parties?{partyConsent:false}:{}),character:'student',label:'보건실에서 구조한 학생',job:'rest',fatigue:50,stress:40,injury:1,nutrition:35,hydration:30,woundDays:0,woundRisk:0,caredDay:null});}
- if(won){if(shopSorties[active.kind]){text=shopAftermath(result,true,(rosterName(s,result)));}else if(active.kind==='clinic'){text='보건실 물자함을 확인하고 원정을 마쳤다. 가방에 직접 챙긴 물자만 가져왔다.';}else if(active.kind==='escape'){r.escapes++;r.threat=survivalClamp(r.threat+4);text=!Object.values(result.actors).some(a=>a.id!=='taei'&&!a.absent)?'혼자 도주로를 넘어 숨을 돌렸다.':'도주로를 넘어 동료와 다시 숨을 돌렸다.';}else if(active.kind==='secure'){r.secured[active.siteId]=true;text=survivalSites[active.siteId].name+' 내부를 확보했다. 출입문을 정리하면 거점으로 삼을 수 있다.';}else if(active.kind==='supply'){if(packed)text='보급 원정을 마쳤다. 가방에 직접 챙긴 물자를 가지고 돌아왔다.';else{r.resources.food+=3;r.resources.water++;text='식량 3과 물 1, 전투 전리품을 가지고 돌아왔다.';}}else if(active.kind==='rescue'){const number=r.members.filter(m=>m.key.startsWith('rescued-')).length+1;r.members.push({key:'rescued-'+number,...(r.parties?{partyConsent:false}:{}),character:'student',label:'구조한 학생 '+number,job:'rest',fatigue:50,stress:40,injury:1,nutrition:35,hydration:30,woundDays:0,woundRisk:0,caredDay:null});text='부상 학생 1명을 데리고 돌아왔다. 먼저 쉴 자리와 치료가 필요하다.';}else{r.base.integrity=Math.min(100,r.base.integrity+15);r.threat=survivalClamp(r.threat-20);text='주변 접근을 막고 거점 출입문을 다시 정리했다.';}}
+ if(active.kind==='partyRescue')text=finishPartyRescue(s,result,won);
+ else if(won){if(shopSorties[active.kind]){text=shopAftermath(result,true,(rosterName(s,result)));}else if(active.kind==='clinic'){text='보건실 물자함을 확인하고 원정을 마쳤다. 가방에 직접 챙긴 물자만 가져왔다.';}else if(active.kind==='escape'){r.escapes++;r.threat=survivalClamp(r.threat+4);text=!Object.values(result.actors).some(a=>a.id!=='taei'&&!a.absent)?'혼자 도주로를 넘어 숨을 돌렸다.':'도주로를 넘어 동료와 다시 숨을 돌렸다.';}else if(active.kind==='secure'){r.secured[active.siteId]=true;text=survivalSites[active.siteId].name+' 내부를 확보했다. 출입문을 정리하면 거점으로 삼을 수 있다.';}else if(active.kind==='supply'){if(packed)text='보급 원정을 마쳤다. 가방에 직접 챙긴 물자를 가지고 돌아왔다.';else{r.resources.food+=3;r.resources.water++;text='식량 3과 물 1, 전투 전리품을 가지고 돌아왔다.';}}else if(active.kind==='rescue'){const number=r.members.filter(m=>m.key.startsWith('rescued-')).length+1;r.members.push({key:'rescued-'+number,...(r.parties?{partyConsent:false}:{}),character:'student',label:'구조한 학생 '+number,job:'rest',fatigue:50,stress:40,injury:1,nutrition:35,hydration:30,woundDays:0,woundRisk:0,caredDay:null});text='부상 학생 1명을 데리고 돌아왔다. 먼저 쉴 자리와 치료가 필요하다.';}else{r.base.integrity=Math.min(100,r.base.integrity+15);r.threat=survivalClamp(r.threat-20);text='주변 접근을 막고 거점 출입문을 다시 정리했다.';}}
  else{r.threat=survivalClamp(r.threat+12);if(r.base)r.base.integrity=Math.max(0,r.base.integrity-8);text=packed?'작전을 중단하고 물러났다. 가방에 이미 챙긴 물자는 가져왔지만 임무 보너스는 얻지 못했다.':'작전을 중단하고 물러났다. 소비한 물자는 돌아오지 않았고, 새로 주울 예정이던 보상도 얻지 못했다.';}
  if(!won&&shopSorties[active.kind])text+=' '+shopAftermath(result,false,(rosterName(s,result)));
  if(active.kind==='clinic'){r.clinicOutcome={day:r.day,success:won,rescued:won&&result.clinic.rescued};text+=' '+clinicAftermath(result,won,(rosterName(s,result)));}

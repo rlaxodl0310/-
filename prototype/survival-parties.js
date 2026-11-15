@@ -1,3 +1,4 @@
+import {openPartyDelay,advancePartyDelays} from './party-delay.js';
 import {enabledAttributes,entityAbilities,characterPresent} from './character-stats.js';
 import {contact,displayName,identities} from './identity.js';
 import {survivalCondition,advanceSurvivalHealth} from './survival-health.js';
@@ -67,11 +68,12 @@ export function dispatchSurvivalParty(state,id,kind){
  const r0=partyReady(state);if(!r0.base||r0.actions<1)throw new Error('거점과 행동 여력 1이 필요해요.');if(!['supply','guard'].includes(kind))throw new Error('파티 임무를 확인하세요.');const s=structuredClone(state);ensureSurvivalParties(s);const r=s.survivalRun,p=r.parties.groups.find(p=>p.id===id);
  if(!p||p.members.includes('taei')||p.mission)throw new Error('다른 대기 중인 파티를 선택하세요.');const team=r.members.filter(m=>p.members.includes(m.key));if(team.length!==p.members.length||team.some(m=>!partyMemberFree(r,m.key)||survivalCondition(m).critical||m.fatigue>=75||m.nutrition<=35||m.hydration<=35))throw new Error('파티원이 몸 상태를 회복한 뒤 임무를 맡겨 주세요.');
  const n=team.length;if(r.resources.food<n||r.resources.water<n)throw new Error('출발 배급으로 파티원마다 공동 식량 1·물 1이 필요해요.');
- r.resources.food-=n;r.resources.water-=n;r.actions--;p.mission={kind,day:r.day,members:[...p.members],threat:r.threat};for(const m of team){m.deployment=p.id;m.job='rest';}partyLog(r,p.name+'이 '+(kind==='supply'?'별도 보급':'주변 경계')+' 임무를 맡았다. 출발 배급을 챙겼으며 하루를 마칠 때 복귀한다.');return s;
+ r.resources.food-=n;r.resources.water-=n;r.actions--;p.mission={kind,day:r.day,members:[...p.members],threat:r.threat};for(const m of team){m.deployment=p.id;m.job='rest';}partyLog(r,p.name+'이 '+(kind==='supply'?'별도 보급':'주변 경계')+' 임무를 맡았다. 출발 배급을 챙겼으며 하루를 마칠 때 귀환 보고를 받는다. 위협 55 이상인 보급 파견은 귀환이 지연될 수 있다.');return s;
 }
-export function resolveSurvivalPartyMissions(state){
- const r=state.survivalRun,events=[];if(!r?.parties)return events;
- for(const p of r.parties.groups){const mission=p.mission;if(!mission)continue;const team=r.members.filter(m=>mission.members.includes(m.key)),power=team.reduce((n,m)=>n+entityAbilities(m).endurance+entityAbilities(m).mentality+entityAbilities(m).agility,0)/Math.max(1,team.length),success=mission.kind==='guard'||mission.threat<65+power;
+export function resolveSurvivalPartyMissions(state,{advanceDelays=false}={}){
+ const r=state.survivalRun,events=[];if(!r?.parties)return events;if(advanceDelays)events.push(...advancePartyDelays(state,r.day));
+ for(const p of r.parties.groups){const mission=p.mission;if(!mission||mission.delayId)continue;const team=r.members.filter(m=>mission.members.includes(m.key)),power=team.reduce((n,m)=>n+entityAbilities(m).endurance+entityAbilities(m).mentality+entityAbilities(m).agility,0)/Math.max(1,team.length),success=mission.kind==='guard'||mission.threat<65+power;
+  if(mission.kind==='supply'&&(!success||mission.threat>=55&&(mission.day+team.length)%3===0)){const event=openPartyDelay(state,p);events.push(p.name+'의 귀환이 늦어졌다. '+event.radio+' 파티 화면에서 대응을 정할 수 있다.');continue;}
   for(const m of team){delete m.deployment;m.fatigue=Math.min(100,m.fatigue+(success?18:30));m.stress=Math.min(100,m.stress+(success?4:16));if(!success)m.injury=Math.min(3,m.injury+1);}
   advanceSurvivalHealth({members:team,status:'active'},team.length,team.length,r.day);
   if(success&&mission.kind==='supply'){r.resources.food+=team.length+2;r.resources.water+=team.length+2;}else if(success)r.threat=Math.max(0,r.threat-12-team.length*2);else r.threat=Math.min(100,r.threat+6);
