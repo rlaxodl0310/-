@@ -553,4 +553,6 @@
 - 최신 교복 시안은 허리선에 맞는 반팔 셔츠, 짧고 폭이 좁은 무주름 H라인 치마이며 재킷은 없다. 셔츠의 검정 파이핑과 검정 넥타이는 제작자가 선택한 세부안이다.
 - [한국식 반팔 교복 수정 원본](assets/seoha-korean-summer-uniform.png)을 보존한다. 기존 얼굴·머리·무표정과 엉뚱한 성격 기준은 유지한다.
 
-![윤서하 가칭 최신 한국식 반팔 교복 시안](assets/seoha-korean-summer-uniform.png)
+- 사용자 추가 요청에 따라 치마 밑단을 더 올린 [길이 조정 원본](assets/seoha-summer-skirt-length.png)을 저장했다. 반팔 셔츠·H라인·무표정 얼굴과 나머지 외형 기준은 유지한다.
+
+![윤서하 가칭 최신 교복 길이 수정 시안](assets/seoha-summer-skirt-length.png)
