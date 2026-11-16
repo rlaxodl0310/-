@@ -1,0 +1,3 @@
+const fs=require('node:fs/promises'),path=require('node:path');
+async function prepare(){const root=path.resolve(__dirname,'..'),target=process.platform;if(!['win32','linux'].includes(target)||process.arch!=='x64')throw Error('This build supports Windows/Linux x64.');const triple=target==='win32'?'x86_64-pc-windows-msvc':'x86_64-unknown-linux-musl';const source=path.join(root,'node_modules/@openai/codex-'+target+'-x64/vendor',triple),dest=path.join(root,'vendor/codex-'+target+'-x64');await fs.access(path.join(source,'bin',target==='win32'?'codex.exe':'codex'));await fs.cp(source,dest,{recursive:true});console.log('Official Codex runtime prepared.');}
+prepare().catch(error=>{console.error(error.message);process.exitCode=1;});
