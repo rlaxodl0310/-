@@ -53,6 +53,30 @@ const actors={taei:'김태이',dogyeom:'백도겸',seoha:'같은 학교 여학�
       done:{speaker:'yeogyeong',emotion:1,text:'됐다. 세게 당겼으면 찢어질 뻔했네. 고마워.',sd:5,end:true,flags:['yeogyeong_pencilcase_done']}
     }}
   );
+
+  assets.yeogyeongFantasy='../assets/yeogyeong-fantasy-expressions.png';
+  assets.yeogyeongOutfit='../assets/yeogyeong-fantasy-outfit.png';
+  assets.yeogyeongHealSolo='../assets/event-yeogyeong-healing.png';
+  assets.yeogyeongGateSolo='../assets/event-yeogyeong-gate.png';
+  assets.yeogyeongFantasySD='../assets/sd-yeogyeong-fantasy.png';
+  events.push(
+    {id:'yeogyeong_healing_solo',title:'여경 · 작은 치유의 빛',location:'inn_practice_table',owner:'yeogyeong',members:['yeogyeong'],cg:'yeogyeongHealSolo',portraitAsset:'yeogyeongFantasy',sdAsset:'yeogyeongFantasySD',entry:'practice',nodes:{
+      practice:{speaker:'yeogyeong',emotion:5,text:'조금만…… 너무 세게 하지는 말고.',sd:1,choices:[
+        {id:'steady',label:'숨을 고르고 작은 빛을 잠깐 유지해 본다',next:'steady',minutes:2},
+        {id:'rest',label:'힘을 풀고 잠시 쉬며 연습을 정리한다',next:'rest',minutes:1}]},
+      steady:{speaker:'yeogyeong',emotion:0,text:'아까보다는 덜 흔들리네. 오늘은 여기까지만 하자.',sd:0,next:'done'},
+      rest:{speaker:'yeogyeong',emotion:2,text:'긴장해서 어깨에 힘이 들어갔네. 조금 쉬어야겠다.',sd:2,next:'done'},
+      done:{speaker:'yeogyeong',emotion:1,text:'사람한테 쓰려면 더 배워야겠지.',end:true,flags:['yeogyeong_healing_practice_done']}
+    }},
+    {id:'yeogyeong_gate_solo',title:'여경 · 울타리 옆의 소리',location:'village_gate',owner:'yeogyeong',members:['yeogyeong'],cg:'yeogyeongGateSolo',portraitAsset:'yeogyeongFantasy',sdAsset:'yeogyeongFantasySD',entry:'rustle',nodes:{
+      rustle:{speaker:'yeogyeong',emotion:3,text:'……뭐야. 방금 거기서 소리 났는데.',sd:3,choices:[
+        {id:'watch',label:'울타리와 거리를 두고 잠깐 살펴본다',next:'bird',minutes:2},
+        {id:'light',label:'등불이 있는 쪽으로 물러나 확인한다',next:'light',minutes:1}]},
+      bird:{speaker:'yeogyeong',emotion:0,text:'새였네. 아…… 놀랐잖아.',sd:4,next:'done'},
+      light:{speaker:'yeogyeong',emotion:2,text:'여기서는 잘 보인다. 새가 나뭇잎 건드린 거구나.',sd:4,next:'done'},
+      done:{speaker:'yeogyeong',emotion:1,text:'괜찮아. 천천히 가면 돼.',sd:5,end:true,flags:['yeogyeong_gate_checked']}
+    }}
+  );
   const data={version:2,assets,actors,events,emotions:['평상시','작은 웃음','걱정·의아함','놀람','짜증','집중·딴생각']};
   if(typeof module!=='undefined'&&module.exports)module.exports=data;else root.StoryKitData=data;
 })(globalThis);

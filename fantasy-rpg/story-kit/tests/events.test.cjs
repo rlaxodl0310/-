@@ -39,7 +39,7 @@ test('every event branch completes, can restore every node, commits time only on
     }
     walk(base);
   }
-  assert.equal(endings,10);
+  assert.equal(endings,14);
 });
 test('invalid choice cannot advance or charge time',()=>{
   const engine=new Engine(D),e=D.events[0];engine.start(e.id,context(e));const before=engine.serialize();
@@ -68,11 +68,20 @@ test('each event runs with only its owner and never speaks as another protagonis
 });
 
 test('Yeogyeong events require Taei as viewer and preserve that condition on restore',()=>{
-  for(const e of D.events.filter(e=>e.owner==='yeogyeong')){
+  for(const e of D.events.filter(e=>e.viewer==='taei')){
     const engine=new Engine(D);
     assert.throws(()=>engine.start(e.id,{location:e.location,members:e.members,viewer:'dogyeom'}));
     assert.equal(engine.history.length,0);
     engine.start(e.id,context(e));
     assert.deepEqual(Engine.restore(D,engine.serialize()).history,engine.history);
   }
+});
+
+test('fantasy scenes use matching costume sheets and preserve previous v2 saves',()=>{
+ const old=Engine.restore(D,JSON.stringify({version:2,history:[{type:'start',id:'yeogyeong_notebook',context:{location:'classroom',members:['yeogyeong'],viewer:'taei'}}]}));
+ assert.equal(old.state.active.id,'yeogyeong_notebook');
+ for(const e of D.events.filter(e=>e.portraitAsset)){
+  assert.ok(D.assets[e.portraitAsset]);assert.ok(D.assets[e.sdAsset]);assert.equal(e.viewer,undefined);
+  assert.equal(e.owner,'yeogyeong');assert.ok(!JSON.stringify(e).includes('유예'));
+ }
 });
