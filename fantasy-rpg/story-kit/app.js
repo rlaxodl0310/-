@@ -7,13 +7,13 @@ function tile(node,path,index){node.style.backgroundImage=`url("${path}")`;node.
 function run(action){try{action();save();draw();}catch(error){$('error').textContent=error.message;}}
 function draw(){
   const a=engine.state.active,n=engine.current();$('menu').hidden=!!a&&!paused;$('player').hidden=!a||paused;
-  $('status').textContent=`완료 ${engine.state.completed.length}/3 · 연습 시간 ${engine.state.minutes}분 · ${a?'대화 진행 중 · 자동 저장':'준비됨'}`;
+  $('status').textContent=`완료 ${engine.state.completed.length}/${D.events.length} · 연습 시간 ${engine.state.minutes}분 · ${a?'대화 진행 중 · 자동 저장':'준비됨'}`;
   $('resume').hidden=!a;$('events').replaceChildren();
-  for(const e of D.events){const b=element('button',e.title+(engine.state.completed.includes(e.id)?' · 완료':''));b.disabled=!!a||engine.state.completed.includes(e.id);b.onclick=()=>run(()=>{engine.start(e.id,{location:e.location,members:e.members});paused=false;});$('events').append(b);}
+  for(const e of D.events){const b=element('button',e.title+(engine.state.completed.includes(e.id)?' · 완료':''));b.disabled=!!a||engine.state.completed.includes(e.id);b.onclick=()=>run(()=>{engine.start(e.id,{location:e.location,members:e.members,viewer:e.viewer});paused=false;});$('events').append(b);}
   if(!a)return;const event=engine.event(a.id);$('event-title').textContent=event.title;$('cg').src=D.assets[event.cg];
   tile($('portrait'),D.assets[n.speaker],n.emotion||0);$('portrait').setAttribute('aria-label',D.actors[n.speaker]+' '+D.emotions[n.emotion||0]);
   $('speaker').textContent=D.actors[n.speaker];$('line').textContent=n.text;$('emotion').textContent=D.emotions[n.emotion||0];
-  $('sd').hidden=n.sd===undefined;if(n.sd!==undefined)tile($('sd'),D.assets.sd,n.sd);
+  $('sd').hidden=n.sd===undefined;if(n.sd!==undefined)tile($('sd'),D.assets[event.sdAsset||'sd'],n.sd);
   $('choices').replaceChildren();
   if(n.choices)for(const c of n.choices){const b=element('button',c.label);b.onclick=()=>run(()=>engine.advance(c.id));$('choices').append(b);}
   else{const b=element('button',n.end?'대화 마치기':'계속');b.onclick=()=>run(()=>engine.advance());$('choices').append(b);}
@@ -21,4 +21,4 @@ function draw(){
 $('pause').onclick=()=>{paused=true;save();draw();};$('resume').onclick=()=>{paused=false;draw();};
 $('reset').onclick=()=>{if(confirm('연습 이벤트 기록을 초기화할까요?')){engine=new E(D);paused=false;storageBlocked=false;$('error').textContent='';save();draw();}};
 for(const id of Object.keys(D.actors)){const article=document.createElement('article');article.append(element('h3',D.actors[id]));const image=document.createElement('img');image.src=D.assets[id];image.alt=D.actors[id]+' 표정 여섯 가지';article.append(image);$('sheets').append(article);}
-$('sd-sheet').src=D.assets.sd;draw();
+$('sd-sheet').src=D.assets.sd;$('yeogyeong-sd-sheet').src=D.assets.yeogyeongSD;draw();

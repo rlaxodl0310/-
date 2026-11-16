@@ -3,7 +3,11 @@
     taei:'../assets/taei-expressions.png',dogyeom:'../assets/dogyeom-expressions.png',seoha:'../assets/seoha-expressions.png',
     taeiSolo:'../assets/event-taei-solo.png',dogyeomSolo:'../assets/event-dogyeom-solo.png',seohaSolo:'../assets/event-seoha-solo.png',sd:'../assets/sd-solo.png'
   };
-  const actors={taei:'김태이',dogyeom:'백도겸',seoha:'같은 학교 여학생'};
+  assets.yeogyeong='../assets/yeogyeong-expressions.png';
+assets.yeogyeongClassSolo='../assets/event-yeogyeong-classroom.png';
+assets.yeogyeongHallSolo='../assets/event-yeogyeong-corridor.png';
+assets.yeogyeongSD='../assets/sd-yeogyeong.png';
+const actors={taei:'김태이',dogyeom:'백도겸',seoha:'같은 학교 여학생'};
   const events=[
     {id:'taei_map_solo',title:'태이 · 지도와 이정표',location:'signpost',owner:'taei',members:['taei'],cg:'taeiSolo',entry:'map',nodes:{
       map:{speaker:'taei',emotion:2,text:'표시가 비슷한데…… 바로 가긴 좀 그렇네.',sd:0,choices:[
@@ -30,6 +34,25 @@
       done:{speaker:'seoha',emotion:0,text:'……나 뭐 하러 왔더라. 아, 물.',end:true,flags:['seoha_solo_bird']}
     }}
   ];
+  actors.yeogyeong='차여경';
+  events.push(
+    {id:'yeogyeong_notebook',title:'여경 · 공책의 빈칸',location:'classroom',owner:'yeogyeong',members:['yeogyeong'],viewer:'taei',cg:'yeogyeongClassSolo',sdAsset:'yeogyeongSD',entry:'ask',nodes:{
+      ask:{speaker:'yeogyeong',emotion:0,text:'태이야, 여기 적었어? 나 이 부분만 비었네.',sd:1,choices:[
+        {id:'compare',label:'내 공책과 비교해 본다',next:'compare',minutes:2},
+        {id:'admit',label:'“나도 못 적었는데.”',next:'admit',minutes:1}]},
+      compare:{speaker:'yeogyeong',emotion:1,text:'아, 이거구나. 잠깐만. 여기까지만 적을게.',sd:2,next:'done'},
+      admit:{speaker:'yeogyeong',emotion:2,text:'너도? 그럼 둘 다 같은 데서 놓쳤네. 쉬는 시간에 물어보자.',sd:1,next:'done'},
+      done:{speaker:'yeogyeong',emotion:1,text:'아무튼 이 부분은 확인해야겠다. 고마워.',end:true,flags:['yeogyeong_notebook_done']}
+    }},
+    {id:'yeogyeong_pencilcase',title:'여경 · 걸린 지퍼',location:'school_corridor',owner:'yeogyeong',members:['yeogyeong'],viewer:'taei',cg:'yeogyeongHallSolo',sdAsset:'yeogyeongSD',entry:'zip',nodes:{
+      zip:{speaker:'yeogyeong',emotion:2,text:'아, 또 걸렸어. 태이야, 안에 뭐 끼었는지 좀 보여?',sd:3,choices:[
+        {id:'lining',label:'안감이 끼인 곳을 가리킨다',next:'lining',minutes:1},
+        {id:'empty',label:'내용물을 가방에 옮기고 확인해 보자고 한다',next:'empty',minutes:2}]},
+      lining:{speaker:'yeogyeong',emotion:5,text:'여기? 아, 보인다. 잠깐, 반대로 조금만 당기면…….',sd:3,next:'done'},
+      empty:{speaker:'yeogyeong',emotion:0,text:'그래야겠다. 펜 떨어지면 좀 잡아줘.',sd:4,next:'done'},
+      done:{speaker:'yeogyeong',emotion:1,text:'됐다. 세게 당겼으면 찢어질 뻔했네. 고마워.',sd:5,end:true,flags:['yeogyeong_pencilcase_done']}
+    }}
+  );
   const data={version:2,assets,actors,events,emotions:['평상시','작은 웃음','걱정·의아함','놀람','짜증','집중·딴생각']};
   if(typeof module!=='undefined'&&module.exports)module.exports=data;else root.StoryKitData=data;
 })(globalThis);

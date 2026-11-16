@@ -1,6 +1,6 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const D=require('../data.js'),Engine=require('../engine.js');
-const context=e=>({location:e.location,members:[...e.members]});
+const context=e=>({location:e.location,members:[...e.members],viewer:e.viewer});
 
 test('every referenced graphic exists and every graph edge is valid',()=>{
   for(const file of Object.values(D.assets))assert.ok(fs.existsSync(path.join(__dirname,'..',file)),file);
@@ -39,7 +39,7 @@ test('every event branch completes, can restore every node, commits time only on
     }
     walk(base);
   }
-  assert.equal(endings,6);
+  assert.equal(endings,10);
 });
 test('invalid choice cannot advance or charge time',()=>{
   const engine=new Engine(D),e=D.events[0];engine.start(e.id,context(e));const before=engine.serialize();
@@ -55,14 +55,24 @@ test('malformed saves are rejected, not accepted as world state',()=>{
 test('each event runs with only its owner and never speaks as another protagonist',()=>{
   for(const e of D.events){
     assert.deepEqual(e.members,[e.owner]);
-    const engine=new Engine(D);engine.start(e.id,{location:e.location,members:[e.owner]});
+    const engine=new Engine(D);engine.start(e.id,context(e));
     for(const n of Object.values(e.nodes)){
       assert.equal(n.speaker,e.owner);
-      if(n.sd!==undefined)assert.equal(n.sd%3,['taei','dogyeom','seoha'].indexOf(e.owner));
+      if(n.sd!==undefined&&!e.sdAsset)assert.equal(n.sd%3,['taei','dogyeom','seoha'].indexOf(e.owner));
     }
     assert.ok(e.cg.endsWith('Solo'));
   }
   assert.equal(D.version,2);
   assert.ok(!Object.values(D.assets).includes('../assets/sd-interactions.png'));
   assert.throws(()=>Engine.restore(D,JSON.stringify({version:1,history:[]})));
+});
+
+test('Yeogyeong events require Taei as viewer and preserve that condition on restore',()=>{
+  for(const e of D.events.filter(e=>e.owner==='yeogyeong')){
+    const engine=new Engine(D);
+    assert.throws(()=>engine.start(e.id,{location:e.location,members:e.members,viewer:'dogyeom'}));
+    assert.equal(engine.history.length,0);
+    engine.start(e.id,context(e));
+    assert.deepEqual(Engine.restore(D,engine.serialize()).history,engine.history);
+  }
 });

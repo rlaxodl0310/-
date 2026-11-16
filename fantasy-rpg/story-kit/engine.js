@@ -8,8 +8,9 @@
       const e=this.event(id);
       if(this.state.completed.includes(id))throw Error('이미 완료한 이벤트입니다.');
       if(!context||context.location!==e.location||!Array.isArray(context.members)||e.members.some(m=>!context.members.includes(m)))throw Error('장소나 참여 인물 조건이 맞지 않습니다.');
+      if(e.viewer&&context.viewer!==e.viewer)throw Error('대화 상대 조건이 맞지 않습니다.');
       this.state.active={id,node:e.entry,pendingMinutes:0};
-      this.history.push({type:'start',id,context:{location:context.location,members:[...context.members]}});
+      this.history.push({type:'start',id,context:{location:context.location,members:[...context.members],...(e.viewer?{viewer:context.viewer}:{})}});
     }
     advance(choiceId=null){
       const a=this.state.active;if(!a)throw Error('진행 중인 이벤트가 없습니다.');
