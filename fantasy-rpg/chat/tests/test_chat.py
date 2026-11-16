@@ -30,12 +30,15 @@ class ModelHandler(BaseHTTPRequestHandler):
 
 class ChatTests(unittest.TestCase):
     def setUp(self):
+        self.provider = patch.dict(os.environ, {"FANTASY_PROVIDER": "ollama"})
+        self.provider.start()
         self.temp = tempfile.TemporaryDirectory()
         self.dbpatch = patch.object(server, "DB", Path(self.temp.name) / "chat.sqlite3")
         self.dbpatch.start()
         self.sid = server.new_session("subway")
 
     def tearDown(self):
+        self.provider.stop()
         self.dbpatch.stop()
         self.temp.cleanup()
 

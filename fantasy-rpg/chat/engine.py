@@ -49,7 +49,7 @@ class ModelError(Exception):
 
 
 def settings():
-    provider = os.getenv("FANTASY_PROVIDER", "ollama")
+    provider = os.getenv("FANTASY_PROVIDER", "codex")
     return {
         "provider": provider,
         "model": os.getenv("FANTASY_MODEL", "gpt-4.1-mini" if provider == "openai" else "").strip(),
@@ -99,6 +99,12 @@ def parse_reply(raw):
 
 def generate(scene_id, turns):
     cfg = settings()
+    if cfg["provider"] == "codex":
+        from codex_bridge import BridgeError, generate as codex_generate
+        try:
+            return parse_reply(codex_generate(prompt(scene_id, turns)))
+        except BridgeError as error:
+            raise ModelError(str(error)) from None
     if not cfg["model"]:
         raise ModelError("운영 서버에 대화 모델이 아직 연결되지 않았습니다. 입력은 저장되지 않았습니다.")
     if cfg["provider"] not in ("ollama", "compatible", "openai"):

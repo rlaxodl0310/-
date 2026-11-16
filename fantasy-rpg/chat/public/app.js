@@ -25,7 +25,7 @@ function draw() {
     $('turns').append(row);
   }
   $('empty').hidden=state.turns.length>0;
-  $('connection').textContent=state.configured?`대화 자동 저장 · ${state.turns.length} / ${state.max_turns}회`:'대화 모델 연결 준비 중 · 현재는 화면과 입력을 확인할 수 있어요.';
+  $('connection').textContent=(state.connection?.message || '대화 모델 연결 준비 중') + (state.configured?` · 자동 저장 ${state.turns.length} / ${state.max_turns}회`:'');
   $('suggestions').replaceChildren();
   if(!state.turns.length)for(const text of scene.suggestions){const b=node('button',text);b.type='button';b.onclick=()=>{$('message').value=text;changed();$('message').focus();};$('suggestions').append(b);}
 }

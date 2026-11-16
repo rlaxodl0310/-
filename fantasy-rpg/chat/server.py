@@ -80,6 +80,18 @@ def take_turn(sid, text, request_id, expected_turn):
 
 
 class Handler(BaseHTTPRequestHandler):
+    def local_request(self):
+        if settings()["provider"] != "codex":
+            return True
+        try:
+            host = urlparse("//" + self.headers.get("Host", "")).hostname
+        except ValueError:
+            host = None
+        if host not in ("localhost", "127.0.0.1", "::1"):
+            self.reply(403, {"error": "구독 연결은 localhost에서만 이용할 수 있습니다."})
+            return False
+        return True
+
     def log_message(self, *_):
         pass  # No dialogue text, API keys, or session cookies in request logs.
 
@@ -108,13 +120,20 @@ class Handler(BaseHTTPRequestHandler):
         return new_session("subway"), True
 
     def do_GET(self):
+        if not self.local_request():
+            return
         path = urlparse(self.path).path
         if path in ("/api/state", "/api/export"):
             sid, created = self.session()
             state = read_state(sid)
             if path == "/api/state":
                 cfg = settings()
-                state.update(scenes={k: {key: v[key] for key in ("title", "caption", "opening", "speaker", "suggestions")} for k, v in SCENES.items()}, configured=bool(cfg["model"] and (cfg["provider"] != "openai" or cfg["key"])), max_turns=MAX_TURNS)
+                if cfg["provider"] == "codex":
+                    from codex_bridge import connection_status
+                    status = connection_status()
+                else:
+                    status = {"ready": bool(cfg["model"] and (cfg["provider"] != "openai" or cfg["key"])), "message": "대화 모델 설정 확인"}
+                state.update(scenes={k: {key: v[key] for key in ("title", "caption", "opening", "speaker", "suggestions")} for k, v in SCENES.items()}, configured=status["ready"], connection=status, max_turns=MAX_TURNS)
             self.reply(200, state, sid if created else None)
             return
         files = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/style.css": ("style.css", "text/css; charset=utf-8")}
@@ -125,6 +144,8 @@ class Handler(BaseHTTPRequestHandler):
         self.reply(200, (ROOT / "public" / name).read_bytes(), content_type=mime)
 
     def do_POST(self):
+        if not self.local_request():
+            return
         origin = self.headers.get("Origin")
         if origin and urlparse(origin).netloc != self.headers.get("Host"):
             self.reply(403, {"error": "다른 사이트에서 보낸 요청은 허용하지 않습니다."})
@@ -162,5 +183,7 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     address = (os.getenv("HOST", "127.0.0.1"), int(os.getenv("PORT", "8090")))
+    if settings()["provider"] == "codex" and address[0] not in ("127.0.0.1", "localhost", "::1"):
+        raise SystemExit("ChatGPT 구독 연결은 개인 PC 로컬 전용입니다. HOST=127.0.0.1로 실행해 주세요.")
     print(f"판타지 대화 시제품: http://{address[0]}:{address[1]}", flush=True)
     ThreadingHTTPServer(address, Handler).serve_forever()
