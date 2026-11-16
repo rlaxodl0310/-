@@ -86,6 +86,8 @@ def invoke(args, *, cwd, input_text=None, timeout=10):
 
 def failure(text):
     low = text.lower()
+    if "read-only file system" in low or "permission denied" in low:
+        return "Codex 저장 경로에 쓰기 권한이 없습니다. 개인 PC에서 정상 설치한 Codex로 실행하거나 설치 경로 권한을 확인해 주세요. 로그인 파일을 복사하거나 유료 API로 전환하지 않았습니다."
     if any(word in low for word in ("usage limit", "rate limit", "limit reached", "quota", "usage_limit", "한도")):
         return "ChatGPT/Codex 사용 한도에 도달했습니다. 자동 재시도나 유료 API 전환 없이 멈췄습니다. 한도가 회복된 뒤 다시 시도해 주세요."
     if any(word in low for word in ("login", "log in", "sign in", "unauthorized", "401", "authentication", "token expired")):
