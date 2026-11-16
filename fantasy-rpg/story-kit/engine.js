@@ -28,9 +28,9 @@
       }
       this.history.push({type:'advance',choiceId});
     }
-    serialize(){return JSON.stringify({version:1,history:this.history});}
+    serialize(){return JSON.stringify({version:this.data.version,history:this.history});}
     static restore(data,text){
-      const saved=JSON.parse(text);if(saved.version!==1||!Array.isArray(saved.history)||saved.history.length>2000)throw Error('지원하지 않는 저장입니다.');
+      const saved=JSON.parse(text);if(saved.version!==data.version||!Array.isArray(saved.history)||saved.history.length>2000)throw Error('지원하지 않는 저장입니다.');
       const engine=new Engine(data);
       for(const action of saved.history){
         if(action.type==='start')engine.start(action.id,action.context);

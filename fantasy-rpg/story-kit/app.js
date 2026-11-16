@@ -1,4 +1,4 @@
-const D=StoryKitData,E=StoryKitEngine,$=id=>document.getElementById(id),KEY='fantasy-story-kit-v1';
+const D=StoryKitData,E=StoryKitEngine,$=id=>document.getElementById(id),KEY='fantasy-story-kit-v2-solo';
 let engine=new E(D),paused=false,storageBlocked=false;
 try{const saved=localStorage.getItem(KEY);if(saved)engine=E.restore(D,saved);}catch{storageBlocked=true;$('error').textContent='저장 기록을 읽지 못했습니다. 원본은 덮어쓰지 않습니다. 필요하면 초기화해 주세요.';}
 function save(){if(storageBlocked)return;try{localStorage.setItem(KEY,engine.serialize());}catch{$('error').textContent='브라우저 저장이 불가능합니다. 이 창에서는 계속 진행할 수 있습니다.';}}

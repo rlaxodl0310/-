@@ -17,7 +17,7 @@ test('every referenced graphic exists and every graph edge is valid',()=>{
 test('event conditions require correct place and all actual participants',()=>{
   const e=D.events[0],engine=new Engine(D);
   assert.throws(()=>engine.start(e.id,{location:'elsewhere',members:e.members}));
-  assert.throws(()=>engine.start(e.id,{location:e.location,members:['taei']}));
+  assert.throws(()=>engine.start(e.id,{location:e.location,members:[]}));
   assert.equal(engine.state.active,null);assert.equal(engine.history.length,0);
 });
 test('every event branch completes, can restore every node, commits time only on completion',()=>{
@@ -39,7 +39,7 @@ test('every event branch completes, can restore every node, commits time only on
     }
     walk(base);
   }
-  assert.equal(endings,10);
+  assert.equal(endings,6);
 });
 test('invalid choice cannot advance or charge time',()=>{
   const engine=new Engine(D),e=D.events[0];engine.start(e.id,context(e));const before=engine.serialize();
@@ -47,8 +47,22 @@ test('invalid choice cannot advance or charge time',()=>{
 });
 test('active event cannot be overwritten, reading never mutates state',()=>{
   const engine=new Engine(D),e=D.events[0];engine.start(e.id,context(e));const before=engine.serialize();
-  assert.throws(()=>engine.start('rain',context(D.events[2])));engine.current();engine.current();assert.equal(engine.serialize(),before);
+  assert.throws(()=>engine.start(D.events[2].id,context(D.events[2])));engine.current();engine.current();assert.equal(engine.serialize(),before);
 });
 test('malformed saves are rejected, not accepted as world state',()=>{
-  for(const save of ['no json','{}',JSON.stringify({version:8,history:[]}),JSON.stringify({version:1,history:[{type:'grant_level',level:999}]})])assert.throws(()=>Engine.restore(D,save));
+  for(const save of ['no json','{}',JSON.stringify({version:8,history:[]}),JSON.stringify({version:2,history:[{type:'grant_level',level:999}]})])assert.throws(()=>Engine.restore(D,save));
+});
+test('each event runs with only its owner and never speaks as another protagonist',()=>{
+  for(const e of D.events){
+    assert.deepEqual(e.members,[e.owner]);
+    const engine=new Engine(D);engine.start(e.id,{location:e.location,members:[e.owner]});
+    for(const n of Object.values(e.nodes)){
+      assert.equal(n.speaker,e.owner);
+      if(n.sd!==undefined)assert.equal(n.sd%3,['taei','dogyeom','seoha'].indexOf(e.owner));
+    }
+    assert.ok(e.cg.endsWith('Solo'));
+  }
+  assert.equal(D.version,2);
+  assert.ok(!Object.values(D.assets).includes('../assets/sd-interactions.png'));
+  assert.throws(()=>Engine.restore(D,JSON.stringify({version:1,history:[]})));
 });
