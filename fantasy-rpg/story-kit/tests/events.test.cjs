@@ -39,7 +39,7 @@ test('every event branch completes, can restore every node, commits time only on
     }
     walk(base);
   }
-  assert.equal(endings,14);
+  assert.equal(endings,18);
 });
 test('invalid choice cannot advance or charge time',()=>{
   const engine=new Engine(D),e=D.events[0];engine.start(e.id,context(e));const before=engine.serialize();
@@ -84,4 +84,10 @@ test('fantasy scenes use matching costume sheets and preserve previous v2 saves'
   assert.ok(D.assets[e.portraitAsset]);assert.ok(D.assets[e.sdAsset]);assert.equal(e.viewer,undefined);
   assert.equal(e.owner,'yeogyeong');assert.ok(!JSON.stringify(e).includes('유예'));
  }
+});
+
+test('Woojin uses distinct cutscene panels, own SD and no companion requirement',()=>{
+ const events=D.events.filter(e=>e.owner==='woojin');
+ assert.equal(events.length,2);assert.deepEqual(events.map(e=>e.cgPanel),[0,1]);
+ for(const e of events){assert.equal(e.viewer,undefined);assert.equal(e.sdAsset,'woojinSD');assert.deepEqual(e.members,['woojin']);}
 });

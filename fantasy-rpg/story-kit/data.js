@@ -77,6 +77,31 @@ const actors={taei:'김태이',dogyeom:'백도겸',seoha:'같은 학교 여학�
       done:{speaker:'yeogyeong',emotion:1,text:'괜찮아. 천천히 가면 돼.',sd:5,end:true,flags:['yeogyeong_gate_checked']}
     }}
   );
+
+  assets.woojin='../assets/woojin-expressions.png';
+  assets.woojinDesign='../assets/woojin-design.png';
+  assets.woojinCrateSolo='../assets/woojin-cutscenes.png';
+  assets.woojinRestSolo='../assets/woojin-cutscenes.png';
+  assets.woojinSD='../assets/sd-woojin.png';
+  actors.woojin='정우진(시안)';
+  events.push(
+    {id:'woojin_crate_solo',title:'우진 · 풀린 매듭',location:'storeroom_table',owner:'woojin',members:['woojin'],cg:'woojinCrateSolo',cgPanel:0,sdAsset:'woojinSD',entry:'knot',nodes:{
+      knot:{speaker:'woojin',emotion:5,text:'들기 전에 이거부터 봐야겠네.',sd:0,choices:[
+        {id:'retie',label:'매듭을 풀어 다시 묶는다',next:'retie',minutes:2},
+        {id:'check',label:'끈이 닳은 곳부터 확인한다',next:'check',minutes:1}]},
+      retie:{speaker:'woojin',emotion:5,text:'이렇게 묶어야 덜 풀리지. 한 번 당겨 보고.',sd:1,next:'done'},
+      check:{speaker:'woojin',emotion:2,text:'끝이 좀 닳았네. 무거운 건 안 넣는 게 낫겠다.',sd:0,next:'done'},
+      done:{speaker:'woojin',emotion:1,text:'됐네. 그래도 밑에서 받쳐 들어야지.',sd:2,end:true,flags:['woojin_crate_checked']}
+    }},
+    {id:'woojin_rest_solo',title:'우진 · 잠깐 쉬는 시간',location:'inn_step',owner:'woojin',members:['woojin'],cg:'woojinRestSolo',cgPanel:1,sdAsset:'woojinSD',entry:'sit',nodes:{
+      sit:{speaker:'woojin',emotion:0,text:'아…… 계속 서 있었더니 허리가 뻐근하네.',sd:3,choices:[
+        {id:'stretch',label:'컵을 내려두고 어깨를 천천히 푼다',next:'stretch',minutes:2},
+        {id:'drink',label:'물을 한 모금 마시고 잠깐 앉아 있는다',next:'drink',minutes:1}]},
+      stretch:{speaker:'woojin',emotion:0,text:'좀 낫네. 힘만 주고 있었구나.',sd:4,next:'done'},
+      drink:{speaker:'woojin',emotion:1,text:'목말랐네. 물부터 마실걸.',sd:3,next:'done'},
+      done:{speaker:'woojin',emotion:1,text:'조금만 더 쉬었다 가자.',sd:5,end:true,flags:['woojin_rest_done']}
+    }}
+  );
   const data={version:2,assets,actors,events,emotions:['평상시','작은 웃음','걱정·의아함','놀람','짜증','집중·딴생각']};
   if(typeof module!=='undefined'&&module.exports)module.exports=data;else root.StoryKitData=data;
 })(globalThis);

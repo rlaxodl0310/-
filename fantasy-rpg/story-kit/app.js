@@ -11,6 +11,8 @@ function draw(){
   $('resume').hidden=!a;$('events').replaceChildren();
   for(const e of D.events){const b=element('button',e.title+(engine.state.completed.includes(e.id)?' · 완료':''));b.disabled=!!a||engine.state.completed.includes(e.id);b.onclick=()=>run(()=>{engine.start(e.id,{location:e.location,members:e.members,viewer:e.viewer});paused=false;});$('events').append(b);}
   if(!a)return;const event=engine.event(a.id);$('event-title').textContent=event.title;$('cg').src=D.assets[event.cg];
+  const panel=$('cg-panel');$('cg').hidden=event.cgPanel!==undefined;panel.hidden=event.cgPanel===undefined;
+  if(event.cgPanel!==undefined){panel.style.backgroundImage='url("'+D.assets[event.cg]+'")';panel.style.backgroundPosition=(event.cgPanel*100)+'% 0';panel.setAttribute('aria-label',event.title+' 개별 컷신');}
   tile($('portrait'),D.assets[event.portraitAsset||n.speaker],n.emotion||0);$('portrait').setAttribute('aria-label',D.actors[n.speaker]+' '+D.emotions[n.emotion||0]);
   $('speaker').textContent=D.actors[n.speaker];$('line').textContent=n.text;$('emotion').textContent=D.emotions[n.emotion||0];
   $('sd').hidden=n.sd===undefined;if(n.sd!==undefined)tile($('sd'),D.assets[event.sdAsset||'sd'],n.sd);
@@ -25,4 +27,8 @@ $('sd-sheet').src=D.assets.sd;$('yeogyeong-sd-sheet').src=D.assets.yeogyeongSD;d
 
 for(const [key,label] of [['yeogyeongOutfit','차여경 이세계 여행복'],['yeogyeongFantasy','차여경 이세계 표정 6종'],['yeogyeongFantasySD','차여경 이세계 SD 6종']]){
   const article=document.createElement('article');article.append(element('h3',label));const picture=document.createElement('img');picture.src=D.assets[key];picture.alt=label;article.append(picture);$('sheets').append(article);
+}
+
+for(const [key,label] of [['woojinDesign','정우진 현대·이세계 복장 시안'],['woojinCrateSolo','정우진 개별 컷신 2종'],['woojinSD','정우진 SD 6종']]){
+ const article=document.createElement('article');article.append(element('h3',label));const picture=document.createElement('img');picture.src=D.assets[key];picture.alt=label;article.append(picture);$('sheets').append(article);
 }
