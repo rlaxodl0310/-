@@ -1,0 +1,12 @@
+(function(root){
+ let state={phase:'idle',ready:false,enabled:false,message:'ChatGPT 구독 연결을 확인하는 중입니다.',deviceCode:null};
+ let enabled=true;
+ function update(patch){state={...state,...patch};document.dispatchEvent(new CustomEvent('ai-status',{detail:{...state}}));}
+ async function call(method,...args){if(!root.desktopAI)throw Error('데스크톱 앱에서 실행해 주세요.');const result=await root.desktopAI[method](...args);if(!result.ok)throw Error(result.error||'요청을 완료하지 못했습니다.');return result.data;}
+ async function check(){if(state.phase==='login')return {...state};try{const result=await call('status');update({phase:result.ready?'ready':'idle',ready:result.ready,enabled:result.ready&&enabled,message:result.message,deviceCode:null});}catch(error){update({phase:'error',ready:false,enabled:false,message:error.message});}return {...state};}
+ async function login(method='browser'){if(state.phase==='login')throw Error('이미 로그인이 진행 중입니다.');update({phase:'login',enabled:false,message:'공식 로그인 화면을 준비하는 중입니다.',deviceCode:null});try{const result=await call('login',method);enabled=true;update({phase:result.ready?'ready':'idle',ready:result.ready,enabled:result.ready,message:result.message,deviceCode:null});}catch(error){update({phase:'error',ready:false,enabled:false,message:error.message});throw error;}}
+ function pending(){try{return JSON.parse(localStorage.getItem('fantasy-desktop-pending'));}catch{return null;}}
+ async function send(scene,node,text){if(!state.enabled)throw Error('ChatGPT 계정으로 먼저 로그인해 주세요.');const previous=pending(),request=previous?.scene===scene&&previous?.node===node&&previous?.text===text?previous:{scene,node,text,request_id:crypto.randomUUID()};try{localStorage.setItem('fantasy-desktop-pending',JSON.stringify(request));}catch{}const result=await call('send',request);if(!Array.isArray(result.panels))throw Error('대사 형식이 올바르지 않습니다.');try{localStorage.removeItem('fantasy-desktop-pending');}catch{}return result.panels.map(p=>p.kind==='action'?'('+p.text+')':p.text).join('\n');}
+ root.desktopAI?.onStatus(info=>update(info));
+ root.GameAI={check,login,send,pending,stop:()=>call('cancel'),openLogin:()=>call('openLogin'),chooseCLI:async()=>{await call('chooseCLI');return check();},reset:async()=>{await call('reset');try{localStorage.removeItem('fantasy-desktop-pending');}catch{}},demo:()=>{enabled=false;update({phase:'demo',enabled:false,message:'작성형 체험 모드입니다. 연결 확인을 누르면 구독 AI로 돌아갑니다.'});},start:async()=>{enabled=true;return check();},get state(){return {...state};}};
+})(globalThis);
