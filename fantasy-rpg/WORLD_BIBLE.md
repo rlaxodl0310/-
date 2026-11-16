@@ -567,3 +567,7 @@
 ![윤서하 가칭 균형 잡힌 체형 시안](assets/seoha-balanced-build.png)
 
 ![윤서하 가칭 측면 시안](assets/seoha-side-design.png)
+
+- 사용자 동의에 따라 팔다리를 날씬하게 다듬고 자세와 옷의 재단으로 균형을 조정한 [측면 수정 시안](assets/seoha-slim-tailored-side.png)을 추가했다. 얼굴·머리·복장과 옷 길이는 기존 기준을 따른다.
+
+![윤서하 가칭 팔다리·재단 조정 측면 시안](assets/seoha-slim-tailored-side.png)
