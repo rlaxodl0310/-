@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>태이의 이야기 · 대화 연습</title><meta name="description" content="말 한마디와 작은 행동으로 이어가는 판타지 이야기"><link rel="stylesheet" href="/style.css"><script defer src="/app.js"></script></head>
+<body><main>
+<header><a class="brand" href="/">TAEI <span>STORY STUDIO</span></a><button id="export" class="quiet">대화 내려받기</button></header>
+<section class="intro"><p class="eyebrow">INTERACTIVE STORY · PROTOTYPE 01</p><h1>이야기는,<br>말 한마디에서.</h1><p>김태이가 되어 말을 건네거나 작은 행동을 적어보세요.</p></section>
+<nav aria-label="연습 장면"><button class="scene" data-scene="subway">01 등굣길 지하철</button><button class="scene" data-scene="arrival">02 낯선 곳에서</button><button id="restart" class="quiet">이 장면 다시 시작</button></nav>
+<section class="story" aria-label="이야기"><div class="scene-heading"><p id="caption" class="eyebrow"></p><h2 id="title"></h2></div><div class="opening"><span class="scene-line"></span><p id="opening"></p></div><div id="turns" role="log" aria-label="대화 기록" aria-live="polite"></div><p id="empty" class="empty">잠깐 눈을 맞추는 것부터 시작해도 괜찮아요.</p></section>
+<div class="composer"><p id="connection" class="connection" role="status"></p><div id="suggestions" class="suggestions"></div><form id="form"><label class="sr-only" for="message">태이의 말이나 행동</label><textarea id="message" maxlength="800" rows="2" placeholder="어떻게 말하거나 행동할까요?"></textarea><div class="send-row"><span id="counter">0 / 800</span><span class="hint">Enter 전송 · Shift+Enter 줄바꿈</span><button id="send" type="submit">말 건네기 <span aria-hidden="true">↗</span></button></div></form><p id="error" role="alert"></p><p class="footnote">임시 인물과 장면으로 대화의 흐름을 검토하는 연습판입니다. 최종 이야기 설정이 아닙니다.</p></div>
+</main></body></html>
