@@ -7,6 +7,7 @@
       if(this.state.active)throw Error('진행 중인 이벤트부터 이어 주세요.');
       const e=this.event(id);
       if(this.state.completed.includes(id))throw Error('이미 완료한 이벤트입니다.');
+      if((e.requiresCompleted||[]).some(id=>!this.state.completed.includes(id)))throw Error('앞선 이야기를 먼저 진행해 주세요.');
       if(!context||context.location!==e.location||!Array.isArray(context.members)||e.members.some(m=>!context.members.includes(m)))throw Error('장소나 참여 인물 조건이 맞지 않습니다.');
       if(e.viewer&&context.viewer!==e.viewer)throw Error('대화 상대 조건이 맞지 않습니다.');
       this.state.active={id,node:e.entry,pendingMinutes:0};

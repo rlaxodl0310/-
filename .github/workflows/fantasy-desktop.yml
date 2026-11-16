@@ -28,6 +28,9 @@ jobs:
       - run: node scripts/prepare-codex.cjs
       - run: npm test
       - run: npm run package:win
+      - name: Build and test patch program
+        shell: pwsh
+        run: ./scripts/build-patch.ps1
       - name: Package downloadable ZIP
         shell: pwsh
         run: |
@@ -35,18 +38,12 @@ jobs:
           Copy-Item licenses/Codex-APACHE-2.0.txt release/FantasyStory-win32-x64/CODEX-LICENSE.txt
           Copy-Item THIRD_PARTY_NOTICES.md release/FantasyStory-win32-x64/THIRD_PARTY_NOTICES.txt
           Compress-Archive -Path release/FantasyStory-win32-x64 -DestinationPath release/FantasyStory-Windows-x64.zip -CompressionLevel Optimal
-          $hash = (Get-FileHash release/FantasyStory-Windows-x64.zip -Algorithm SHA256).Hash
-          @"
-          Windows x64 Electron 앱 시제품입니다. Assets의 ZIP을 받아 폴더 전체를 압축 해제한 뒤 FantasyStory.exe를 실행하세요.
-          상단 ChatGPT 연결에서 공식 계정으로 로그인합니다. 구독의 Codex 사용 한도가 적용됩니다.
-          Windows CI에서 자동 검사를 수행했습니다. 실제 사용자 계정 로그인과 모델 응답은 별도 검증이 필요하며 코드서명 전 시제품입니다.
-          SHA256: $hash
-          이 릴리스는 초안입니다. 저장소 소유자의 GitHub 계정으로 로그인해야 볼 수 있습니다.
-          "@ | Set-Content release/notes.txt -Encoding utf8
       - uses: actions/upload-artifact@v4
         with:
           name: FantasyStory-Windows-x64
-          path: fantasy-rpg/desktop/release/FantasyStory-Windows-x64.zip
+          path: |
+            fantasy-rpg/desktop/release/FantasyStory-Windows-x64.zip
+            fantasy-rpg/desktop/release/FantasyStory-Patch.zip
           compression-level: 0
           retention-days: 14
       - name: Attach to owner-only draft
@@ -54,5 +51,27 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload desktop-v0.1.0-preview release/FantasyStory-Windows-x64.zip --clobber --repo rlaxodl0310/-
-          gh release edit desktop-v0.1.0-preview --notes-file release/notes.txt --repo rlaxodl0310/-
+          $PSNativeCommandUseErrorActionPreference = $false
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $tag = "desktop-v$version-preview"
+          gh release view $tag --repo rlaxodl0310/- *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --draft --prerelease --target $env:GITHUB_SHA --title "이세계 기록 v$version" --notes "Windows 앱과 패치를 준비하는 중입니다." --repo rlaxodl0310/-
+            if ($LASTEXITCODE -ne 0) { throw 'Draft release creation failed.' }
+          }
+          gh release upload $tag release/FantasyStory-Windows-x64.zip release/FantasyStory-Patch.zip --clobber --repo rlaxodl0310/-
+          if ($LASTEXITCODE -ne 0) { throw 'Release upload failed.' }
+          $hash = (Get-FileHash release/FantasyStory-Patch.zip -Algorithm SHA256).Hash
+          @"
+          김태이는 플레이어이며, 현실 등굣길의 지하철에서 시작합니다.
+          파티/동행 정보와 전체 캐릭터 도감을 분리하고, 모르는 인물과 정보는 잠금 처리합니다.
+          기존 앱이 있으면 FantasyStory-Patch.zip만 받으세요. 게임을 저장하고 종료한 뒤 ZIP을 폴더 전체로 풀고 FantasyStoryPatch.exe를 실행해 설치 폴더를 선택합니다.
+          패치는 게임 파일 검사, 백업, 교체 및 실패 시 복원을 지원합니다. 로그인과 게임 저장은 유지되며 새 현실 스토리는 별도 저장 키를 사용합니다.
+          신규 설치는 FantasyStory-Windows-x64.zip을 받습니다.
+          자동 온라인 업데이트는 아직 없으며 직접 실행하는 패치입니다.
+          Node 자동 검사와 Windows 패치 트랜잭션 검사를 통과했습니다. 실제 사용자 계정 로그인과 코드서명은 별도입니다.
+          Patch SHA256: $hash
+          이 릴리스는 초안입니다. 소유자의 GitHub 계정으로 로그인해야 볼 수 있습니다.
+          "@ | Set-Content release/notes.txt -Encoding utf8
+          gh release edit $tag --notes-file release/notes.txt --repo rlaxodl0310/-
+          if ($LASTEXITCODE -ne 0) { throw 'Release notes update failed.' }
