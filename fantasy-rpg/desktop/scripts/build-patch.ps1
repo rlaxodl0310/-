@@ -4,10 +4,16 @@ $folder = Join-Path $root 'release/FantasyStory-Patch'
 New-Item -ItemType Directory -Path $folder -Force | Out-Null
 $compiler = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
 if (-not (Test-Path $compiler)) { throw 'Windows .NET Framework compiler is missing.' }
-& $compiler /nologo /target:winexe /platform:x64 /reference:System.Windows.Forms.dll /reference:System.Runtime.Serialization.dll /reference:System.Core.dll "/out:$folder/FantasyStoryPatch.exe" "$root/patch/Program.cs" "$root/patch/PatchCore.cs"
+$program = (Resolve-Path (Join-Path $root 'patch\Program.cs')).Path
+$core = (Resolve-Path (Join-Path $root 'patch\PatchCore.cs')).Path
+$output = Join-Path $folder 'FantasyStoryPatch.exe'
+$compileArgs = @('/nologo','/target:winexe','/platform:x64','/reference:System.Windows.Forms.dll','/reference:System.Runtime.Serialization.dll','/reference:System.Core.dll',"/out:$output",$program,$core)
+& $compiler @compileArgs
 if ($LASTEXITCODE -ne 0) { throw 'Patch program compilation failed.' }
 $testExe = Join-Path ([System.IO.Path]::GetTempPath()) 'FantasyPatchCoreTests.exe'
-& $compiler /nologo /target:exe /reference:System.Runtime.Serialization.dll /reference:System.Core.dll "/out:$testExe" "$root/tests/PatchCoreTests.cs" "$root/patch/PatchCore.cs"
+$tests = (Resolve-Path (Join-Path $root 'tests\PatchCoreTests.cs')).Path
+$testArgs = @('/nologo','/target:exe','/reference:System.Runtime.Serialization.dll','/reference:System.Core.dll',"/out:$testExe",$tests,$core)
+& $compiler @testArgs
 if ($LASTEXITCODE -ne 0) { throw 'Patch tests compilation failed.' }
 & $testExe
 if ($LASTEXITCODE -ne 0) { throw 'Patch transaction tests failed.' }
