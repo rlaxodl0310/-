@@ -3,7 +3,7 @@
  function reply(actor,text){
   const topic=/안녕|반가|이름/.test(text)?'hello':/괜찮|쉬|휴식|무서|걱정/.test(text)?'care':/어디|지도|길|주변|확인|살펴/.test(text)?'look':null;
   const lines={taei:{hello:'응. 잠깐 이것부터 확인하고.',care:'괜찮아. 급하게 움직이지는 않으려고.',look:'지도랑 실제 길이 좀 달라 보여. 한 번 더 보자.'},dogyeom:{hello:'……왜.',care:'알아서 해. 무리할 생각 없어.',look:'모르는 데를 그냥 들어가자고? 먼저 보고.'},seoha:{hello:'응? 아, 안녕.',care:'괜찮아. 잠깐 다른 생각 했어.',look:'저쪽 보고 있었어. 뭐가 움직여서.'},yeogyeong:{hello:'응. 무슨 일이야?',care:'조금 긴장했나 봐. 잠깐 쉬면 괜찮을 것 같아.',look:'바로 가기보다는 여기서 먼저 확인해 보자.'},woojin:{hello:'네. 무슨 일이에요?',care:'잠깐 앉아 있으면 괜찮겠죠.',look:'움직이기 전에 주변부터 보죠.'}};
-  return topic?lines[actor]?.[topic]||'잠깐 확인해 볼게요.':'[체험 안내] 이 입력에 대한 자유 AI 응답은 아직 연결되지 않았어요. 위의 선택지로 장면을 진행하거나, 인사·주변 확인·휴식에 대해 말해 보세요.';
+  return topic?lines[actor]?.[topic]||'잠깐 확인해 볼게요.':'[체험 안내] 지금은 작성형 체험 모드예요. 상단 AI 시작을 눌러 모델을 준비하면 자유롭게 대화할 수 있어요. 위의 선택지로도 장면을 진행할 수 있어요.';
  }
  function validateSave(raw,D,Engine){
   if(!raw||raw.version!==1||typeof raw.engine!=='string'||!Array.isArray(raw.logs)||raw.logs.length>300||typeof raw.large!=='boolean'||typeof raw.motion!=='boolean')throw Error('지원하지 않는 저장 파일입니다.');
