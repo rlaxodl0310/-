@@ -63,6 +63,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Release upload failed.' }
           $hash = (Get-FileHash release/FantasyStory-Patch.zip -Algorithm SHA256).Hash
           @"
+          v0.3.0: 상단 전투 테스트에서 ChatGPT 구독으로 채팅 행동을 해석합니다. 공식 로그인은 테스트 설정에서 진행합니다.
+          AI는 의도를 해석하고 전투 엔진이 판정합니다. 브라우저 웹 버전 단독은 로컬 규칙 모드입니다.
           김태이는 플레이어이며, 현실 등굣길의 지하철에서 시작합니다.
           파티/동행 정보와 전체 캐릭터 도감을 분리하고, 모르는 인물과 정보는 잠금 처리합니다.
           기존 앱이 있으면 FantasyStory-Patch.zip만 받으세요. 게임을 저장하고 종료한 뒤 ZIP을 폴더 전체로 풀고 FantasyStoryPatch.exe를 실행해 설치 폴더를 선택합니다.

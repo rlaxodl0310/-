@@ -54,3 +54,5 @@ try{const raw=localStorage.getItem(KEY);if(raw)apply(JSON.parse(raw));else start
 
 const unfinished=GameAI.pending();if(unfinished&&unfinished.scene===engine.state.active?.id&&unfinished.node===engine.state.active?.node)$("chat-input").value=unfinished.text;
 GameAI.check();
+
+$('battle-launch').onclick=async()=>{const result=await desktopAI.openBattle();if(!result.ok)toast(result.error);};
