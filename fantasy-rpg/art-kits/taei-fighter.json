@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "status": "authored_draft_not_live",
+  "player": "taei",
+  "costume": "fighter",
+  "prerequisites": [
+    "world_fantasy",
+    "taei_fighter_outfit_acquired"
+  ],
+  "assets": {
+    "design": "assets/taei-fantasy-outfit.png",
+    "expressions": "assets/taei-fighter-expressions.png",
+    "cutscenes": "assets/taei-fighter-cutscenes.png",
+    "sd": "assets/sd-taei-fighter.png"
+  },
+  "layouts": {
+    "expressions": {
+      "columns": 3,
+      "rows": 2
+    },
+    "cutscenes": {
+      "columns": 2,
+      "rows": 1
+    },
+    "sd": {
+      "columns": 3,
+      "rows": 2
+    }
+  },
+  "events": [
+    {
+      "id": "taei_fighter_gear",
+      "location": "training_courtyard",
+      "cgPanel": 0,
+      "role": "player_action",
+      "entry": "check",
+      "nodes": {
+        "check": {
+          "speaker": "narrator",
+          "text": "건틀릿을 움직이면 손목 안쪽의 가죽이 조금 당긴다.",
+          "sd": 0,
+          "choices": [
+            {
+              "id": "loosen",
+              "text": "끈을 조금 풀고 다시 손을 쥔다.",
+              "minutes": 1,
+              "next": "loosen"
+            },
+            {
+              "id": "inspect",
+              "text": "손가락 관절과 손목의 움직임을 확인한다.",
+              "minutes": 2,
+              "next": "inspect"
+            }
+          ]
+        },
+        "loosen": {
+          "speaker": "narrator",
+          "text": "조임을 조절하자 손목을 움직이기 편해진다.",
+          "sd": 2,
+          "end": true
+        },
+        "inspect": {
+          "speaker": "narrator",
+          "text": "주먹을 쥐었다 펴며 불편한 부분을 확인한다.",
+          "sd": 1,
+          "end": true
+        }
+      }
+    },
+    {
+      "id": "taei_fighter_guard",
+      "location": "training_courtyard",
+      "cgPanel": 1,
+      "role": "player_action",
+      "entry": "guard",
+      "nodes": {
+        "guard": {
+          "speaker": "narrator",
+          "text": "견갑과 건틀릿을 착용한 상태로 가드를 올린다.",
+          "sd": 3,
+          "choices": [
+            {
+              "id": "shoulder",
+              "text": "어깨를 천천히 돌려 가동 범위를 확인한다.",
+              "minutes": 1,
+              "next": "shoulder"
+            },
+            {
+              "id": "step",
+              "text": "짧게 한 걸음 내디디며 균형을 확인한다.",
+              "minutes": 2,
+              "next": "step"
+            }
+          ]
+        },
+        "shoulder": {
+          "speaker": "narrator",
+          "text": "팔을 올렸을 때 견갑이 걸리는 위치를 살핀다.",
+          "sd": 1,
+          "end": true
+        },
+        "step": {
+          "speaker": "narrator",
+          "text": "중심이 흔들리지 않는 범위에서 발을 움직여 본다.",
+          "sd": 4,
+          "end": true
+        }
+      }
+    }
+  ]
+}
