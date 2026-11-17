@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "status": "authored_draft_not_live",
+  "id": "college_commuter_unnamed",
+  "displayNameBeforeIntroduction": "휴대전화를 든 여성",
+  "name": null,
+  "age": null,
+  "adult": true,
+  "occupation": "대학생",
+  "personality": null,
+  "assets": {
+    "design": "assets/college-commuter-design.png",
+    "expressions": "assets/college-commuter-expressions.png",
+    "cutscenes": "assets/college-commuter-cutscenes.png",
+    "sd": "assets/sd-college-commuter.png"
+  },
+  "layouts": {
+    "expressions": {
+      "columns": 3,
+      "rows": 2
+    },
+    "cutscenes": {
+      "columns": 2,
+      "rows": 1
+    },
+    "sd": {
+      "columns": 3,
+      "rows": 2
+    }
+  },
+  "knowledge": {
+    "requiresIntroductionForName": true,
+    "partyRequiresSeparateAgreement": true
+  },
+  "events": [
+    {
+      "id": "commuter_phone_draft",
+      "location": "earth_subway",
+      "requires": [
+        "same_car",
+        "in_conversation_range"
+      ],
+      "cgPanel": 0,
+      "entry": "opening",
+      "nodes": {
+        "opening": {
+          "speaker": "narrator",
+          "text": "휴대전화를 든 여성이 안내판과 화면을 번갈아 본다.",
+          "choices": [
+            {
+              "id": "space",
+              "text": "문 쪽으로 지나갈 수 있게 옆으로 비켜선다.",
+              "minutes": 1,
+              "next": "thanks"
+            },
+            {
+              "id": "station",
+              "text": "다음 역 안내가 나왔는지 묻는다.",
+              "minutes": 1,
+              "next": "notice"
+            }
+          ]
+        },
+        "thanks": {
+          "speaker": "college_commuter_unnamed",
+          "text": "아, 감사합니다.",
+          "end": true
+        },
+        "notice": {
+          "speaker": "college_commuter_unnamed",
+          "text": "저도 지금 보려던 참이에요. 방송 다시 나오면 확인해 볼게요.",
+          "end": true
+        }
+      }
+    },
+    {
+      "id": "commuter_bag_draft",
+      "location": "earth_subway",
+      "requires": [
+        "same_car",
+        "in_conversation_range"
+      ],
+      "cgPanel": 1,
+      "entry": "strap",
+      "nodes": {
+        "strap": {
+          "speaker": "narrator",
+          "text": "여성이 가방 끈을 고쳐 메며 통로 쪽을 살핀다.",
+          "choices": [
+            {
+              "id": "pass",
+              "text": "지나가려는지 묻는다.",
+              "minutes": 1,
+              "next": "pass"
+            },
+            {
+              "id": "wait",
+              "text": "방해하지 않고 잠깐 기다린다.",
+              "minutes": 1,
+              "next": "wait"
+            }
+          ]
+        },
+        "pass": {
+          "speaker": "college_commuter_unnamed",
+          "text": "네. 조금만 지나갈게요.",
+          "end": true
+        },
+        "wait": {
+          "speaker": "narrator",
+          "text": "가방을 정리한 여성이 통로를 따라 자리를 옮긴다.",
+          "end": true
+        }
+      }
+    }
+  ]
+}
