@@ -1,22 +1,16 @@
 using System;
 using System.IO;
 using System.Diagnostics;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 class Program {
- [STAThread]
- static int Main(){
-  Application.EnableVisualStyles();
-  try{
-   var root=AppDomain.CurrentDomain.BaseDirectory;var manifest=PatchCore.Read(Path.Combine(root,"manifest.json"));var payload=Path.Combine(root,"app.asar");
-   if(PatchCore.Hash(payload)!=manifest.sha256)throw new Exception("패치 파일 검사 값이 다릅니다. ZIP을 다시 내려받아 폴더 전체를 압축 해제해 주세요.");
-   MessageBox.Show("게임을 저장하고 완전히 종료해 주세요.\n다음 화면에서 FantasyStory.exe가 있는 설치 폴더를 선택합니다.\n로그인 정보와 게임 저장은 유지됩니다.","이세계 기록 패치",MessageBoxButtons.OK,MessageBoxIcon.Information);
-   string folder;using(var picker=new FolderBrowserDialog()){picker.Description="FantasyStory.exe가 있는 폴더를 선택하세요";picker.ShowNewFolderButton=false;if(picker.ShowDialog()!=DialogResult.OK)return 0;folder=Path.GetFullPath(picker.SelectedPath);}
-   var exe=Path.Combine(folder,"FantasyStory.exe");
-   foreach(var process in Process.GetProcessesByName("FantasyStory")){try{if(String.Equals(process.MainModule.FileName,exe,StringComparison.OrdinalIgnoreCase))throw new InvalidOperationException("게임이 아직 실행 중입니다. 완전히 종료하고 다시 시도해 주세요.");}catch(System.ComponentModel.Win32Exception){throw new InvalidOperationException("게임 실행 여부를 확인하지 못했습니다. 게임을 종료하고 다시 시도해 주세요.");}finally{process.Dispose();}}
-   if(MessageBox.Show(PatchCore.InstalledVersion(folder)+" → "+manifest.version+" 버전으로 패치할까요?\n게임 파일만 교체하고 기존 파일은 백업합니다.","패치 확인",MessageBoxButtons.YesNo,MessageBoxIcon.Question)!=DialogResult.Yes)return 0;
-   var backup=PatchCore.Apply(folder,payload,manifest);
-   if(MessageBox.Show("패치 완료: "+manifest.version+"\n기존 파일은 resources 폴더에 백업했습니다.\n지금 게임을 실행할까요?","이세계 기록",MessageBoxButtons.YesNo,MessageBoxIcon.Information)==DialogResult.Yes){try{Process.Start(new ProcessStartInfo(exe){WorkingDirectory=folder,UseShellExecute=true});}catch{MessageBox.Show("패치는 완료됐습니다. FantasyStory.exe를 직접 실행해 주세요.");}}
-   return 0;
-  }catch(Exception error){MessageBox.Show(error.Message,"패치하지 못했습니다",MessageBoxButtons.OK,MessageBoxIcon.Error);return 1;}
- }
+ static string SelectGame(){while(true){using(var picker=new OpenFileDialog()){picker.Title="설치된 FantasyStory.exe를 선택하세요 (ZIP은 먼저 압축 해제)";picker.Filter="이세계 기록|FantasyStory.exe|실행 파일|*.exe";picker.CheckFileExists=true;if(picker.ShowDialog()!=DialogResult.OK)return null;try{return InstallationLocator.Resolve(picker.FileName);}catch(Exception e){MessageBox.Show(e.Message,"게임 위치 확인",MessageBoxButtons.OK,MessageBoxIcon.Warning);}}}}
+ static string Choose(List<string> found){if(found.Count==0){MessageBox.Show("일반 설치 위치에서 게임을 찾지 못했습니다. 다른 드라이브나 폴더에 보관했다면 실행 파일을 한 번 선택해 주세요. 이후에는 이 경로를 기억합니다.","게임 찾기");return SelectGame();}if(found.Count==1)return found[0];using(var form=new Form()){form.Text="게임이 여러 개 발견됐습니다";form.Width=760;form.Height=300;form.StartPosition=FormStartPosition.CenterScreen;var list=new ListBox{Dock=DockStyle.Fill,HorizontalScrollbar=true};foreach(var folder in found)list.Items.Add(folder+"   ("+PatchCore.InstalledVersion(folder)+")");list.SelectedIndex=0;var ok=new Button{Text="이 설치본 업데이트",Dock=DockStyle.Bottom,Height=44,DialogResult=DialogResult.OK};form.Controls.Add(list);form.Controls.Add(ok);form.AcceptButton=ok;if(form.ShowDialog()!=DialogResult.OK)return null;return found[list.SelectedIndex];}}
+ [STAThread] static int Main(){Application.EnableVisualStyles();try{
+ var root=AppDomain.CurrentDomain.BaseDirectory;var manifestFile=Path.Combine(root,"manifest.json");var payload=Path.Combine(root,"app.asar");if(!File.Exists(manifestFile)||!File.Exists(payload))throw new Exception("패치 구성 파일이 없습니다. ZIP 안에서 실행하지 말고 폴더 전체를 압축 해제해 주세요.");var manifest=PatchCore.Read(manifestFile);if(PatchCore.Hash(payload)!=manifest.sha256)throw new Exception("패치 파일 검사 값이 다릅니다. 패치 ZIP을 다시 내려받아 폴더 전체를 압축 해제해 주세요.");
+ List<string> found=null;Exception failure=null;using(var searching=new Form()){searching.Text="이세계 기록 자동 업데이트";searching.Width=480;searching.Height=160;searching.StartPosition=FormStartPosition.CenterScreen;searching.ControlBox=false;searching.Controls.Add(new Label{Text="설치된 게임을 자동으로 찾고 있습니다…",Dock=DockStyle.Top,Height=50,TextAlign=System.Drawing.ContentAlignment.MiddleCenter});searching.Controls.Add(new ProgressBar{Style=ProgressBarStyle.Marquee,Dock=DockStyle.Bottom,Height=22});searching.Shown+=(sender,args)=>{Task.Factory.StartNew(()=>{try{found=InstallationLocator.Discover(root);}catch(Exception e){failure=e;}}).ContinueWith(t=>searching.BeginInvoke(new Action(()=>searching.Close())));};searching.ShowDialog();}if(failure!=null)throw failure;var folder=Choose(found);if(folder==null)return 0;
+ while(InstallationLocator.Running(folder)){if(MessageBox.Show("게임을 찾았습니다:\n"+folder+"\n\n게임이 실행 중입니다. 먼저 게임에서 저장하고 종료한 뒤 ‘다시 시도’를 누르면 자동으로 업데이트합니다. 강제로 종료하지 않습니다.","게임 종료 대기",MessageBoxButtons.RetryCancel,MessageBoxIcon.Information)!=DialogResult.Retry)return 0;}
+ var current=PatchCore.InstalledVersion(folder);PatchCore.Apply(folder,payload,manifest);InstallationLocator.Remember(folder);var exe=Path.Combine(folder,"FantasyStory.exe");if(MessageBox.Show("업데이트 완료: "+current+" → "+manifest.version+"\n"+folder+"\n로그인과 저장을 유지했고 기존 게임 파일은 백업했습니다.\n\n지금 게임을 실행할까요?","이세계 기록",MessageBoxButtons.YesNo,MessageBoxIcon.Information)==DialogResult.Yes)Process.Start(new ProcessStartInfo(exe){WorkingDirectory=folder,UseShellExecute=true});return 0;
+ }catch(UnauthorizedAccessException){MessageBox.Show("설치 폴더에 쓰기 권한이 없습니다. 파일이 잠겨 있지 않은지 확인하고, 관리자 권한이 필요한 위치라면 패치를 관리자 권한으로 실행해 주세요.","업데이트하지 못했습니다",MessageBoxButtons.OK,MessageBoxIcon.Error);return 1;}catch(Exception error){MessageBox.Show(error.Message,"업데이트하지 못했습니다",MessageBoxButtons.OK,MessageBoxIcon.Error);return 1;}}
 }
