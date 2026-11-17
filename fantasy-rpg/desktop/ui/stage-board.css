@@ -1,0 +1,30 @@
+/* Locations and reusable transparent standing sprites are independent layers. */
+#scene-art{filter:none;background-color:#33434a}
+#scene-portrait{right:4%;top:24px;bottom:28px;width:38%;height:auto;max-width:460px;background-size:contain;background-position:center bottom;border:0!important;outline:0;box-shadow:none;filter:drop-shadow(0 8px 8px #0004);pointer-events:none}
+.vignette{background:linear-gradient(90deg,#06100d9c 0%,#06100d66 43%,transparent 76%),linear-gradient(0deg,#07100b77,transparent 22%)}
+.scene-top{text-shadow:0 2px 6px #000b}.scene-caption{display:none}
+.dialogue-wrap{left:7%;right:44%;bottom:28px}.dialogue{min-height:66px}#line{margin:12px 0 16px;font-size:18px;line-height:1.7}#choices{margin-bottom:12px}#choices button{width:auto}#choices{display:flex;flex-wrap:wrap}
+#panel[data-mode="quests"],#panel[data-mode="storychat"]{width:min(1100px,calc(100% - 84px))}
+#panel-body .story-live-stage{position:relative;height:430px;margin-top:16px;overflow:hidden;background:#304349}
+#panel-body .story-live-background{position:absolute;inset:0;background-size:cover;background-position:center}
+#panel-body .story-live-portrait{position:absolute;inset:12px 6% 12px auto;width:45%;height:auto;aspect-ratio:auto;margin:0;background-size:contain;background-position:center bottom;border:0;outline:0;box-shadow:none;filter:drop-shadow(0 5px 6px #0003)}
+#panel-body .wooden-quest-board{background:#4d2a17 url('assets/quest-board-wood.png') center/cover;min-height:420px;padding:36px;border:12px solid #452612;box-shadow:inset 0 0 20px #0008,0 12px 30px #0004}
+#panel-body .quest-paper-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:25px;align-items:stretch}
+#panel-body button.quest-paper{position:relative;display:flex;flex-direction:column;gap:10px;min-height:265px;text-align:left;margin:0;padding:24px 20px 20px;background:linear-gradient(105deg,#ead9ac,#f4e7c5 50%,#dfc994);color:#38291b;border:0;border-radius:0;box-shadow:2px 7px 10px #0007;transform:rotate(-1deg);font-family:var(--serif);transition:transform .15s,box-shadow .15s}
+#panel-body button.quest-paper:nth-child(3n+2){transform:rotate(1.3deg)}#panel-body button.quest-paper:nth-child(3n){transform:rotate(-.4deg)}
+#panel-body button.quest-paper::before{content:'';position:absolute;top:7px;left:50%;width:9px;height:9px;border-radius:50%;background:#70492c;box-shadow:0 2px 2px #0007}
+#panel-body button.quest-paper:hover{transform:translateY(-4px) rotate(0);box-shadow:2px 12px 16px #0008;color:#38291b}
+#panel-body .quest-paper strong{font-size:17px;font-weight:500;line-height:1.5;display:block;border-block:1px solid #64482f44;padding-block:8px}
+.paper-rank{font:11px Arial,sans-serif;letter-spacing:.12em}.paper-type{font-size:12px}.paper-excerpt{font-size:12px;line-height:1.65}.paper-reward{margin-top:auto;font-size:12px}.paper-stamp{align-self:flex-end;color:#84382d;border:2px solid currentColor;padding:0 7px;transform:rotate(-8deg);font-size:12px}
+#panel-body .quest-paper[data-state="accepted"] .paper-stamp{color:#305a3c}#panel-body .quest-paper[data-state="expired"],#panel-body .quest-paper[data-state="overdue"]{filter:saturate(.3);opacity:.75}
+#panel-body .quest-board-empty{color:#f4e7c5;text-shadow:0 2px 3px #000;margin:auto}
+.quest-test-settings{margin-top:24px}.quest-test-settings summary{cursor:pointer}.quest-test-settings>div{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+#panel-body dialog.quest-document{box-sizing:border-box;width:min(620px,calc(100% - 32px));max-height:85svh;overflow:auto;padding:32px;background:linear-gradient(100deg,#e5d1a3,#f6eacb 50%,#e5d1a3);color:#38291b;border:1px solid #ad8756;box-shadow:0 25px 100px #0009;font-family:var(--serif)}
+.quest-document::backdrop{background:#080c08b8;backdrop-filter:blur(4px)}
+#panel-body .quest-document h3{color:#38291b;margin:12px 0 20px;font-size:25px;line-height:1.5}
+.quest-document-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.quest-document-heading>span{font:10px Arial,sans-serif;letter-spacing:.13em}
+#panel-body .quest-document button{background:#4d3822;color:#fff1cf;border:1px solid #8c693e;margin:0}#panel-body .quest-document button:hover{background:#62482d}.quest-document-rank{display:inline-block;margin-top:14px;border:2px solid #84382d;color:#84382d;padding:2px 14px;transform:rotate(-5deg);font-size:25px}
+.quest-document dl{display:grid;grid-template-columns:90px 1fr;gap:8px 14px;padding-block:18px;border-block:1px solid #70553655}.quest-document dt{font-weight:500}.quest-document dd{margin:0;overflow-wrap:anywhere}
+@media(max-width:850px){#scene-portrait{right:0;width:45%;top:80px;bottom:28px}#panel[data-mode="quests"],#panel[data-mode="storychat"]{width:calc(100% - 60px)}#panel-body .wooden-quest-board{padding:22px;border-width:8px}.dialogue-wrap{left:5%;right:43%}#panel-body .story-live-stage{height:370px}}
+@media(max-width:520px){#scene-portrait{right:0;width:50%;top:90px;bottom:300px}#panel[data-mode="quests"],#panel[data-mode="storychat"]{width:100%;padding:20px}#panel-body .wooden-quest-board{padding:18px;border-width:6px}#panel-body dialog.quest-document{padding:20px}.quest-document dl{grid-template-columns:72px 1fr;gap:8px}#panel-body .story-live-stage{height:330px}.scene{min-height:780px}.dialogue-wrap{left:5%;right:5%}}
+@media(prefers-reduced-motion:reduce){#panel-body button.quest-paper{transition:none}}
