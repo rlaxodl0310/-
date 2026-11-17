@@ -9,3 +9,5 @@ html,body{width:100%;height:100%;overflow:hidden}body{background:#253e35}header{
 
 /* Keep the logical camera isotropic: backing canvas follows the actual viewport. */
 .canvas-wrap canvas{width:100%;height:100%;aspect-ratio:auto}.canvas-wrap:after{background:radial-gradient(ellipse at 50% 42%,transparent 30%,#08180d44 100%),linear-gradient(transparent 55%,#09161199 100%)}
+
+#narration{position:fixed;z-index:5;left:50%;transform:translateX(-50%);bottom:calc(var(--controls-height,230px) + 38px);width:min(680px,calc(100vw - 50px));padding:12px 20px;background:linear-gradient(90deg,#10261cbd,#10261ced,#10261cbd);border-left:2px solid #c9b27d;box-shadow:0 4px 20px #0004;pointer-events:none}#narrator{font-size:10px;letter-spacing:1px;color:#d5c197}#narration p{color:#edf0db;font-size:14px;margin:3px 0 0;line-height:1.6}@media(max-width:600px){#narration{bottom:calc(var(--controls-height,260px) + 20px);padding:8px 12px;width:calc(100vw - 24px)}#narration p{font-size:11px}.arena-top{gap:4px}.arena-top button{font-size:8px;padding:3px}.arena-top #round{display:none}}
