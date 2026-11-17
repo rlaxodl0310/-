@@ -3,3 +3,5 @@ release/
 vendor/
 data/
 *.log
+
+/ui/sample.lookpack

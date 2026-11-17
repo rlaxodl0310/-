@@ -34,6 +34,7 @@ jobs:
       - name: Package downloadable ZIP
         shell: pwsh
         run: |
+          Copy-Item ui/sample.lookpack release/FantasyStory-Lookpack-Sample.lookpack
           Copy-Item README.md release/FantasyStory-win32-x64/README.txt
           Copy-Item licenses/Codex-APACHE-2.0.txt release/FantasyStory-win32-x64/CODEX-LICENSE.txt
           Copy-Item THIRD_PARTY_NOTICES.md release/FantasyStory-win32-x64/THIRD_PARTY_NOTICES.txt
@@ -44,6 +45,7 @@ jobs:
           path: |
             fantasy-rpg/desktop/release/FantasyStory-Windows-x64.zip
             fantasy-rpg/desktop/release/FantasyStory-Patch.zip
+            fantasy-rpg/desktop/release/FantasyStory-Lookpack-Sample.lookpack
           compression-level: 0
           retention-days: 14
       - name: Attach to owner-only draft
@@ -59,11 +61,13 @@ jobs:
             gh release create $tag --draft --prerelease --target $env:GITHUB_SHA --title "이세계 기록 v$version" --notes "Windows 앱과 패치를 준비하는 중입니다." --repo rlaxodl0310/-
             if ($LASTEXITCODE -ne 0) { throw 'Draft release creation failed.' }
           }
-          gh release upload $tag release/FantasyStory-Windows-x64.zip release/FantasyStory-Patch.zip --clobber --repo rlaxodl0310/-
+          gh release upload $tag release/FantasyStory-Windows-x64.zip release/FantasyStory-Patch.zip release/FantasyStory-Lookpack-Sample.lookpack --clobber --repo rlaxodl0310/-
           if ($LASTEXITCODE -ne 0) { throw 'Release upload failed.' }
           $hash = (Get-FileHash release/FantasyStory-Patch.zip -Algorithm SHA256).Hash
           @"
-          v0.3.0: 상단 전투 테스트에서 ChatGPT 구독으로 채팅 행동을 해석합니다. 공식 로그인은 테스트 설정에서 진행합니다.
+          v0.4.0: 상단 외형팩에서 평소 일러스트 팩을 불러오고 미리보기 및 장비 조합을 선택합니다. 예제 외형팩 추가로 바로 시험할 수 있습니다.
+          이후 외형팩 추가에는 패치가 필요 없습니다. 외형 선택은 현재 연출용이며 아이템이나 스탯을 지급하지 않습니다.
+          ChatGPT 구독 전투 행동 해석은 전투 테스트에서 사용할 수 있습니다.
           AI는 의도를 해석하고 전투 엔진이 판정합니다. 브라우저 웹 버전 단독은 로컬 규칙 모드입니다.
           김태이는 플레이어이며, 현실 등굣길의 지하철에서 시작합니다.
           파티/동행 정보와 전체 캐릭터 도감을 분리하고, 모르는 인물과 정보는 잠금 처리합니다.

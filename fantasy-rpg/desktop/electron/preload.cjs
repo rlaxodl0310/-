@@ -1,4 +1,5 @@
 const {contextBridge,ipcRenderer}=require('electron');
+contextBridge.exposeInMainWorld('lookPacksAPI',Object.freeze({list:()=>ipcRenderer.invoke('looks:list'),importPack:()=>ipcRenderer.invoke('looks:import'),importSample:()=>ipcRenderer.invoke('looks:sample'),toggle:request=>ipcRenderer.invoke('looks:toggle',request),remove:request=>ipcRenderer.invoke('looks:remove',request),preview:request=>ipcRenderer.invoke('looks:preview',request),resolve:request=>ipcRenderer.invoke('looks:resolve',request)}));
 contextBridge.exposeInMainWorld('desktopAI',Object.freeze({
  battleJudge:request=>ipcRenderer.invoke('ai:battle',request),openBattle:()=>ipcRenderer.invoke('ai:open-battle'),openStory:()=>ipcRenderer.invoke('ai:open-story'),
  status:()=>ipcRenderer.invoke('ai:status'),login:method=>ipcRenderer.invoke('ai:login',method),cancel:()=>ipcRenderer.invoke('ai:cancel'),send:request=>ipcRenderer.invoke('ai:chat',request),reset:()=>ipcRenderer.invoke('ai:reset'),chooseCLI:()=>ipcRenderer.invoke('ai:choose-cli'),openLogin:()=>ipcRenderer.invoke('ai:open-login'),
