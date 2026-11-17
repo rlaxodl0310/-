@@ -2,7 +2,7 @@
  const CAST={narrator:{name:'상황',text:'현실의 환경 묘사'},yeogyeong:{name:'차여경',text:'같은 반 친구. 차분하고 올바르며 겁이 많다. 간호학과 진학을 준비한다.'}};
  function reply(actor,text){
   const topic=/안녕|반가|이름/.test(text)?'hello':/괜찮|쉬|휴식|무서|걱정/.test(text)?'care':/어디|지도|길|주변|확인|살펴/.test(text)?'look':null;
-  const lines={yeogyeong:{hello:'응. 오늘은 좀 일찍 나왔네.',care:'괜찮아. 아직 학교까지 시간 좀 남았잖아.',look:'다음 역 안내가 곧 나올 것 같은데.'}};
+  const lines={yui:{hello:'응. 이렇게 얘기하는 건 처음이네.',care:'일단 손잡이부터 잡자. 열차 움직이네.',look:'나도 안내 방송 기다리는 중이야.'},yeogyeong:{hello:'응. 오늘은 좀 일찍 나왔네.',care:'괜찮아. 아직 학교까지 시간 좀 남았잖아.',look:'다음 역 안내가 곧 나올 것 같은데.'}};
   return topic?lines[actor]?.[topic]||'잠깐 확인해 볼게요.':'[체험 안내] 지금은 작성형 체험 모드예요. 상단 ChatGPT 연결에서 로그인하면 AI와 대화할 수 있어요. 위의 선택지로도 장면을 진행할 수 있어요.';
  }
  function validateSave(raw,D,Engine){

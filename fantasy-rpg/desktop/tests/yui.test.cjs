@@ -1,0 +1,7 @@
+const test=require('node:test'),assert=require('node:assert/strict');
+const D=require('../ui/data.js'),E=require('../ui/engine.js'),C=require('../ui/core.js');
+const context=e=>({location:e.location,members:e.members,viewer:e.viewer});
+function finish(e){while(e.state.active){const n=e.current();e.advance(n.choices?n.choices[0].id:null);}}
+function ready(){const e=new E(D);for(const id of ['earth_commute','earth_schooltalk']){e.start(id,context(e.event(id)));finish(e);}return e;}
+test('Yui stays hidden until introduction finishes; companionship needs explicit invitation',()=>{for(const choice of ['together','greet']){const e=ready();assert.ok(!C.codexInfo(D,e.state).some(x=>x.name==='한유이'));e.start('earth_yui_meeting',context(e.event('earth_yui_meeting')));e.advance();e.advance('ask');e.advance();e.advance(choice);assert.ok(!C.partyInfo(D,e.state).some(x=>x.id==='yui'));assert.deepEqual(E.restore(D,e.serialize()).state,e.state);e.advance();assert.equal(C.codexInfo(D,e.state).find(x=>x.id==='yui').age,20);assert.equal(C.partyInfo(D,e.state).some(x=>x.id==='yui'),choice==='together');assert.equal(e.state.minutes,4);}});
+test('Yui encounter supports interrupted save without granting knowledge or time',()=>{const e=ready(),minutes=e.state.minutes;e.start('earth_yui_meeting',context(e.event('earth_yui_meeting')));e.advance();e.advance('remember');e.abandon();assert.equal(e.state.minutes,minutes);assert.ok(!e.state.flags.includes('known_person_yui'));assert.deepEqual(E.restore(D,e.serialize()).state,e.state);});
