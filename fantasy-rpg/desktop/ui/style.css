@@ -8,3 +8,5 @@
 
 .codex-card{border:1px solid #b9c49b33;padding:15px 18px;margin:12px 0;background:#1b251d;border-radius:4px}.codex-card h3{margin:3px 0!important}.codex-number{font-size:10px;letter-spacing:.15em;color:#89997d}.codex-card p{margin:6px 0;font-size:12px}
 .look-preview{height:360px;background-color:#384039;border:1px solid #cbb77e55;border-radius:6px;background-repeat:no-repeat;margin:15px 0}.look-card{padding:16px;border:1px solid #d0c7a833;border-radius:6px;margin:14px 0}.look-entry{border-top:1px solid #ffffff1a;padding:12px 0}.look-entry strong{font-size:13px}.look-entry p,.look-card p{font-size:12px;color:#b7c3b0}.look-equipment{display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid #ffffff1a;padding:12px 0}.look-equipment strong{width:100%}.look-equipment label{font-size:11px}.look-equipment select{max-width:180px;background:#253127;color:#eee;border:1px solid #c3ceaf44;border-radius:4px;padding:5px}
+
+.story-live-portrait{height:280px;background-size:300% 200%;background-repeat:no-repeat}#panel-body form textarea{width:100%;min-height:80px}#panel-body section{margin-top:20px}#panel-body form+button{margin-top:8px}.header-right{flex-wrap:wrap}

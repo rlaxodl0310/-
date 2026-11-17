@@ -2,15 +2,24 @@ const {app,BrowserWindow,ipcMain,dialog,shell,nativeImage}=require('electron');
 const path=require('node:path'),fs=require('node:fs/promises'),{existsSync}=require('node:fs');
 const {pathToFileURL}=require('node:url');
 const {LookPacks}=require('./look-packs.cjs');
+const {QuestBoard}=require('./quest-board.cjs');
+const {StoryChat}=require('./story-chat.cjs');
 const {BattleJudge}=require('./battle-judge.cjs');
 const {CodexBridge}=require('./codex.cjs'),{Dialogue}=require('./dialogue.cjs');
-let window,bridge,dialogue,battleJudge,looks,deviceURL=null;
+let window,bridge,dialogue,battleJudge,quests,story,looks,deviceURL=null;
 const battleEntry=pathToFileURL(path.join(__dirname,'../ui/battle/index.html')).href;
 const entry=pathToFileURL(path.join(__dirname,'../ui/index.html')).href;
 function allowedURL(value){try{const url=new URL(value);return url.protocol==='https:'&&url.hostname==='auth.openai.com'&&['/codex/device','/oauth/authorize','/authorize'].includes(url.pathname);}catch{return false;}}
 async function executable(){if(process.env.FANTASY_CODEX_BIN&&existsSync(process.env.FANTASY_CODEX_BIN))return process.env.FANTASY_CODEX_BIN;let config={};try{config=JSON.parse(await fs.readFile(path.join(app.getPath('userData'),'settings.json'),'utf8'));}catch{}if(typeof config.cli==='string'&&existsSync(config.cli))return config.cli;const platform=process.platform,arch=process.arch;if(app.isPackaged){const native=path.join(process.resourcesPath,'codex-'+platform+'-'+arch,'bin',platform==='win32'?'codex.exe':'codex');if(existsSync(native))return native;}const triple={linux:'x86_64-unknown-linux-musl',win32:'x86_64-pc-windows-msvc',darwin:'x86_64-apple-darwin'}[platform];const native=path.join(__dirname,'../node_modules/@openai/codex-'+platform+'-'+arch,'vendor',triple||'', 'bin',platform==='win32'?'codex.exe':'codex');return existsSync(native)?native:(process.env.FANTASY_CODEX_BIN||'codex');}
-async function configure(){looks=new LookPacks(path.join(app.getPath('userData'),'appearance-packs'),{validateImage:bytes=>{const image=nativeImage.createFromBuffer(bytes);if(image.isEmpty())throw Error('PNG 이미지를 해석하지 못했습니다.');}});bridge=new CodexBridge(await executable(),{onLogin:info=>{if(allowedURL(info.url))deviceURL=info.url;window?.webContents.send('ai:progress',info);}});battleJudge=new BattleJudge(bridge);dialogue=new Dialogue(path.join(app.getPath('userData'),'ai-dialogue.json'),bridge);}
+async function configure(){looks=new LookPacks(path.join(app.getPath('userData'),'appearance-packs'),{validateImage:bytes=>{const image=nativeImage.createFromBuffer(bytes);if(image.isEmpty())throw Error('PNG 이미지를 해석하지 못했습니다.');}});bridge=new CodexBridge(await executable(),{onLogin:info=>{if(allowedURL(info.url))deviceURL=info.url;window?.webContents.send('ai:progress',info);}});battleJudge=new BattleJudge(bridge);quests=new QuestBoard(path.join(app.getPath('userData'),'quest-board-test.json'),bridge);story=new StoryChat(path.join(app.getPath('userData'),'story-chat-test.json'),bridge);dialogue=new Dialogue(path.join(app.getPath('userData'),'ai-dialogue.json'),bridge);}
 function register(){for(const [channel,handler]of Object.entries({
+ 'quest:list':()=>quests.read(),
+ 'quest:refresh':r=>quests.refresh(r?.scenario,r?.ai===true),
+ 'quest:accept':r=>quests.accept(r?.id),
+ 'quest:advance':()=>quests.advance(),
+ 'story:state':()=>story.read(),
+ 'story:send':r=>story.send(r),
+ 'story:reset':()=>story.reset(),
  'looks:list':()=>looks.list(),
  'looks:import':async()=>{const picked=await dialog.showOpenDialog(window,{title:'외형팩 불러오기',properties:['openFile'],filters:[{name:'외형팩',extensions:['lookpack','json']}]});if(picked.canceled)return{cancelled:true};const f=picked.filePaths[0];if((await fs.stat(f)).size>32*1024*1024)throw Error('외형팩은 최대 32MB입니다.');return looks.importText(await fs.readFile(f,'utf8'));},
  'looks:sample':async()=>looks.importText(await fs.readFile(path.join(__dirname,'../ui/sample.lookpack'),'utf8')),
@@ -20,14 +29,14 @@ function register(){for(const [channel,handler]of Object.entries({
  'looks:resolve':request=>looks.resolve(request),
  'ai:status':()=>bridge.check(),
  'ai:battle':async request=>{const status=await bridge.check();if(!status.ready)throw Error(status.message);return battleJudge.judge(request);},
- 'ai:open-battle':async()=>{if(bridge.busy||dialogue.busy||battleJudge.busy)throw Error('진행 중인 요청을 마치거나 취소해 주세요.');await window.loadURL(battleEntry);return{ok:true};},
- 'ai:open-story':async()=>{if(bridge.busy||battleJudge.busy)throw Error('진행 중인 요청을 마치거나 취소해 주세요.');await window.loadURL(entry);return{ok:true};},
+ 'ai:open-battle':async()=>{if(bridge.busy||dialogue.busy||battleJudge.busy||quests.busy||story.busy)throw Error('진행 중인 요청을 마치거나 취소해 주세요.');await window.loadURL(battleEntry);return{ok:true};},
+ 'ai:open-story':async()=>{if(bridge.busy||battleJudge.busy||quests.busy||story.busy)throw Error('진행 중인 요청을 마치거나 취소해 주세요.');await window.loadURL(entry);return{ok:true};},
  'ai:login':async(method='browser')=>{if(dialogue.busy)throw Error('대화가 끝난 뒤 로그인해 주세요.');deviceURL=null;await bridge.login(method);return bridge.check();},
  'ai:cancel':()=>{bridge.stop();return{ok:true};},
  'ai:chat':async request=>{const status=await bridge.check();if(!status.ready)throw Error(status.message);return dialogue.send(request);},
  'ai:reset':()=>dialogue.reset(),
  'ai:open-login':async()=>{if(!allowedURL(deviceURL))throw Error('먼저 로그인을 눌러 인증 코드를 받아 주세요.');await shell.openExternal(deviceURL);return{ok:true};},
- 'ai:choose-cli':async()=>{if(bridge.busy||dialogue.busy)throw Error('진행 중인 요청이 끝난 뒤 선택해 주세요.');const result=await dialog.showOpenDialog(window,{title:'공식 Codex 실행 파일 선택',properties:['openFile'],filters:process.platform==='win32'?[{name:'Codex 실행 파일',extensions:['exe']}]:[]});if(result.canceled)return{cancelled:true};const cli=result.filePaths[0];if(process.platform==='win32'&&!cli.toLowerCase().endsWith('.exe'))throw Error('공식 codex.exe를 선택해 주세요.');await fs.mkdir(app.getPath('userData'),{recursive:true});await fs.writeFile(path.join(app.getPath('userData'),'settings.json'),JSON.stringify({cli}));await configure();return bridge.check();}
+ 'ai:choose-cli':async()=>{if(bridge.busy||dialogue.busy||quests.busy||story.busy)throw Error('진행 중인 요청이 끝난 뒤 선택해 주세요.');const result=await dialog.showOpenDialog(window,{title:'공식 Codex 실행 파일 선택',properties:['openFile'],filters:process.platform==='win32'?[{name:'Codex 실행 파일',extensions:['exe']}]:[]});if(result.canceled)return{cancelled:true};const cli=result.filePaths[0];if(process.platform==='win32'&&!cli.toLowerCase().endsWith('.exe'))throw Error('공식 codex.exe를 선택해 주세요.');await fs.mkdir(app.getPath('userData'),{recursive:true});await fs.writeFile(path.join(app.getPath('userData'),'settings.json'),JSON.stringify({cli}));await configure();return bridge.check();}
  }))ipcMain.handle(channel,async(event,...args)=>{if(event.sender!==window?.webContents||event.senderFrame!==window.webContents.mainFrame||![entry,battleEntry].includes(event.senderFrame.url.split('#')[0]))throw Error('허용하지 않는 요청입니다.');try{return{ok:true,data:await handler(...args)};}catch(error){return{ok:false,error:error.message};}});}
 if(!app.requestSingleInstanceLock())app.quit();else{
  app.on('second-instance',()=>{if(window){if(window.isMinimized())window.restore();window.focus();}});
