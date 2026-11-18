@@ -1,6 +1,7 @@
 const {app,BrowserWindow,ipcMain,dialog,shell,nativeImage}=require('electron');
 const path=require('node:path'),fs=require('node:fs/promises'),{existsSync}=require('node:fs');
 const {pathToFileURL}=require('node:url');
+const {assetURL}=require('./scene-art.cjs');
 const {LookPacks}=require('./look-packs.cjs');
 const {QuestBoard}=require('./quest-board.cjs');
 const {StoryChat}=require('./story-chat.cjs');
@@ -15,6 +16,7 @@ async function rememberInstallation(){if(!app.isPackaged||process.platform!=='wi
 async function configure(){looks=new LookPacks(path.join(app.getPath('userData'),'appearance-packs'),{validateImage:bytes=>{const image=nativeImage.createFromBuffer(bytes);if(image.isEmpty())throw Error('PNG 이미지를 해석하지 못했습니다.');}});bridge=new CodexBridge(await executable(),{onLogin:info=>{if(allowedURL(info.url))deviceURL=info.url;window?.webContents.send('ai:progress',info);}});battleJudge=new BattleJudge(bridge);quests=new QuestBoard(path.join(app.getPath('userData'),'quest-board-test.json'),bridge);story=new StoryChat(path.join(app.getPath('userData'),'story-chat-test.json'),bridge);dialogue=new Dialogue(path.join(app.getPath('userData'),'ai-dialogue.json'),bridge);}
 async function currentSample(asset){if(asset?.packId==='official-example'&&asset.lookId==='yeogyeong-school')return {...asset,dataURL:'data:image/png;base64,'+(await fs.readFile(path.join(__dirname,'../ui/assets/yeogyeong-standing.png'))).toString('base64'),layout:{columns:1,rows:1}};return asset;}
 function register(){for(const [channel,handler]of Object.entries({
+ 'art:asset':key=>assetURL(path.join(__dirname,'../ui'),key),
  'quest:list':()=>quests.read(),
  'quest:refresh':r=>quests.refresh(r?.scenario,r?.ai===true),
  'quest:accept':r=>quests.accept(r?.id),
