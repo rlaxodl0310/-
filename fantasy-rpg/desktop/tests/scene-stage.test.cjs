@@ -6,3 +6,5 @@ test('cutscenes are explicit and returning to scene restores character and backg
 test('unknown or absent character does not render a different person',()=>{const Stage=load(),background=layer(),portrait=layer();Stage.render({background,portrait,location:'bad',characterId:'missing'});assert.equal(portrait.hidden,true);assert.equal(portrait.style.backgroundImage,'none');assert.match(background.style.backgroundImage,/bg-subway/);});
 
 test('original head cells retain their aspect ratio, including non-square reference cells',()=>{const Stage=load();for(const [cw,ch,crop]of [[512,512,378],[273,287,378],[512,512,340]]){const d=Stage.headDimensions(cw,ch,crop),sourceRatio=(430/512*cw)/(crop/512*ch);assert.ok(Math.abs(d.width/d.height-sourceRatio)<.004);}});
+
+test('Soyun uses an integrated illustration without the old head overlay',()=>{const Stage=load();assert.equal(Stage.identityMode('dogyeom-childhood-friend'),'integrated');assert.equal(Stage.identityMode('yeogyeong'),'original-head');const D=require('../ui/data.js');assert.equal(D.catalog.find(c=>c.id==='dogyeom-childhood-friend').name,'임소윤');assert.ok(!D.initiallyKnown.includes('dogyeom-childhood-friend'));});

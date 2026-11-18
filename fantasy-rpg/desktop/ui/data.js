@@ -1,7 +1,7 @@
 (function(root){
  const assets={yui:'assets/yui-expressions.png',yuiSD:'assets/sd-yui.png',yuiCG:'assets/yui-cutscenes.png',yeogyeong:'assets/yeogyeong-expressions.png',yeogyeongSD:'assets/sd-yeogyeong.png'};
  const player={id:'taei',name:'김태이',age:18,grade:'고등학교 2학년'};
- const actors={yui:'한유이',yuiUnknown:'검은 단발의 여성',narrator:'상황',yeogyeong:'차여경'};
+ const actors={'dogyeom-childhood-friend':'임소윤',yui:'한유이',yuiUnknown:'검은 단발의 여성',narrator:'상황',yeogyeong:'차여경'};
  const profiles={yui:{name:'한유이',text:'20세, 158cm. 태이의 고등학교 졸업생이며 인근 대학교 학생. 학교에서 예쁘기로 유명했다. 본인이 3학년일 때 입학한 태이가 잘생겨 눈에 띄어 얼굴과 이름만 알고 있었고 대화한 적은 없다. 특별한 호감은 확정되지 않았다. 성격 세부는 미정. 현재는 현실 지하철로 미래의 전송과 능력을 모른다. 현재 장면의 자기소개 이전에는 이름과 나이를 먼저 누설하지 않는다.'},yeogyeong:{name:'차여경',text:'김태이와 조금 친한 같은 반 친구. 올바르고 차분하며 겁이 많고 귀여운 면이 있다. 남을 돕는 것을 좋아하고 간호학과 진학을 목표로 입시를 준비한다. 지금은 평범한 등굣길이며, 미래의 사건이나 능력은 알지 못한다.'},narrator:{name:'상황',text:'현재 눈앞에서 관찰할 수 있는 현실의 환경만 묘사한다.'}};
  const common={era:'earth',owner:'yeogyeong',viewer:'taei',members:['yeogyeong'],location:'earth_subway',sceneStyle:'subway',portraitAsset:'yeogyeong',sdAsset:'yeogyeongSD'};
  const events=[
@@ -41,7 +41,7 @@
    done:{speaker:'narrator',emotion:0,text:'익숙한 철로 소리가 이어진다. 아직은 평소와 같은 지하철 안이다.',end:true,flags:['earth_prologue_done']}
   }}
  ];
- const catalog=[{id:'yui',name:'한유이',age:20},{id:'taei',name:'김태이',age:18},{id:'yeogyeong',name:'차여경',age:null},{id:'dogyeom',name:'백도겸',age:null},{id:'seoha',name:'윤서하',age:null},{id:'woojin',name:'정우진',age:null},{id:'zero',name:'제로',age:null}];
+ const catalog=[{id:'yui',name:'한유이',age:20},{id:'taei',name:'김태이',age:18},{id:'yeogyeong',name:'차여경',age:null},{id:'dogyeom',name:'백도겸',age:null},{id:'seoha',name:'윤서하',age:null},{id:'woojin',name:'정우진',age:null},{id:'zero',name:'제로',age:null},{id:'dogyeom-childhood-friend',name:'임소윤',age:null}];
  const initiallyKnown=['taei','yeogyeong','dogyeom'];
  const data={catalog,initiallyKnown,version:3,saveVersion:2,player,actors,profiles,publicFacts:{yui:{name:'한유이',age:20},yeogyeong:{name:'차여경',age:null}},events,assets,emotions:['평상시','작은 웃음','걱정·의아함','놀람','짜증','집중']};
  if(typeof module!=='undefined'&&module.exports)module.exports=data;else root.StoryKitData=data;
