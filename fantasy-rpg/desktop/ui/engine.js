@@ -1,6 +1,6 @@
 (function(root){
   class Engine{
-    constructor(data){this.data=data;this.state={active:null,completed:[],minutes:0,flags:[]};this.history=[];}
+    constructor(data){this.data=data;this.state={active:null,completed:[],minutes:0,flags:[],visitedLocations:[],currentLocation:null};this.history=[];}
     event(id){const e=this.data.events.find(e=>e.id===id);if(!e)throw Error('없는 이벤트입니다.');return e;}
     current(){const a=this.state.active;return a?this.event(a.id).nodes[a.node]:null;}
     start(id,context){
@@ -11,6 +11,8 @@
       if(!context||context.location!==e.location||!Array.isArray(context.members)||e.members.some(m=>!context.members.includes(m)))throw Error('장소나 참여 인물 조건이 맞지 않습니다.');
       if(e.viewer&&context.viewer!==e.viewer)throw Error('대화 상대 조건이 맞지 않습니다.');
       this.state.active={id,node:e.entry,pendingMinutes:0};
+      this.state.currentLocation=e.location;
+      if(!this.state.visitedLocations.includes(e.location))this.state.visitedLocations.push(e.location);
       this.history.push({type:'start',id,context:{location:context.location,members:[...context.members],...(e.viewer?{viewer:context.viewer}:{})}});
     }
     abandon(){if(!this.state.active)throw Error('진행 중인 이벤트가 없습니다.');this.state.active=null;this.history.push({type:'abandon'});}
