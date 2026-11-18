@@ -1,0 +1,17 @@
+(function(r,f){if(typeof module==='object'&&module.exports)module.exports=f(require('./geography-data.js'));else r.GameGeography=f(r.GeographyData);})(globalThis,D=>{
+const freeze=o=>{if(o&&typeof o==='object'){Object.values(o).forEach(freeze);Object.freeze(o);}return o;};freeze(D);
+const anchors={north:[[50,52],[50,17],[20,48],[55,83],[78,49],[28,76]],east:[[30,48],[52,40],[50,76],[17,52],[76,25],[79,75]],west:[[49,46],[48,21],[18,61],[81,47],[53,79],[75,25]],south:[[47,57],[48,20],[22,46],[81,48],[76,78],[25,24]],central:[[51,45],[74,23],[26,35],[80,45],[52,81],[26,20],[78,77]],sky:[[50,45],[23,76],[75,48],[49,17],[25,39]]};
+const records=[];
+for(const c of D.continents){for(const [i,p]of c.cities.entries())records.push({...p,continent:c.id,kind:'city',point:anchors[c.id][i],note:p.infrastructure.join('·')});for(const [i,p]of c.villages.entries()){const col=i%5,row=Math.floor(i/5);records.push({...p,continent:c.id,kind:'village',point:[12+col*18,20+row*14]});}}
+for(const [i,p]of D.wilderness.entries())records.push({...p,point:[19+(i%3)*31,30+Math.floor(i%9/3)*23]});freeze(records);
+const byId=new Map(records.map(p=>[p.id,p])),continents=freeze(D.continents.map(c=>({id:c.id,mapId:'erdia_'+c.id,name:c.name,direction:c.direction,terrain:c.terrain,targets:c.targets,layer:c.id==='sky'?'sky':'ground'})));
+function continent(id){return continents.find(c=>c.id===id||c.mapId===id)||null;}
+function continentOf(id){if(byId.has(id))return byId.get(id).continent;const c=continents.find(c=>id===c.mapId||['nw','n','ne','w','center','e','sw','s','se'].some(d=>id===c.mapId+'_'+d));return c?.id||null;}
+function visits(state={}){const ids=state.visitedLocations||[];if(!Array.isArray(ids)||ids.length>2000||ids.some(id=>typeof id!=='string'))throw Error('탐험 기록 형식이 잘못되었습니다.');return new Set(ids);}
+function knownContinent(state,id){const c=continent(id);if(!c)return false;const v=visits(state);return [...v].some(p=>continentOf(p)===c.id);}
+function locations(state,id,{artwork=false,kind='all',parent=null}={}){const c=continent(id);if(!c)throw Error('없는 대륙입니다.');const v=visits(state);return records.filter(p=>p.continent===c.id&&(parent?p.parent===parent:!p.parent)&&(kind==='all'||p.kind===kind)).map(p=>{const known=v.has(p.id);return {id:p.id,continent:c.id,kind:p.kind,point:p.point,known,current:state.currentLocation===p.id,name:known||artwork?p.name:'?',location:known||artwork?p.location||'':null,note:known||artwork?p.note:null,hasChildren:records.some(k=>k.parent===p.id)};});}
+function detail(state,id,{artwork=false}={}){const p=byId.get(id);if(!p)return null;const known=visits(state).has(id);return{id:p.id,kind:p.kind,known,name:known||artwork?p.name:'?',location:known||artwork?p.location||'':null,note:known||artwork?p.note:null,continent:p.continent,parent:p.parent||null};}
+function legacyState(state){const v=visits(state),extra=continents.filter(c=>c.layer==='ground'&&knownContinent(state,c.id)).map(c=>c.mapId);return{...state,visitedLocations:[...v,...extra],currentLocation:continentOf(state.currentLocation)?'erdia_'+continentOf(state.currentLocation):state.currentLocation};}
+function fixture(){return{version:1,events:records.map(p=>({id:'visit-'+p.id,location:p.id,members:[],era:'fantasy',entry:'arrive',nodes:{arrive:{end:true,text:p.name}}}))};}
+return{continents,records,continent,continentOf,locations,detail,knownContinent,legacyState,fixture,revision:D.sourceRevision};
+});
