@@ -6,6 +6,6 @@ contextBridge.exposeInMainWorld('desktopAI',Object.freeze({
  onStatus:callback=>{const listener=(_event,state)=>callback(state);ipcRenderer.on('ai:progress',listener);return()=>ipcRenderer.removeListener('ai:progress',listener);}
 }));
 
-contextBridge.exposeInMainWorld('associationAPI',Object.freeze({list:()=>ipcRenderer.invoke('quest:list'),refresh:r=>ipcRenderer.invoke('quest:refresh',r),accept:r=>ipcRenderer.invoke('quest:accept',r),advance:()=>ipcRenderer.invoke('quest:advance'),storyState:()=>ipcRenderer.invoke('story:state'),storySend:r=>ipcRenderer.invoke('story:send',r),storyReset:()=>ipcRenderer.invoke('story:reset')}));
+contextBridge.exposeInMainWorld('associationAPI',Object.freeze({expense:r=>ipcRenderer.invoke('quest:expense',r),simulate:r=>ipcRenderer.invoke('quest:simulate',r),sell:r=>ipcRenderer.invoke('quest:sell',r),list:()=>ipcRenderer.invoke('quest:list'),refresh:r=>ipcRenderer.invoke('quest:refresh',r),accept:r=>ipcRenderer.invoke('quest:accept',r),advance:()=>ipcRenderer.invoke('quest:advance'),storyState:()=>ipcRenderer.invoke('story:state'),storySend:r=>ipcRenderer.invoke('story:send',r),storyReset:()=>ipcRenderer.invoke('story:reset')}));
 
 contextBridge.exposeInMainWorld('sceneArtAPI',Object.freeze({asset:key=>ipcRenderer.invoke('art:asset',key)}));
