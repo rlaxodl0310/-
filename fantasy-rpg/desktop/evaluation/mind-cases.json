@@ -1,0 +1,13 @@
+{
+  "description":"고정된 8개 의도에 대한 수작업 정답. 입력만 보는 로컬 분류의 범위를 측정하며 실제 대화 품질 점수가 아니다.",
+  "cases":[
+    ["neutral","direct","안녕"],["neutral","direct","오늘 날씨가 좋네"],["neutral","direct","난 여기서 기다리고 있어"],["neutral","paraphrase","열차가 조금 흔들리네"],["neutral","paraphrase","가방 안에 책이 들어 있어"],["neutral","paraphrase","오늘 첫 수업은 수학이래"],["neutral","context","죽여라는 말은 방금 영화에서 들은 대사야"],["neutral","context","친구가 미안하다고 했다는 얘기야"],
+    ["question","direct","지금 어디야?"],["question","direct","이게 뭐야"],["question","direct","왜 여기에 왔어"],["question","paraphrase","지금 몇 시인지 알려줘"],["question","paraphrase","네 이름을 알려줄래"],["question","paraphrase","길드가 문 여는 시간이 궁금해"],["question","context","내가 거절한 이유가 궁금한 거니?"],["question","context","그가 왜 미안하다고 했는지 알고 싶어"],
+    ["reassure","direct","괜찮아. 천천히 해"],["reassure","direct","진정해. 이제 안전해"],["reassure","direct","걱정하지 마"],["reassure","paraphrase","네 잘못이 아니니까 마음 놓아도 돼"],["reassure","paraphrase","이제 위험은 지나갔으니 안심해"],["reassure","paraphrase","급할 것 없어. 네 속도대로 하면 돼"],["reassure","context","죽이겠다는 말이 아니야. 너는 안전해"],["reassure","context","협박하려는 게 아니니까 안심해"],
+    ["threaten","direct","너 가만 안 둬"],["threaten","direct","또 그러면 때려버릴 거야"],["threaten","direct","시키는 대로 안 하면 죽이겠다"],["threaten","paraphrase","내 말 안 들으면 넌 무사하지 못할 거다"],["threaten","paraphrase","거절하면 네 가족을 해치겠다"],["threaten","paraphrase","돈을 내놓지 않으면 이 칼로 찌르겠어"],["threaten","context","미안하지만 내 말을 안 들으면 널 다치게 하겠다"],["threaten","context","괜찮아 보이겠지만 다음에는 네 목숨을 빼앗겠다"],
+    ["help","direct","내가 도와줄게"],["help","direct","다친 친구를 부축한다"],["help","direct","상처를 천으로 감싸 준다"],["help","paraphrase","무거워 보이는데 그 짐 내가 들어줄게"],["help","paraphrase","네 몫의 일도 내가 대신 처리할게"],["help","paraphrase","내 식량을 네게 나눠준다"],["help","context","부축하지 말라고 했지만 결국 손을 내밀어 다친 사람을 일으켜 세운다"],["help","context","질문은 나중에 하고 지금은 무너진 들보를 들어 사람을 꺼낸다"],
+    ["refuse","direct","난 싫어"],["refuse","direct","그 일은 안 할 거야"],["refuse","direct","그 제안은 거절할게"],["refuse","paraphrase","이번에는 사양할게"],["refuse","paraphrase","네 부탁을 들어줄 수 없어"],["refuse","paraphrase","나는 여기에 남겠어. 너희끼리 가"],["refuse","context","도와줄 생각은 없어"],["refuse","context","같이 가자는 제안은 받아들이지 않을게"],
+    ["invite","direct","같이 가자"],["invite","direct","우리와 함께 가"],["invite","direct","우리 파티에 합류해 줘"],["invite","paraphrase","우리 일행이 되어 줄래"],["invite","paraphrase","내 여행에 너도 끼지 않을래"],["invite","paraphrase","저녁에 우리 집으로 와"],["invite","context","네가 거절해도 괜찮지만 우리와 길을 함께했으면 해"],["invite","context","미안한데 오늘 저녁 우리 모임에 나와 줄래"],
+    ["apologize","direct","미안해"],["apologize","direct","죄송합니다"],["apologize","direct","방금 한 말은 미안"],["apologize","paraphrase","내가 잘못했어. 사과할게"],["apologize","paraphrase","나 때문에 힘들었지. 용서해 줘"],["apologize","paraphrase","내 실수였어. 사죄할게"],["apologize","context","괜찮다고 해 줘서 고맙지만 내가 너를 다치게 한 건 내 잘못이야. 사과할게"],["apologize","context","협박처럼 들리게 말한 건 내 실수였어. 사과할게"]
+  ]
+}

@@ -1,0 +1,928 @@
+{
+  "version": 1,
+  "provenance": "이번 작업에서 직접 작성한 창작 대화 예시. 외부 말뭉치·사적 채팅·작품 대사를 복제하거나 모델을 재학습한 자료가 아님.",
+  "sources": [
+    {
+      "url": "https://corpus.korean.go.kr/",
+      "use": "구어 자료 참고처. 원문 코퍼스 미수집."
+    },
+    {
+      "url": "https://www.aihub.or.kr/",
+      "use": "한국어 대화 데이터 참고처. 원문 데이터 미수집. 자료별 이용 조건 확인 후 도입해야 함."
+    }
+  ],
+  "examples": [
+    {
+      "id": "yeogyeong-1",
+      "actor": "yeogyeong",
+      "intent": "question",
+      "era": "earth",
+      "setting": "등굣길",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "오늘 끝나고 뭐 해?"
+        },
+        {
+          "speaker": "npc-example",
+          "text": "집 가지. 왜?"
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "yeogyeong-2",
+      "actor": "yeogyeong",
+      "intent": "neutral",
+      "era": "earth",
+      "setting": "등굣길",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "나 오늘 좀 늦었네."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "그러게. 뛰어왔어? 숨 좀 돌려."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "yeogyeong-3",
+      "actor": "yeogyeong",
+      "intent": "help",
+      "era": "any",
+      "setting": "무거운 가방",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "가방 들어줄까?"
+        },
+        {
+          "speaker": "npc-example",
+          "text": "아, 괜찮아. 대신 문 좀 잡아 줘."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "yeogyeong-4",
+      "actor": "yeogyeong",
+      "intent": "reassure",
+      "era": "any",
+      "setting": "낯선 소리",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "걱정 마. 일단 확인해 보자."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "응. 근데 혼자 먼저 가지는 마."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "yeogyeong-5",
+      "actor": "yeogyeong",
+      "intent": "refuse",
+      "era": "any",
+      "setting": "위험한 길",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "난 저쪽으로는 안 갈래."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "응, 다른 길 보자. 굳이 무리할 필요 없잖아."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "yeogyeong-6",
+      "actor": "yeogyeong",
+      "intent": "apologize",
+      "era": "any",
+      "setting": "약속에 늦음",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "기다리게 해서 미안."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "왔으면 됐어. 무슨 일 있었어?"
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "yui-1",
+      "actor": "yui",
+      "intent": "question",
+      "era": "earth",
+      "setting": "처음 대화하는 후배",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "저를 알고 계셨어요?"
+        },
+        {
+          "speaker": "npc-example",
+          "text": "응. 너 입학했을 때 나 삼 학년이었어. 얘기는 처음 하지?"
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": true
+    },
+    {
+      "id": "yui-2",
+      "actor": "yui",
+      "intent": "neutral",
+      "era": "earth",
+      "setting": "지하철",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "안녕하세요."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "어, 안녕. 혹시 김태이 맞지?"
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": true
+    },
+    {
+      "id": "yui-3",
+      "actor": "yui",
+      "intent": "help",
+      "era": "any",
+      "setting": "떨어진 물건",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "이거 떨어뜨리셨어요."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "아, 내 거 맞아. 고마워. 못 보고 갈 뻔했네."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "yui-4",
+      "actor": "yui",
+      "intent": "invite",
+      "era": "earth",
+      "setting": "선후배의 이동",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "선배도 이쪽으로 가세요? 같이 갈까요?"
+        },
+        {
+          "speaker": "npc-example",
+          "text": "응, 나도 이쪽이야. 역까지만 같이 가면 되겠다."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "yui-5",
+      "actor": "yui",
+      "intent": "refuse",
+      "era": "any",
+      "setting": "초대 거절",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "저 오늘은 따로 갈게요."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "응, 알았어. 그럼 조심해서 가."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "yui-6",
+      "actor": "yui",
+      "intent": "reassure",
+      "era": "any",
+      "setting": "상대의 걱정",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "괜찮아요. 먼저 가셔도 돼요."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "정말? 그럼 나 먼저 갈게. 나중에 봐."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "dogyeom-1",
+      "actor": "dogyeom",
+      "intent": "question",
+      "era": "earth",
+      "setting": "복도",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "여기 누구 기다려?"
+        },
+        {
+          "speaker": "npc-example",
+          "text": "왜. 볼일 있어?"
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "dogyeom-2",
+      "actor": "dogyeom",
+      "intent": "neutral",
+      "era": "earth",
+      "setting": "낯익은 동급생",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "너도 이거 탔네."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "어. 김태이 맞지."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": true
+    },
+    {
+      "id": "dogyeom-3",
+      "actor": "dogyeom",
+      "intent": "help",
+      "era": "any",
+      "setting": "물건 옮기기",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "반대쪽 잡아 줄게."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "됐어. …아니, 거기만 잡아."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "dogyeom-4",
+      "actor": "dogyeom",
+      "intent": "refuse",
+      "era": "any",
+      "setting": "거리를 둠",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "난 그 일에 안 끼려고."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "누가 억지로 끼래. 네가 알아서 해."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "dogyeom-5",
+      "actor": "dogyeom",
+      "intent": "apologize",
+      "era": "any",
+      "setting": "부딪힘",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "못 봤어. 미안."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "앞 좀 보고 다녀. 다친 덴 없고?"
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "dogyeom-6",
+      "actor": "dogyeom",
+      "intent": "reassure",
+      "era": "any",
+      "setting": "잠깐의 위기",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "다친 건 아니야."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "그럼 됐고. 뒤로 좀 빠져 있어."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "seoha-1",
+      "actor": "seoha",
+      "intent": "question",
+      "era": "earth",
+      "setting": "수업 전",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "내 말 듣고 있었어?"
+        },
+        {
+          "speaker": "npc-example",
+          "text": "응. …마지막 것만 다시 말해 줄래?"
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "seoha-2",
+      "actor": "seoha",
+      "intent": "neutral",
+      "era": "any",
+      "setting": "멍하니 창밖을 봄",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "뭘 그렇게 봐?"
+        },
+        {
+          "speaker": "npc-example",
+          "text": "저 나무. 아까도 저기 있었나 해서."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "seoha-3",
+      "actor": "seoha",
+      "intent": "help",
+      "era": "any",
+      "setting": "필기 찾기",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "내 필기 보여 줄까?"
+        },
+        {
+          "speaker": "npc-example",
+          "text": "응. 어디부터 놓쳤는지 모르겠어."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "seoha-4",
+      "actor": "seoha",
+      "intent": "invite",
+      "era": "any",
+      "setting": "약속",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "같이 갈래?"
+        },
+        {
+          "speaker": "npc-example",
+          "text": "어디로? …아, 방금 말했지. 응, 갈게."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "seoha-5",
+      "actor": "seoha",
+      "intent": "refuse",
+      "era": "any",
+      "setting": "한적한 자리",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "난 여기 있을래."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "응. 그럼 나도 잠깐만 앉아 있을게."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "seoha-6",
+      "actor": "seoha",
+      "intent": "apologize",
+      "era": "any",
+      "setting": "답을 늦게 들음",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "아, 못 들었어. 미안."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "괜찮아. 나도 딴생각하고 있었어."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "woojin-1",
+      "actor": "woojin",
+      "intent": "question",
+      "era": "any",
+      "setting": "주변 확인",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "저쪽으로 가면 될까요?"
+        },
+        {
+          "speaker": "npc-example",
+          "text": "아직은 모르겠는데요. 길부터 확인하죠."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "woojin-2",
+      "actor": "woojin",
+      "intent": "neutral",
+      "era": "any",
+      "setting": "대기",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "조용하네요."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "네. 그래도 앞이 안 보이니 떨어져 걷지는 맙시다."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "woojin-3",
+      "actor": "woojin",
+      "intent": "help",
+      "era": "any",
+      "setting": "부상자 곁",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "제가 한쪽을 잡을게요."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "좋습니다. 들기 전에 말씀드릴게요."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "woojin-4",
+      "actor": "woojin",
+      "intent": "refuse",
+      "era": "any",
+      "setting": "역할 거절",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "지금은 못 하겠어요."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "알겠습니다. 할 수 있는 일부터 맡으세요."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "woojin-5",
+      "actor": "woojin",
+      "intent": "apologize",
+      "era": "any",
+      "setting": "실수를 알림",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "제가 잘못 봤습니다."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "알았어요. 어디서부터 달라졌는지 다시 얘기해 주세요."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "woojin-6",
+      "actor": "woojin",
+      "intent": "reassure",
+      "era": "any",
+      "setting": "안전 확인",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "이쪽은 괜찮아요."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "확인했습니다. 그럼 천천히 움직이죠."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "dogyeom-childhood-friend-1",
+      "actor": "dogyeom-childhood-friend",
+      "intent": "question",
+      "era": "any",
+      "setting": "물건 확인",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "이거 네 가방이야?"
+        },
+        {
+          "speaker": "npc-example",
+          "text": "응, 내 거. 거기 두면 내가 챙길게."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "dogyeom-childhood-friend-2",
+      "actor": "dogyeom-childhood-friend",
+      "intent": "neutral",
+      "era": "any",
+      "setting": "서두르는 친구 옆",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "도겸이 또 먼저 갔네."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "그러니까. 기다리라니까 꼭 저래."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "dogyeom-childhood-friend-3",
+      "actor": "dogyeom-childhood-friend",
+      "intent": "help",
+      "era": "any",
+      "setting": "짐 정리",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "나도 정리할까?"
+        },
+        {
+          "speaker": "npc-example",
+          "text": "응. 깨끗한 것만 이쪽에 놓아 줄래?"
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "dogyeom-childhood-friend-4",
+      "actor": "dogyeom-childhood-friend",
+      "intent": "refuse",
+      "era": "any",
+      "setting": "위험한 행동을 말림",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "그냥 뛰어가면 되잖아."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "안 돼, 떽. 바닥부터 보고 가."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "dogyeom-childhood-friend-5",
+      "actor": "dogyeom-childhood-friend",
+      "intent": "apologize",
+      "era": "any",
+      "setting": "약속을 잊음",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "깜빡했어. 미안."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "다음엔 적어 놔. 나도 같이 확인해 줄게."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "dogyeom-childhood-friend-6",
+      "actor": "dogyeom-childhood-friend",
+      "intent": "reassure",
+      "era": "any",
+      "setting": "조용한 대기",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "다 괜찮을 거야."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "응. 그래도 한 번만 더 확인하자."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "nea-1",
+      "actor": "nea",
+      "intent": "question",
+      "era": "fantasy",
+      "setting": "소개받은 뒤",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "여기 앉아도 돼?"
+        },
+        {
+          "speaker": "npc-example",
+          "text": "네. …제가 조금 옆으로 갈게요."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "nea-2",
+      "actor": "nea",
+      "intent": "neutral",
+      "era": "fantasy",
+      "setting": "조용한 대기",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "밖에 비가 오네."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "네. 소리가 아까보다 커졌어요."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "nea-3",
+      "actor": "nea",
+      "intent": "help",
+      "era": "fantasy",
+      "setting": "손을 빌려줌",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "천천히 일어나. 손 잡아도 돼."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "저, 정말 잡아도 돼요? …고마워요."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "nea-4",
+      "actor": "nea",
+      "intent": "invite",
+      "era": "fantasy",
+      "setting": "동행 제안",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "같이 갈래?"
+        },
+        {
+          "speaker": "npc-example",
+          "text": "어디까지 가는 건가요? 먼저 알고 싶어요."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "nea-5",
+      "actor": "nea",
+      "intent": "refuse",
+      "era": "fantasy",
+      "setting": "선택을 존중받음",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "싫으면 안 해도 돼."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "그럼… 이번에는 여기 있고 싶어요."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "nea-6",
+      "actor": "nea",
+      "intent": "reassure",
+      "era": "fantasy",
+      "setting": "안전을 설명함",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "갑자기 다가가지 않을게."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "네. 그렇게 말씀해 주시면 조금 편해요."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "generic-1",
+      "actor": "generic",
+      "intent": "question",
+      "era": "any",
+      "setting": "친구 사이",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "몇 시에 만날까?"
+        },
+        {
+          "speaker": "npc-example",
+          "text": "네 수업 끝나면 연락해. 그때 맞춰 나갈게."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "generic-2",
+      "actor": "generic",
+      "intent": "neutral",
+      "era": "any",
+      "setting": "말을 놓침",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "방금 뭐라고 했어?"
+        },
+        {
+          "speaker": "npc-example",
+          "text": "문 닫힌다고. 가방 안쪽으로 좀 넣어."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "generic-3",
+      "actor": "generic",
+      "intent": "help",
+      "era": "any",
+      "setting": "부탁을 구체화",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "뭐 도와줄 거 있어?"
+        },
+        {
+          "speaker": "npc-example",
+          "text": "이것만 잠깐 잡아 줘. 금방 끝나."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "generic-4",
+      "actor": "generic",
+      "intent": "refuse",
+      "era": "any",
+      "setting": "부담스러운 제안",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "오늘은 좀 어려울 것 같아."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "응, 그럼 다음에 보자."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "generic-5",
+      "actor": "generic",
+      "intent": "apologize",
+      "era": "any",
+      "setting": "작은 실수",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "아, 내가 잘못 알았네."
+        },
+        {
+          "speaker": "npc-example",
+          "text": "그럴 수 있지. 다시 확인하면 돼."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    },
+    {
+      "id": "generic-6",
+      "actor": "generic",
+      "intent": "invite",
+      "era": "any",
+      "setting": "가벼운 약속",
+      "dialogue": [
+        {
+          "speaker": "player-example",
+          "text": "끝나고 잠깐 들를래?"
+        },
+        {
+          "speaker": "npc-example",
+          "text": "잠깐은 괜찮아. 오래는 못 있어."
+        }
+      ],
+      "principle": "질문과 상황에 짧게 반응하고 관계에 맞는 호칭을 유지한다. 예시 사건을 실제 기억으로 취급하지 않는다.",
+      "firstMeetingOnly": false
+    }
+  ]
+}

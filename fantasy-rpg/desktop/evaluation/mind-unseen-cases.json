@@ -1,0 +1,13 @@
+{
+ "description":"문맥 업그레이드 구현 후 새로 작성한 40문장. 첫 평가 후 이 문장에 맞춘 분류 규칙 수정은 하지 않음. 제작자가 정답을 부여한 소규모 내부 평가이며 독립 블라인드 평가는 아님.",
+ "cases":[
+ ["neutral","unseen","버스가 늦게 오네"],["neutral","unseen","점심은 이미 먹었어"],["neutral","unseen","저 건물은 예전에 창고였대"],["neutral","unseen","친구에게 들은 이야기를 전하는 중이야"],["neutral","unseen","우리 반은 내일 시험이래"],
+ ["question","unseen","정류장이 어디에 있는지 알려줘"],["question","unseen","너 오늘도 학원 가니?"],["question","unseen","무슨 일이 있었는지 궁금해"],["question","unseen","혹시 이 열쇠 본 적 있어?"],["question","unseen","문을 열어도 되는지 알고 싶어"],
+ ["reassure","unseen","무서워할 필요 없어. 내가 옆에 있어"],["reassure","unseen","잘못한 건 네가 아니야. 너무 자책하지 마"],["reassure","unseen","진정해. 다 끝났어"],["reassure","unseen","안심해도 돼. 아무도 널 탓하지 않아"],["reassure","unseen","괜찮아. 시간은 충분해"],
+ ["threaten","unseen","가만 안 둘 거다. 당장 꺼져"],["threaten","unseen","한 번만 더 그러면 해치겠어"],["threaten","unseen","이 일을 떠벌리면 네 집을 불태울 거야"],["threaten","unseen","빚을 안 갚으면 네 다리를 부러뜨리겠어"],["threaten","unseen","지금 안 내놓으면 후회하게 해 주겠어"],
+ ["help","unseen","넘어진 할머니를 부축한다"],["help","unseen","내가 네 동생을 데려올게"],["help","unseen","그 짐은 내가 대신 옮겨 줄게"],["help","unseen","상처에 깨끗한 천을 감싸 준다"],["help","unseen","너 혼자 하지 마. 나도 도와줄게"],
+ ["refuse","unseen","이건 내 힘으로 할 수 없겠어"],["refuse","unseen","내 답은 아니야"],["refuse","unseen","죄송하지만 그 부탁은 사양할게요"],["refuse","unseen","그 제안은 거절하겠습니다"],["refuse","unseen","오늘은 함께 가지 않을 거야"],
+ ["invite","unseen","주말에 우리끼리 영화 볼래?"],["invite","unseen","너도 우리 조에 들어와"],["invite","unseen","학교까지 같이 가자"],["invite","unseen","내 파티에 합류해 주겠어?"],["invite","unseen","우리 일행이 되어 줘"],
+ ["apologize","unseen","방금 내가 한 말 취소할게. 미안해"],["apologize","unseen","죄송해요. 제가 약속을 잊었어요"],["apologize","unseen","제 잘못을 인정합니다. 사과드려요"],["apologize","unseen","제가 경솔했어요. 용서해 주세요"],["apologize","unseen","내 실수야. 정말 미안"]
+ ]
+}
