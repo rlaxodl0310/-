@@ -1,0 +1,254 @@
+[
+  {
+    "id": "north-city-01",
+    "target": "assets/cities/north-city-01.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "bcaa3754b577d8ec34e4ad8adec5d87a12ea7fb1e582253c0b8b8ec2b5f6ae87"
+  },
+  {
+    "id": "north-city-02",
+    "target": "assets/cities/north-city-02.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "81f56edf74ddb1fcda1ff9fa4523d38cd10130386af2e6baab0b769bfda58871"
+  },
+  {
+    "id": "north-city-03",
+    "target": "assets/cities/north-city-03.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "b20343d58d7b4e14c8345d988ae4338b3d2e7d71b2d6e78fc98f7faf2ffc9edf"
+  },
+  {
+    "id": "north-city-04",
+    "target": "assets/cities/north-city-04.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "041db27e7d9c3746f6994c8807900043baf8f65e1bc52cf0cf4b11193c215f58"
+  },
+  {
+    "id": "north-city-05",
+    "target": "assets/cities/north-city-05.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "b84756d5286f3692be20ff46dd81d3e84815885eeec835ead96937264ab26ecb"
+  },
+  {
+    "id": "north-city-06",
+    "target": "assets/cities/north-city-06.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "c78be4a243471250dd077345f6d2ec0274ee107072d7953f1a1eca6723ca2c0d"
+  },
+  {
+    "id": "east-city-01",
+    "target": "assets/cities/east-city-01.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "8d26ab559fb7de55c33cadf9e30230cdebc54786c5c6b5ee6656980d7f74c585"
+  },
+  {
+    "id": "east-city-02",
+    "target": "assets/cities/east-city-02.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "35afd8520a4ff431f1ef4517663cec3a8bfa82d2dcb3b9b8d6925f540bf4db1e"
+  },
+  {
+    "id": "east-city-03",
+    "target": "assets/cities/east-city-03.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "ee44d857cf8f81ab0695964c79c34fb094858afbcecee3ce31a94764673a3272"
+  },
+  {
+    "id": "east-city-04",
+    "target": "assets/cities/east-city-04.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "699fa5f8c289ead37f7a11b86a71a3e38f2a49eae6b3ae0cae168e915f85d3b5"
+  },
+  {
+    "id": "east-city-05",
+    "target": "assets/cities/east-city-05.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "c919aad442f06ab527c6a4445f43f479d168ebaeb9d553cc9f027223d4cf7906"
+  },
+  {
+    "id": "east-city-06",
+    "target": "assets/cities/east-city-06.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "9b381179887cb5bb659c0c1783f250ca1846667a6327e631bf85494a047459d7"
+  },
+  {
+    "id": "west-city-01",
+    "target": "assets/city-valk-districts.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "3629b6917880bd81e27c9ce62e0cbb39e5d895b8f644f7f7e2e461a326f8c721"
+  },
+  {
+    "id": "west-city-02",
+    "target": "assets/cities/west-city-02.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "ab44bea4b176e173f2bb9d7000e64205fb9e675664ff73d4b7b60c90e5dc1c1d"
+  },
+  {
+    "id": "west-city-03",
+    "target": "assets/cities/west-city-03.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "b400d042d0e0c5ae10bb420e403202d2e09ce30cb2bc97e768590205f6a3aca9"
+  },
+  {
+    "id": "west-city-04",
+    "target": "assets/cities/west-city-04.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "c2f0d0e1e1b5c692556c5cee6a1e8eda7ffb01f47f4580779bbb71f5668da11e"
+  },
+  {
+    "id": "west-city-05",
+    "target": "assets/cities/west-city-05.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "bade493e15bdd95788777e54f64b37fd754808dc017bee6213f5c6fe002392ef"
+  },
+  {
+    "id": "west-city-06",
+    "target": "assets/cities/west-city-06.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "0613d9f5e906cc17e1d6d066fd81fead45381c510bbe6fc4ace1d82eb573fe0d"
+  },
+  {
+    "id": "south-city-01",
+    "target": "assets/cities/south-city-01.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "f0c64cd9452fb11f99e81ed71551b80bfd023d4a0d2360765be863bfd6caafbc"
+  },
+  {
+    "id": "south-city-02",
+    "target": "assets/cities/south-city-02.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "c901b49d343a9180472cce8e2e1a92e08432b79610d19500e2ea50579596e4cd"
+  },
+  {
+    "id": "south-city-03",
+    "target": "assets/cities/south-city-03.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "d1e83da0d759fe1343e192c549c0c860e65b37ae78bfacc6296011ea3e0826b9"
+  },
+  {
+    "id": "south-city-04",
+    "target": "assets/cities/south-city-04.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "80d34f4085c9dddedfacf83f9e7ab550c8c53e7027694a711bddda2c589f54cd"
+  },
+  {
+    "id": "south-city-05",
+    "target": "assets/cities/south-city-05.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "1631099ca472adb388d5b9e1054de7b7ac4aef88aada9ee8d1b3ab7e78b943d7"
+  },
+  {
+    "id": "south-city-06",
+    "target": "assets/cities/south-city-06.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "0fe9ac5d919cf1cd342b34f1b42197201443fdfae0e47c906f58c4a0ca956e77"
+  },
+  {
+    "id": "central-city-01",
+    "target": "assets/cities/central-city-01.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "12e1366a48a35f0d869feb362cd5cbb6472477ed6c0015e41567b001af7ec1d8"
+  },
+  {
+    "id": "central-city-02",
+    "target": "assets/cities/central-city-02.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "8e32383159118d2a613e262b6b6ec5c386d5781b05d208b53d744d1459d33266"
+  },
+  {
+    "id": "central-city-03",
+    "target": "assets/cities/central-city-03.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "cb86d6b3fbc510bd1e2e202ce0b9f7dea3365f9883bff171e5fdee6fcf0d39e8"
+  },
+  {
+    "id": "central-city-04",
+    "target": "assets/cities/central-city-04.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "99dc7fb70d57b07b58dc43ca3cd6ef11842dc938ed37d78537331ff0248ce2b8"
+  },
+  {
+    "id": "central-city-05",
+    "target": "assets/cities/central-city-05.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "046c84aea06770f2e041f28a541dbcc6e7dee13f229997080f8b5e4bd25c176f"
+  },
+  {
+    "id": "central-city-06",
+    "target": "assets/cities/central-city-06.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "4420a78d2aa762ec9d0f37d588ee56db97bb5768f3f910fa765d05e46f8d52f5"
+  },
+  {
+    "id": "central-city-07",
+    "target": "assets/cities/central-city-07.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "a9f6c5657dad4e4b0d64e099939a83de2f6d7c8adca40007e5ce0c4dd0a62840"
+  },
+  {
+    "id": "sky-city-01",
+    "target": "assets/cities/sky-city-01.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "6f8a7234380a81e0d5f9b612142b160bcd579cf950628384c1b2ac33076a726a"
+  },
+  {
+    "id": "sky-city-02",
+    "target": "assets/cities/sky-city-02.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "53ab0fb15afa9d3b082c246ae81f6c539570c46b8c1afc1eca002479623bebfe"
+  },
+  {
+    "id": "sky-city-03",
+    "target": "assets/cities/sky-city-03.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "918da8df36c3ac63149ad0668faaaeb89b7f3edc18c29330c9d379150e6c6b3d"
+  },
+  {
+    "id": "sky-city-04",
+    "target": "assets/cities/sky-city-04.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "8430b4db82b860bac0e6e652ed3c1d38939b2fa732986f7f57757f18b116d108"
+  },
+  {
+    "id": "sky-city-05",
+    "target": "assets/cities/sky-city-05.png",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "5fa681d7a58fc54086a85fb267b537ae2421f611fe7ecf277d8c6c4e4e80178d"
+  }
+]
