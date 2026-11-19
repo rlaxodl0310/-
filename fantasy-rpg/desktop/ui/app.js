@@ -17,14 +17,14 @@ function render(){document.body.classList.toggle('large-text',large);document.bo
 function button(text,fn,cls){const b=document.createElement('button');b.textContent=text;b.onclick=fn;if(cls)b.className=cls;return b;}
 function el(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
 function closePanel(){$('panel').hidden=true;$('scrim').hidden=true;returnFocus?.focus();}
-function openPanel(kind){if(busy){toast("AI 응답을 기다리는 중입니다. 완료 후 이동해 주세요.");return;}returnFocus=document.activeElement;const body=$('panel-body');$('panel').dataset.mode=kind;body.replaceChildren();const title={chapters:'이야기 장면',status:'플레이어 정보',cast:'파티 / 동행',codex:'캐릭터 도감',monsters:'몬스터 도감',journal:'지나온 대화',saves:'저장과 불러오기',settings:'환경 설정',appearance:'평소 일러스트 · 외형팩',quests:'협회 의뢰 게시판',storychat:'실시간 AI 이야기',world:'알게 된 세계',map:'탐험 지도',maptest:'도시·마을 탐험 테스트'};$('panel-title').textContent=title[kind];
+function openPanel(kind){if(busy){toast("AI 응답을 기다리는 중입니다. 완료 후 이동해 주세요.");return;}returnFocus=document.activeElement;const body=$('panel-body');$('panel').dataset.mode=kind;body.replaceChildren();const title={chapters:'이야기 장면',status:'플레이어 정보',cast:'파티 / 동행',codex:'캐릭터 도감',monsters:'몬스터 도감',journal:'지나온 대화',saves:'저장과 불러오기',settings:'환경 설정',appearance:'평소 일러스트 · 외형팩',quests:'협회 의뢰 게시판',storychat:'실시간 AI 이야기',world:'알게 된 세계',map:'탐험 지도',maptest:'도시·마을 탐험 테스트'};$('panel-title').textContent=title[kind];if(typeof DirectorUI!=='undefined'&&DirectorUI.panel(kind,body)){$('panel').hidden=false;$('scrim').hidden=false;$('close-panel').focus();return;}
  if(kind==='chapters'){body.append(el('p','플레이어는 김태이입니다. 현실의 등굣길부터 순서대로 진행합니다.','muted'));for(const e of D.events){const done=engine.state.completed.includes(e.id),active=engine.state.active?.id===e.id;const b=button((done?'✓ ':active?'▶ ':'')+e.title+(done?' · 완료':''),()=>{if(active){closePanel();return;}if(engine.state.active){if(!confirm('현재 장면을 중단하고 새 장면으로 전환할까요? 현재까지의 대화는 기록에 남습니다.'))return;engine.abandon();}start(e.id);},'scene-card');b.disabled=done||(e.requiresCompleted||[]).some(id=>!engine.state.completed.includes(id));body.append(b);}body.append(button('처음부터 새로 시작',()=>{if(confirm('현실의 등굣길부터 다시 시작할까요? 수동 저장 슬롯은 유지됩니다.')){engine=new E(D);logs=[];LookPacksUI.setEquipment({});blocked=false;start(D.events[0].id);}}));}
  if(kind==='map')GeographyUI.panel(body,()=>engine.state,{onTest:()=>openPanel('maptest')});
  if(kind==='maptest')GeographyUI.testPanel(body);
 
  if(kind==='world')WorldRules.journal(body,engine.state.flags);
  if(kind==='quests')AssociationUI.panel(body);
- if(kind==='storychat')AssociationUI.story(body);
+ if(kind==='storychat')DirectorUI.open(body);
  if(kind==='appearance'){LookPacksUI.panel(body,D,engine.state,()=>{persist();render();});}
  if(kind==='status'){body.append(el('h3','김태이 · 플레이어'),el('p','18세 · 고등학교 2학년'),el('p','현재: 학교에 가기 위해 지하철을 탄 등굣길.'),el('p','태이의 대사와 행동은 직접 입력하거나 선택합니다.','muted'));}
  if(kind==='cast'){const party=C.partyInfo(D,engine.state);if(!party.length)body.append(el('p','현재 함께 이동하기로 한 일행이 없습니다.'));for(const person of party){body.append(el('h3',person.name),el('p','나이 · '+(person.age===null?'아직 확인하지 못함':person.age+'세')));}}
@@ -45,7 +45,7 @@ function openPanel(kind){if(busy){toast("AI 응답을 기다리는 중입니다.
  $('panel').hidden=false;$('scrim').hidden=false;$('close-panel').focus();}
 document.querySelectorAll('[data-panel]').forEach(b=>b.onclick=()=>openPanel(b.dataset.panel));$('close-panel').onclick=closePanel;$('scrim').onclick=closePanel;
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanel();if(e.key==='Tab'&&!$('panel').hidden){const items=[...$('panel').querySelectorAll('button,input,a')].filter(x=>!x.disabled);const first=items[0],last=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
-$('save-now').onclick=()=>{if(persist())toast('빠른 저장 완료');else toast('자동 저장을 사용할 수 없습니다. 저장 메뉴에서 파일로 내보내세요.');};$('sd-toggle').onclick=()=>{sdOpen=!sdOpen;render();};
+$('save-now').onclick=()=>{if(document.body.dataset.storyMode==='director'){toast('AI 이야기는 매 응답 후 앱에 자동 저장됩니다.');return;}if(persist())toast('빠른 저장 완료');else toast('자동 저장을 사용할 수 없습니다. 저장 메뉴에서 파일로 내보내세요.');};$('sd-toggle').onclick=()=>{sdOpen=!sdOpen;render();};
 function setBusy(value){busy=value;$('chat-input').disabled=value;for(const b of document.querySelectorAll('#choices button,#sd-toggle'))b.disabled=value;const send=$('chat-form').querySelector('button');send.disabled=false;send.textContent=value?'■':'↗';send.setAttribute('aria-label',value?'AI 답변 생성 중단':'메시지 보내기');$('save-state').textContent=value?'ChatGPT가 답변하는 중 · ■ 버튼으로 중단':'저장됨 · 이 브라우저';}
 $('chat-form').onsubmit=async e=>{e.preventDefault();if(busy){GameAI.stop();return;}const input=$('chat-input'),text=input.value.trim(),n=engine.current(),active=engine.state.active;if(!text||!n)return;
  if(!GameAI.state.enabled&&GameAI.state.phase!=='demo'){toast('연결 메뉴에서 ChatGPT로 로그인해 주세요.');openPanel('settings');return;}

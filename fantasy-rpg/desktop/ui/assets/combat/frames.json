@@ -1,0 +1,334 @@
+{
+  "ready": {
+    "taei": {
+      "src": "assets/combat/cast-atlas.png",
+      "x": 53,
+      "y": 5,
+      "w": 311,
+      "h": 426,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "dogyeom": {
+      "src": "assets/combat/cast-atlas.png",
+      "x": 495,
+      "y": 5,
+      "w": 246,
+      "h": 426,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "yeogyeong": {
+      "src": "assets/combat/cast-atlas.png",
+      "x": 884,
+      "y": 17,
+      "w": 279,
+      "h": 410,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "seoha": {
+      "src": "assets/combat/cast-atlas.png",
+      "x": 33,
+      "y": 429,
+      "w": 376,
+      "h": 429,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "yui": {
+      "src": "assets/combat/cast-atlas.png",
+      "x": 479,
+      "y": 440,
+      "w": 269,
+      "h": 418,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "woojin": {
+      "src": "assets/combat/cast-atlas.png",
+      "x": 828,
+      "y": 432,
+      "w": 388,
+      "h": 427,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "dogyeom-childhood-friend": {
+      "src": "assets/combat/cast-atlas.png",
+      "x": 26,
+      "y": 858,
+      "w": 306,
+      "h": 401,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "nea": {
+      "src": "assets/combat/cast-atlas.png",
+      "x": 407,
+      "y": 854,
+      "w": 383,
+      "h": 405,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "zero": {
+      "src": "assets/combat/cast-atlas.png",
+      "x": 812,
+      "y": 886,
+      "w": 426,
+      "h": 346,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    }
+  },
+  "attack": {
+    "taei": {
+      "src": "assets/combat/cast-attack.png",
+      "x": 27,
+      "y": 7,
+      "w": 381,
+      "h": 422,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "dogyeom": {
+      "src": "assets/combat/cast-attack.png",
+      "x": 459,
+      "y": 4,
+      "w": 304,
+      "h": 424,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "yeogyeong": {
+      "src": "assets/combat/cast-attack.png",
+      "x": 822,
+      "y": 10,
+      "w": 414,
+      "h": 419,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "seoha": {
+      "src": "assets/combat/cast-attack.png",
+      "x": 9,
+      "y": 421,
+      "w": 414,
+      "h": 437,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "yui": {
+      "src": "assets/combat/cast-attack.png",
+      "x": 430,
+      "y": 429,
+      "w": 340,
+      "h": 421,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "woojin": {
+      "src": "assets/combat/cast-attack.png",
+      "x": 796,
+      "y": 425,
+      "w": 441,
+      "h": 427,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "dogyeom-childhood-friend": {
+      "src": "assets/combat/cast-attack.png",
+      "x": 13,
+      "y": 850,
+      "w": 370,
+      "h": 402,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "nea": {
+      "src": "assets/combat/cast-attack.png",
+      "x": 406,
+      "y": 833,
+      "w": 405,
+      "h": 420,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "zero": {
+      "src": "assets/combat/cast-attack.png",
+      "x": 812,
+      "y": 850,
+      "w": 424,
+      "h": 378,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    }
+  },
+  "hit": {
+    "taei": {
+      "src": "assets/combat/cast-hit.png",
+      "x": 76,
+      "y": 11,
+      "w": 327,
+      "h": 422,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "dogyeom": {
+      "src": "assets/combat/cast-hit.png",
+      "x": 467,
+      "y": 25,
+      "w": 315,
+      "h": 408,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "yeogyeong": {
+      "src": "assets/combat/cast-hit.png",
+      "x": 854,
+      "y": 17,
+      "w": 359,
+      "h": 417,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "seoha": {
+      "src": "assets/combat/cast-hit.png",
+      "x": 26,
+      "y": 434,
+      "w": 375,
+      "h": 418,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "yui": {
+      "src": "assets/combat/cast-hit.png",
+      "x": 404,
+      "y": 466,
+      "w": 379,
+      "h": 374,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "woojin": {
+      "src": "assets/combat/cast-hit.png",
+      "x": 836,
+      "y": 434,
+      "w": 399,
+      "h": 420,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "dogyeom-childhood-friend": {
+      "src": "assets/combat/cast-hit.png",
+      "x": 29,
+      "y": 862,
+      "w": 356,
+      "h": 391,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "nea": {
+      "src": "assets/combat/cast-hit.png",
+      "x": 394,
+      "y": 852,
+      "w": 423,
+      "h": 390,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "zero": {
+      "src": "assets/combat/cast-hit.png",
+      "x": 829,
+      "y": 876,
+      "w": 409,
+      "h": 364,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    }
+  },
+  "run": {
+    "taei": {
+      "src": "assets/combat/cast-run.png",
+      "x": 24,
+      "y": 6,
+      "w": 385,
+      "h": 412,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "dogyeom": {
+      "src": "assets/combat/cast-run.png",
+      "x": 452,
+      "y": 7,
+      "w": 330,
+      "h": 415,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "yeogyeong": {
+      "src": "assets/combat/cast-run.png",
+      "x": 868,
+      "y": 6,
+      "w": 330,
+      "h": 416,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "seoha": {
+      "src": "assets/combat/cast-run.png",
+      "x": 14,
+      "y": 424,
+      "w": 364,
+      "h": 433,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "yui": {
+      "src": "assets/combat/cast-run.png",
+      "x": 425,
+      "y": 424,
+      "w": 329,
+      "h": 431,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "woojin": {
+      "src": "assets/combat/cast-run.png",
+      "x": 817,
+      "y": 425,
+      "w": 418,
+      "h": 435,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "dogyeom-childhood-friend": {
+      "src": "assets/combat/cast-run.png",
+      "x": 16,
+      "y": 859,
+      "w": 322,
+      "h": 395,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "nea": {
+      "src": "assets/combat/cast-run.png",
+      "x": 374,
+      "y": 873,
+      "w": 414,
+      "h": 372,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    },
+    "zero": {
+      "src": "assets/combat/cast-run.png",
+      "x": 810,
+      "y": 906,
+      "w": 421,
+      "h": 309,
+      "imageWidth": 1247,
+      "imageHeight": 1261
+    }
+  }
+}
