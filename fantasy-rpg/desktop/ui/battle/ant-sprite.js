@@ -1,0 +1,7 @@
+(function(r){
+function draw(ctx,t=0,moving=false){ctx.clearRect(0,0,86,86);ctx.save();ctx.translate(43,49);ctx.scale(2,2);ctx.lineCap='square';ctx.lineJoin='miter';const line=(pts,color,w)=>{ctx.strokeStyle=color;ctx.lineWidth=w;ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.stroke();},poly=(pts,color)=>{ctx.fillStyle=color;ctx.strokeStyle='#342422';ctx.lineWidth=1;ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.closePath();ctx.fill();ctx.stroke();};
+// Three pairs: far legs above torso, near legs below. Forelegs are thicker hooks.
+for(const side of [-1,1])for(let i=0;i<3;i++){const x=8-i*7,k=moving?Math.round(Math.sin(t*10+i*2+side)*2):0,end=x+(i===0?11:i===2?-8:0);line([[x,-1],[x+side*3,side*(6+i%2)],[end+k,side*(11+i%2)]],'#342422',i===0?4:3);line([[x,-1],[x+side*3,side*(6+i%2)],[end+k,side*(11+i%2)]],'#9b5643',i===0?2.5:1.5);if(i===0)line([[end+k,side*11],[end+3+k,side*9]],'#bd7d5a',2);}
+poly([[-19,-4],[-16,-9],[-7,-8],[-3,-4],[-4,4],[-12,7],[-19,3]],'#713c35');line([[-15,-8],[-13,5]],'#432a28',1);poly([[-8,-5],[-2,-7],[5,-4],[5,3],[-2,5],[-7,3]],'#955540');poly([[3,-7],[13,-8],[19,-3],[17,4],[8,6],[3,2]],'#a35b43');poly([[15,-4],[22,-7],[20,-2],[24,0],[18,1]],'#c17b56');poly([[17,3],[23,5],[21,7],[18,6],[15,4]],'#b27150');ctx.fillStyle='#e9d7ad';ctx.fillRect(12,-3,2,1);line([[8,-7],[10,-13],[17,-16]],'#382820',1);line([[13,-7],[16,-12],[22,-12]],'#382820',1);ctx.fillStyle='#b5a37e';ctx.fillRect(-15,-10,3,3);ctx.fillRect(-3,-8,2,2);ctx.restore();}
+r.AntSprite={draw};
+})(globalThis);

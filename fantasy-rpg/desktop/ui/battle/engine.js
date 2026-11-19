@@ -1,7 +1,7 @@
 (function(root){
-const names={goblin:'고블린',slime:'슬라임',ves:'베스'};
+const names={goblin:'고블린',slime:'슬라임',ves:'베스',ant:'앤트'};
 class Battle{
- constructor(options={}){this.seed=options.seed||731;this.round=1;this.status='playing';this.log=[];this.units=[{id:'taei',name:'김태이',kind:'taei',team:'ally',hp:100,max:100,mana:24,weapon:['gauntlet','bow','magic'].includes(options.weapon)?options.weapon:'gauntlet',x:1,y:1,guard:false}];if(options.partner)this.units.push({id:'dogyeom',name:'백도겸',kind:'dogyeom',team:'ally',hp:85,max:85,x:0,y:2});this.potions=2;this.seen=[];const kind=names[options.kind]?options.kind:'goblin';for(let i=0;i<Math.min(5,Math.max(1,options.count||3));i++)this.units.push({id:'enemy-'+i,name:names[kind]+' '+(i+1),kind,team:'enemy',hp:kind==='slime'?24:30,max:kind==='slime'?24:30,x:5+(i%2),y:i%3,windup:false});}
+ constructor(options={}){this.seed=options.seed||731;this.round=1;this.status='playing';this.log=[];this.units=[{id:'taei',name:'김태이',kind:'taei',team:'ally',hp:100,max:100,mana:24,weapon:['gauntlet','bow','magic'].includes(options.weapon)?options.weapon:'gauntlet',x:1,y:1,guard:false}];if(options.partner)this.units.push({id:'dogyeom',name:'백도겸',kind:'dogyeom',team:'ally',hp:85,max:85,x:0,y:2});this.potions=2;this.seen=[];const kind=names[options.kind]?options.kind:'goblin';for(let i=0;i<Math.min(5,Math.max(1,options.count||3));i++)this.units.push({id:'enemy-'+i,name:names[kind]+' '+(i+1),kind,team:'enemy',hp:kind==='slime'?24:kind==='ant'?28:30,max:kind==='slime'?24:kind==='ant'?28:30,x:5+(i%2),y:i%3,windup:false});}
  random(){this.seed=(Math.imul(this.seed,1664525)+1013904223)>>>0;return this.seed/4294967296;}
  weapon(){return this.units[0].weapon||'gauntlet';}
  living(team){return this.units.filter(u=>u.team===team&&u.hp>0);}
@@ -10,11 +10,11 @@ class Battle{
  decide(unit,playerAction){
  const allies=this.living('ally').sort((a,b)=>this.distance(unit,a)-this.distance(unit,b));const t=allies[0],distance=this.distance(unit,t);
  if(unit.hp<unit.max*.35&&distance<=1)return{type:'retreat',target:t.id,reason:unit.name+'이 상처를 의식하며 몸을 낮춘다. 정면 충돌을 피하려 한다.'};
- if(distance>1)return{type:'approach',target:t.id,reason:unit.name+(playerAction==='retreat'?'이 물러나는 상대를 따라 거리를 좁히려 한다.':unit.kind==='slime'?'이 진동이 전해지는 쪽으로 몸을 늘인다.':unit.kind==='ves'?'가 넓어진 틈을 보고 낮게 날아든다.':'이 상대와의 거리를 재며 접근할 길을 고른다.')};
+ if(distance>1)return{type:'approach',target:t.id,reason:unit.name+(playerAction==='retreat'?'이 물러나는 상대를 따라 거리를 좁히려 한다.':unit.kind==='ant'?'가 진동과 냄새 흔적을 따라 거리를 좁힌다.':unit.kind==='slime'?'이 진동이 전해지는 쪽으로 몸을 늘인다.':unit.kind==='ves'?'가 넓어진 틈을 보고 낮게 날아든다.':'이 상대와의 거리를 재며 접근할 길을 고른다.')};
  if(unit.windup)return{type:'attack',target:t.id,reason:unit.name+(t.guard?'이 올라간 가드에도 준비한 공격을 밀어붙인다.':'이 준비한 공격을 실행할 틈을 잡는다.')};
- if(t.guard&&this.round%2===1&&(unit.kind==='ves'||(unit.kind==='goblin'&&this.living('enemy').length>1)))return{type:'flank',target:t.id,reason:unit.name+(unit.kind==='ves'?'가 정면의 가드를 피해 측면으로 선회한다.':'이 정면을 피하고 동료 옆으로 돌아 압박하려 한다.')};
+ if(t.guard&&this.round%2===1&&(unit.kind==='ves'||(['goblin','ant'].includes(unit.kind)&&this.living('enemy').length>1)))return{type:'flank',target:t.id,reason:unit.name+(unit.kind==='ant'?'가 다른 개체의 압박을 틈타 옆으로 돌아 물어뜯을 자리를 찾는다.':unit.kind==='ves'?'가 정면의 가드를 피해 측면으로 선회한다.':'이 정면을 피하고 동료 옆으로 돌아 압박하려 한다.')};
  if(t.guard&&unit.kind==='slime')return{type:'guard',target:t.id,reason:unit.name+'이 움츠러든 상대 앞에서 점액을 낮게 퍼뜨린다. 무리하게 뛰어들지 않는다.'};
- return{type:'prepare',target:t.id,reason:unit.name+(unit.kind==='ves'?'가 날개를 접었다 펴며 급강하를 준비한다.':unit.kind==='slime'?'이 몸을 뒤로 모아 덮칠 힘을 모은다.':'이 발을 고쳐 디디고 몽둥이를 들어 올린다.')};
+ return{type:'prepare',target:t.id,reason:unit.name+(unit.kind==='ant'?'가 앞다리를 벌리고 큰 턱을 열어 물기를 준비한다.':unit.kind==='ves'?'가 날개를 접었다 펴며 급강하를 준비한다.':unit.kind==='slime'?'이 몸을 뒤로 모아 덮칠 힘을 모은다.':'이 발을 고쳐 디디고 몽둥이를 들어 올린다.')};
  }
  act(action,targetId,skillId=null){if(this.status!=='playing')throw Error('종료된 전투입니다.');if(!['attack','heavy','guard','dodge','approach','retreat','heal','flee','skill'].includes(action))throw Error('행동을 선택해 주세요.');const skill=action==='skill'?Battle.skills.find(s=>s.id===skillId):null;if(skill&&skill.weapon!==this.weapon())throw Error('현재 전투 방식에서 사용할 수 없는 스킬입니다.');if(action==='skill'&&!skill)throw Error('사용할 스킬을 선택해 주세요.');const p=this.units[0],target=this.units.find(u=>u.id===targetId&&u.team==='enemy'&&u.hp>0)||this.living('enemy')[0];if(action==='attack'&&this.weapon()==='magic'&&p.mana<2)throw Error('마법 공격에는 마나 2가 필요합니다.');if(skill&&p.mana<skill.cost)throw Error('마나가 부족합니다.');if(action==='heal'&&!this.potions)throw Error('남은 포션이 없습니다.');if(action==='heavy'&&p.mana<6)throw Error('마나가 부족합니다.');const events=[];const emit=(text,extra={})=>{this.log.push(text);events.push({text,...extra,units:this.units.map(u=>({...u})),potions:this.potions});};const move=(u,t,away=false)=>{const old={x:u.x,y:u.y};let x=Math.max(0,Math.min(6,u.x+Math.sign(t.x-u.x)*(away?-1:1))),y=u.y;if(x===u.x||Math.abs(t.y-u.y)>1)y=Math.max(0,Math.min(2,u.y+Math.sign(t.y-u.y)*(away?-1:1)));const occupied=(xx,yy)=>this.units.some(a=>a.id!==u.id&&a.hp>0&&a.x===xx&&a.y===yy);if(occupied(x,y)){const alt=[u.y,u.y-1,u.y+1].find(yy=>yy>=0&&yy<=2&&!occupied(x,yy));if(alt===undefined){emit(u.name+'이 길이 막혀 자리를 지켰다.',{type:'guard',actor:u.id});return;} y=alt;}if(x===u.x&&y===u.y){emit(u.name+'이 더 이동할 공간이 없어 자리를 지킨다.',{type:'guard',actor:u.id});return;}u.x=x;u.y=y;emit(u.name+(away?'이 거리를 벌렸다.':'이 위치를 옮겼다.'),{type:'move',actor:u.id,from:old,to:{x,y}});};
  const hit=(a,t,damage,tag)=>{const weapon=a.id==='taei'?this.weapon():'gauntlet',ranged=weapon!=='gauntlet';
@@ -41,7 +41,7 @@ class Battle{
  else if(plan.type==='flank'){const candidates=[e.y-1,e.y+1].filter(y=>y>=0&&y<=2&&!this.units.some(a=>a.hp>0&&a.id!==e.id&&a.x===e.x&&a.y===y));if(candidates.length){const from={x:e.x,y:e.y};e.y=candidates[0];emit(e.name+'이 옆으로 이동해 압박한다.',{type:'move',actor:e.id,from,to:{x:e.x,y:e.y}});}else{e.guard=true;emit(e.name+'이 옆길이 막히자 자세를 낮춰 버틴다.',{type:'guard',actor:e.id});}e.windup=false;}
  else if(plan.type==='guard'){e.guard=true;e.windup=false;emit(e.name+'이 몸을 낮추고 다음 움직임을 기다린다.',{type:'guard',actor:e.id});}
  else if(plan.type==='prepare'){e.windup=true;emit(e.name+'이 '+t.name+'을 노리고 공격 자세를 잡았다.',{type:'tell',actor:e.id,target:t.id});}
- else{e.windup=false;hit(e,t,e.kind==='slime'?9:12,'공격');}
+ else{e.windup=false;hit(e,t,e.kind==='slime'?9:e.kind==='ant'?10:12,'공격');}
  }
  this.round++;if(p.hp<=0){this.status='lost';emit('김태이가 더는 싸울 수 없다.',{type:'end'});}else if(!this.living('enemy').length){this.status='won';emit('모든 적을 제압했다.',{type:'end'});}return events;}
  save(){return JSON.stringify({version:1,state:this});}
