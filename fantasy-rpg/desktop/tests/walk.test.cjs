@@ -1,0 +1,3 @@
+const t=require('node:test'),a=require('node:assert/strict'),M=require('../ui/map/walk.js').Map;
+t('click paths avoid blocked building cells and move continuously',()=>{const m=new M({width:8,height:6,start:{x:1,y:2},blocked:[{x:2,y:2}]});a(m.go(3,2));a(!m.route.some(p=>p.x===2&&p.y===2));m.tick(.05);a(m.player.x!==1||m.player.y!==2);for(let i=0;i<100;i++)m.tick(.1);a.deepEqual(m.player,{x:3,y:2});a.equal(m.route.length,0);});
+t('interactions require proximity and invalid destinations cannot replace a valid path',()=>{const m=new M();a.equal(m.nearest([{id:'far',x:0,y:0}]),null);a.equal(m.nearest([{id:'near',x:11,y:8}]).id,'near');a(m.go(11,8));const before=JSON.stringify(m.route);a.equal(m.go(100,100),false);a.equal(JSON.stringify(m.route),before);});

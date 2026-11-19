@@ -64,3 +64,9 @@ const unfinished=GameAI.pending();if(unfinished&&unfinished.scene===engine.state
 GameAI.check();
 
 $('battle-launch').onclick=async()=>{const result=await desktopAI.openBattle();if(!result.ok)toast(result.error);};
+
+function walkBuilding(target){
+ const old=document.querySelector('.walk-dialogue');old?.remove();const box=document.createElement('section');box.className='walk-dialogue';box.setAttribute('role','dialog');box.setAttribute('aria-label',target.label+' 상호작용');const name=document.createElement('strong');name.textContent=target.label;const text=document.createElement('p');text.textContent=target.note||'건물 앞에 도착했다. 내부 사건과 실제 이용 기능은 아직 연결되지 않았다.';const back=document.createElement('button');back.textContent='탐색으로 돌아가기';back.onclick=()=>box.remove();box.append(name,text,back);document.body.append(box);back.focus();
+}
+$('walk-launch').onclick=()=>{if(busy){toast('대화 응답을 기다리는 중입니다.');return;}const event=engine.state.active?engine.event(engine.state.active.id):null;const owner=event?.owner;const allowed=owner&&owner!=='taei'&&CharacterOrigins.allowed(owner,{era:event?.era||'earth',location:event?.location||'earth_subway'});WalkUI.open({background:SceneStage.backgrounds[event?.location]||SceneStage.backgrounds.earth_subway,npc:allowed?{id:owner,name:actorName(owner)}:null,label:'현재 장면 · 이동 시제품',onTalk:()=>{$('chat-input').focus();toast('기존 대화 화면으로 돌아왔습니다.');}});};
+$('town-walk-test').onclick=()=>{if(busy)return;const city=globalThis.CityDistrictData?.[0];WalkUI.open({background:city?.asset||SceneStage.backgrounds.well,label:'마을 이동 테스트 · 본편 위치와 저장은 유지',buildings:[{id:'inn',label:'여관',note:'여관 입구다. 방 예약과 숙박은 후속 연결 예정이다.'},{id:'shop',label:'잡화점',note:'잡화점 문 앞이다. 상품 목록과 거래는 후속 연결 예정이다.'},{id:'guild',label:'협회',note:'협회 입구다. 실제 의뢰 게시판 연결은 후속 작업이다.'},{id:'clinic',label:'진료소',note:'진료소 입구다. 진료 서비스는 후속 연결 예정이다.'}],onBuilding:walkBuilding});};
