@@ -1,0 +1,3 @@
+const t=require('node:test'),a=require('node:assert/strict'),F=require('../ui/battle/feedback.js');
+t('playback timings keep decisions shorter than actions and honor speed and reduced motion',()=>{a(F.duration({type:'think'})<F.duration({type:'attack'}));for(const type of ['attack','move','hit','miss','heal','cast','projectile','unknown']){a(F.duration({type})>0);a.equal(F.duration({type},2),F.duration({type})/2);a(F.duration({type},1,true)<=160);a(Number.isFinite(F.duration({type},NaN)));}});
+t('miss never creates hit sparks and equipped weapon chooses feedback',()=>{a.equal(F.burst('miss').count,0);a.notEqual(F.burst('hit','bow').count,F.burst('hit','magic').count);});
