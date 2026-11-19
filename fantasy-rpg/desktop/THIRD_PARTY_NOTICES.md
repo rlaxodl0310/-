@@ -5,3 +5,6 @@
 - @electron/packager 20.3.0 — BSD-2-Clause, build-time only.
 
 Runtime binaries are distributed unchanged from official Electron GitHub releases and OpenAI npm platform packages. Authentication belongs to the user's official Codex installation/account and is not distributed in the application archive.
+
+
+Three.js r160 (0.160.1), MIT license. Source: https://github.com/mrdoob/three.js . License: licenses/ThreeJS-MIT.txt . Bundled locally for the town WebGL renderer.

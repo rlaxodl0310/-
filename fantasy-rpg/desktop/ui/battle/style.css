@@ -48,3 +48,5 @@ html,body{width:100%;height:100%;overflow:hidden}body{background:#253e35}header{
 .cast-avatar{width:36px;height:56px;object-fit:contain;image-rendering:pixelated}
 
 .additional-monster-sprite{width:100%;height:100%;display:block;image-rendering:pixelated}
+
+.rt-link{color:#eedbb2;text-decoration:none;padding:10px 14px;background:#172d24;border:1px solid #c7bb8055;border-radius:4px;font-size:12px}
