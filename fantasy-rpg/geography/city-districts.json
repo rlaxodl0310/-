@@ -1,0 +1,2524 @@
+[
+  {
+    "id": "north-city-01",
+    "name": "도르문",
+    "continent": "north",
+    "location": "중남부 분지",
+    "infrastructure": [
+      "행정",
+      "교육",
+      "상업",
+      "물류"
+    ],
+    "visualDraft": "Slate civic buildings and timber shopfronts in a temperate sheltered northern basin, green hills, orderly school-going urban daily life, brass bells and communal covered arcades, no snow blanket.",
+    "asset": "assets/cities/north-city-01.png",
+    "districts": [
+      {
+        "name": "시청 앞길",
+        "row": 0,
+        "points": {
+          "administration": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "general_store": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "배움의 거리",
+        "row": 1,
+        "points": {
+          "school": [
+            50,
+            44
+          ],
+          "clinic": [
+            15,
+            50
+          ],
+          "prayer": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "상단 마당",
+        "row": 2,
+        "points": {
+          "warehouse": [
+            50,
+            44
+          ],
+          "inn": [
+            15,
+            50
+          ],
+          "eatery": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "온화한 북부 분지의 청회색 지붕과 목조 회랑. 행정·교육 시설, 종소리와 상단 마당이 어우러진 정돈된 생활도시."
+  },
+  {
+    "id": "north-city-02",
+    "name": "케스윅",
+    "continent": "north",
+    "location": "최북단 산맥 관문",
+    "infrastructure": [
+      "요새 방위",
+      "군수",
+      "방어 마법",
+      "칼드렌 마탑"
+    ],
+    "visualDraft": "Extreme northern fortress at a snowy mountain pass, heavy dark granite and iron shutters, teal defensive runes, practical disciplined garrison culture, snow swept to road edges, imposing but not crowded.",
+    "asset": "assets/cities/north-city-02.png",
+    "districts": [
+      {
+        "name": "요새 관문",
+        "row": 0,
+        "points": {
+          "fortress": [
+            50,
+            44
+          ],
+          "guard": [
+            15,
+            50
+          ],
+          "association": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "군수 골목",
+        "row": 1,
+        "points": {
+          "armory": [
+            50,
+            44
+          ],
+          "smith": [
+            15,
+            50
+          ],
+          "equipment_shop": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "방벽의 뜰",
+        "row": 2,
+        "points": {
+          "mage_tower": [
+            50,
+            44
+          ],
+          "clinic": [
+            15,
+            50
+          ],
+          "prayer": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "최북단 설산 관문의 짙은 화강암 성벽과 철제 방한 덧문. 청록색 방어 문양과 군수 시설로 요새의 긴장감을 표현."
+  },
+  {
+    "id": "north-city-03",
+    "name": "브리잔",
+    "continent": "north",
+    "location": "서부의 깊은 만",
+    "infrastructure": [
+      "항구",
+      "어업",
+      "조선"
+    ],
+    "visualDraft": "Cold deep western bay with steep cliffs, tarred timber, blue slate roofs and rope decorations, working fishing and shipwright harbor culture, wet cobbles and gulls, no polar ice.",
+    "asset": "assets/cities/north-city-03.png",
+    "districts": [
+      {
+        "name": "만 안쪽 부두",
+        "row": 0,
+        "points": {
+          "port": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "general_store": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "선박 골목",
+        "row": 1,
+        "points": {
+          "shipyard": [
+            50,
+            44
+          ],
+          "smith": [
+            15,
+            50
+          ],
+          "equipment_shop": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "선원 쉼터",
+        "row": 2,
+        "points": {
+          "inn": [
+            50,
+            44
+          ],
+          "eatery": [
+            15,
+            50
+          ],
+          "general_store": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "깊은 만의 절벽과 젖은 자갈길. 타르를 바른 목재·밧줄·그물·선박 골조로 어업과 조선의 생활감을 표현."
+  },
+  {
+    "id": "north-city-04",
+    "name": "오슬렌",
+    "continent": "north",
+    "location": "중앙으로 이어지는 남부 육로",
+    "infrastructure": [
+      "역참",
+      "마차 운송",
+      "창고"
+    ],
+    "visualDraft": "Temperate southern overland gateway of the north, broad packed gravel roads, red-brick coach courtyards, chestnut trees and warm timber beams; travelers and freight schedules shape street life.",
+    "asset": "assets/cities/north-city-04.png",
+    "districts": [
+      {
+        "name": "역참 앞마당",
+        "row": 0,
+        "points": {
+          "coach_station": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "inn": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "짐수레 거리",
+        "row": 1,
+        "points": {
+          "warehouse": [
+            50,
+            44
+          ],
+          "smith": [
+            15,
+            50
+          ],
+          "general_store": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "남문 생활길",
+        "row": 2,
+        "points": {
+          "administration": [
+            50,
+            44
+          ],
+          "eatery": [
+            15,
+            50
+          ],
+          "clinic": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "남부 육로의 넓은 역참 마당과 붉은 벽돌 창고. 마차·수레 수리 도구·여행객 숙소가 중심인 운송도시."
+  },
+  {
+    "id": "north-city-05",
+    "name": "헤스턴",
+    "continent": "north",
+    "location": "동부 산록",
+    "infrastructure": [
+      "의료",
+      "회복 시설",
+      "약재 유통"
+    ],
+    "visualDraft": "Eastern mountain foothill wellness town, pale limestone, sage-green shutters, herb drying racks, gentle terraces and mountain springs; quiet care and convalescence culture.",
+    "asset": "assets/cities/north-city-05.png",
+    "districts": [
+      {
+        "name": "회복의 뜰",
+        "row": 0,
+        "points": {
+          "hospital": [
+            50,
+            44
+          ],
+          "clinic": [
+            15,
+            50
+          ],
+          "prayer": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "약초 상점길",
+        "row": 1,
+        "points": {
+          "apothecary": [
+            50,
+            44
+          ],
+          "general_store": [
+            15,
+            50
+          ],
+          "eatery": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "산록 숙박길",
+        "row": 2,
+        "points": {
+          "inn": [
+            50,
+            44
+          ],
+          "school": [
+            15,
+            50
+          ],
+          "association": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "산록의 밝은 석회암 건물과 옅은 녹색 창문. 약초 건조대·계단식 정원·회복 시설이 있는 차분한 의료도시."
+  },
+  {
+    "id": "north-city-06",
+    "name": "마고트",
+    "continent": "north",
+    "location": "남서부 하천 평야",
+    "infrastructure": [
+      "농축산",
+      "식량 저장",
+      "하천 운송"
+    ],
+    "visualDraft": "Fertile southwest river floodplain, ochre half timber houses, grain baskets and cattle bells, sturdy low granaries, green fields and slow river; agricultural cooperative market life, no snow.",
+    "asset": "assets/cities/north-city-06.png",
+    "districts": [
+      {
+        "name": "곡물 장터",
+        "row": 0,
+        "points": {
+          "grain_market": [
+            50,
+            44
+          ],
+          "general_store": [
+            15,
+            50
+          ],
+          "association": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "강가 생활길",
+        "row": 1,
+        "points": {
+          "administration": [
+            50,
+            44
+          ],
+          "clinic": [
+            15,
+            50
+          ],
+          "prayer": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "목축 숙박길",
+        "row": 2,
+        "points": {
+          "inn": [
+            50,
+            44
+          ],
+          "eatery": [
+            15,
+            50
+          ],
+          "smith": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "하천 평야의 낮은 곡물 창고와 황토색 목조 주택. 곡물 바구니·가축 종·강변 길에 농축산 공동체의 분위기를 반영."
+  },
+  {
+    "id": "east-city-01",
+    "name": "샤델",
+    "continent": "east",
+    "location": "서부 강 유역",
+    "infrastructure": [
+      "행정",
+      "농산물 유통",
+      "상업"
+    ],
+    "visualDraft": "Humid western river valley, pale plaster and deep green tiled roofs, river stone embankments, woven produce baskets, riverside greenery; busy agricultural commerce and civic life.",
+    "asset": "assets/cities/east-city-01.png",
+    "districts": [
+      {
+        "name": "강변 청사길",
+        "row": 0,
+        "points": {
+          "administration": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "clinic": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "수확 장터",
+        "row": 1,
+        "points": {
+          "grain_market": [
+            50,
+            44
+          ],
+          "general_store": [
+            15,
+            50
+          ],
+          "eatery": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "나루 숙박길",
+        "row": 2,
+        "points": {
+          "inn": [
+            50,
+            44
+          ],
+          "school": [
+            15,
+            50
+          ],
+          "prayer": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "습윤한 강 유역의 연한 회벽과 녹색 기와. 수확물 바구니와 강변 석축을 따라 행정과 농산물 교역이 이어짐."
+  },
+  {
+    "id": "east-city-02",
+    "name": "에보니",
+    "continent": "east",
+    "location": "중앙 호숫가",
+    "infrastructure": [
+      "마법 교육",
+      "연구",
+      "의료",
+      "실베른 마탑"
+    ],
+    "visualDraft": "Humid central lakeside university town, silver-blue roof tiles, pale stone and living trees, subtle everyday magic rather than giant crystals, calm scholarly habits, lake reflections and lotus gardens.",
+    "asset": "assets/cities/east-city-02.png",
+    "districts": [
+      {
+        "name": "호수 학당길",
+        "row": 0,
+        "points": {
+          "mage_tower": [
+            50,
+            44
+          ],
+          "school": [
+            15,
+            50
+          ],
+          "association": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "연구 정원",
+        "row": 1,
+        "points": {
+          "research": [
+            50,
+            44
+          ],
+          "clinic": [
+            15,
+            50
+          ],
+          "prayer": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "학생 상점길",
+        "row": 2,
+        "points": {
+          "general_store": [
+            50,
+            44
+          ],
+          "inn": [
+            15,
+            50
+          ],
+          "eatery": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "호숫가의 은청색 지붕과 나무 정원. 과장된 수정 대신 소박한 마법 설비와 연구·교육 시설로 학술 분위기를 표현."
+  },
+  {
+    "id": "east-city-03",
+    "name": "미루카",
+    "continent": "east",
+    "location": "남부 습지와 평야의 경계",
+    "infrastructure": [
+      "약재",
+      "수산물",
+      "생태 조사"
+    ],
+    "visualDraft": "Wetland and fertile plain border, dark cypress timber on stone piers, raised walkways and reed awnings, mist and medicinal plants; practical wetland ecology and fishing livelihood, not a primitive settlement.",
+    "asset": "assets/cities/east-city-03.png",
+    "districts": [
+      {
+        "name": "습지 조사길",
+        "row": 0,
+        "points": {
+          "research": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "clinic": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "약재 교환길",
+        "row": 1,
+        "points": {
+          "apothecary": [
+            50,
+            44
+          ],
+          "general_store": [
+            15,
+            50
+          ],
+          "eatery": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "물가 쉼터",
+        "row": 2,
+        "points": {
+          "inn": [
+            50,
+            44
+          ],
+          "school": [
+            15,
+            50
+          ],
+          "prayer": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "습지 경계의 튼튼한 석조 기단과 목조 보행로. 갈대 차양·약초·수산물 도구가 생태 조사 시설과 함께 배치됨."
+  },
+  {
+    "id": "east-city-04",
+    "name": "즈펠",
+    "continent": "east",
+    "location": "중앙을 바라보는 서부 해안",
+    "infrastructure": [
+      "여객 항구",
+      "화물 운송",
+      "비행선 정박장"
+    ],
+    "visualDraft": "West-facing eastern coast gateway, sea-green tiled roofs, pale dockside stone, both sea passenger travel and restrained medieval fantasy airships, nautical pennants and wind flags, humid bright coastal weather.",
+    "asset": "assets/cities/east-city-04.png",
+    "districts": [
+      {
+        "name": "여객 부두",
+        "row": 0,
+        "points": {
+          "port": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "inn": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "하늘 정박길",
+        "row": 1,
+        "points": {
+          "air_dock": [
+            50,
+            44
+          ],
+          "smith": [
+            15,
+            50
+          ],
+          "equipment_shop": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "항구 상점길",
+        "row": 2,
+        "points": {
+          "general_store": [
+            50,
+            44
+          ],
+          "eatery": [
+            15,
+            50
+          ],
+          "administration": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "서부 해안의 연한 석조 건물과 청록색 지붕. 여객 부두와 공중 정박장을 구분하고 바람 깃발로 교통 관문을 표현."
+  },
+  {
+    "id": "east-city-05",
+    "name": "오티스",
+    "continent": "east",
+    "location": "북동부 구릉",
+    "infrastructure": [
+      "유리공예",
+      "생활용 마도구",
+      "교육"
+    ],
+    "visualDraft": "Northeast green hills with glass craft studios, translucent colored glass canopies, creamy stone and muted blue woodwork, subtle practical household magical lamps; refined artisan education culture.",
+    "asset": "assets/cities/east-city-05.png",
+    "districts": [
+      {
+        "name": "유리 공방길",
+        "row": 0,
+        "points": {
+          "craft_workshop": [
+            50,
+            44
+          ],
+          "smith": [
+            15,
+            50
+          ],
+          "equipment_shop": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "배움의 마당",
+        "row": 1,
+        "points": {
+          "school": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "administration": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "빛창 상점길",
+        "row": 2,
+        "points": {
+          "general_store": [
+            50,
+            44
+          ],
+          "inn": [
+            15,
+            50
+          ],
+          "eatery": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "구릉의 유리 공방과 색유리 차양. 생활용 마도구와 공예 교육이 보이는 밝고 섬세한 작업 거리."
+  },
+  {
+    "id": "east-city-06",
+    "name": "레븐",
+    "continent": "east",
+    "location": "남동부 해안",
+    "infrastructure": [
+      "어업",
+      "해상 운송",
+      "생물 연구 지원"
+    ],
+    "visualDraft": "Southeast subtropical wooded coast, blue-green sea, stone seawalls and salt-weathered cedar facades, tidepool specimen baskets, fishing nets; marine ecology support and working shipping community.",
+    "asset": "assets/cities/east-city-06.png",
+    "districts": [
+      {
+        "name": "어선 부두",
+        "row": 0,
+        "points": {
+          "port": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "smith": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "해양 조사길",
+        "row": 1,
+        "points": {
+          "research": [
+            50,
+            44
+          ],
+          "clinic": [
+            15,
+            50
+          ],
+          "school": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "해안 상점길",
+        "row": 2,
+        "points": {
+          "general_store": [
+            50,
+            44
+          ],
+          "inn": [
+            15,
+            50
+          ],
+          "eatery": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "남동부 해안의 소금기 어린 목재와 석조 방파제. 그물·조개 표본·어선 수리 도구로 어업과 해양 조사 문화를 표현."
+  },
+  {
+    "id": "west-city-01",
+    "name": "발크",
+    "continent": "west",
+    "location": "중앙 고원 분지",
+    "infrastructure": [
+      "행정",
+      "장비 제작",
+      "기술 교육",
+      "브라켄 마탑"
+    ],
+    "visualDraft": "기존 발크 시장·공방·강변 거리 일러스트 유지",
+    "asset": "assets/city-valk-districts.png",
+    "districts": [
+      {
+        "name": "중앙 시장",
+        "row": 0,
+        "points": {
+          "association": [
+            53,
+            41
+          ],
+          "general_store": [
+            13,
+            49
+          ],
+          "equipment_shop": [
+            88,
+            48
+          ]
+        }
+      },
+      {
+        "name": "서부 공방 골목",
+        "row": 1,
+        "points": {
+          "smith": [
+            20,
+            56
+          ],
+          "armory": [
+            83,
+            48
+          ]
+        }
+      },
+      {
+        "name": "동부 강변",
+        "row": 2,
+        "points": {
+          "clinic": [
+            17,
+            50
+          ],
+          "prayer": [
+            84,
+            43
+          ]
+        }
+      }
+    ],
+    "artDirection": "발크의 기존 시장·장비 공방·강변 그림 유지. 고원 분지의 장비 제작도시로 목재·석재·금속 가공의 균형을 유지."
+  },
+  {
+    "id": "west-city-02",
+    "name": "티몬",
+    "continent": "west",
+    "location": "북부 산록",
+    "infrastructure": [
+      "광업",
+      "제련",
+      "중량 화물 운송"
+    ],
+    "visualDraft": "Northern rocky mountain foothill mining city, ochre stone, dark steel bracing and slate roofs, engineered ore chutes, dusty sunlight and well-maintained drainage; proud practical miners and heavy freight craft culture.",
+    "asset": "assets/cities/west-city-02.png",
+    "districts": [
+      {
+        "name": "광석 마당",
+        "row": 0,
+        "points": {
+          "ore_yard": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "general_store": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "제련 골목",
+        "row": 1,
+        "points": {
+          "smith": [
+            50,
+            44
+          ],
+          "equipment_shop": [
+            15,
+            50
+          ],
+          "guard": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "광부 쉼터",
+        "row": 2,
+        "points": {
+          "inn": [
+            50,
+            44
+          ],
+          "eatery": [
+            15,
+            50
+          ],
+          "clinic": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "북부 산록의 황토빛 석재와 철제 보강재. 광석 선별장·제련 시설·무거운 짐수레로 광업도시의 실용성을 표현."
+  },
+  {
+    "id": "west-city-03",
+    "name": "로첸",
+    "continent": "west",
+    "location": "서부 하구",
+    "infrastructure": [
+      "항구",
+      "곡물 거래",
+      "금속 제품 수출"
+    ],
+    "visualDraft": "Western estuary city with ochre brick, green copper roof trims, canal locks, grain barrels and tidy metal cargo stacks; merchants connect farms to forged export goods, low river horizon.",
+    "asset": "assets/cities/west-city-03.png",
+    "districts": [
+      {
+        "name": "하구 선적길",
+        "row": 0,
+        "points": {
+          "port": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "administration": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "금속 상점길",
+        "row": 1,
+        "points": {
+          "equipment_shop": [
+            50,
+            44
+          ],
+          "smith": [
+            15,
+            50
+          ],
+          "general_store": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "수로 숙박길",
+        "row": 2,
+        "points": {
+          "inn": [
+            50,
+            44
+          ],
+          "eatery": [
+            15,
+            50
+          ],
+          "prayer": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "하구의 황토 벽돌과 구리빛 지붕 장식. 곡물 통과 금속 수출품을 실어 나르는 수로·부두의 분위기."
+  },
+  {
+    "id": "west-city-04",
+    "name": "쿠르사",
+    "continent": "west",
+    "location": "중앙으로 이어지는 동부 협곡 입구",
+    "infrastructure": [
+      "육상 운송",
+      "호위 중개",
+      "장비 수리"
+    ],
+    "visualDraft": "Eastern canyon gateway linking overland continents, terraced rust-red sandstone and pale timber, monumental but walkable bridge approaches, mule courtyards and shade cloth; escort contractors and caravan repair culture.",
+    "asset": "assets/cities/west-city-04.png",
+    "districts": [
+      {
+        "name": "협곡 역참",
+        "row": 0,
+        "points": {
+          "coach_station": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "guard": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "수리 골목",
+        "row": 1,
+        "points": {
+          "smith": [
+            50,
+            44
+          ],
+          "equipment_shop": [
+            15,
+            50
+          ],
+          "general_store": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "고개 쉼터",
+        "row": 2,
+        "points": {
+          "inn": [
+            50,
+            44
+          ],
+          "eatery": [
+            15,
+            50
+          ],
+          "clinic": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "동부 협곡의 적갈색 사암과 계단식 길. 호위 접수소·역참·수리 골목에 이동과 안전을 중시하는 도시의 생활을 반영."
+  },
+  {
+    "id": "west-city-05",
+    "name": "제노바",
+    "continent": "west",
+    "location": "남부 강 유역",
+    "infrastructure": [
+      "목재",
+      "직물",
+      "선박 부품 제작"
+    ],
+    "visualDraft": "Southern green river valley, timber lattice facades, hanging dyed fabrics, stacked ship ribs and water-powered sawmills, warm wood colors; textile workers and skilled ship-component makers share neighborhood lanes.",
+    "asset": "assets/cities/west-city-05.png",
+    "districts": [
+      {
+        "name": "목재 작업길",
+        "row": 0,
+        "points": {
+          "shipyard": [
+            50,
+            44
+          ],
+          "smith": [
+            15,
+            50
+          ],
+          "association": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "직물 공방길",
+        "row": 1,
+        "points": {
+          "craft_workshop": [
+            50,
+            44
+          ],
+          "general_store": [
+            15,
+            50
+          ],
+          "equipment_shop": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "강변 생활길",
+        "row": 2,
+        "points": {
+          "inn": [
+            50,
+            44
+          ],
+          "school": [
+            15,
+            50
+          ],
+          "clinic": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "남부 강 유역의 목재 격자 건물과 걸린 직물. 선박 부품·직물·목재 가공이 같은 생활권에 공존하는 생산도시."
+  },
+  {
+    "id": "west-city-06",
+    "name": "하딘",
+    "continent": "west",
+    "location": "북동부 산간 분지",
+    "infrastructure": [
+      "주거",
+      "교육",
+      "의료",
+      "생활용품 생산"
+    ],
+    "visualDraft": "Sheltered northeastern mountain basin, clean pale stone and honey timber homes, tidy courtyards, neighborhood tool makers, flower boxes; comfortable school and family health culture, no grim factory skyline.",
+    "asset": "assets/cities/west-city-06.png",
+    "districts": [
+      {
+        "name": "배움의 뜰",
+        "row": 0,
+        "points": {
+          "school": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "administration": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "생활 공방길",
+        "row": 1,
+        "points": {
+          "craft_workshop": [
+            50,
+            44
+          ],
+          "general_store": [
+            15,
+            50
+          ],
+          "smith": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "산간 쉼터",
+        "row": 2,
+        "points": {
+          "clinic": [
+            50,
+            44
+          ],
+          "inn": [
+            15,
+            50
+          ],
+          "eatery": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "산간 분지의 밝은 석재·꿀빛 목재·화분 있는 안뜰. 학교·진료소와 생활용품 제작이 가까운 가족 중심 생활도시."
+  },
+  {
+    "id": "south-city-01",
+    "name": "자하브",
+    "continent": "south",
+    "location": "큰 강의 하구",
+    "infrastructure": [
+      "행정",
+      "상단 본부",
+      "금융",
+      "대형 시장"
+    ],
+    "visualDraft": "Warm broad river delta trade capital, sand-colored stone, amber glazed tiles and turquoise shutters, covered arcades and geometric textile awnings; merchant negotiations, bookkeeping and public market etiquette, lush delta plants, not desert.",
+    "asset": "assets/cities/south-city-01.png",
+    "districts": [
+      {
+        "name": "상단 광장",
+        "row": 0,
+        "points": {
+          "administration": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "general_store": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "환전 회랑",
+        "row": 1,
+        "points": {
+          "exchange_house": [
+            50,
+            44
+          ],
+          "equipment_shop": [
+            15,
+            50
+          ],
+          "smith": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "하구 숙박길",
+        "row": 2,
+        "points": {
+          "inn": [
+            50,
+            44
+          ],
+          "eatery": [
+            15,
+            50
+          ],
+          "prayer": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "큰 강 하구의 모래빛 석재와 청록 창문·직물 차양. 상단 업무·환전·시장 거래를 중심으로 한 교역 분위기."
+  },
+  {
+    "id": "south-city-02",
+    "name": "코림",
+    "continent": "south",
+    "location": "북부의 큰 만",
+    "infrastructure": [
+      "여객",
+      "화물 항구",
+      "운송 연구",
+      "벨로아 마탑"
+    ],
+    "visualDraft": "Warm northern deep bay transport town, white stone and cobalt shutters, nautical brass and carefully organized loading balconies, magical transportation research discreetly integrated, blue bay and flowering trees.",
+    "asset": "assets/cities/south-city-02.png",
+    "districts": [
+      {
+        "name": "만 여객길",
+        "row": 0,
+        "points": {
+          "port": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "inn": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "항행 연구길",
+        "row": 1,
+        "points": {
+          "mage_tower": [
+            50,
+            44
+          ],
+          "school": [
+            15,
+            50
+          ],
+          "smith": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "부두 상점길",
+        "row": 2,
+        "points": {
+          "general_store": [
+            50,
+            44
+          ],
+          "equipment_shop": [
+            15,
+            50
+          ],
+          "eatery": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "북부 만의 흰 석재와 푸른 덧문·황동 항행 도구. 항구 여객과 운송 연구가 만나는 질서 있는 교통도시."
+  },
+  {
+    "id": "south-city-03",
+    "name": "베네치",
+    "continent": "south",
+    "location": "서부 내륙 평야",
+    "infrastructure": [
+      "농축산",
+      "직물",
+      "식량 유통"
+    ],
+    "visualDraft": "Warm western inland farming plain, cream stone and soft red tile roofs, fabric awnings, wheat carts, cattle courtyards and sun-washed green lanes; cloth production and communal harvest commerce.",
+    "asset": "assets/cities/south-city-03.png",
+    "districts": [
+      {
+        "name": "수확 장터",
+        "row": 0,
+        "points": {
+          "grain_market": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "general_store": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "천짜는 골목",
+        "row": 1,
+        "points": {
+          "craft_workshop": [
+            50,
+            44
+          ],
+          "smith": [
+            15,
+            50
+          ],
+          "equipment_shop": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "들판 숙박길",
+        "row": 2,
+        "points": {
+          "inn": [
+            50,
+            44
+          ],
+          "eatery": [
+            15,
+            50
+          ],
+          "clinic": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "온난한 내륙 평야의 붉은 기와와 밝은 회벽. 곡물·직물·낙농 식품이 오가는 수확 장터와 작업 골목."
+  },
+  {
+    "id": "south-city-04",
+    "name": "우드라",
+    "continent": "south",
+    "location": "동부 해안",
+    "infrastructure": [
+      "조선",
+      "선박 수리",
+      "항해 인력 양성"
+    ],
+    "visualDraft": "Warm eastern maritime coast, weathered ochre stone and navy-painted timber, giant ship ribs beyond spacious docks, sailcloth banners, rigging and nautical classrooms; expert ship repair and navigator training culture.",
+    "asset": "assets/cities/south-city-04.png",
+    "districts": [
+      {
+        "name": "건조장 앞길",
+        "row": 0,
+        "points": {
+          "shipyard": [
+            50,
+            44
+          ],
+          "smith": [
+            15,
+            50
+          ],
+          "association": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "항해 배움길",
+        "row": 1,
+        "points": {
+          "school": [
+            50,
+            44
+          ],
+          "equipment_shop": [
+            15,
+            50
+          ],
+          "guard": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "선원 생활길",
+        "row": 2,
+        "points": {
+          "inn": [
+            50,
+            44
+          ],
+          "eatery": [
+            15,
+            50
+          ],
+          "general_store": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "동부 해안의 바랜 황토 석재와 남색 목재. 선박 골조·돛감·항해 교육 도구로 조선과 수리의 전문성을 표현."
+  },
+  {
+    "id": "south-city-05",
+    "name": "페잔",
+    "continent": "south",
+    "location": "남동부의 큰 만",
+    "infrastructure": [
+      "국제 교역",
+      "창고",
+      "여행객 숙박"
+    ],
+    "visualDraft": "Large warm southeastern bay cosmopolitan trade city, varied but harmonized sandstone facades and layered jewel-colored awnings, merchant seals and luggage carts; welcoming international travel, warehouses and courtyard inns, not a royal palace.",
+    "asset": "assets/cities/south-city-05.png",
+    "districts": [
+      {
+        "name": "교역 상점길",
+        "row": 0,
+        "points": {
+          "general_store": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "administration": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "짐보관 거리",
+        "row": 1,
+        "points": {
+          "warehouse": [
+            50,
+            44
+          ],
+          "smith": [
+            15,
+            50
+          ],
+          "equipment_shop": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "여행자 회랑",
+        "row": 2,
+        "points": {
+          "inn": [
+            50,
+            44
+          ],
+          "eatery": [
+            15,
+            50
+          ],
+          "clinic": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "큰 만의 여러 교역품과 조화로운 차양. 창고·짐수레·안뜰 여관으로 국제 교역과 여행객 숙박의 다양성을 표현."
+  },
+  {
+    "id": "south-city-06",
+    "name": "나폴",
+    "continent": "south",
+    "location": "북서부 구릉",
+    "infrastructure": [
+      "도자기",
+      "염색",
+      "교육",
+      "농산물 거래"
+    ],
+    "visualDraft": "Warm northwest rolling hills, terracotta kilns, glazed ceramic roof ornaments, indigo dye vats and ochre plaster, fig gardens; earthy pottery and dye craft culture with apprentice streets and produce trade.",
+    "asset": "assets/cities/south-city-06.png",
+    "districts": [
+      {
+        "name": "가마 공방길",
+        "row": 0,
+        "points": {
+          "craft_workshop": [
+            50,
+            44
+          ],
+          "smith": [
+            15,
+            50
+          ],
+          "general_store": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "구릉 장터",
+        "row": 1,
+        "points": {
+          "grain_market": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "eatery": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "배움의 골목",
+        "row": 2,
+        "points": {
+          "school": [
+            50,
+            44
+          ],
+          "inn": [
+            15,
+            50
+          ],
+          "clinic": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "북서 구릉의 테라코타 가마와 쪽빛 염색 통. 도자기 장식·농산물 장터·도제 골목으로 흙과 색의 공예 분위기."
+  },
+  {
+    "id": "central-city-01",
+    "name": "펠릭스",
+    "continent": "central",
+    "location": "중앙 대하 연안의 황도",
+    "infrastructure": [
+      "연합 행정",
+      "외교",
+      "교통"
+    ],
+    "visualDraft": "Imperial capital on a great central river, more developed clean paved boulevards, white limestone with deep purple imperial cloth, formal stone balustrades and discreet magical streetlights; civic ceremony and diplomatic multicultural etiquette, still medieval fantasy no automobiles.",
+    "asset": "assets/cities/central-city-01.png",
+    "districts": [
+      {
+        "name": "황궁 앞대로",
+        "row": 0,
+        "points": {
+          "imperial_palace": [
+            50,
+            44
+          ],
+          "guard": [
+            15,
+            50
+          ],
+          "administration": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "외교 접수길",
+        "row": 1,
+        "points": {
+          "association": [
+            50,
+            44
+          ],
+          "school": [
+            15,
+            50
+          ],
+          "clinic": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "대하 상점길",
+        "row": 2,
+        "points": {
+          "general_store": [
+            50,
+            44
+          ],
+          "inn": [
+            15,
+            50
+          ],
+          "eatery": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "대하 연안 황도의 밝은 석회암·자주색 문장천·정비된 대로. 황궁 외곽과 공공 접수 구역으로 연합 행정·외교의 격식을 표현."
+  },
+  {
+    "id": "central-city-02",
+    "name": "루체른",
+    "continent": "central",
+    "location": "북동부 호수·구릉 지대의 성도",
+    "infrastructure": [
+      "교황청",
+      "의료",
+      "구호",
+      "순례 시설"
+    ],
+    "visualDraft": "Holy city on northeastern lake hills, ivory stone and restrained gold, generous stairs and cypress courtyards, stained glass and healing herb cloisters; pilgrimage, organized relief and sacred music culture, no omnipresent magic cures guaranteed.",
+    "asset": "assets/cities/central-city-02.png",
+    "districts": [
+      {
+        "name": "성당 앞뜰",
+        "row": 0,
+        "points": {
+          "cathedral": [
+            50,
+            44
+          ],
+          "prayer": [
+            15,
+            50
+          ],
+          "association": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "교황청 외곽길",
+        "row": 1,
+        "points": {
+          "papal_palace": [
+            50,
+            44
+          ],
+          "guard": [
+            15,
+            50
+          ],
+          "clinic": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "순례자 쉼터",
+        "row": 2,
+        "points": {
+          "inn": [
+            50,
+            44
+          ],
+          "eatery": [
+            15,
+            50
+          ],
+          "general_store": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "호수 구릉의 상아색 석재와 절제된 금색 장식. 성당·교황청 외곽·구호 진료소·순례 숙소의 종교도시 분위기."
+  },
+  {
+    "id": "central-city-03",
+    "name": "담보르",
+    "continent": "central",
+    "location": "북부·서부 육로 합류점",
+    "infrastructure": [
+      "환승 운송",
+      "도매시장",
+      "대형 창고"
+    ],
+    "visualDraft": "Overland northern and western route junction on central continent, excellent wide stone streets, red brick arcades and slate roof freight halls, clocks and route pennants; wholesale bargaining and efficient transfer logistics culture.",
+    "asset": "assets/cities/central-city-03.png",
+    "districts": [
+      {
+        "name": "환승 마당",
+        "row": 0,
+        "points": {
+          "coach_station": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "inn": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "도매 짐길",
+        "row": 1,
+        "points": {
+          "warehouse": [
+            50,
+            44
+          ],
+          "general_store": [
+            15,
+            50
+          ],
+          "smith": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "길목 생활길",
+        "row": 2,
+        "points": {
+          "administration": [
+            50,
+            44
+          ],
+          "clinic": [
+            15,
+            50
+          ],
+          "eatery": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "육로 합류점의 넓은 포장도로와 붉은 벽돌 회랑. 도매 짐마당과 환승 역참에 정확한 배차·하역 문화를 표현."
+  },
+  {
+    "id": "central-city-04",
+    "name": "이스탄",
+    "continent": "central",
+    "location": "동부의 완만한 고원",
+    "infrastructure": [
+      "학술",
+      "마법 연구",
+      "전문 의료",
+      "아스테르 마탑"
+    ],
+    "visualDraft": "Gentle eastern high plateau academic town, dressed pale stone, oxidized copper roofs, broad landscaped quadrangles and subtle rune-lit instruments; advanced scholarship, specialist care and formal research culture, spacious and calm.",
+    "asset": "assets/cities/central-city-04.png",
+    "districts": [
+      {
+        "name": "학술 회랑",
+        "row": 0,
+        "points": {
+          "mage_tower": [
+            50,
+            44
+          ],
+          "school": [
+            15,
+            50
+          ],
+          "association": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "의술 정원",
+        "row": 1,
+        "points": {
+          "hospital": [
+            50,
+            44
+          ],
+          "research": [
+            15,
+            50
+          ],
+          "clinic": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "학자 상점길",
+        "row": 2,
+        "points": {
+          "general_store": [
+            50,
+            44
+          ],
+          "inn": [
+            15,
+            50
+          ],
+          "eatery": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "완만한 고원의 다듬은 석재와 녹청색 금속 지붕. 연구 회랑·학당·전문 의료 구역의 정비된 학술도시."
+  },
+  {
+    "id": "central-city-05",
+    "name": "벨벳",
+    "continent": "central",
+    "location": "남부 대하의 항구",
+    "infrastructure": [
+      "해상",
+      "내륙 운송 연결",
+      "금융"
+    ],
+    "visualDraft": "Southern central great-river port where sea and inland barges meet, refined cream stone and dark blue roof tiles, iron canal rails and brass mooring rings; shipping finance and precise merchant services, broad water reflection.",
+    "asset": "assets/cities/central-city-05.png",
+    "districts": [
+      {
+        "name": "대하 부두길",
+        "row": 0,
+        "points": {
+          "port": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "guard": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "어음 상점길",
+        "row": 1,
+        "points": {
+          "exchange_house": [
+            50,
+            44
+          ],
+          "general_store": [
+            15,
+            50
+          ],
+          "administration": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "물길 숙박길",
+        "row": 2,
+        "points": {
+          "inn": [
+            50,
+            44
+          ],
+          "eatery": [
+            15,
+            50
+          ],
+          "smith": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "대하 항구의 밝은 석재와 남색 지붕·황동 계류 장치. 내륙 선박과 해상 운송, 환전 업무가 연결되는 상업 수변."
+  },
+  {
+    "id": "central-city-06",
+    "name": "조르다",
+    "continent": "central",
+    "location": "북서부 고원",
+    "infrastructure": [
+      "농업 연구",
+      "생활 시설 제작",
+      "교육"
+    ],
+    "visualDraft": "Northwestern central highland, clean cream stone and honey timber, terraced demonstration gardens and glass conservatories, waterwheel tools and blue cloth; agricultural experiment and practical household engineering educational culture, greener than imperial capital.",
+    "asset": "assets/cities/central-city-06.png",
+    "districts": [
+      {
+        "name": "실습 정원길",
+        "row": 0,
+        "points": {
+          "farm_school": [
+            50,
+            44
+          ],
+          "school": [
+            15,
+            50
+          ],
+          "association": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "생활 제작길",
+        "row": 1,
+        "points": {
+          "craft_workshop": [
+            50,
+            44
+          ],
+          "smith": [
+            15,
+            50
+          ],
+          "general_store": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "고원 생활길",
+        "row": 2,
+        "points": {
+          "clinic": [
+            50,
+            44
+          ],
+          "inn": [
+            15,
+            50
+          ],
+          "eatery": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "북서 고원의 시범 정원과 유리 온실·실습 도구. 농업 교육과 생활 시설 제작이 만나는 녹색 연구 생활권."
+  },
+  {
+    "id": "central-city-07",
+    "name": "로크웰",
+    "continent": "central",
+    "location": "남동부 내륙 평야",
+    "infrastructure": [
+      "주거",
+      "생활용품 생산",
+      "지역 상업"
+    ],
+    "visualDraft": "Southeastern central inland plain family city, comfortable cream plaster and warm brick, paved tree-lined neighborhood lanes, ceramic water fountains and modest magical street lamps; strong everyday shopping and domestic manufacture, more developed public facilities without royal grandeur.",
+    "asset": "assets/cities/central-city-07.png",
+    "districts": [
+      {
+        "name": "이웃 장터",
+        "row": 0,
+        "points": {
+          "general_store": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "administration": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "생활 작업길",
+        "row": 1,
+        "points": {
+          "craft_workshop": [
+            50,
+            44
+          ],
+          "smith": [
+            15,
+            50
+          ],
+          "equipment_shop": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "가족의 뜰",
+        "row": 2,
+        "points": {
+          "school": [
+            50,
+            44
+          ],
+          "clinic": [
+            15,
+            50
+          ],
+          "inn": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "내륙 평야의 따뜻한 벽돌과 나무 가로수·공공 분수. 중앙의 정비된 기반시설을 가진 평범하고 편안한 생활도시."
+  },
+  {
+    "id": "sky-city-01",
+    "name": "누메온",
+    "continent": "sky",
+    "location": "주섬 중앙 평지",
+    "infrastructure": [
+      "행정",
+      "상업",
+      "교육",
+      "물자 분배"
+    ],
+    "visualDraft": "Central flatland of floating main island, pale limestone and sky-blue ceramic roofs, windproof covered arcades, rainwater cisterns and rope-secured hanging gardens; orderly island resource sharing and education culture, clouds visible beyond protected edge but city has broad solid ground.",
+    "asset": "assets/cities/sky-city-01.png",
+    "districts": [
+      {
+        "name": "분배 광장",
+        "row": 0,
+        "points": {
+          "administration": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "warehouse": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "배움의 회랑",
+        "row": 1,
+        "points": {
+          "school": [
+            50,
+            44
+          ],
+          "clinic": [
+            15,
+            50
+          ],
+          "prayer": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "바람 상점길",
+        "row": 2,
+        "points": {
+          "general_store": [
+            50,
+            44
+          ],
+          "inn": [
+            15,
+            50
+          ],
+          "eatery": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "주섬 중앙의 밝은 석재와 하늘색 지붕·방풍 회랑. 빗물 저장과 공동 물자 분배를 고려한 안정적인 공중 생활도시."
+  },
+  {
+    "id": "sky-city-02",
+    "name": "하스카",
+    "continent": "sky",
+    "location": "주섬 남서쪽 가장자리",
+    "infrastructure": [
+      "공중 항구",
+      "비행선 정비",
+      "창고"
+    ],
+    "visualDraft": "Southwestern edge of a floating island, massive safe stone railings, honey timber and dark steel airship gantries, brass winches and mooring ropes, a few majestic airships beyond; practical flight crews and airborne cargo culture, not sci-fi, broad walkable safe quay.",
+    "asset": "assets/cities/sky-city-02.png",
+    "districts": [
+      {
+        "name": "구름 승선길",
+        "row": 0,
+        "points": {
+          "air_dock": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "port": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "비행선 작업길",
+        "row": 1,
+        "points": {
+          "air_workshop": [
+            50,
+            44
+          ],
+          "smith": [
+            15,
+            50
+          ],
+          "equipment_shop": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "계류 짐마당",
+        "row": 2,
+        "points": {
+          "warehouse": [
+            50,
+            44
+          ],
+          "inn": [
+            15,
+            50
+          ],
+          "eatery": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "주섬 가장자리의 안전한 석조 난간·황동 권양기·계류 밧줄. 승선장과 비행선 작업장으로 비행 인력의 실용적인 문화를 표현."
+  },
+  {
+    "id": "sky-city-03",
+    "name": "제피",
+    "continent": "sky",
+    "location": "동부 호숫가",
+    "infrastructure": [
+      "농업",
+      "수로 관리",
+      "식량 저장"
+    ],
+    "visualDraft": "Eastern freshwater lake on floating main island, green terraced fields, aqueducts and sluice gates, pale stone with muted mint timber, water conservation and agricultural distribution culture, solid island farmland with cloud sea far beyond, bright fresh air.",
+    "asset": "assets/cities/sky-city-03.png",
+    "districts": [
+      {
+        "name": "호수 물길",
+        "row": 0,
+        "points": {
+          "administration": [
+            50,
+            44
+          ],
+          "association": [
+            15,
+            50
+          ],
+          "general_store": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "수확 저장길",
+        "row": 1,
+        "points": {
+          "grain_market": [
+            50,
+            44
+          ],
+          "smith": [
+            15,
+            50
+          ],
+          "eatery": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "물가 생활길",
+        "row": 2,
+        "points": {
+          "school": [
+            50,
+            44
+          ],
+          "clinic": [
+            15,
+            50
+          ],
+          "inn": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "동부 호숫가의 녹색 경작지와 수문·수로. 수자원을 아끼고 수확물을 저장하는 공중섬 농업도시의 분위기."
+  },
+  {
+    "id": "sky-city-04",
+    "name": "운벨",
+    "continent": "sky",
+    "location": "북쪽의 큰 부속 섬",
+    "infrastructure": [
+      "부유 광물 가공",
+      "항행 장비 제작"
+    ],
+    "visualDraft": "Large northern satellite floating island, dark basalt and silvery mineral seams, pale geometric stone workshops, brass navigation instruments and a few restrained levitating ore stones; buoyant mineral artisans and precision navigation craft culture, no futuristic machinery.",
+    "asset": "assets/cities/sky-city-04.png",
+    "districts": [
+      {
+        "name": "부유석 작업길",
+        "row": 0,
+        "points": {
+          "ore_yard": [
+            50,
+            44
+          ],
+          "armory": [
+            15,
+            50
+          ],
+          "association": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "항행 공방길",
+        "row": 1,
+        "points": {
+          "air_workshop": [
+            50,
+            44
+          ],
+          "smith": [
+            15,
+            50
+          ],
+          "equipment_shop": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "돌바람 생활길",
+        "row": 2,
+        "points": {
+          "general_store": [
+            50,
+            44
+          ],
+          "inn": [
+            15,
+            50
+          ],
+          "clinic": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "북쪽 부속섬의 짙은 현무암과 은빛 광물·황동 항행 도구. 과도한 공상과학 장치 없이 부유 광물과 정밀 제작을 표현."
+  },
+  {
+    "id": "sky-city-05",
+    "name": "퀘린",
+    "continent": "sky",
+    "location": "주섬 서부 고지",
+    "infrastructure": [
+      "기상 관측",
+      "교육",
+      "직물 생산"
+    ],
+    "visualDraft": "Western high ground of floating main island, pale stone terraces, wind vanes and brass weather instruments, fluttering woven cloth and sheltered looms, lavender and yellow textile accents; forecasting, learning and wind-tested fabric craft culture, clouds moving beneath distant stone railings.",
+    "asset": "assets/cities/sky-city-05.png",
+    "districts": [
+      {
+        "name": "관측 언덕길",
+        "row": 0,
+        "points": {
+          "weather_station": [
+            50,
+            44
+          ],
+          "school": [
+            15,
+            50
+          ],
+          "association": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "바람 직물길",
+        "row": 1,
+        "points": {
+          "craft_workshop": [
+            50,
+            44
+          ],
+          "general_store": [
+            15,
+            50
+          ],
+          "smith": [
+            85,
+            50
+          ]
+        }
+      },
+      {
+        "name": "고지 쉼터",
+        "row": 2,
+        "points": {
+          "inn": [
+            50,
+            44
+          ],
+          "clinic": [
+            15,
+            50
+          ],
+          "prayer": [
+            85,
+            50
+          ]
+        }
+      }
+    ],
+    "artDirection": "주섬 서부 고지의 풍향계·관측 기구·방풍 직물. 바람을 측정하고 직물을 시험하는 교육·관측 작업도시."
+  }
+]
