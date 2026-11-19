@@ -76,5 +76,6 @@ jobs:
           소유자만 확인하는 초안 릴리스입니다. GitHub 소유자 계정 로그인이 필요합니다.
           "@ | Set-Content release/notes.txt -Encoding utf8
           if ($version -eq '0.22.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '세계관과 대화에서 즉석 생성하는 AI 이야기. 일반 전투는 채팅, 누적 사건 근거가 있는 중요 전투는 실시간 조작. 기존 저장 보존. 9명×4자세 투명 전투 원화, 장소4종/몬스터16종 독립 합성. 기존 설치에 패치 ZIP 적용. 실제 AI의 장기 일관성과 전체 특성/장비 판정은 계속 검토 중입니다.' }
+          if ($version -eq '0.22.1') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '로컬 인물 판단 시스템과 ChatGPT의 협력. 인물별 목표/목격 기억/불안/경험을 정리하고 모델의 문맥 피드백과 로컬 검토를 교환합니다. 최대1회 수정 요청, 성공 응답만 원자적으로 저장. 추가 모델 다운로드/API 없음. 로컬은 별도 생성형 언어 모델이 아니며 대사 생성에는 기존 ChatGPT 연결이 필요합니다. 기존 설치에 패치 ZIP 적용, 로그인과 저장 유지.' }
           gh release edit $tag --target $env:GITHUB_SHA --notes-file release/notes.txt --repo rlaxodl0310/-
           if ($LASTEXITCODE -ne 0) { throw 'Release notes update failed.' }
