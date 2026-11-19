@@ -28,3 +28,5 @@ html,body{width:100%;height:100%;overflow:hidden}body{background:#253e35}header{
 .pixel-body.ant-body{background-image:none!important;animation:none!important}.ant-sprite{width:100%;height:100%;image-rendering:pixelated;display:block}
 
 #cut-art.ant-cut{width:min(100%,440px);height:auto;aspect-ratio:550/506;margin:auto}
+
+.clad-sprite{width:100%;height:100%;image-rendering:pixelated;display:block}#cut-art.clad-cut{width:min(100%,850px);height:auto;aspect-ratio:1672/941;margin:auto}

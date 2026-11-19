@@ -1,1 +1,3 @@
 .monster-entry{margin:20px 0}.monster-entry h4{margin-top:18px}.monster-entry p{line-height:1.8}.monster-art{background-repeat:no-repeat;background-color:#152019;margin:14px 0;max-width:100%}.monster-art-main{aspect-ratio:976/1024;background-size:157.38% 100%;background-position:left top;max-width:650px}.monster-art-action,.monster-art-sd{aspect-ratio:550/506;background-size:279.273% 202.372%;background-position:right top;max-width:460px}.monster-art-sd{background-position:right bottom}
+
+.clad-art.monster-art-main,.clad-art.monster-art-action{aspect-ratio:1672/941;background-size:100% 100%;max-width:800px}.clad-art.monster-art-sd{aspect-ratio:2172/724;background-size:100% 100%;max-width:800px;background-position:center}
