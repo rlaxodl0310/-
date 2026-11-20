@@ -27,6 +27,7 @@ function register(){for(const [channel,handler]of Object.entries({
  'quest:simulate':r=>quests.simulate(r?.id),
  'quest:sell':r=>quests.sell(r?.item,r?.quantity),
  'quest:advance':()=>quests.advance(),
+ 'director:restore':r=>{if(bridge.busy)throw Error('진행 중인 AI 응답을 마친 뒤 복구해 주세요.');return director.restorePrevious(r?.revision??null);},
  'director:state':()=>director.read(),
  'director:send':r=>director.send(r),
  'director:launch':async r=>{if(bridge.busy)throw Error('진행 중인 입력을 마쳐 주세요.');await director.realtimeStart(r?.revision);await window.loadURL(realtimeEntry);return{ok:true};},
