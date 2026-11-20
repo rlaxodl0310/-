@@ -80,5 +80,6 @@ jobs:
           if ($version -eq '0.23.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '문맥/관계/현대 대화 예시 업그레이드. 낮은 확신도 피드백의 감정 반영 차단, 인물별 사실/추측/관계/대화 진행 구분, 창작 예시48개 검색, 목격 사건 인용 검사. 외부 코퍼스 재학습 아님. 내부 새40문장 분류18→25정답; 실제 ChatGPT 품질 A/B 미실시. 기존 설치에 패치 적용, 로그인과 저장 유지.' }
           if ($version -eq '0.24.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '장기 이야기 연속성 보조. 확정 설정/엔진 상태/관찰/추측 구분, 이전 상태 변경 근거 검사, 사건 원문 보존과20턴 인용 묶음, 과거 단서/미해결 문제 재검색, 실패 응답 저장 차단과 직전 저장 복구. 실제 ChatGPT 장기 품질 보장은 아님. 기존 설치에 패치 ZIP 적용, 로그인과 기존 저장 유지.' }
           if ($version -eq '0.25.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '일반 전투 행동 판정과 NPC 반응 1차 확장. 실제 확인한 물건/거리/부상 조건으로 판정 후 묘사, 상태와 사건 기록 유지, NPC 수락/망설임/거절 및 제한된 자율 반응, 행동 단서 보기. 모든 스킬/정밀 물리/실시간 장애물 동기화는 아직 아님. 기존 설치에 패치 ZIP 적용, 로그인과 저장 유지.' }
+          if ($version -eq '0.26.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '개인 스킬 등록/전투 사용/숙련/제한된 이펙트 레시피 엔진. 실제 보유 근거와 경험을 검사하며 공용 스킬 목록은 비워 둡니다. AI 이야기에서 별도 스킬 실험실을 실행할 수 있습니다. 기존 설치에 패치 적용, 로그인과 저장 유지.' }
           gh release edit $tag --target $env:GITHUB_SHA --notes-file release/notes.txt --repo rlaxodl0310/-
           if ($LASTEXITCODE -ne 0) { throw 'Release notes update failed.' }

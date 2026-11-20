@@ -1,0 +1,6 @@
+(function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.SkillEffects=factory();})(globalThis,()=>{
+'use strict';
+const palettes={physical:'#ffe6b0',fire:'#ff9c69',frost:'#acecff',shadow:'#b6a5ec',light:'#fff3c4',arcane:'#adc2ff'};
+function draw(ctx,event,point,scale,age,reduced=false){const v=event?.visual;if(!v||!Object.hasOwn(palettes,v.element)||!['arc','ring','trail','sparks'].includes(v.motif)||!Number.isFinite(age)||age<0||age>.55)return false;const p=point(event),t=reduced?.35:age/.55,r=Math.min(64,Math.max(12,scale*1.25))*Math.min(1.55,Math.max(.8,Number(v.scale)||1)),angle=Math.atan2(event.face?.y||0,event.face?.x||1);ctx.save();ctx.globalAlpha=reduced?.65:1-t;ctx.strokeStyle=palettes[v.element];ctx.lineWidth=2+(1-t)*2;ctx.translate(p.x,p.y);ctx.rotate(angle);ctx.beginPath();if(v.motif==='arc')ctx.arc(0,0,r*(.5+t*.7),-.9+t*.8,.9+t*.8);else if(v.motif==='ring')ctx.arc(0,0,r*(.4+t),0,Math.PI*2);else if(v.motif==='trail'){ctx.moveTo(-r*t,0);ctx.quadraticCurveTo(0,-r*.4,r*(.4+t),0);}else for(let i=0;i<8;i++){const a=i*Math.PI/4,d=r*(.2+t);ctx.moveTo(Math.cos(a)*d,Math.sin(a)*d);ctx.lineTo(Math.cos(a)*(d+6),Math.sin(a)*(d+6));}ctx.stroke();ctx.restore();return true;}
+return{draw};
+});
