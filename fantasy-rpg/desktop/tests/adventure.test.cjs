@@ -7,6 +7,7 @@ const t = require("node:test"),
   XP = require("../ui/progression/experience.js"),
   { initial, StoryDirector } = require("../electron/story-director.cjs"),
   { createCombat } = require("../ui/story/combat.js");
+function sampleContracts(s){const D=require('../ui/association/dynamic-contracts.js'),b=D.local(A.ensure(s));for(const p of b.plans){if(p.type==='hunt'){p.count=2;p.species='goblin';p.reward=100;}if(p.type==='supply'){p.count=2;p.reward=24;}}return b;}
 const start = () => ({
     ...initial(),
     era: "fantasy",
@@ -205,7 +206,8 @@ t(
       let d;
       const bridge = {
         check: async () => ({ ready: true }),
-        generateStructured: async () => {
+        generateStructured: async (messages,schema) => {
+          if(schema.properties.plans)return sampleContracts(await d.read());
           const s = await d.read(),
             moving = !!bridge.travel;
           return {
@@ -311,7 +313,7 @@ t(
   },
 );
 t(
-  "optional AI may add brief flavor but cannot alter contracts or commit a failed promise",
+  "AI creates complete executable contracts and invalid generation preserves the existing board",
   async () => {
     const fs = require("node:fs/promises"),
       os = require("node:os"),
@@ -321,14 +323,7 @@ t(
       let bad = false;
       const d = new StoryDirector(path.join(dir, "story.json"), {
         check: async () => ({ ready: true }),
-        generateStructured: async () => ({
-          quests: [1, 2, 3, 4, 5].map((i) => ({
-            id: "story-quest-" + i,
-            flavor: bad
-              ? "보상100금화"
-              : "접수인은 인근 주민들의 불편을 전하며 도움을 부탁한다.",
-          })),
-        }),
+        generateStructured: async () => {const b=sampleContracts(start());if(bad)b.plans[0].count=999;return b;},
       });
       await d.save(start());
       let s = await d.adventureAction({
@@ -339,6 +334,7 @@ t(
       a.equal(s.adventure.quests.length, 5);
       a(s.adventure.quests.every((q) => q.flavor));
       a.equal(s.adventure.quests[0].reward, 100);
+      s.minutes=360;await d.save(s);
       const before = await fs.readFile(d.file, "utf8");
       bad = true;
       await a.rejects(

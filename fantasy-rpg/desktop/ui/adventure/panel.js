@@ -26,6 +26,7 @@
         state.combat?.status === "playing" ||
         state.player.hp <= 0;
     let dialog;
+    if(a?.generation?.boards?.[state.location]){const g=a.generation.boards[state.location];n("p","탱탱 "+(g.source==='ai'?"↔ ChatGPT":"· 로컬 생성")+" · 게시판 "+g.generation+"회차");const log=n("details","");n("summary","탱탱의 계약 검토 기록",log);for(const x of g.exchange||[])n("p",x.actor+" · "+x.text,log);}
     const caravanTitle=n("p","호위는 ‘호위 여정’·‘개인 호위’, 채굴은 ‘마석 채굴’에서 실제 수행할 수 있습니다.");
     const message = n("p", "");
     message.setAttribute("role", "status");
@@ -59,28 +60,31 @@
     if (locked)
       n("p", "이세계에서 장면 생성과 전투를 마친 뒤 사용할 수 있습니다.");
     button(
-      "협회 게시판 확인 · 새 의뢰",
+      "탱탱에게 새 게시판 요청",
       { type: "refresh" },
       body,
       !Adventure.association(state),
     );
     if (allowAI)
       button(
-        "AI 안내문 포함해 새 의뢰",
+        "탱탱 ↔ ChatGPT · 계약 생성",
         { type: "refreshAI" },
         body,
         !Adventure.association(state),
       );
+    const generatorLab=n("a","탱탱 생성 시험 · 본편과 분리");generatorLab.href="association/generator-lab.html";
     const board = n("div", "");
     board.className = "wooden-quest-board";
     const papers = n("div", "", board);
     papers.className = "quest-paper-grid";
+    const archive=n("details","");n("summary","완료·교체·기한 종료 의뢰",archive);const archivedPapers=n("div","",archive);archivedPapers.className="quest-paper-grid";
     for (const q of a?.quests || []) {
       if (q.issuerLocation !== state.location && q.status !== "accepted")
         continue;
-      const paper = n("button", "", papers);
+      const paper = n("button", "", ["open","accepted"].includes(q.status)?papers:archivedPapers);
       paper.className = "quest-paper";
       paper.dataset.state = q.status;
+      paper.dataset.questId=q.id;
       const progress =
         q.type === "supply"
           ? a.inventory.filter(i=>i.kind==='material'&&!i.partyLootId).reduce((n,i)=>n+i.quantity,0)
@@ -151,7 +155,7 @@
             );
           if (q.type === "ecology")
             button(
-              "현장 조사 · 10분",
+              "현장 조사 · "+(q.surveyMinutes||10)+"분",
               { type: "survey", questId: q.id },
               dialog,
               q.destination !== state.location || Adventure.ready(state, q),

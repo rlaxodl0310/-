@@ -12,6 +12,7 @@
       require("../escort/model.js"),
       require("../escort/personal.js"),
       require("../mining/model.js"),
+      require("../association/dynamic-contracts.js"),
     );
   else
     r.Adventure = f(
@@ -26,8 +27,9 @@
       r.CaravanEscort,
       r.PersonalEscort,
       r.MiningQuest,
+      r.DynamicContracts,
     );
-})(globalThis, (Growth, XP, Rules, Money, Geo, Facilities, Essences, Party, Escort, Personal, Mining) => {
+})(globalThis, (Growth, XP, Rules, Money, Geo, Facilities, Essences, Party, Escort, Personal, Mining, Dynamic) => {
   "use strict";
   const clone = (x) => JSON.parse(JSON.stringify(x)),
     fail = (m) => {
@@ -83,6 +85,7 @@
     if(Escort)Escort.validate(s);
     if(Personal)Personal.validate(s);
     if(Mining)Mining.validate(s);
+    if(Dynamic)Dynamic.validate(s);
     return expire(s);
   }
   function validate(a) {
@@ -441,7 +444,7 @@
         ready(s, q)
       )
         fail("조사 의뢰의 실제 목적지에서 수행해 주세요.");
-      s.minutes += policy.surveyMinutes;
+      s.minutes += q.surveyMinutes||policy.surveyMinutes;
       if (s.minutes > q.deadline) fail("조사 중 의뢰 기한을 넘깁니다.");
       q.performers=[...new Set([...(q.performers||[]),"taei"])];
       q.progress = 1;
