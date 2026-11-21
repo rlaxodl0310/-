@@ -30,6 +30,7 @@ function register(){for(const [channel,handler]of Object.entries({
  'director:restore':r=>{if(bridge.busy)throw Error('진행 중인 AI 응답을 마친 뒤 복구해 주세요.');return director.restorePrevious(r?.revision??null);},
  'director:state':()=>director.read(),
  'director:send':r=>director.send(r),
+ 'director:adventure':r=>{if(bridge.busy)throw Error('AI 응답을 먼저 마쳐 주세요.');return director.adventureAction(r);},
  'director:progression':r=>{if(bridge.busy)throw Error('AI 응답이 끝난 뒤 변경해 주세요.');return director.progressionAction(r);},
  'director:launch':async r=>{if(bridge.busy)throw Error('진행 중인 입력을 마쳐 주세요.');await director.realtimeStart(r?.revision);await window.loadURL(realtimeEntry);return{ok:true};},
  'director:handoff':()=>director.activeHandoff?director.read().then(s=>({...director.activeHandoff,player:s.player,monsters:s.combat.monsters,enemies:s.combat.enemies,present:s.present,skillBook:s.skillBook,commonState:s.combat.commonState})):null,

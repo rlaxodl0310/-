@@ -158,6 +158,7 @@ t(
       const d = new StoryDirector(path.join(dir, "story.json"), {}),
         s = initial();
       s.era = "fantasy";
+      s.location = require("../ui/map/geography.js").records[0].id;
       s.combat = createCombat(["goblin"], "realtime", "test");
       await d.save(s);
       const h = await d.realtimeStart(0);
