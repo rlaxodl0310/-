@@ -1,0 +1,4 @@
+'use strict';
+// Different domains share the same core, not the same project rules or memories.
+const schema={type:'object',additionalProperties:false,required:['title','priority'],properties:{title:{type:'string',minLength:1,maxLength:80},priority:{type:'integer',minimum:1,maximum:3}}};
+module.exports={projects:{'sample-game':{'next-event':{adapterVersion:'1',instructions:'현재 게임 상황에 맞는 다음 사건을 제안한다. 실제 자원이나 완료를 확정하지 않는다.',schema,local:({context})=>({title:(context.place||'마을')+' 주변의 새 요청',priority:2}),validate:p=>{if(/보상 지급|완료했다/.test(p.title))throw Error('사건 제안만 가능하며 결과를 먼저 확정하지 않습니다.');},prepare:p=>({kind:'game-event-proposal',...p})}},'sample-app':{'next-task':{adapterVersion:'1',instructions:'현재 개발 프로젝트의 다음 작업을 제안한다. 배포나 파일 변경은 실행하지 않는다.',schema,local:({context})=>({title:(context.component||'설정 화면')+' 동작 점검',priority:1}),prepare:p=>({kind:'development-task-proposal',...p})}}}};

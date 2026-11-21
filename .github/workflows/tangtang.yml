@@ -1,0 +1,25 @@
+name: TangTang independent core
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tangtang/**'
+      - 'fantasy-rpg/desktop/electron/tangtang/**'
+      - 'fantasy-rpg/desktop/electron/contract-generator.cjs'
+      - 'fantasy-rpg/desktop/scripts/sync-tangtang.cjs'
+      - '.github/workflows/tangtang.yml'
+permissions:
+  contents: read
+jobs:
+  independent-and-consumer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm --prefix tangtang test
+      - run: node fantasy-rpg/desktop/scripts/sync-tangtang.cjs --check
+      - run: npm --prefix fantasy-rpg/desktop test
+      - run: npm --prefix tangtang run demo

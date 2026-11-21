@@ -76,7 +76,7 @@ class StoryDirector{
  const response=await generate(schema,'당신은 현재 계약에 기록된 의뢰인의 직업·용건·보호 물품을 바탕으로 이번 경로 제안 응답을 작성한다. decision은 accept 또는 refuse. text는240자 이하 자연스러운 한국어 존댓말. 실제 기한,남은 이동시간,자료 보존,부상,최근 위협과 불안을 고려해 자율적으로 동의하거나 거절한다. 빠른 길이라고 무조건 동의하지 않는다. 이름/나이/성별/비밀은 미정이며 새로 만들지 않는다. 돈/XP/보상/치료/자료 복구/도착 결과를 서술하지 않는다. '+JSON.stringify({contract:q.personal.contract,deadline:q.deadline,minutes:next.minutes,proposal:q.personal.pendingRoute,client:q.personal.client,condition:{hp:q.personal.clientHP,notes:q.personal.notes,stress:q.personal.stress},recentEvents:q.personal.history.slice(-8),opinions:q.personal.opinions.slice(-4)}),Personal.localOpinion(next,q),r=>Personal.opinion(next,q.id,r,'ai'));
  next=Personal.opinion(next,q.id,response.value,response.source);
  }
- }else if(['reunite','followup'].includes(req.action.type)){next=Personal.reunite(next,req.action);if(req.action.type==='followup')next=await ContractGenerator.followup(s,next,this.bridge);}
+ }else if(['reunite','followup'].includes(req.action.type)){next=Personal.reunite(next,req.action);if(req.action.type==='followup')next=await ContractGenerator.followup(s,next,this.bridge,{requestId:req.requestId});}
  else next=Personal.apply(next,req.action,{createCombat});
  if(req.action.type!=='rest')next=Services.advance(s,next);
  q=next.adventure.quests.find(q=>q.id===req.action.questId);
