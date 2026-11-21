@@ -26,6 +26,8 @@ npm install /path/to/tangtang-core-0.1.0.tgz
 
 `프로젝트 문맥 → 모델 제안 → schema/프로젝트 규칙 검토 → 준비 가능 여부 검토 → 수정 요청 → 승인 영수증`이다. 기본 수정 요청은1회, 설정 가능한 상한은3회다. 반려 이유와 이전 제안을 함께 모델에 돌려준다. 로컬 대안도 같은 검사를 통과해야 하며 `source: local`로 구분한다.
 
+모델 호출 자체가 실패하면 `PROVIDER_FAILED`로 즉시 중단한다. 권한·연결·시간 초과 같은 실행 오류를 내용 반려로 취급하거나 모델에 수정 요청으로 보내지 않으며, 로컬 결과로 자동 대체하지 않는다. 승인 영수증을 저장하지 않아 같은 요청을 다시 시도할 수 있다. 취소는 기존 취소 오류를 유지한다. 모델이 데이터를 반환한 뒤 형식·프로젝트 규칙 검증에서 반려된 경우에만 내용 수정을 요청한다.
+
 ```js
 const { TangTang, createBridgeProvider } = require('@tangtang/core');
 const { FileStore } = require('@tangtang/core/node');
