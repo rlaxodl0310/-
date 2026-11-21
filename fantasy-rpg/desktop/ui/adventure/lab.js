@@ -1,6 +1,6 @@
 "use strict";
 let state,
-  rare = true,
+  rare = "essence",
   serial = 0;
 const root = document.getElementById("panel-body");
 function reset() {
@@ -21,11 +21,17 @@ function reset() {
 function create(monsters, mode, reason) {
   const c = NarrativeCombat.createCombat(monsters, mode, reason);
   if (rare) {
-    for (let i = 0; i < 10000; i++) {
+    for (let i = 0; i < 1000000; i++) {
       const id = "lab-rare-" + serial + "-" + i;
+      const roll = CombatRules.rng(
+        CombatRules.hash("drop:" + id + ":0"),
+      ).next();
       if (
-        CombatRules.rng(CombatRules.hash("drop:" + id + ":0")).next() <
-        Adventure.policy.essenceChance
+        rare === "essence"
+          ? roll < Adventure.policy.essenceChance
+          : roll >= Adventure.policy.essenceChance &&
+            roll <
+              Adventure.policy.essenceChance + Adventure.policy.soulStoneChance
       ) {
         c.id = id;
         break;
@@ -87,9 +93,10 @@ function draw() {
 }
 document.getElementById("reset").onclick = reset;
 document.getElementById("rare").onclick = () => {
-  rare = !rare;
+  rare = rare === "essence" ? "soul" : rare === "soul" ? false : "essence";
   document.getElementById("rare").textContent =
-    "희귀 드랍 고정 시험 · " + (rare ? "켜짐" : "꺼짐");
+    "희귀 드랍 고정 시험 · " +
+    (rare === "essence" ? "정수" : rare === "soul" ? "영혼석" : "꺼짐");
 };
 document.getElementById("wait").onclick = () => {
   state.minutes += 31;

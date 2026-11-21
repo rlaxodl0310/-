@@ -27,8 +27,9 @@
     };
   // Balance defaults, not immutable world laws. Essences remain exceptionally rare.
   const policy = Object.freeze({
-    version: 1,
-    essenceChance: 0.005,
+    version: 2,
+    essenceChance: 0.0001,
+    soulStoneChance: 0.00015,
     stoneChance: 0.2,
     refreshMinutes: 360,
     surveyMinutes: 10,
@@ -62,6 +63,11 @@
         sequence: 0,
       };
     }
+    if (Array.isArray(s.adventure.ground))
+      for (const loot of s.adventure.ground) {
+        if (loot.soulStone === undefined) loot.soulStone = false;
+        if (loot.dropVersion === undefined) loot.dropVersion = 1;
+      }
     validate(s.adventure);
     return expire(s);
   }
@@ -93,7 +99,7 @@
         fail("중복 모험 기록입니다.");
     for (const item of a.inventory)
       if (
-        !["material", "stone"].includes(item.kind) ||
+        !["material", "stone", "soul-stone"].includes(item.kind) ||
         !Number.isSafeInteger(item.quantity) ||
         item.quantity <= 0
       )
@@ -105,6 +111,7 @@
         typeof loot.claimed !== "boolean" ||
         typeof loot.essence !== "boolean" ||
         typeof loot.stone !== "boolean" ||
+        typeof loot.soulStone !== "boolean" ||
         !Geo.records.some((p) => p.id === loot.location) ||
         !Essences.records.some(
           (m) => m.id === loot.species && m.stars === loot.stars,
@@ -280,7 +287,11 @@
       const random = Rules.rng(
           Rules.hash("drop:" + battle.id + ":" + enemy.id),
         ),
-        essence = random.next() < policy.essenceChance,
+        rareRoll = random.next(),
+        essence = rareRoll < policy.essenceChance,
+        soulStone =
+          rareRoll >= policy.essenceChance &&
+          rareRoll < policy.essenceChance + policy.soulStoneChance,
         stone = random.next() < policy.stoneChance,
         id = "loot-" + battle.id + "-" + enemy.id;
       a.ground.push({
@@ -291,6 +302,8 @@
         createdAt: s.minutes,
         claimed: false,
         essence,
+        soulStone,
+        dropVersion: 2,
         stone,
         stars: m.stars,
       });
@@ -429,6 +442,15 @@
           id: "stone:" + loot.stars,
           name: loot.stars + "등급 마석",
           kind: "stone",
+          quantity: 1,
+        });
+      if (loot.soulStone)
+        addStack(a, {
+          id: "soul:" + loot.species,
+          name: loot.name + " 영혼석",
+          kind: "soul-stone",
+          species: loot.species,
+          stars: loot.stars,
           quantity: 1,
         });
       if (loot.essence && s.minutes < loot.createdAt + 30)

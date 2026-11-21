@@ -201,12 +201,17 @@
           ? " · 정수 " + (loot.createdAt + 30 - state.minutes) + "분 남음"
           : "";
       button(
-        loot.name + " 재료" + (loot.stone ? " · 마석" : "") + essence + " 회수",
+        loot.name +
+          " 재료" +
+          (loot.stone ? " · 마석" : "") +
+          (loot.soulStone ? " · 영혼석" : "") +
+          essence +
+          " 회수",
         { type: "pickup", lootId: loot.id },
       );
     }
-    n("h3", "소지 재료·마석");
-    if (!a?.inventory.length) n("p", "소지한 재료·마석이 없습니다.");
+    n("h3", "소지 재료·마석·영혼석");
+    if (!a?.inventory.length) n("p", "소지한 재료·마석·영혼석이 없습니다.");
     for (const item of a?.inventory || [])
       n("p", item.name + " ×" + item.quantity);
     n("h3", "소지 정수");

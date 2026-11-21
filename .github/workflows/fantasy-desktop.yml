@@ -82,6 +82,7 @@ jobs:
           if ($version -eq '0.25.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '일반 전투 행동 판정과 NPC 반응 1차 확장. 실제 확인한 물건/거리/부상 조건으로 판정 후 묘사, 상태와 사건 기록 유지, NPC 수락/망설임/거절 및 제한된 자율 반응, 행동 단서 보기. 모든 스킬/정밀 물리/실시간 장애물 동기화는 아직 아님. 기존 설치에 패치 ZIP 적용, 로그인과 저장 유지.' }
           if ($version -eq '0.26.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '개인 스킬 등록/전투 사용/숙련/제한된 이펙트 레시피 엔진. 실제 보유 근거와 경험을 검사하며 공용 스킬 목록은 비워 둡니다. AI 이야기에서 별도 스킬 실험실을 실행할 수 있습니다. 기존 설치에 패치 적용, 로그인과 저장 유지.' }
           if ($version -eq '0.27.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '공용 액티브181항목 도감/실행/레시피 이펙트. 체력/마나 스탯1=HP/MP100, 등급 고정, 쿨타임 없음. 기존 자원 비율 보존. AI 이야기에서 도감·시험장을 열 수 있습니다. 수치와 수련 정책은 시제품 균형입니다. 기존 설치에 패치 적용, 로그인과 저장 유지.' }
+          if ($version -eq '0.34.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '정수0.01%,영혼석0.015% 희귀 드랍. 종/등급별 영혼석 소지품과 비소멸 저장, 기존 전리품 보존, 검증실 정수/영혼석 전환. 기존 로그인과 저장 유지.' }
           if ($version -eq '0.33.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '본편 토벌/조사/재료납품 수락·수행·귀환·증빙·돈/XP 정산. 현장 전리품 회수, 재료/마석 소지품, 희귀 정수의 생성 후30분 소멸과 흡수. 선택적 AI 안내문과 원자 저장. 기존 로그인/저장 유지, 별도 수행 검증실 포함.' }
           if ($version -eq '0.32.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '10레벨 구간 경험치 문턱, 몬스터별 차등 XP와 본편 승리 보상, 의뢰 경험치 견적/시험 완료 지급, 이월과3포인트 및 중복 방지. 기존 로그인과 저장 유지.' }
           if ($version -eq '0.31.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '성장→배분→정수→장비→전투→저장 통합 검증. 레벨 상승당3포인트 내부 보상과 중복 방지. 경험치 곡선은 검증실 전용 초안이며 본편 자동 보상은 미적용. 기존 로그인과 저장 유지.' }

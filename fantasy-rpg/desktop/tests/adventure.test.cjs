@@ -137,7 +137,7 @@ t(
     let s = board();
     s = act(s, "accept", find(s, "hunt"));
     let id;
-    for (let i = 0; i < 10000; i++) {
+    for (let i = 0; i < 1000000; i++) {
       const candidate = "rare-" + i;
       if (
         Rules.rng(Rules.hash("drop:" + candidate + ":0")).next() <
