@@ -44,7 +44,7 @@ t(
     const s = board();
     a.equal(s.adventure.economy.wallet, 0);
     a.deepEqual(s.adventure.inventory, []);
-    a.equal(s.adventure.quests.length, 3);
+    a.equal(s.adventure.quests.length, 4);
     M.check(s.adventure.economy);
     a.throws(() => A.apply(s, { type: "refresh" }));
     a.throws(() => A.apply(initial(), { type: "refresh" }));
@@ -322,7 +322,7 @@ t(
       const d = new StoryDirector(path.join(dir, "story.json"), {
         check: async () => ({ ready: true }),
         generateStructured: async () => ({
-          quests: [1, 2, 3].map((i) => ({
+          quests: [1, 2, 3, 4].map((i) => ({
             id: "story-quest-" + i,
             flavor: bad
               ? "보상100금화"
@@ -336,7 +336,7 @@ t(
         requestId: "ai-board-first",
         action: { type: "refreshAI" },
       });
-      a.equal(s.adventure.quests.length, 3);
+      a.equal(s.adventure.quests.length, 4);
       a(s.adventure.quests.every((q) => q.flavor));
       a.equal(s.adventure.quests[0].reward, 100);
       const before = await fs.readFile(d.file, "utf8");

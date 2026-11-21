@@ -6,6 +6,7 @@
     onAction,
     {
       onTravel = () => {},
+      onEscort = () => {},
       onAbsorb = async () => {},
       disabled = false,
       allowAI = true,
@@ -24,6 +25,7 @@
         state.combat?.status === "playing" ||
         state.player.hp <= 0;
     let dialog;
+    const caravanTitle=n("p","상인단 호위 의뢰는 수락 후 상단의 ‘호위 여정’에서 출발·이동·대응·인계할 수 있습니다.");
     const message = n("p", "");
     message.setAttribute("role", "status");
     async function run(action) {
@@ -91,6 +93,7 @@
             accepted: "수행 중",
             completed: "정산 완료",
             expired: "기한 종료",
+            failed: "계약 실패",
           }[q.status],
         ],
         ["span", Adventure.locationName(q.destination)],
@@ -136,7 +139,7 @@
             "접수소에 증빙 제출·정산",
             { type: "submit", questId: q.id },
             dialog,
-            q.issuerLocation !== state.location || !Adventure.ready(state, q),
+            (q.type==='caravan'?q.destination!==state.location:q.issuerLocation !== state.location) || !Adventure.ready(state, q),
           );
           if (q.type === "hunt")
             button(
@@ -152,10 +155,11 @@
               dialog,
               q.destination !== state.location || Adventure.ready(state, q),
             );
-          const travel = n("button", "이동할 말 입력", dialog);
+          const travel = n("button", q.type==='caravan'?"호위 여정 열기":"이동할 말 입력", dialog);
           travel.onclick = () => {
             dialog.close();
             dialog.remove();
+            if(q.type==='caravan'){onEscort();return;}
             onTravel(
               Adventure.travelText(
                 Adventure.ready(state, q) ? q.issuerLocation : q.destination,

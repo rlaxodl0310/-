@@ -4,9 +4,10 @@
       require("../realtime/engine.js"),
       require("./common.js"),
       require("../combat/rules.js"),
+      require("../escort/model.js"),
     );
-  else r.CommonChat = f(r.RealTimeBattle, r.CommonSkills, r.CombatRules);
-})(globalThis, (Battle, C, Rules) => {
+  else r.CommonChat = f(r.RealTimeBattle, r.CommonSkills, r.CombatRules, r.CaravanEscort);
+})(globalThis, (Battle, C, Rules, Escort) => {
   "use strict";
   const clone = (v) => JSON.parse(JSON.stringify(v)),
     distPoint = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -165,8 +166,10 @@
         c.distance--;
         note += " · 적이 거리를 좁힌다.";
       } else {
-        b.damage(actor, p, state.enemyDamage?.[actor.kind] || 12, "gauntlet");
-        note += " · 적이 반격한다.";
+        const victim=Escort?Escort.combatTarget({...c,round:(c.round||0)+1},p,basicIntent):p;
+        if(victim!==p)Object.assign(victim,{x:p.x-1,y:p.y,radius:.4,mass:180,commonStatuses:victim.commonStatuses||[]});
+        b.damage(actor, victim, state.enemyDamage?.[actor.kind] || 12, "gauntlet");
+        note += victim===p?" · 적이 반격한다.":" · 적이 "+victim.name+" 쪽을 공격한다.";
       }
     }
     const outgoing = (b.formulaLog || [])

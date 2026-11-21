@@ -3,9 +3,10 @@
     module.exports = f(
       require("../battle/roster.js"),
       require("../combat/rules.js"),
+      require("../escort/model.js"),
     );
-  else r.NarrativeCombat = f(r.CombatRoster, r.CombatRules);
-})(globalThis, (Roster, Rules) => {
+  else r.NarrativeCombat = f(r.CombatRoster, r.CombatRules, r.CaravanEscort);
+})(globalThis, (Roster, Rules, Escort) => {
   "use strict";
   const clone = (x) => JSON.parse(JSON.stringify(x));
   function createCombat(monsters, mode, reason) {
@@ -115,7 +116,7 @@
           "-" +
           resolution.formulaEvents.length,
         actor: source === player ? "taei" : "enemy-" + source.id,
-        target: victim === player ? "taei" : "enemy-" + victim.id,
+        target: victim === player ? "taei" : victim.id?.startsWith?.("escort-") ? victim.id : "enemy-" + victim.id,
         damage: actual,
         verdict,
       });
@@ -236,14 +237,16 @@
         resolution.enemyResponse = "적이 빈 거리를 좁히며 추격한다.";
       } else {
         const raw = Roster.get(actor.kind).damage,
+          victim=Escort?Escort.combatTarget(combat,player,intent):player,
           r = hit(
             actor,
-            player,
+            victim,
             raw,
             actor.aimPart || "torso",
             combat.guard ? 0.65 : 0,
           );
-        resolution.incoming = r.actual;
+        resolution.incoming = victim===player?r.actual:0;
+        if(victim!==player){resolution.escortDamage={target:victim.id,name:victim.name,damage:r.actual,hp:victim.hp};resolution.enemyResponse='적이 '+victim.name+' 쪽으로 공격했다.';}
         if (registered?.effect === "guard") {
           resolution.blocked = Math.max(
             0,
@@ -251,7 +254,7 @@
           );
           combat.guard = false;
         }
-        resolution.enemyResponse = combat.guard
+        if(victim===player)resolution.enemyResponse = combat.guard
           ? "적의 공격을 대비한 자세로 받아냈다."
           : "적이 빈틈을 노려 공격했다.";
       }

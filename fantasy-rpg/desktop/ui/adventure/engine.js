@@ -9,6 +9,7 @@
       require("../map/facilities.js"),
       require("../monsters/essence-rules.js"),
       require("../party/model.js"),
+      require("../escort/model.js"),
     );
   else
     r.Adventure = f(
@@ -20,8 +21,9 @@
       r.WorldFacilities,
       r.EssenceRules,
       r.PartyRewards,
+      r.CaravanEscort,
     );
-})(globalThis, (Growth, XP, Rules, Money, Geo, Facilities, Essences, Party) => {
+})(globalThis, (Growth, XP, Rules, Money, Geo, Facilities, Essences, Party, Escort) => {
   "use strict";
   const clone = (x) => JSON.parse(JSON.stringify(x)),
     fail = (m) => {
@@ -39,6 +41,7 @@
       hunt: { reward: 100, xp: 52, count: 2 },
       ecology: { reward: 40, xp: 45, count: 1 },
       supply: { reward: 24, xp: 36, count: 2 },
+      caravan: { reward: 160, xp: 90, count: 3 },
     }),
   });
   function association(state) {
@@ -71,6 +74,7 @@
         if (loot.dropVersion === undefined) loot.dropVersion = 1;
       }
     validate(s.adventure);
+    if(Escort)Escort.validate(s);
     return expire(s);
   }
   function validate(a) {
@@ -126,7 +130,7 @@
         !Geo.records.some((p) => p.id === q.issuerLocation) ||
         !Geo.records.some((p) => p.id === q.destination) ||
         !Number.isFinite(q.deadline) ||
-        !["open", "accepted", "completed", "expired"].includes(q.status) ||
+        !["open", "accepted", "completed", "expired", "failed"].includes(q.status) ||
         !Number.isInteger(q.progress) ||
         q.progress < 0
       )
@@ -141,10 +145,11 @@
       s.player = Growth.recalculate(s.player);
     }
     for (const q of s.adventure.quests)
-      if (["open", "accepted"].includes(q.status) && s.minutes > q.deadline) {
+      if (["open", "accepted"].includes(q.status) && s.minutes > q.deadline && !(q.type==='caravan'&&Escort?.ready(s,q))) {
         q.status = "expired";
         Money.release(s.adventure.economy, q.id);
       }
+    if(Escort)Escort.expire(s);
     if(Party&&s.partyRewards){Party.validate(s);Party.expire(s);}
     return s;
   }
@@ -176,8 +181,10 @@
       fail("협회 접수소가 있는 도시/마을에서 게시판을 확인해 주세요.");
     const a = s.adventure,
       previous = a.refreshes[s.location];
-    if (previous !== undefined && s.minutes - previous < policy.refreshMinutes)
+    if (previous !== undefined && s.minutes - previous < policy.refreshMinutes) {
+      if(Escort&&!a.quests.some(q=>q.type==='caravan'&&q.issuerLocation===s.location)&&Escort.post(s))return s;
       fail("새 의뢰는 세계 시간6시간마다 확인할 수 있습니다.");
+    }
     const site = destination(s),
       species = /곤충/.test(site.note)
         ? "ant"
@@ -247,11 +254,13 @@
       a.quests.push(q);
       made++;
     }
+    if(Escort)made+=Escort.post(s);
     if (!made) fail("추가 가능한 의뢰나 예치 예산이 없습니다.");
     a.refreshes[s.location] = s.minutes;
     return s;
   }
   function ready(s, q) {
+    if(q.type==='caravan')return Escort?Escort.ready(s,q):false;
     return q.type === "supply"
       ? s.adventure.inventory.filter(i=>i.kind==='material'&&!i.partyLootId).reduce((n,i)=>n+i.quantity,0) >= q.target
       : q.progress >= q.target;
@@ -265,6 +274,7 @@
         (a.economy.inventory.monster_scrap || 0) + item.quantity;
   }
   function observe(previous, state) {
+    if(Escort)state=Escort.observe(previous,state);
     if (state.era !== "fantasy") return state;
     const old = previous.combat,
       battle = state.combat,
@@ -346,8 +356,10 @@
       a.quests.some(
         (q) => q.status === "open" && q.issuerLocation === s.location,
       )
-    )
+    ) {
+      if(Escort&&!a.quests.some(q=>q.type==='caravan'&&q.issuerLocation===s.location))Escort.post(s);
       return s;
+    }
     if (action.type === "refresh" || action.type === "refreshAI")
       return refresh(s);
     if (action.type === "accept") {
@@ -367,8 +379,7 @@
       if (q.status === "completed") fail("이미 정산한 의뢰입니다.");
       if (
         q.status !== "accepted" ||
-        q.issuerLocation !== s.location ||
-        !association(s) ||
+        (q.type==='caravan'?s.location!==q.destination:q.issuerLocation !== s.location || !association(s)) ||
         !ready(s, q)
       )
         fail("원래 접수소에서 실제 목표와 증빙을 완료한 뒤 제출해 주세요.");
