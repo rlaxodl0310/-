@@ -103,6 +103,8 @@
         verdict: math,
       });
       this.formulaLog = this.formulaLog.slice(-4096);
+      const assisted=[...this.statuses(source).filter(s=>['attack','strength','weapon_edge','enchant','attackSpeed','castSpeed'].includes(s.key)).map(s=>({s,target:source.id})),...this.statuses(target).filter(s=>['defense','damageReduction'].includes(s.key)).map(s=>({s,target:target.id}))];
+      for(const {s,target:actorId} of assisted)if(s.source&&s.source!==actorId&&this.units.find(u=>u.id===s.source)?.team==='ally'&&result.afterDefense>=0){this.partyUtilityLog??=[];this.partyUtilityLog.push({id:'buff-assist-'+this.encounterId+'-'+(++this.serial),kind:'buff-assist',actor:s.source,target:actorId,amount:1});this.partyUtilityLog=this.partyUtilityLog.slice(-4096);}
       if (result.absorbed > 0)
         this.emit("blocked", {
           actor: source.id,
@@ -330,6 +332,7 @@
         ...extra,
       };
       u.commonStatuses = existing.concat(status).slice(-256);
+      if(isDebuff&&['root','slow','weak','defenseWeak','silence','airborne','stun'].includes(key)){this.partyUtilityLog??=[];this.partyUtilityLog.push({id:'utility-'+this.encounterId+'-'+(++this.serial),kind:'utility',actor:p.skill.ownerId,target:u.id,amount:Math.min(10,duration)});this.partyUtilityLog=this.partyUtilityLog.slice(-4096);}
       return status;
     };
     B.prototype.statusPower = function (u, key) {

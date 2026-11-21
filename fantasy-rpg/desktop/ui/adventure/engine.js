@@ -8,6 +8,7 @@
       require("../map/geography.js"),
       require("../map/facilities.js"),
       require("../monsters/essence-rules.js"),
+      require("../party/model.js"),
     );
   else
     r.Adventure = f(
@@ -18,8 +19,9 @@
       r.GameGeography,
       r.WorldFacilities,
       r.EssenceRules,
+      r.PartyRewards,
     );
-})(globalThis, (Growth, XP, Rules, Money, Geo, Facilities, Essences) => {
+})(globalThis, (Growth, XP, Rules, Money, Geo, Facilities, Essences, Party) => {
   "use strict";
   const clone = (x) => JSON.parse(JSON.stringify(x)),
     fail = (m) => {
@@ -143,6 +145,7 @@
         q.status = "expired";
         Money.release(s.adventure.economy, q.id);
       }
+    if(Party&&s.partyRewards){Party.validate(s);Party.expire(s);}
     return s;
   }
   function locationName(id) {
@@ -250,7 +253,7 @@
   }
   function ready(s, q) {
     return q.type === "supply"
-      ? (s.adventure.economy.inventory.monster_scrap || 0) >= q.target
+      ? s.adventure.inventory.filter(i=>i.kind==='material'&&!i.partyLootId).reduce((n,i)=>n+i.quantity,0) >= q.target
       : q.progress >= q.target;
   }
   function addStack(a, item) {
@@ -306,6 +309,7 @@
         dropVersion: 2,
         stone,
         stars: m.stars,
+        ...(battle.partyProof?{partyClaimants:battle.partyProof.claimants,partyContract:battle.partyProof.contract}:{}),
       });
       for (const q of a.quests)
         if (
@@ -316,6 +320,7 @@
           q.acceptedAt <= previous.minutes &&
           !q.proofs.includes(id)
         ) {
+          q.performers=[...new Set([...(q.performers||[]),...Object.keys(battle.partyProof?.metrics||{}).filter(id=>Object.values(battle.partyProof.metrics[id]).some(n=>n>0)),...(!battle.partyProof?["taei"]:[])])];
           q.progress++;
           q.proofs.push(id);
         }
@@ -354,6 +359,8 @@
         fail("해당 접수소에서 모집 중인 의뢰만 수락할 수 있습니다.");
       q.status = "accepted";
       q.acceptedAt = s.minutes;
+      q.performers=[];
+      q.partyContract=Party?(Party.context(s).contract||null):null;
       return s;
     }
     if (action.type === "submit") {
@@ -375,7 +382,7 @@
       });
       if (q.type === "supply") {
         let remaining = q.target;
-        for (const item of a.inventory.filter((x) => x.kind === "material")) {
+        for (const item of a.inventory.filter((x) => x.kind === "material"&&!x.partyLootId)) {
           const taken = Math.min(item.quantity, remaining);
           item.quantity -= taken;
           remaining -= taken;
@@ -383,12 +390,10 @@
         a.inventory = a.inventory.filter((i) => i.quantity > 0);
         if (remaining) fail("실제 납품 재료가 부족합니다.");
       }
-      s.player = XP.award(
-        s.player,
-        q.experienceReward,
-        "story-quest:" + q.id,
-        "quest",
-      );
+      q.performers=[...new Set([...(q.performers||[]),...(q.type==='supply'?['taei']:[])])];
+      if(Party){const rewarded=Party.questXP(s,q);s.player=rewarded.player;if(rewarded.partyRewards)s.partyRewards=rewarded.partyRewards;}else s.player=XP.award(s.player,q.experienceReward,'story-quest:'+q.id,'quest');
+      const payees=q.partyContract?.mode&&q.partyContract.mode!=='discuss'?q.partyContract.members:q.performers.length?q.performers:q.partyContract?.members||['taei'];
+      if(Party&&payees.length>1){const shared=Party.reserveMoney(s,q.reward,payees,q.partyContract,'quest:'+q.id);s.partyRewards=shared.partyRewards;s.adventure.economy=shared.adventure.economy;q.sharedMoneyPool=shared.partyRewards.pools.at(-1).id;}
       q.status = "completed";
       q.completedAt = s.minutes;
       q.receipt = { ...receipt, xp: q.experienceReward };
@@ -404,6 +409,7 @@
         fail("조사 의뢰의 실제 목적지에서 수행해 주세요.");
       s.minutes += policy.surveyMinutes;
       if (s.minutes > q.deadline) fail("조사 중 의뢰 기한을 넘깁니다.");
+      q.performers=[...new Set([...(q.performers||[]),"taei"])];
       q.progress = 1;
       q.proofs.push("survey:" + requestId);
       q.observation = Geo.records.find((p) => p.id === s.location).note;
@@ -431,6 +437,7 @@
       const loot = a.ground.find((x) => x.id === action.lootId);
       if (!loot || loot.claimed || loot.location !== s.location)
         fail("이 장소에서 아직 회수하지 않은 전리품만 획득할 수 있습니다.");
+      if(Party){const shared=Party.capture(s,loot);if(shared){const captured=shared.adventure.ground.find(x=>x.id===loot.id);captured.claimed=true;captured.claimedAt=s.minutes;return shared;}}
       addStack(a, {
         id: "material:" + loot.species,
         name: loot.name + " 재료",

@@ -80,7 +80,7 @@
       paper.dataset.state = q.status;
       const progress =
         q.type === "supply"
-          ? a.economy.inventory.monster_scrap || 0
+          ? a.inventory.filter(i=>i.kind==='material'&&!i.partyLootId).reduce((n,i)=>n+i.quantity,0)
           : q.progress;
       for (const [tag, text] of [
         ["strong", q.title],
@@ -166,7 +166,7 @@
         if (q.receipt)
           n(
             "p",
-            "지급 완료 · " +
+            (q.sharedMoneyPool?"정산 완료 · 공동 금액은 파티 분배에서 확인 · ":"지급 완료 · ") +
               GameEconomy.format(q.receipt.reward) +
               " / " +
               q.receipt.xp +

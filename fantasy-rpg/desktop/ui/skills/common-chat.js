@@ -217,7 +217,7 @@
     };
     const resolution = {
       engine: "common",
-      formulaEvents: [...(b.formulaLog || []), ...(b.healingLog || [])],
+      formulaEvents: [...(b.formulaLog || []), ...(b.healingLog || []),...(b.partyUtilityLog||[])],
       discoveredTrail: clone(b.revealedTrail || []),
       objectChanges: clone(b.props || []).filter(
         (p) => p.moved || p.vibratingUntil,
