@@ -44,7 +44,7 @@
     Object.assign(b.units[0], {
       level: p.level || 1,
       aimPart: p.aimPart || "torso",
-      stats:Rules.baseStats(p),effectBonuses:Rules.normalizeActor(p).effectBonuses,agility:Rules.stat(p,"agility",b.units[0].agility),combatStats: Rules.actorStats(p),
+      stats:Rules.baseStats(p),effectBonuses:Rules.normalizeActor(p).effectBonuses,agility:Rules.baseStats(p).agility??b.units[0].agility,combatStats: Rules.actorStats(p),
       armor: clone(p.armor || {}),
     });
     b.units[0].x = 5;

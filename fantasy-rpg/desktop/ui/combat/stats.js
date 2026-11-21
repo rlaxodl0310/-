@@ -44,6 +44,8 @@
     "criticalMultiplier",
   ];
   const clone = (v) => JSON.parse(JSON.stringify(v));
+  const fatiguePolicy=Object.freeze({thresholds:[40,60,80,100],multipliers:[1,.9,.8,.65,0]});
+  function fatigue(actor={}){const value=actor.fatigue??0;if(!Number.isFinite(value)||value<0||value>100)throw Error('피로도는0~100이어야 합니다.');const tier=value>=100?4:value>=80?3:value>=60?2:value>=40?1:0;return{value,tier,multiplier:fatiguePolicy.multipliers[tier],exhausted:tier===4,name:['양호','피곤','지침','심한 피로','탈진'][tier]};}
   function base(actor = {}) {
     const result = {};
     for (const { key } of fields) {
@@ -147,6 +149,7 @@
     };
   }
   return {
+    fatigue,fatiguePolicy,
     fields,
     aliases,
     base,

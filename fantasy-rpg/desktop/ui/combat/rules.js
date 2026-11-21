@@ -80,7 +80,7 @@
       health: "health",
       mana: "mana",
     };
-    if (mapping[key]) return Stats.value(actor, mapping[key], fallback);
+    if (mapping[key]) return Stats.value(actor, mapping[key], fallback)*(key==='agility'?Stats.fatigue(actor).multiplier:1);
     if (key === "vitalAccuracy") return 0;
     return number(actor?.effectBonuses?.[key] ?? actor?.[key], fallback);
   }
@@ -129,7 +129,7 @@
         now,
       ),
       weak = modifier(actor, ["weak"], POLICY.weaknessCap, now);
-    return base * Math.max(0, 1 + bonus - weak);
+    return base * Math.max(0, 1 + bonus - weak)*Stats.fatigue(actor).multiplier;
   }
   function penetration(
     defense,
@@ -332,7 +332,7 @@
           now,
         ) - modifier(source, ["weak"], 0.5, now),
       raw =
-        (base + attackBase * coefficient) * Math.max(0, 1 + attackBonus) * mult,
+        (base + attackBase * coefficient) * Math.max(0, 1 + attackBonus) * mult * Stats.fatigue(source).multiplier,
       part = input.part || "torso",
       armor = target.armor?.[part] || null,
       armorDR = armor ? ratio(armor.damageReduction) : 0,
@@ -587,6 +587,7 @@
   }
   return {
     POLICY,
+    fatigue:Stats.fatigue,
     normalizeActor: Stats.normalize,
     baseStats: Stats.base,
     baseFields: Stats.fields,

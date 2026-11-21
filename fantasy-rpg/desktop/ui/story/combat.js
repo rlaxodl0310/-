@@ -37,6 +37,7 @@
   function resolveCombat(original, stats, intent, target = 0, tactical = {}) {
     if (original.mode !== "chat" || original.status !== "playing")
       throw Error("진행 중인 채팅 전투가 아닙니다.");
+    if(Rules.fatigue(stats).exhausted&&!['observe','talk'].includes(intent))throw Error('탈진 상태에서는 공격·이동을 할 수 없습니다.');
     if (
       original.commonState &&
       typeof module === "object" &&
@@ -56,6 +57,7 @@
       !["attack", "defend", "move", "flee", "talk", "observe"].includes(intent)
     )
       throw Error("지원하지 않는 시도입니다.");
+    if(Rules.fatigue(stats).exhausted&&!['observe','talk'].includes(intent))throw Error('탈진 상태에서는 공격·이동을 할 수 없습니다.');
     const combat = clone(original),
       player = clone(stats),
       random = Rules.rng(combat.rngState || Rules.hash(combat.id)),

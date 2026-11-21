@@ -31,6 +31,7 @@ function select(state, input) {
   return matches[0] || null;
 }
 function cast(state, skill, input, id, target = 0) {
+ if(require('../ui/combat/stats.js').fatigue(state.player).exhausted)throw Error('탈진 상태에서는 스킬을 사용할 수 없습니다.');
   if (skill.origin === "common") {
     const def = Common.get(skill.commonId);
     if (["pull_object", "vibrate_object"].includes(def.mechanic.kind)) {

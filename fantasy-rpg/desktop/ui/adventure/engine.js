@@ -327,6 +327,7 @@
     if (state.era !== "fantasy") fail("이세계에서 사용할 수 있습니다.");
     if (state.combat?.status === "playing") fail("전투를 먼저 마쳐 주세요.");
     if (state.player.hp <= 0) fail("전투 불능 상태에서는 수행할 수 없습니다.");
+    if(Rules.fatigue(state.player).exhausted&&['hunt','survey'].includes(action.type))fail('탈진 상태에서는 먼저 수면이 필요합니다.');
     const s = ensure(state),
       a = s.adventure;
     let q;

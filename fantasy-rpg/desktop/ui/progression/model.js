@@ -229,6 +229,7 @@
         wielded.durability,
         p.weaponState.durability,
       );
+    if(!wielded&&p.weaponState&&Number.isFinite(p.weaponState.durability)&&g.legacyWeapon?.weaponState?.id===p.weaponState.id)g.legacyWeapon.weaponState.durability=Math.min(g.legacyWeapon.weaponState.durability,p.weaponState.durability);
     const list = sources(p),
       stats = {};
     for (const source of list)
