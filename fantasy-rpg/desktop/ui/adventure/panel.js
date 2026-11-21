@@ -7,6 +7,7 @@
     {
       onTravel = () => {},
       onEscort = () => {},
+      onMining = () => {},
       onAbsorb = async () => {},
       disabled = false,
       allowAI = true,
@@ -25,7 +26,7 @@
         state.combat?.status === "playing" ||
         state.player.hp <= 0;
     let dialog;
-    const caravanTitle=n("p","상인단 호위 의뢰는 수락 후 상단의 ‘호위 여정’에서 출발·이동·대응·인계할 수 있습니다.");
+    const caravanTitle=n("p","호위는 ‘호위 여정’·‘개인 호위’, 채굴은 ‘마석 채굴’에서 실제 수행할 수 있습니다.");
     const message = n("p", "");
     message.setAttribute("role", "status");
     async function run(action) {
@@ -155,11 +156,11 @@
               dialog,
               q.destination !== state.location || Adventure.ready(state, q),
             );
-          const travel = n("button", ['caravan','escort'].includes(q.type)?"호위 여정 열기":"이동할 말 입력", dialog);
+          const travel = n("button", q.type==='mining'?"채굴 여정 열기": ['caravan','escort'].includes(q.type)?"호위 여정 열기":"이동할 말 입력", dialog);
           travel.onclick = () => {
             dialog.close();
             dialog.remove();
-            if(['caravan','escort'].includes(q.type)){onEscort(q.type);return;}
+            if(q.type==='mining'){onMining();return;}if(['caravan','escort'].includes(q.type)){onEscort(q.type);return;}
             onTravel(
               Adventure.travelText(
                 Adventure.ready(state, q) ? q.issuerLocation : q.destination,

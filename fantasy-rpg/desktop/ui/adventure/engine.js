@@ -11,6 +11,7 @@
       require("../party/model.js"),
       require("../escort/model.js"),
       require("../escort/personal.js"),
+      require("../mining/model.js"),
     );
   else
     r.Adventure = f(
@@ -24,8 +25,9 @@
       r.PartyRewards,
       r.CaravanEscort,
       r.PersonalEscort,
+      r.MiningQuest,
     );
-})(globalThis, (Growth, XP, Rules, Money, Geo, Facilities, Essences, Party, Escort, Personal) => {
+})(globalThis, (Growth, XP, Rules, Money, Geo, Facilities, Essences, Party, Escort, Personal, Mining) => {
   "use strict";
   const clone = (x) => JSON.parse(JSON.stringify(x)),
     fail = (m) => {
@@ -45,6 +47,7 @@
       supply: { reward: 24, xp: 36, count: 2 },
       caravan: { reward: 160, xp: 90, count: 3 },
       escort: { reward: 180, xp: 110, count: 3 },
+      mining: { reward: 120, xp: 80, count: 4 },
     }),
   });
   function association(state) {
@@ -79,6 +82,7 @@
     validate(s.adventure);
     if(Escort)Escort.validate(s);
     if(Personal)Personal.validate(s);
+    if(Mining)Mining.validate(s);
     return expire(s);
   }
   function validate(a) {
@@ -149,12 +153,13 @@
       s.player = Growth.recalculate(s.player);
     }
     for (const q of s.adventure.quests)
-      if (["open", "accepted"].includes(q.status) && s.minutes > q.deadline && !(q.type==='caravan'&&Escort?.ready(s,q)) && !(q.type==='escort'&&Personal?.ready(s,q))) {
+      if (["open", "accepted"].includes(q.status) && s.minutes > q.deadline && !(q.type==='caravan'&&Escort?.ready(s,q)) && !(q.type==='escort'&&Personal?.ready(s,q)) && !(q.type==='mining'&&Mining?.ready(s,q))) {
         q.status = "expired";
         Money.release(s.adventure.economy, q.id);
       }
     if(Escort)Escort.expire(s);
     if(Personal)Personal.expire(s);
+    if(Mining)Mining.expire(s);
     if(Party&&s.partyRewards){Party.validate(s);Party.expire(s);}
     return s;
   }
@@ -190,6 +195,7 @@
       let added=0;
       if(Escort&&!a.quests.some(q=>q.type==='caravan'&&q.issuerLocation===s.location))added+=Escort.post(s);
       if(Personal&&!a.quests.some(q=>q.type==='escort'&&q.issuerLocation===s.location))added+=Personal.post(s);
+      if(Mining&&!a.quests.some(q=>q.type==='mining'))added+=Mining.post(s);
       if(added)return s;
       fail("새 의뢰는 세계 시간6시간마다 확인할 수 있습니다.");
     }
@@ -264,6 +270,7 @@
     }
     if(Escort)made+=Escort.post(s);
     if(Personal)made+=Personal.post(s);
+    if(Mining)made+=Mining.post(s);
     if (!made) fail("추가 가능한 의뢰나 예치 예산이 없습니다.");
     a.refreshes[s.location] = s.minutes;
     return s;
@@ -271,6 +278,7 @@
   function ready(s, q) {
     if(q.type==='caravan')return Escort?Escort.ready(s,q):false;
     if(q.type==='escort')return Personal?Personal.ready(s,q):false;
+    if(q.type==='mining')return Mining?Mining.ready(s,q):false;
     return q.type === "supply"
       ? s.adventure.inventory.filter(i=>i.kind==='material'&&!i.partyLootId).reduce((n,i)=>n+i.quantity,0) >= q.target
       : q.progress >= q.target;
@@ -286,6 +294,7 @@
   function observe(previous, state) {
     if(Escort)state=Escort.observe(previous,state);
     if(Personal)state=Personal.observe(previous,state);
+    if(Mining)state=Mining.observe(previous,state);
     if (state.era !== "fantasy") return state;
     const old = previous.combat,
       battle = state.combat,
@@ -370,6 +379,7 @@
     ) {
       if(Escort&&!a.quests.some(q=>q.type==='caravan'&&q.issuerLocation===s.location))Escort.post(s);
       if(Personal&&!a.quests.some(q=>q.type==='escort'&&q.issuerLocation===s.location))Personal.post(s);
+      if(Mining&&!a.quests.some(q=>q.type==='mining'))Mining.post(s);
       return s;
     }
     if (action.type === "refresh" || action.type === "refreshAI")
