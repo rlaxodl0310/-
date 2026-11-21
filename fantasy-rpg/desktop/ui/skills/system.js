@@ -375,11 +375,12 @@
     const b = read(book),
       skill = Common.definition(id, ownerId),
       old = b.skills.find((s) => s.id === skill.id);
-    if (old) return { book: b, skill: old, created: false };
+    if (old) { if(old.progressionGranted){delete old.progressionGranted;old.acquisition=clone(source);b.revision++;} return { book: b, skill: old, created: false }; }
     if (b.skills.length >= 1024) throw Error("스킬 기록 한도입니다.");
     skill.acquisition = clone(source);
     b.skills.push(skill);
-    b.progress[skill.id] = { xp: 0, uses: 0, encounters: {} };
+    b.progress[skill.id] ??= { xp: 0, uses: 0, encounters: {} };
+    if(b.dormantProgressionSkills)delete b.dormantProgressionSkills[skill.id];
     b.revision++;
     return { book: b, skill, created: true };
   }
@@ -440,6 +441,7 @@
     )
       throw Error("지금 행동할 수 있는 상태가 아닙니다.");
     if (s.origin === "common") {
+      if(s.progressionGranted&&!(s.progressionSources||[]).some(id=>(ctx.equipmentIds||[]).includes(id)))throw Error("스킬을 제공하는 장비를 사용할 수 없습니다.");
       const p = Common.prepare(s, ctx);
       if (ctx.mana < p.mana) throw Error("마나가 부족합니다.");
       return { ...p, skill: clone(s) };
