@@ -62,9 +62,9 @@ function draw() {
     "레벨 " +
     (player.level ?? 1) +
     " · 경험치 " +
-    (player.draftExperience?.xp || 0) +
+    (player.experience?.xp || 0) +
     " / " +
-    LevelDraft.required(player.level ?? 1) +
+    ExperienceRules.required(player.level ?? 1) +
     " · 레벨업당 3포인트";
   container.replaceChildren();
   ProgressionUI.render(container, player, now, async (action) => {
@@ -88,7 +88,7 @@ document.getElementById("reload").onclick = () => {
   draw();
 };
 document.getElementById("xp").onclick = () => {
-  player = LevelDraft.award(player, 100, "lab-xp-" + ++xpSerial);
+  player = ExperienceRules.award(player, 100, "lab-xp-" + ++xpSerial, "test");
   draw();
 };
 document.getElementById("integration").onclick = () => {
@@ -105,7 +105,7 @@ document.getElementById("integration").onclick = () => {
     };
     sample.hp = 120;
     sample.mana = 170;
-    sample = LevelDraft.award(sample, 100, "integration-xp");
+    sample = ExperienceRules.award(sample, 100, "integration-xp", "test");
     sample = Progression.apply(sample, {
       type: "allocate",
       values: { strength: 3 },

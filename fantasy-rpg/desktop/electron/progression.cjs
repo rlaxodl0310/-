@@ -48,8 +48,10 @@ function sync(state) {
   return { ...state, player, skillBook: book };
 }
 function context(state) {
+  const XP=require("../ui/progression/experience.js");
   return {
     ...G.breakdown(state.player, state.skillBook?.clock || 0),
+    experience:{level:state.player.level||1,current:state.player.experience?.xp||0,required:XP.required(state.player.level||1),policy:XP.policy,authority:"경험치는 실제 전투/검증된 의뢰 완료만 지급한다. AI가 묘사로 경험치/레벨/포인트를 발명하지 않는다."},
     rule: "합계는 이미 출처별 보너스를 포함한다. 정수/장비 보너스를 다시 더하지 않는다. 소지하지 않은 물품·포인트를 만들어 지급하지 않는다. pending-cost-and-mechanic 능력은 설명만 등록되었으며 사용 성공/소모량을 발명하지 않는다.",
   };
 }

@@ -15,6 +15,7 @@
         return e;
       };
     n("h3", "능력치와 성장");
+    if(globalThis.ExperienceRules)n("p","레벨 "+(player.level||1)+" · 경험치 "+(player.experience?.xp||0)+" / "+ExperienceRules.required(player.level||1));
     const table = n("table", "");
     table.className = "progression-table";
     const header = n("tr", "", n("thead", "", table));
