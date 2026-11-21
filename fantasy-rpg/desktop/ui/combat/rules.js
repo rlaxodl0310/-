@@ -1,7 +1,8 @@
 (function (root, factory) {
-  if (typeof module === "object" && module.exports) module.exports = factory();
-  else root.CombatRules = factory();
-})(globalThis, () => {
+  if (typeof module === "object" && module.exports)
+    module.exports = factory(require("./stats.js"));
+  else root.CombatRules = factory(root.StatRules);
+})(globalThis, (Stats) => {
   "use strict";
   const clamp = (x, a, b) => Math.max(a, Math.min(b, x)),
     clone = (x) => JSON.parse(JSON.stringify(x));
@@ -68,8 +69,22 @@
     return n >>> 0;
   }
   function stat(actor, key, fallback = 0) {
-    return number(actor?.combatStats?.[key] ?? actor?.[key], fallback);
+    const mapping = {
+      attack: "strength",
+      magicAttack: "magicAttack",
+      defense: "defense",
+      magicDefense: "magicResistance",
+      strength: "strength",
+      agility: "agility",
+      magicResistance: "magicResistance",
+      health: "health",
+      mana: "mana",
+    };
+    if (mapping[key]) return Stats.value(actor, mapping[key], fallback);
+    if (key === "vitalAccuracy") return 0;
+    return number(actor?.effectBonuses?.[key] ?? actor?.[key], fallback);
   }
+
   function strongest(statuses, now = 0) {
     const groups = new Map();
     for (const s of statuses || []) {
@@ -97,11 +112,7 @@
   }
   function effectiveDefense(actor, type, now = 0) {
     const base = positive(
-        stat(
-          actor,
-          type === "magic" ? "magicDefense" : "defense",
-          stat(actor, "defense"),
-        ),
+        stat(actor, type === "magic" ? "magicDefense" : "defense", 0),
       ),
       bonus = modifier(actor, ["defense"], POLICY.defenseBuffCap, now),
       weak = modifier(actor, ["defenseWeak"], POLICY.weaknessCap, now);
@@ -109,11 +120,7 @@
   }
   function effectiveAttack(actor, type, now = 0) {
     const base = positive(
-      stat(
-        actor,
-        type === "magic" ? "magicAttack" : "attack",
-        stat(actor, "attack"),
-      ),
+      stat(actor, type === "magic" ? "magicAttack" : "attack", 0),
     );
     const bonus = modifier(
         actor,
@@ -315,11 +322,7 @@
         input.penetrationOrder,
       ),
       attackBase = positive(
-        stat(
-          source,
-          type === "magic" ? "magicAttack" : "attack",
-          stat(source, "attack"),
-        ),
+        stat(source, type === "magic" ? "magicAttack" : "attack", 0),
       ),
       attackBonus =
         modifier(
@@ -336,7 +339,7 @@
       vital = vitalContest(
         attack,
         defense,
-        input.vitalAccuracy ?? stat(source, "vitalAccuracy"),
+        input.vitalAccuracy ?? input.skillOptions?.vitalAccuracy ?? 0,
         input.vitalCoefficient ?? 1,
         armorDR,
       ),
@@ -556,27 +559,13 @@
     return null;
   }
   function actorStats(actor = {}) {
-    const result = { ...(actor.combatStats || {}) };
-    for (const key of [
-      "attack",
-      "magicAttack",
-      "defense",
-      "magicDefense",
-      "criticalChance",
-      "criticalMultiplier",
-      "vitalAccuracy",
-      "healingPower",
-      "shieldPower",
-      "controlPower",
-      "controlResistance",
-    ])
-      if (!Number.isFinite(result[key]) && Number.isFinite(actor[key]))
-        result[key] = actor[key];
-    return result;
+    return Stats.derived(actor);
   }
+
   function context() {
     return {
       version: POLICY.version,
+      statSystem: Stats.context(),
       authority:
         "코드의 판정 결과가 피해/방호/회복의 원본이며 AI가 수치·치명타·우회 성공을 발명하지 않는다.",
       damage:
@@ -598,6 +587,9 @@
   }
   return {
     POLICY,
+    normalizeActor: Stats.normalize,
+    baseStats: Stats.base,
+    baseFields: Stats.fields,
     actorStats,
     rng,
     hash,

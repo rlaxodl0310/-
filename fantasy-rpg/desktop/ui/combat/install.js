@@ -50,8 +50,9 @@
               "torso",
             penetrationPercent: m.penetrationPercent ?? m.penetration ?? 0,
             penetrationFlat: m.penetrationFlat ?? 0,
-            criticalChance: m.criticalChance ?? source.criticalChance,
-            vitalCoefficient: m.vitalCoefficient ?? 1,
+            criticalChance: m.criticalChance ?? registered?.skill?.options?.criticalChance ?? R.stat(source,"criticalChance"),
+            vitalAccuracy:m.vitalAccuracy??registered?.skill?.options?.vitalAccuracy??0,
+            vitalCoefficient: m.vitalCoefficient ?? registered?.skill?.options?.vitalCoefficient ?? 1,
             damageType: kind === "magic" ? "magic" : "physical",
             projectile: !!registered?.projectile,
             shields: this.statuses(target)

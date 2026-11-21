@@ -11,13 +11,11 @@ function reset() {
         : { [$("armor-part").value]: { damageReduction: v("armorDR") / 100 } },
     source = {
       level: v("sourceLevel"),
-      attack: v("attack"),
-      criticalChance: v("critical") / 100,
-      vitalAccuracy: v("vital") / 100,
+      stats: { strength: v("attack"), magicAttack: v("magicAttack") },
     },
     target = {
       level: v("targetLevel"),
-      defense: v("defense"),
+      stats: { defense: v("defense"), magicResistance: v("magicResistance") },
       armor,
       max: 500,
       hp: 500,
@@ -48,6 +46,9 @@ function reset() {
     spec: {
       basePower: v("base"),
       coefficient: v("coefficient"),
+      damageType: $("damage-type").value,
+      criticalChance: v("critical") / 100,
+      vitalAccuracy: v("vital") / 100,
       hitMultiplier: v("hitPercent") / 100,
       penetrationPercent: v("percentPen") / 100,
       penetrationFlat: v("flatPen"),
@@ -128,7 +129,10 @@ $("hit").onclick = () => {
   draw();
 };
 $("heal").onclick = () => {
-  if(state.target.hp<=0){$("detail").textContent="전투 불능은 일반 치유만으로 회복하지 않습니다.";return;}
+  if (state.target.hp <= 0) {
+    $("detail").textContent = "전투 불능은 일반 치유만으로 회복하지 않습니다.";
+    return;
+  }
   const r = R.healAmount({
     mana: state.spec.mana,
     grade: state.spec.grade,

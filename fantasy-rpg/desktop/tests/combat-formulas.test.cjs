@@ -56,7 +56,8 @@ test("critical and armor breach use independent random samples per contact", () 
 });
 test("armor applies only at the actually struck part; breach never removes defense", () => {
   const args = {
-    source: { attack: 100, vitalAccuracy: 0.3 },
+    source: { stats: { strength: 100 } },
+    vitalAccuracy: 0.3,
     target: { defense: 100, armor: { shoulder: { damageReduction: 0.33 } } },
     basePower: 100,
     coefficient: 0,

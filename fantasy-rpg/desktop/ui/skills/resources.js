@@ -1,12 +1,13 @@
 (function (r, f) {
-  if (typeof module === "object" && module.exports) module.exports = f();
-  else r.ResourceRules = f();
-})(globalThis, () => {
+  if (typeof module === "object" && module.exports)
+    module.exports = f(require("../combat/stats.js"));
+  else r.ResourceRules = f(r.StatRules);
+})(globalThis, (Stats) => {
   "use strict";
   const valid = (n) => Number.isFinite(n) && n > 0 && n <= 10000;
   const stat = (n) => Number.isFinite(n) && n >= 0 && n <= 10000;
   function normalise(input = {}) {
-    const p = JSON.parse(JSON.stringify(input));
+    const p = Stats.normalize(input);
     if (p.resourceVersion === 2) {
       if (!stat(p.stats?.health) || !stat(p.stats?.mana))
         throw Error("체력/마나 스탯이 잘못되었습니다.");

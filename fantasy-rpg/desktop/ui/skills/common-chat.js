@@ -41,27 +41,10 @@
       b.props.find((o) => !o.fixed && o.weight === "light")?.id;
     b.encounterId = c.id;
     b.serial = c.commonState?.serial || 0;
-    for (const key of [
-      "attack",
-      "magicAttack",
-      "defense",
-      "magicDefense",
-      "criticalChance",
-      "criticalMultiplier",
-      "vitalAccuracy",
-      "healingPower",
-      "shieldPower",
-      "controlPower",
-      "controlResistance",
-    ])
-      if (Number.isFinite(p[key]) && !Number.isFinite(p.combatStats?.[key])) {
-        b.units[0].combatStats ??= {};
-        b.units[0].combatStats[key] = p[key];
-      }
     Object.assign(b.units[0], {
       level: p.level || 1,
       aimPart: p.aimPart || "torso",
-      combatStats: Rules.actorStats(p),
+      stats:Rules.baseStats(p),effectBonuses:Rules.normalizeActor(p).effectBonuses,agility:Rules.stat(p,"agility",b.units[0].agility),combatStats: Rules.actorStats(p),
       armor: clone(p.armor || {}),
     });
     b.units[0].x = 5;
@@ -73,7 +56,7 @@
       const u = b.units[i + 1];
       Object.assign(u, {
         level: e.level || 1,
-        combatStats: Rules.actorStats(e),
+        stats:Rules.baseStats(e),effectBonuses:Rules.normalizeActor(e).effectBonuses,agility:Rules.stat(e,"agility",u.agility),combatStats: Rules.actorStats(e),
         armor: clone(e.armor || {}),
       });
       u.hp = e.hp;
