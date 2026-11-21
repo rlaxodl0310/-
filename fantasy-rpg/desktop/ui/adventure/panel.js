@@ -139,7 +139,7 @@
             "접수소에 증빙 제출·정산",
             { type: "submit", questId: q.id },
             dialog,
-            (q.type==='caravan'?q.destination!==state.location:q.issuerLocation !== state.location) || !Adventure.ready(state, q),
+            (['caravan','escort'].includes(q.type)?q.destination!==state.location:q.issuerLocation !== state.location) || !Adventure.ready(state, q),
           );
           if (q.type === "hunt")
             button(
@@ -155,11 +155,11 @@
               dialog,
               q.destination !== state.location || Adventure.ready(state, q),
             );
-          const travel = n("button", q.type==='caravan'?"호위 여정 열기":"이동할 말 입력", dialog);
+          const travel = n("button", ['caravan','escort'].includes(q.type)?"호위 여정 열기":"이동할 말 입력", dialog);
           travel.onclick = () => {
             dialog.close();
             dialog.remove();
-            if(q.type==='caravan'){onEscort();return;}
+            if(['caravan','escort'].includes(q.type)){onEscort(q.type);return;}
             onTravel(
               Adventure.travelText(
                 Adventure.ready(state, q) ? q.issuerLocation : q.destination,
