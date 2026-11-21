@@ -387,6 +387,34 @@
     }
     return recalculate(p);
   }
+  function awardLevel(actor, newLevel, receipt) {
+    const p = ensure(actor),
+      g = p.progression,
+      previous = p.level ?? 1;
+    if (
+      !id(receipt) ||
+      !Number.isSafeInteger(newLevel) ||
+      newLevel < 1 ||
+      !Number.isSafeInteger(previous) ||
+      previous < 1
+    )
+      fail("레벨 보상 형식이 잘못되었습니다.");
+    const signature = "level:" + newLevel,
+      old = g.receipts.find((r) => r.id === receipt);
+    if (old) {
+      if (old.signature !== signature)
+        fail("같은 레벨 보상 사건의 내용이 다릅니다.");
+      return recalculate(p);
+    }
+    if (newLevel <= previous) fail("이미 도달했거나 이전인 레벨입니다.");
+    const points = (newLevel - previous) * 3;
+    if (!Number.isSafeInteger(g.points + points))
+      fail("포인트 계산 범위를 초과했습니다.");
+    g.points += points;
+    p.level = newLevel;
+    g.receipts.push({ id: receipt, signature });
+    return recalculate(p);
+  }
   function damageEquipment(actor, itemId, amount) {
     const p = ensure(actor),
       item = p.progression.inventory.find((i) => i.id === itemId);
@@ -447,6 +475,7 @@
     grant,
     apply,
     damageEquipment,
+    awardLevel,
     breakdown,
     sources,
   };
