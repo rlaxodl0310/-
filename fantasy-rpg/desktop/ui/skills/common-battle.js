@@ -72,6 +72,7 @@
       for (const saved of state.units || []) {
         const u = this.units.find((u) => u.id === saved.id);
         if (u) {
+          u.controlHistory = clone(saved.controlHistory || {});
           u.commonStatuses = (saved.statuses || [])
             .filter((s) => s.until > now)
             .map(convert);
@@ -87,6 +88,10 @@
           ...convert(f),
           nextTick: this.time + Math.max(0, f.nextTick - now),
         }));
+      this.healingOverTime = (state.healingOverTime || []).map((e) => ({
+        ...clone(e),
+        nextTick: this.time + (e.nextTick - now),
+      }));
       this.bloodTrails = clone(state.bloodTrails || []);
       this.props = clone(state.props || this.props || []);
       for (const ghost of state.illusions || [])
@@ -210,6 +215,7 @@
         m = d.mechanic,
         skill = p.skill;
       p.castId = a.castId;
+      p.hitPart = a.hitPart || u.aimPart || "torso";
       const target =
         this.units.find((v) => v.id === a.targetId && v.hp > 0) ||
         this.target(u);
@@ -299,6 +305,8 @@
           if (d.name === "과부하")
             mark(v, "speed", { potency: 0.25, fatigue: true });
           if (d.name === "전의 고양") mark(v, "attack");
+          if (["순발 강화", "전의 고양"].includes(d.name))
+            mark(v, "attackSpeed");
           if (d.name === "전투 격려") mark(v, "defense");
         }
         return;
@@ -316,21 +324,22 @@
         ].includes(m.kind)
       ) {
         for (const t of enemies.slice(0, d.name === "연쇄 구속" ? 3 : 1)) {
-          mark(t, m.kind);
-          if (d.name === "쇄암수" || d.name === "무장 약화")
-            mark(t, "weak-weapon");
-          if (["root", "silence"].includes(m.kind)) t.action = null;
-          award(t, 1);
+          const applied = mark(t, m.kind);
+          if (applied) {
+            if (d.name === "쇄암수" || d.name === "무장 약화")
+              mark(t, "weak-weapon");
+            if (["root", "silence"].includes(m.kind)) t.action = null;
+            award(t, 1);
+          }
         }
         return;
       }
-      if (m.kind === "shield" || m.kind === "counter") {
-        for (const v of ally)
-          mark(v, m.kind, {
-            buffer: m.amount * 2,
-            projectileOnly: !!m.projectileOnly,
-            reflect: !!m.reflect,
-          });
+      if (m.kind === "shield") {
+        for (const v of ally) this.grantShield(u, v, p);
+        return;
+      }
+      if (m.kind === "counter") {
+        for (const v of ally) mark(v, "counter");
         return;
       }
       if (m.kind === "impact") {
@@ -344,21 +353,21 @@
       }
       if (m.kind === "heal") {
         const t =
-            this.units.find(
-              (v) => v.id === u.supportTarget && v.team === u.team && v.hp > 0,
-            ) || u,
-          n = Math.min(t.max - t.hp, m.amount);
-        t.hp += n;
-        this.emit("heal", { actor: u.id, target: t.id, amount: n });
-        award(t, n);
+          this.units.find(
+            (v) => v.id === u.supportTarget && v.team === u.team && v.hp > 0,
+          ) || u;
+        const n = this.heal(
+          u,
+          t,
+          { mana: d.mana, grade: d.grade, coefficient: m.healCoefficient ?? 1 },
+          { skill, castId: a.castId },
+        );
         for (const linked of this.living(u.team).filter(
           (v) =>
             v.id !== t.id &&
             this.statuses(v).some((s) => s.key === "link" && s.link === t.id),
-        )) {
-          const amount = Math.min(linked.max - linked.hp, n * 0.5);
-          linked.hp += amount;
-        }
+        ))
+          this.heal(u, linked, { base: n * 0.5, bonus: 0 });
         return;
       }
       if (m.kind === "transfer") {
@@ -368,9 +377,8 @@
         if (!t) return;
         const n = Math.min(m.amount, u.hp - 1, t.max - t.hp);
         u.hp -= n;
-        t.hp += n;
-        this.emit("heal", { actor: u.id, target: t.id, amount: n });
-        award(t, n);
+        const received = this.heal(u, t, { base: n, bonus: 0 });
+        award(t, received);
         return;
       }
       if (m.kind === "link") {
@@ -562,7 +570,12 @@
               damage: m.amount / m.hits,
               life: m.range / 9,
               weapon: m.element === "physical" ? "bow" : "magic",
-              registered: { skill, castId: a.castId, common: d },
+              registered: {
+                skill,
+                castId: a.castId,
+                common: d,
+                hitPart: p.hitPart,
+              },
               commonId: d.id,
               pierce: m.pierce || 1,
               hitIds: [],
@@ -604,76 +617,18 @@
         this.emit("evade", { target: t.id, x: t.x, y: t.y });
         return;
       }
-      let factor =
-        1 +
-        this.statusPower(source, "attack") +
-        this.statusPower(source, "strength") +
-        this.statusPower(source, "weapon_edge") +
-        this.statusPower(source, "enchant") -
-        this.statuses(source)
-          .filter(
-            (s) =>
-              s.key === "weak" &&
-              !(C.get(s.commonId)?.name === "쇠약" && kind === "magic"),
-          )
-          .reduce((n, s) => Math.max(n, s.potency), 0);
-      factor *=
-        1 +
-        this.statuses(t)
-          .filter(
-            (s) =>
-              s.key === "vulnerable" &&
-              !(C.get(s.commonId)?.name === "마력 침식" && kind !== "magic"),
-          )
-          .reduce((n, s) => Math.max(n, s.potency), 0);
-      factor *=
-        1 -
-        this.statuses(t)
-          .filter(
-            (s) =>
-              s.key === "defense" &&
-              !(
-                kind === "magic" &&
-                ["강체", "호신강기"].includes(C.get(s.commonId)?.name)
-              ),
-          )
-          .reduce((n, s) => Math.max(n, s.potency), 0) *
-          (1 - (m?.penetration || 0));
-      amount = Math.max(1, Math.round(amount * factor));
       const before = t.hp;
-      for (const shield of this.statuses(t).filter(
-        (s) =>
-          s.key === "shield" && (!s.projectileOnly || registered?.projectile),
-      )) {
-        const n = Math.min(shield.buffer, amount);
-        shield.buffer -= n;
-        amount -= n;
-        const owner = this.units.find((v) => v.id === shield.source),
-          sk = this.skillBook.skills.find((s) => s.id === shield.skillId);
-        if (owner && sk) this.skillAward(owner, sk, shield.castId, source, n);
-        if (amount <= 0) break;
-      }
-      const counter = this.statuses(t).find((s) => s.key === "counter");
-      if (counter && !registered?.reaction) {
-        amount = Math.ceil(amount * 0.5);
-        counter.until = this.time;
-        const owner = t,
-          sk = this.skillBook.skills.find((s) => s.id === counter.skillId);
-        if (sk) {
-          const d = C.get(sk.commonId);
-          old.damage.call(
-            this,
-            owner,
-            source,
-            Math.min(amount, d?.mechanic.amount || amount),
-            "magic",
-            { skill: sk, castId: counter.castId, reaction: true },
-          );
-        }
-      }
-      if (amount > 0)
-        old.damage.call(this, source, t, amount, kind, registered);
+      const verdict = this.resolveRuledHit(source, t, amount, kind, registered);
+      if (!verdict) return;
+      if (verdict.hpDamage > 0)
+        old.damage.call(this, source, t, verdict.hpDamage, kind, {
+          ...(registered || {}),
+          resolved: true,
+        });
       const actual = before - t.hp;
+      if (!verdict.blockEffects)
+        for (const status of this.statuses(t).filter((s) => s.consumeOnHit))
+          status.until = this.time;
       if (actual > 0) {
         if (t.kind === "illusion" && t.prepared) {
           const owner = this.units.find((u) => u.id === t.owner);
@@ -693,8 +648,7 @@
           for (const other of this.living(t.team).filter(
             (o) => o !== t && dist(o, t) < 1.5,
           ))
-            old.damage.call(
-              this,
+            this.damage(
               source,
               other,
               Math.ceil(actual * 0.5),
@@ -720,13 +674,22 @@
             (s) => s.key === "enchant" && C.get(s.commonId)?.mechanic.lifesteal,
           )
         ) {
-          source.hp = Math.min(
-            source.max,
-            source.hp + Math.ceil(actual * (m?.lifesteal || 0.15)),
-          );
+          this.heal(source, source, { base: actual * (m?.lifesteal || 0.15) });
         }
-        if (m?.push) this.move(t, t.x - source.x, t.y - source.y, 0.2, m.push);
-        if (m?.launch && t.hp > 0)
+        if (this.hasStatus(source, "resonance") && !registered?.reaction) {
+          t.resonanceHits =
+            typeof t.resonanceHits === "object" ? t.resonanceHits : {};
+          const resonanceKey = m?.element || kind;
+          t.resonanceHits[resonanceKey] =
+            (t.resonanceHits[resonanceKey] || 0) + 1;
+          if (t.resonanceHits[resonanceKey] % 3 === 0)
+            this.damage(source, t, actual * 0.3, "magic", { reaction: true });
+        }
+      }
+      if (verdict.preShieldDamage > 0 && t.hp > 0) {
+        if (!verdict.blockEffects && m?.push)
+          this.move(t, t.x - source.x, t.y - source.y, 0.2, m.push);
+        if (!verdict.blockEffects && m?.launch && t.hp > 0)
           this.addStatus(t, "airborne", {
             common: {
               mechanic: { duration: m.launch, potency: 0 },
@@ -735,16 +698,18 @@
             skill: registered.skill,
             castId: registered.castId,
           });
-        if (this.hasStatus(source, "resonance") && !registered?.reaction) {
-          t.resonanceHits =
-            typeof t.resonanceHits === "object" ? t.resonanceHits : {};
-          const resonanceKey = m?.element || kind;
-          t.resonanceHits[resonanceKey] =
-            (t.resonanceHits[resonanceKey] || 0) + 1;
-          if (t.resonanceHits[resonanceKey] % 3 === 0)
-            old.damage.call(this, source, t, Math.ceil(actual * 0.3), "magic");
-        }
       }
+      if (verdict.counterReaction && t.hp > 0 && source.hp > 0) {
+        const r = verdict.counterReaction,
+          skill = this.skillBook.skills.find((s) => s.id === r.skillId);
+        if (skill)
+          this.damage(t, source, r.amount, "magic", {
+            skill,
+            castId: r.castId,
+            reaction: true,
+          });
+      }
+      return { actual, verdict };
     };
     B.prototype.release = function (u, a) {
       old.release.call(this, u, a);
@@ -849,6 +814,7 @@
               {
                 skill: task.prepared.skill,
                 castId: task.prepared.castId,
+                hitPart: task.prepared.hitPart,
                 common: task.prepared.common,
               },
             );
@@ -870,8 +836,9 @@
           }
         if (shot.life <= 0) continue;
         for (const u of this.living(shot.team === "ally" ? "enemy" : "ally")) {
-          const shield = this.statuses(u).find(
-            (s) => s.key === "shield" && s.reflect && s.buffer > 0,
+          const shield = this.activeShields(u).find(
+            (s) =>
+              s.key === "shield" && s.reflect && (s.remaining ?? s.buffer) > 0,
           );
           if (
             shield &&
@@ -888,7 +855,11 @@
             shot.registered = sk
               ? { skill: sk, castId: shield.castId, projectile: true }
               : null;
-            shield.buffer -= shot.damage;
+            shield.remaining = Math.max(
+              0,
+              (shield.remaining ?? shield.buffer) - shot.damage,
+            );
+            shield.buffer = shield.remaining;
             if (shield.buffer <= 0) shield.until = this.time;
             this.emit("skill_fx", {
               actor: u.id,

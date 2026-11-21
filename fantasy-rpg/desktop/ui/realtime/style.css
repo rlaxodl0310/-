@@ -7,3 +7,5 @@
 @media(max-width:650px){header>div{display:none}header nav{margin-left:auto}}
 
 #registered-skills{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;max-width:920px;max-height:95px;overflow:auto;margin:8px auto 0;pointer-events:auto}#registered-skills:empty{display:none}#registered-skills button{font-size:12px;max-width:100%;overflow-wrap:anywhere;padding:8px 12px}
+
+#aim-part{max-width:100px;font-size:12px;padding:8px}

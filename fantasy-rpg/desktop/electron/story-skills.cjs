@@ -81,6 +81,7 @@ function cast(state, skill, input, id, target = 0) {
         ...prepared,
         skill: undefined,
         effect: skill.effect,
+        damageType:skill.element==='physical'?'physical':'magic',
         name: skill.name,
       },
     },

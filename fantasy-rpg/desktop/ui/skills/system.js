@@ -4,7 +4,15 @@
   else root.SkillSystem = factory(root.CommonSkills);
 })(globalThis, (Common) => {
   "use strict";
-  const EFFECTS = ["strike", "bolt", "guard", "dash", "mend"],
+  const EFFECTS = [
+      "strike",
+      "bolt",
+      "guard",
+      "dash",
+      "mend",
+      "barrier",
+      "one-hit-barrier",
+    ],
     ELEMENTS = ["physical", "fire", "frost", "shadow", "light", "arcane"],
     CONDITIONS = ["none", "counter-window", "stored-impact"],
     MOTIFS = ["arc", "ring", "trail", "sparks"];
@@ -400,6 +408,8 @@
           guard: "짧게 다음 충격에 대비",
           dash: "지정 방향으로 짧게 이동",
           mend: "범위 안 아군의 실제 손상을 회복",
+          barrier: "피해량을 흡수하는 보호막을 생성",
+          "one-hit-barrier": "방호 한계 안에서 한 타격을 차단",
         }[s.effect] +
         " · " +
         s.grade +
@@ -475,6 +485,8 @@
       throw Error("회복할 아군 대상이 필요합니다.");
     return {
       skill: clone(s),
+      grade: s.grade,
+      baseMana: s.cost.mana,
       mana,
       cooldown: s.cost.cooldown,
       windup: s.cost.windup,

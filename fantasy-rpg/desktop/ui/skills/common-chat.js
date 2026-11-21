@@ -3,9 +3,10 @@
     module.exports = f(
       require("../realtime/engine.js"),
       require("./common.js"),
+      require("../combat/rules.js"),
     );
-  else r.CommonChat = f(r.RealTimeBattle, r.CommonSkills);
-})(globalThis, (Battle, C) => {
+  else r.CommonChat = f(r.RealTimeBattle, r.CommonSkills, r.CombatRules);
+})(globalThis, (Battle, C, Rules) => {
   "use strict";
   const clone = (v) => JSON.parse(JSON.stringify(v)),
     distPoint = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -40,6 +41,29 @@
       b.props.find((o) => !o.fixed && o.weight === "light")?.id;
     b.encounterId = c.id;
     b.serial = c.commonState?.serial || 0;
+    for (const key of [
+      "attack",
+      "magicAttack",
+      "defense",
+      "magicDefense",
+      "criticalChance",
+      "criticalMultiplier",
+      "vitalAccuracy",
+      "healingPower",
+      "shieldPower",
+      "controlPower",
+      "controlResistance",
+    ])
+      if (Number.isFinite(p[key]) && !Number.isFinite(p.combatStats?.[key])) {
+        b.units[0].combatStats ??= {};
+        b.units[0].combatStats[key] = p[key];
+      }
+    Object.assign(b.units[0], {
+      level: p.level || 1,
+      aimPart: p.aimPart || "torso",
+      combatStats: Rules.actorStats(p),
+      armor: clone(p.armor || {}),
+    });
     b.units[0].x = 5;
     b.units[0].y = 8;
     b.units[0].sheathed = p.sheathed ?? true;
@@ -47,6 +71,11 @@
     if (Number.isFinite(p.stamina)) b.units[0].stamina = p.stamina;
     for (const [i, e] of c.enemies.entries()) {
       const u = b.units[i + 1];
+      Object.assign(u, {
+        level: e.level || 1,
+        combatStats: Rules.actorStats(e),
+        armor: clone(e.armor || {}),
+      });
       u.hp = e.hp;
       u.max = e.max;
       u.x = 5 + c.distance + (i % 2) * 0.5;
@@ -59,10 +88,13 @@
         const u = b.units.find((u) => u.id === saved.id);
         if (u) {
           u.commonStatuses = clone(saved.statuses);
+          u.controlHistory = clone(saved.controlHistory || {});
           if (u.id !== "taei") u.mana = saved.mana ?? u.mana;
           u.supportTarget = saved.supportTarget;
         }
       }
+      if (c.commonState.rngState)
+        b.formulaRng = Rules.rng(c.commonState.rngState);
       b.time =
         (c.commonState.time || 0) +
         (Number.isFinite(c.commonState.captureClock)
@@ -71,6 +103,7 @@
       b.bloodTrails = clone(c.commonState.bloodTrails || []);
       b.props = clone(c.commonState.props || b.props);
       b.commonFields = clone(c.commonState.fields || []);
+      b.healingOverTime = clone(c.commonState.healingOverTime || []);
       for (const ghost of c.commonState.illusions || [])
         b.units.push(clone(ghost));
     }
@@ -153,12 +186,13 @@
         note += " · 적이 반격한다.";
       }
     }
-    const outgoing = b.events
-        .filter((e) => e.type === "hit" && e.actor === "taei")
+    const outgoing = (b.formulaLog || [])
+        .filter((e) => e.actor === "taei")
         .reduce((n, e) => n + e.damage, 0),
-      incoming = b.events
-        .filter((e) => e.type === "hit" && e.target === "taei")
+      incoming = (b.formulaLog || [])
+        .filter((e) => e.target === "taei")
         .reduce((n, e) => n + e.damage, 0);
+
     c.round = (c.round || 0) + 1;
     c.enemies = c.enemies.map((e, i) => ({
       ...e,
@@ -170,14 +204,17 @@
       bloodTrails: clone(b.bloodTrails || []),
       props: clone(b.props || []),
       serial: b.serial,
+      rngState: b.formulaRng?.state || Rules.hash(b.encounterId),
       captureClock: b.skillBook.clock,
       time: b.time,
       fields: clone(b.commonFields || []),
+      healingOverTime: clone(b.healingOverTime || []),
       units: b.units
         .filter((u) => u.kind !== "illusion")
         .map((u) => ({
           id: u.id,
           statuses: clone(u.commonStatuses || []),
+          controlHistory: clone(u.controlHistory || {}),
           mana: u.mana,
           weaponState: u.weaponState ? clone(u.weaponState) : undefined,
           stamina: u.stamina,
@@ -197,6 +234,7 @@
     };
     const resolution = {
       engine: "common",
+      formulaEvents: [...(b.formulaLog || []), ...(b.healingLog || [])],
       discoveredTrail: clone(b.revealedTrail || []),
       objectChanges: clone(b.props || []).filter(
         (p) => p.moved || p.vibratingUntil,
@@ -212,8 +250,8 @@
       intent: basicIntent || "skill",
       outgoing,
       incoming,
-      healed: b.events
-        .filter((e) => e.type === "heal")
+      healed: (b.healingLog || [])
+        .filter((e) => e.target === p.id)
         .reduce((n, e) => n + e.amount, 0),
       escaped,
       enemyResponse: note,

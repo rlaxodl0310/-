@@ -1,4 +1,5 @@
 (function(root){
+const Rules=typeof module!=='undefined'&&module.exports?require('../combat/rules.js'):root.CombatRules;
 const R=typeof module!=='undefined'&&module.exports?require('./roster.js'):root.CombatRoster;
 const names={goblin:'고블린',slime:'슬라임',ves:'베스',ant:'앤트',clad:'클래드',lairon:'갱도라',velum:'벨룸',draven:'드라벤',noxvern:'녹스베른'};
 if(R)for(const m of R.monsters)names[m.id]=m.name;
@@ -35,7 +36,7 @@ class Battle{
  const flight=(miss)=>{if(ranged)emit(weapon==='bow'?'화살이 목표를 향해 날아간다.':'마력탄이 목표를 향해 날아간다.',{type:'projectile',actor:a.id,target:t.id,weapon,miss});};
  if(t.dodge){t.dodge=false;if(this.random()<.75){flight(true);emit(t.name+'이 몸을 비틀어 공격 궤적에서 벗어났다.',{type:'miss',actor:a.id,target:t.id,evaded:true});return;}}
  if(this.random()<.08){flight(true);emit(a.name+'의 공격이 빗나갔다.',{type:'miss',actor:a.id,target:t.id});return;}flight(false);
- if(t.guard)damage=Math.max(1,Math.ceil(damage*.4));t.hp=Math.max(0,t.hp-damage);emit(a.name+' → '+t.name+' · '+tag+' '+damage,{type:'hit',actor:a.id,target:t.id,damage,weapon});if(!t.hp)emit(t.name+'이 쓰러졌다.',{type:'down',target:t.id});};
+ const verdict=Rules.resolveHit({source:a,target:t,basePower:damage,damageType:weapon==='magic'?'magic':'physical',part:a.aimPart||'torso',shields:(t.commonStatuses||[]).filter(s=>s.key==='shield'),extraReduction:t.guard?.6:0,now:this.round},()=>this.random());t.commonStatuses=(t.commonStatuses||[]).filter(s=>s.key!=='shield').concat(verdict.shields.map(s=>({...s,key:'shield'})));damage=Math.min(t.hp,verdict.hpDamage);t.hp=Math.max(0,t.hp-damage);emit(a.name+' → '+t.name+' · '+tag+' '+damage,{type:'hit',actor:a.id,target:t.id,damage,weapon,verdict});if(!t.hp)emit(t.name+'이 쓰러졌다.',{type:'down',target:t.id});};
  if(!this.tactical||this.actionsLeft===this.actionBudget()){p.guard=false;p.dodge=false;}
  if(action==='move'){for(const [i,next] of path.entries()){const from={x:p.x,y:p.y};p.x=next.x;p.y=next.y;emit('김태이가 선택한 경로를 따라 이동한다.',{type:'move',actor:p.id,from,to:next,stride:true,pathIndex:i,pathLength:path.length});}}
  else if(action==='endTurn'){emit('남은 행동을 마치고 상대 움직임을 살핀다.',{type:'guard',actor:p.id});}
