@@ -38,8 +38,10 @@ const previews=[{
     cast:fullImage('janghwa-cast.webp',720,1080),
     hit:fullImage('janghwa-hit.webp',720,1080),
     flustered:fullImage('janghwa-flustered.webp',720,1080),
+    alternate:fullImage('janghwa-alternate.webp',720,1080),
+    alternateCast:fullImage('janghwa-alternate-cast.webp',720,1080),
   },
-  sd:{default:fullImage('janghwa-sd.webp',512,512)},
+  sd:{default:fullImage('janghwa-sd.webp',512,512),alternate:fullImage('janghwa-alternate-sd.webp',512,512)},
 }];
 function get(id){return records.find(r=>r.id===id)||null;}
 function appearance(id,{look='default',pose='default'}={}){const r=get(id);return r?.looks[pose==='default'?look:pose]||r?.looks.default||null;}
