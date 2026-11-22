@@ -91,6 +91,21 @@ records.push({
   },
   sd:{default:fullImage('spike-sd.webp',512,512)},
   combatSprite:combatAtlas('spike',1,.78),
+},{
+  id:'jave',name:'제이브',age:18,species:'인간족',heightCm:178,weightKg:71,
+  unknownName:'보라색 머리의 인간족',requiresStoryIntroduction:true,
+  persona:'인간족 제이브. 18살, 178cm, 71kg. 유쾌하고 시원시원한 쾌남이다. 출신·직업·무기·전용 기술·첫 만남은 미정이다. 불꽃 능력과 흰 생물의 동행을 임의로 확정하지 않는다.',
+  preferredWeapons:[],
+  motion:{name:'한 발 가볍게 디디고 상체를 열기',lean:6,step:8,turn:-7,side:13,tempo:1.12},
+  looks:{
+    default:fullImage('jave-standing.webp',720,1080),
+    rear:fullImage('jave-rear.webp',720,1080),
+    help:fullImage('jave-talk.webp',720,1080),
+    ready:fullImage('jave-ready.webp',720,1080),
+    laughing:fullImage('jave-laughing.webp',720,1080),
+  },
+  sd:{default:fullImage('jave-sd.webp',512,512)},
+  combatSprite:combatAtlas('jave',.97,1.12),
 });
 function get(id){return records.find(r=>r.id===id)||null;}
 function appearance(id,{look='default',pose='default'}={}){const r=get(id);return r?.looks[pose==='default'?look:pose]||r?.looks.default||null;}
