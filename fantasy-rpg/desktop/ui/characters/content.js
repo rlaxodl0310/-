@@ -473,6 +473,23 @@ records.push({
   sd:{default:fullImage('ariel-sd.webp',512,512)},
   combatSprite:combatAtlas('ariel',.93,.96),
 });
+records.push({
+  id:'milia',name:'밀리아',age:null,species:'날도마뱀 수인',heightCm:155,weightKg:42,
+  unknownName:'연푸른 머리와 보랏빛 활강막을 지닌 수인',origin:'fantasy',requiresStoryIntroduction:true,
+  persona:'날도마뱀 수인 밀리아. 155cm, 42kg. 작은 약속을 기억한다. 친구가 걱정되면 구실을 만들어 먼저 찾아가지만 자신이 도움을 청할 때는 망설인다. 무기와 전용 전투 기술은 미정이다.',
+  preferredWeapons:[],
+  lookLabels:{cutscene:'활강막을 펼치기 · 컷신'},
+  motion:{name:'가볍게 뛰어 활강막 펼치기',lean:-2.6,step:5.8,turn:6.75,side:12.25,tempo:1.11},
+  looks:{
+    default:fullImage('milia-standing.webp',720,1080),
+    rear:fullImage('milia-rear.webp',720,1080),
+    help:fullImage('milia-talk.webp',720,1080),
+    reaction:fullImage('milia-reaction.webp',720,1080),
+    cutscene:fullImage('milia-cutscene.webp',720,1080),
+  },
+  sd:{default:fullImage('milia-sd.webp',512,512)},
+  combatSprite:combatAtlas('milia',.90,1.11),
+});
 get('fafnir').looks.casual=fullImage('fafnir-casual.webp',720,1080);
 get('fenri').looks.casual=fullImage('fenri-casual.webp',720,1080);
 function get(id){return records.find(r=>r.id===id)||null;}
