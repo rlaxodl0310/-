@@ -454,6 +454,25 @@ records.push({
   sd:{default:fullImage('halo-sd.webp',512,512)},
   combatSprite:combatAtlas('halo',.97,1.07),
 });
+records.push({
+  id:'ariel',name:'아리엘',age:null,species:'인간족',heightCm:164,weightKg:48,
+  unknownName:'주문서를 든 갈색 머리 메이지',origin:'fantasy',requiresStoryIntroduction:true,
+  persona:'인간족 메이지 아리엘. 164cm, 48kg. 주문을 쓰기 전에 주변부터 정돈하고 실패 원인을 기록한다. 실험 노트를 칭찬받으면 설명이 길어진다.',
+  preferredWeapons:['staff'],roles:['mage'],combatStyle:'magic',
+  lookLabels:{help:'실험 노트 살피기',reaction:'칭찬을 듣고 기뻐하기',cutscene:'별 장식 지팡이로 시전하기'},
+  motion:{name:'주문서를 열고 지팡이를 들어 올리기',lean:2.75,step:4.15,turn:8.25,side:7.25,tempo:.96},
+  looks:{
+    default:fullImage('ariel-standing.webp',720,1080),
+    rear:fullImage('ariel-rear.webp',720,1080),
+    casual:fullImage('ariel-casual.webp',720,1080),
+    help:fullImage('ariel-talk.webp',720,1080),
+    reaction:fullImage('ariel-reaction.webp',720,1080),
+    cast:fullImage('ariel-cutscene.webp',720,1080),
+    cutscene:fullImage('ariel-cutscene.webp',720,1080),
+  },
+  sd:{default:fullImage('ariel-sd.webp',512,512)},
+  combatSprite:combatAtlas('ariel',.93,.96),
+});
 get('fafnir').looks.casual=fullImage('fafnir-casual.webp',720,1080);
 get('fenri').looks.casual=fullImage('fenri-casual.webp',720,1080);
 function get(id){return records.find(r=>r.id===id)||null;}
