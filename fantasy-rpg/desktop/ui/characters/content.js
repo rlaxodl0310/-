@@ -344,6 +344,97 @@ records.push({
   sd:{default:fullImage('nadan-sd.webp',512,512)},
   combatSprite:combatAtlas('nadan',.92,.91),
 });
+records.push(
+  {
+    id:'hebnia',name:'헤브니아',age:null,species:'엘프족',heightCm:170,weightKg:50,
+    unknownName:'은청색 머리의 엘프',requiresStoryIntroduction:true,origin:'fantasy',
+    persona:'엘프족 헤브니아. 170cm, 50kg. 장난기가 많고 헬레니아의 친동생이다. 양손 대검을 사용한다.',
+    preferredWeapons:['greatsword'],
+    lookLabels:{help:'장난스럽게 웃기',reaction:'승부를 즐기는 표정',cutscene:'대검을 휘두르기 · 컷신'},
+    motion:{name:'대검을 휘두르기',lean:4.5,step:6.75,turn:-12.5,side:9.75,tempo:1.06},
+    looks:{
+    default:fullImage('hebnia-standing.webp',720,1080),
+    rear:fullImage('hebnia-rear.webp',720,1080),
+    help:fullImage('hebnia-talk.webp',720,1080),
+    reaction:fullImage('hebnia-reaction.webp',720,1080),
+    cutscene:fullImage('hebnia-cutscene.webp',720,1080),
+    attack:fullImage('hebnia-cutscene.webp',720,1080),
+    },
+    sd:{default:fullImage('hebnia-sd.webp',512,512)},
+    combatSprite:combatAtlas('hebnia',0.96,1.06),
+  },
+  {
+    id:'hellenia',name:'헬레니아',age:null,species:'엘프족',heightCm:171,weightKg:52,
+    unknownName:'금빛 땋은 머리의 엘프',requiresStoryIntroduction:true,origin:'fantasy',
+    persona:'엘프족 헬레니아. 171cm, 52kg. 진중하고 진지하다. 헤브니아의 친언니이며 방패와 중검을 사용한다.',
+    preferredWeapons:['sword', 'shield'],
+    lookLabels:{help:'진지하게 살피기',reaction:'동생을 걱정하는 표정',cutscene:'방패로 막아 서기 · 컷신'},
+    motion:{name:'방패로 막아 서기',lean:-1.75,step:4.25,turn:7.75,side:5.75,tempo:0.93},
+    looks:{
+    default:fullImage('hellenia-standing.webp',720,1080),
+    rear:fullImage('hellenia-rear.webp',720,1080),
+    help:fullImage('hellenia-talk.webp',720,1080),
+    reaction:fullImage('hellenia-reaction.webp',720,1080),
+    cutscene:fullImage('hellenia-cutscene.webp',720,1080),
+    guard:fullImage('hellenia-cutscene.webp',720,1080),
+    casual:fullImage('hellenia-casual.webp',720,1080),
+    },
+    sd:{default:fullImage('hellenia-sd.webp',512,512)},
+    combatSprite:combatAtlas('hellenia',0.96,0.93),
+  },
+  {
+    id:'biscuit',name:'비스킷',age:null,species:'드워프족',heightCm:138,weightKg:43,
+    unknownName:'은빛 머리의 드워프',requiresStoryIntroduction:true,origin:'fantasy',
+    persona:'드워프족 비스킷. 138cm, 43kg. 막 대장장이가 된 신참으로, 유쾌하고 능청스럽다. 이야기가 진행되면서 대장장이로 성장한다.',
+    preferredWeapons:[],
+    lookLabels:{help:'능청스러운 윙크',reaction:'만든 경첩을 보여주기',cutscene:'모루에서 경첩을 두드리기 · 컷신'},
+    motion:{name:'모루에서 경첩을 두드리기',lean:5.25,step:5.25,turn:10.25,side:8.75,tempo:1.02},
+    looks:{
+    default:fullImage('biscuit-standing.webp',720,1080),
+    rear:fullImage('biscuit-rear.webp',720,1080),
+    help:fullImage('biscuit-talk.webp',720,1080),
+    reaction:fullImage('biscuit-reaction.webp',720,1080),
+    cutscene:fullImage('biscuit-cutscene.webp',720,1080),
+    },
+    sd:{default:fullImage('biscuit-sd.webp',512,512)},
+    combatSprite:combatAtlas('biscuit',0.78,1.02),
+  },
+  {
+    id:'yunseol',name:'윤설',age:null,species:'인간족',heightCm:161,weightKg:45,
+    unknownName:'긴 봉을 든 인간족',requiresStoryIntroduction:true,origin:'fantasy',
+    persona:'인간족 윤설. 161cm, 45kg. 느긋하고 말수가 적으며 겨룰 때는 상대 발놀림을 보고 먼저 거리를 잡는다. 긴 봉을 사용한다.',
+    preferredWeapons:['staff'],
+    lookLabels:{help:'여유롭게 미소 짓기',reaction:'상대의 발놀림을 살피기',cutscene:'긴 봉을 휘두르기 · 컷신'},
+    motion:{name:'긴 봉을 휘두르기',lean:-5.75,step:6.75,turn:14,side:11.75,tempo:1.13},
+    looks:{
+    default:fullImage('yunseol-standing.webp',720,1080),
+    rear:fullImage('yunseol-rear.webp',720,1080),
+    help:fullImage('yunseol-talk.webp',720,1080),
+    reaction:fullImage('yunseol-reaction.webp',720,1080),
+    cutscene:fullImage('yunseol-cutscene.webp',720,1080),
+    attack:fullImage('yunseol-cutscene.webp',720,1080),
+    },
+    sd:{default:fullImage('yunseol-sd.webp',512,512)},
+    combatSprite:combatAtlas('yunseol',0.91,1.13),
+  }
+);
+records.push({
+  id:'spina',name:'스피나',age:null,species:'세이블영양 수인',heightCm:167,weightKg:44,
+  unknownName:'긴 검은 뿔의 수인',origin:'fantasy',requiresStoryIntroduction:true,
+  persona:'세이블영양 수인 스피나. 167cm, 44kg. 차별을 겪은 뒤 말하기 전에 상대 반응을 살핀다. 가까운 사람을 위해 조용히 자리를 내어주는 식으로 마음을 표현한다.',
+  preferredWeapons:[],
+  lookLabels:{cutscene:'수줍게 두 팔을 아래로 모으기 · 컷신'},
+  motion:{name:'한 걸음 비켜 분절 무기 휘두르기',lean:-3.25,step:5.9,turn:11.5,side:10.75,tempo:1.01},
+  looks:{
+    default:fullImage('spina-standing.webp',720,1080),
+    rear:fullImage('spina-rear.webp',720,1080),
+    casual:fullImage('spina-casual.webp',720,1080),
+    help:fullImage('spina-talk.webp',720,1080),
+    cutscene:fullImage('spina-cutscene.webp',720,1080),
+  },
+  sd:{default:fullImage('spina-sd.webp',512,512)},
+  combatSprite:combatAtlas('spina',.94,1.01),
+});
 get('fafnir').looks.casual=fullImage('fafnir-casual.webp',720,1080);
 get('fenri').looks.casual=fullImage('fenri-casual.webp',720,1080);
 function get(id){return records.find(r=>r.id===id)||null;}
