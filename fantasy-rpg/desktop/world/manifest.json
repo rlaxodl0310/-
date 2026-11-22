@@ -2,8 +2,8 @@
   "revision": "erdia-2026-11-22",
   "sourceRepository": "rlaxodl0310/-",
   "sourcePath": "fantasy-rpg/WORLD_BIBLE.md",
-  "sourceBlob": "6a8743bfcf6db83a6e8e5b479683c07bf488fc75",
-  "sha256": "3793ee774d0a079ee9176632513250f3b9ebe8325103607852ade11fa60f8fdb",
+  "sourceBlob": "d3a4655c94fb90359af8ea351aed3404a1634530",
+  "sha256": "e5c9755195041b9a8c9593f480d39a475e78f121d8ed30dd224f26b16174e719",
   "lastSection": 113,
   "pendingProposal": [
     "마석의 상세 기원·충전·생활 마도구 보급 규칙"
@@ -12,6 +12,6 @@
   "commonSkills": {
     "source": "common-active-skills-source.txt",
     "count": 181,
-    "sha256": "3793ee774d0a079ee9176632513250f3b9ebe8325103607852ade11fa60f8fdb"
+    "sha256": "e5c9755195041b9a8c9593f480d39a475e78f121d8ed30dd224f26b16174e719"
   }
 }
