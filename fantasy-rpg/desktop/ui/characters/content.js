@@ -25,8 +25,24 @@ records.push({
   motion:{name:'짧게 발을 들여 검을 크게 휘두르기',lean:7,step:7,turn:9,side:9,tempo:1.04},
   persona:'개 수인 펜리. 검을 사용하는 슬레이어. 161cm, 52kg. 나이는 미정. 붉은 머리, 금빛 눈, 개 귀와 꼬리, 짧은 치마를 유지한다. 평소 장난기와 애교가 많지만 차별을 받으면 주눅들고 소심해진다. 이세계 현지인으로 현실에 등장하지 않는다. 이름 선공개나 자동 합류 없음.',
 });
+function fullImage(src,w,h){
+  return {src:'assets/'+src,x:0,y:0,w,h,imageWidth:w,imageHeight:h};
+}
+const previews=[{
+  id:'janghwa',name:'장화',age:null,species:'인간족',heightCm:157,weightKg:49,
+  preferredWeapons:['manaThread'],
+  looks:{
+    default:fullImage('janghwa-standing.webp',720,1080),
+    help:fullImage('janghwa-talk.webp',720,1080),
+    guard:fullImage('janghwa-guard.webp',720,1080),
+    cast:fullImage('janghwa-cast.webp',720,1080),
+    hit:fullImage('janghwa-hit.webp',720,1080),
+    flustered:fullImage('janghwa-flustered.webp',720,1080),
+  },
+  sd:{default:fullImage('janghwa-sd.webp',512,512)},
+}];
 function get(id){return records.find(r=>r.id===id)||null;}
 function appearance(id,{look='default',pose='default'}={}){const r=get(id);return r?.looks[pose==='default'?look:pose]||r?.looks.default||null;}
 function displayName(state,id){const r=get(id);if(!r)return null;const introduced=state?.knownIdentities?.[id]===true||(state?.turns||[]).some(t=>(t.panels||[]).some(p=>p.speaker===id&&String(p.text||'').includes(r.name)));return introduced?r.name:r.unknownName;}
-return{records,get,appearance,displayName,combatFrame};
+return{records,previews,get,appearance,displayName,combatFrame};
 });
