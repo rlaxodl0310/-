@@ -142,6 +142,22 @@ records.push({
   },
   sd:{default:fullImage('kiriel-sd.webp',512,512)},
   combatSprite:combatAtlas('kiriel',.96,1.02),
+},{
+  id:'palanus',name:'팔라누스',age:null,species:'인간족',heightCm:170,weightKg:54,
+  unknownName:'붉고 검은 대검을 든 인간족',requiresStoryIntroduction:true,
+  persona:'인간족 팔라누스. 170cm, 54kg. 대검을 사용한다. 침착하고 위급할 때 판단이 빠르다. 상황이 정리되면 짧은 농담으로 긴장을 풀기도 한다. 남의 실수에는 관대하지만 자기 실수는 오래 곱씹는다. 나이·출신·직업·전용 기술·첫 만남은 미정이다.',
+  preferredWeapons:['greatsword'],
+  lookLabels:{attack:'대검 공격',cutscene:'판단하는 순간 · 컷신'},
+  motion:{name:'짧게 중심을 옮긴 뒤 대검을 곧게 휘두르기',lean:4,step:6.5,turn:-10,side:8,tempo:.88},
+  looks:{
+    default:fullImage('palanus-standing.webp',720,1080),
+    rear:fullImage('palanus-rear.webp',720,1080),
+    help:fullImage('palanus-talk.webp',720,1080),
+    attack:fullImage('palanus-sword.webp',720,1080),
+    cutscene:fullImage('palanus-cutscene.webp',720,1080),
+  },
+  sd:{default:fullImage('palanus-sd.webp',512,512)},
+  combatSprite:combatAtlas('palanus',.96,.88),
 });
 function get(id){return records.find(r=>r.id===id)||null;}
 function appearance(id,{look='default',pose='default'}={}){const r=get(id);return r?.looks[pose==='default'?look:pose]||r?.looks.default||null;}
