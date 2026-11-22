@@ -1,3 +1,4 @@
+const {AIDiagnostics}=require('./ai-diagnostics.cjs');
 const {app,BrowserWindow,ipcMain,dialog,shell,nativeImage}=require('electron');
 const path=require('node:path'),fs=require('node:fs/promises'),{existsSync}=require('node:fs');
 const {pathToFileURL}=require('node:url');
@@ -9,16 +10,19 @@ const {StoryChat}=require('./story-chat.cjs');
 const {BattleJudge}=require('./battle-judge.cjs');
 const {RealtimeJudge}=require('./realtime-judge.cjs');
 const {CodexBridge}=require('./codex.cjs'),{Dialogue}=require('./dialogue.cjs');
-let director,window,bridge,dialogue,battleJudge,realtimeJudge,quests,story,looks,deviceURL=null;
+let diagnostics,director,window,bridge,dialogue,battleJudge,realtimeJudge,quests,story,looks,deviceURL=null;
 const battleEntry=pathToFileURL(path.join(__dirname,'../ui/battle/index.html')).href;
 const realtimeEntry=pathToFileURL(path.join(__dirname,'../ui/realtime/index.html')).href;
 const entry=pathToFileURL(path.join(__dirname,'../ui/index.html')).href;
 function allowedURL(value){try{const url=new URL(value);return url.protocol==='https:'&&url.hostname==='auth.openai.com'&&['/codex/device','/oauth/authorize','/authorize'].includes(url.pathname);}catch{return false;}}
 async function executable(){if(process.env.FANTASY_CODEX_BIN&&existsSync(process.env.FANTASY_CODEX_BIN))return process.env.FANTASY_CODEX_BIN;let config={};try{config=JSON.parse(await fs.readFile(path.join(app.getPath('userData'),'settings.json'),'utf8'));}catch{}if(typeof config.cli==='string'&&existsSync(config.cli))return config.cli;const platform=process.platform,arch=process.arch;if(app.isPackaged){const native=path.join(process.resourcesPath,'codex-'+platform+'-'+arch,'bin',platform==='win32'?'codex.exe':'codex');if(existsSync(native))return native;}const triple={linux:'x86_64-unknown-linux-musl',win32:'x86_64-pc-windows-msvc',darwin:'x86_64-apple-darwin'}[platform];const native=path.join(__dirname,'../node_modules/@openai/codex-'+platform+'-'+arch,'vendor',triple||'', 'bin',platform==='win32'?'codex.exe':'codex');return existsSync(native)?native:(process.env.FANTASY_CODEX_BIN||'codex');}
 async function rememberInstallation(){if(!app.isPackaged||process.platform!=='win32')return;try{const file=path.join(app.getPath('appData'),'FantasyStory','installations.txt');let prior=[];try{prior=(await fs.readFile(file,'utf8')).split(/\r?\n/).filter(Boolean).slice(0,20);}catch{}const current=path.dirname(process.execPath),rows=[current,...prior.filter(p=>p.toLowerCase()!==current.toLowerCase())].slice(0,20);await fs.mkdir(path.dirname(file),{recursive:true});await fs.writeFile(file,rows.join('\r\n'));}catch{/* Discovery hint failure must not prevent playing. */}}
-async function configure(){looks=new LookPacks(path.join(app.getPath('userData'),'appearance-packs'),{validateImage:bytes=>{const image=nativeImage.createFromBuffer(bytes);if(image.isEmpty())throw Error('PNG 이미지를 해석하지 못했습니다.');}});bridge=new CodexBridge(await executable(),{onLogin:info=>{if(allowedURL(info.url))deviceURL=info.url;window?.webContents.send('ai:progress',info);}});battleJudge=new BattleJudge(bridge);realtimeJudge=new RealtimeJudge(bridge);quests=new QuestBoard(path.join(app.getPath('userData'),'quest-board-test.json'),bridge);director=new StoryDirector(path.join(app.getPath('userData'),'emergent-story.json'),bridge);story=new StoryChat(path.join(app.getPath('userData'),'story-chat-test.json'),bridge);dialogue=new Dialogue(path.join(app.getPath('userData'),'ai-dialogue.json'),bridge);}
+async function configure(){looks=new LookPacks(path.join(app.getPath('userData'),'appearance-packs'),{validateImage:bytes=>{const image=nativeImage.createFromBuffer(bytes);if(image.isEmpty())throw Error('PNG 이미지를 해석하지 못했습니다.');}});bridge=new CodexBridge(await executable(),{onLogin:info=>{if(allowedURL(info.url))deviceURL=info.url;window?.webContents.send('ai:progress',info);}});diagnostics=new AIDiagnostics(new CodexBridge(await executable()));battleJudge=new BattleJudge(bridge);realtimeJudge=new RealtimeJudge(bridge);quests=new QuestBoard(path.join(app.getPath('userData'),'quest-board-test.json'),bridge);director=new StoryDirector(path.join(app.getPath('userData'),'emergent-story.json'),bridge);story=new StoryChat(path.join(app.getPath('userData'),'story-chat-test.json'),bridge);dialogue=new Dialogue(path.join(app.getPath('userData'),'ai-dialogue.json'),bridge);}
 async function currentSample(asset){if(asset?.packId==='official-example'&&asset.lookId==='yeogyeong-school')return {...asset,dataURL:'data:image/png;base64,'+(await fs.readFile(path.join(__dirname,'../ui/assets/yeogyeong-standing.png'))).toString('base64'),layout:{columns:1,rows:1}};return asset;}
 function register(){for(const [channel,handler]of Object.entries({
+ 'diagnostics:status':()=>diagnostics.status(),
+ 'diagnostics:start':()=>diagnostics.start(),
+ 'diagnostics:cancel':()=>diagnostics.cancel(),
  'art:asset':key=>assetURL(path.join(__dirname,'../ui'),key),
  'quest:list':()=>quests.read(),
  'quest:refresh':r=>quests.refresh(r?.scenario,r?.ai===true),
