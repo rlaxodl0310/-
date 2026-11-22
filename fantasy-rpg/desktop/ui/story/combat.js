@@ -191,6 +191,7 @@
     if (!registered && intent === "attack") {
       if (combat.distance > 1) {
         combat.distance--;
+        resolution.moved = 1;
         resolution.note = "공격 거리에 접근했다. 아직 타격은 닿지 않았다.";
       } else {
         resolution.outgoing = hit(

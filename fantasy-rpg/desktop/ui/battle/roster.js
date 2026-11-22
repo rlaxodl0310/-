@@ -8,7 +8,14 @@ for(const c of D.content.records){const f=c.looks.default;art[c.id]={src:'../'+f
 const stats={goblin:[30,12],slime:[24,9],ves:[30,12],ant:[28,10],clad:[65,18],velum:[50,15],draven:[75,20],noxvern:[140,28],lairon:[110,24]};
 const tells={moa:'뿌리 다리를 고정하고 몸을 기울여 공격을 준비한다.',ruke:'앞발을 낮추고 물어뜯을 틈을 노린다.',por:'지느러미를 접고 몸을 튕길 준비를 한다.',tork:'몸을 낮추고 꼬리를 옆으로 당긴다.',kar:'날개를 접어 급강하할 자세를 잡는다.',rat:'앞니를 드러내며 낮게 웅크린다.',chitin:'톱니형 앞턱을 벌리고 짧은 돌진을 준비한다.'};
 const monsters=E.records.map(m=>Object.freeze({id:m.id,name:m.name,stars:m.stars,hp:(stats[m.id]||[30,9])[0],damage:(stats[m.id]||[30,9])[1],art:monsterArt(m.id),dedicated:dedicated.has(m.id),temporaryArt:!dedicated.has(m.id),tell:tells[m.id]||'자세를 고쳐 공격할 틈을 노린다.'}));
-const characters=D.catalog.map(c=>Object.freeze({id:c.id,name:c.name,preferredWeapons:D.content.get(c.id)?.preferredWeapons||[],roles:D.content.get(c.id)?.roles||[],combatStyle:D.content.get(c.id)?.combatStyle||null,hp:c.id==='taei'?100:85,damage:c.id==='zero'?0:10,passive:c.id==='zero',art:art[c.id]||null,dedicated:dedicated.has(c.id),temporaryArt:!dedicated.has(c.id)}));
+const profiles=new Map(D.content.records.map(record=>[record.id,record]));
+const characters=D.catalog.map(c=>{
+  const profile=profiles.get(c.id);
+  return Object.freeze({id:c.id,name:c.name,preferredWeapons:profile?.preferredWeapons||[],
+    roles:profile?.roles||[],combatStyle:profile?.combatStyle||null,hp:c.id==='taei'?100:85,
+    damage:c.id==='zero'?0:10,passive:c.id==='zero',art:art[c.id]||null,
+    dedicated:dedicated.has(c.id),temporaryArt:!dedicated.has(c.id)});
+});
 function get(id){return monsters.find(m=>m.id===id)||characters.find(c=>c.id===id)||null;}
 return Object.freeze({monsters:Object.freeze(monsters),characters:Object.freeze(characters),get,isGeneric:id=>!!get(id)&&!dedicated.has(id)});
 });

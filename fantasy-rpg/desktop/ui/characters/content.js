@@ -28,9 +28,13 @@ records.push({
 function fullImage(src,w,h){
   return {src:'assets/'+src,x:0,y:0,w,h,imageWidth:w,imageHeight:h};
 }
-const previews=[{
+records.push({
   id:'janghwa',name:'장화',age:null,species:'인간족',heightCm:157,weightKg:49,
-  preferredWeapons:['manaThread'],
+  unknownName:'붉은 단발의 인간족',requiresStoryIntroduction:true,
+  persona:'인간족 장화. 157cm, 49kg. 차분하고 칼같으며 시크하지만 당황하면 말을 더듬는다. 마력실로 싸우며 세부 기술과 출신은 미정이다. 처음 등장하거나 동행하는 계기는 사용자 입력과 현장 근거를 따른다.',
+  preferredWeapons:['manaThread'],combatStyle:'magic',
+  combatSprite:combatAtlas('janghwa',.93,.94),
+  motion:{name:'손목을 돌려 실을 뻗기',lean:2,step:4,turn:-8,side:6,tempo:.94},
   looks:{
     default:fullImage('janghwa-standing.webp',720,1080),
     help:fullImage('janghwa-talk.webp',720,1080),
@@ -44,6 +48,8 @@ const previews=[{
   sd:{default:fullImage('janghwa-sd.webp',512,512),alternate:fullImage('janghwa-alternate-sd.webp',512,512)},
 },{
   id:'selsi',name:'셀시',age:null,species:'개구리 수인',heightCm:168,weightKg:50,
+  unknownName:'은회색 단발의 개구리 수인',requiresStoryIntroduction:true,
+  persona:'개구리 수인 셀시. 168cm, 50kg. 감각 반응이 둔하고 무심하며 귀찮음이 많다. 무기·직업·전용 전투 기술은 미정이다. 처음 등장하거나 동행하는 계기는 사용자 입력과 현장 근거를 따른다.',
   preferredWeapons:[],
   looks:{
     default:fullImage('selsi-standing.webp',720,1080),
@@ -54,9 +60,10 @@ const previews=[{
   },
   sd:{default:fullImage('selsi-sd.webp',512,512)},
   combatSprite:combatAtlas('selsi',.96,.85),
-}];
+  motion:{name:'상체를 느슨하게 두고 한 걸음 비키기',lean:-2,step:4,turn:5,side:11,tempo:.85},
+});
 function get(id){return records.find(r=>r.id===id)||null;}
 function appearance(id,{look='default',pose='default'}={}){const r=get(id);return r?.looks[pose==='default'?look:pose]||r?.looks.default||null;}
 function displayName(state,id){const r=get(id);if(!r)return null;const introduced=state?.knownIdentities?.[id]===true||(state?.turns||[]).some(t=>(t.panels||[]).some(p=>p.speaker===id&&String(p.text||'').includes(r.name)));return introduced?r.name:r.unknownName;}
-return{records,previews,get,appearance,displayName,combatFrame};
+return{records,get,appearance,displayName,combatFrame};
 });

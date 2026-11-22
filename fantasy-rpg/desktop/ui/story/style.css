@@ -20,3 +20,11 @@ body[data-story-mode=director] .dialogue-wrap{background:linear-gradient(90deg,#
 @keyframes story-impact{0%{translate:0 0}25%{translate:-15px -5px;filter:brightness(1.3)}55%{translate:4px 2px}100%{translate:0 0}}
 @keyframes story-retreat{from{translate:35px 0}to{translate:0 0}}
 @media(prefers-reduced-motion:reduce){.story-fighter{animation:none!important}}
+.story-monster[data-pose=attack]{animation:story-enemy-strike .32s ease-out}
+.story-monster[data-pose=hit]{animation:story-enemy-impact .3s ease-out}
+.story-fighter[data-pose=guard],.story-monster[data-pose=guard]{animation:story-guard .3s ease-out}
+.story-fighter[data-pose=dodge]{animation:story-retreat .35s ease-out}
+@keyframes story-enemy-strike{45%{translate:-24px -3px}}
+@keyframes story-enemy-impact{25%{translate:15px -5px;filter:brightness(1.3)}}
+@keyframes story-guard{35%{translate:0 5px}}
+@media(prefers-reduced-motion:reduce){.story-monster{animation:none!important}}

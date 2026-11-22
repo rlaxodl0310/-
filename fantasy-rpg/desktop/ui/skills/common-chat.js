@@ -130,7 +130,8 @@
     const start = b.time,
       oldHP = p.hp,
       oldMana = p.mana;
-    let escaped = false,
+    let moved = 0,
+      escaped = false,
       note = "";
     if (skill) {
       const out = b.castSkill(p, skill.id, t);
@@ -139,6 +140,7 @@
     } else if (basicIntent === "attack") {
       if (c.distance > 1) {
         c.distance--;
+        moved = 1;
         for (const u of b.living("enemy")) u.x = Math.max(p.x + 1, u.x - 1);
         note = "타격 거리에 접근했다.";
       } else b.startAttack(p);
@@ -236,6 +238,7 @@
       intent: basicIntent || "skill",
       outgoing,
       incoming,
+      moved,
       healed: (b.healingLog || [])
         .filter((e) => e.target === p.id)
         .reduce((n, e) => n + e.amount, 0),
@@ -244,7 +247,7 @@
       note,
       manaSpent: oldMana - p.mana,
       ...(skill
-        ? { skillId: skill.id, skillName: skill.name, visual: skill.visual }
+        ? { skillId: skill.id, skillName: skill.name, skillEffect: skill.effect, visual: skill.visual }
         : {}),
     };
     const actionWorld = clone(
