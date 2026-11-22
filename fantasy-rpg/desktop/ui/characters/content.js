@@ -232,6 +232,24 @@ records.push({
   sd:{default:fullImage('karin-sd.webp',512,512)},
   combatSprite:combatAtlas('karin',.94,.88),
 });
+records.push({
+  id:'taeo',name:'태오',age:null,species:'엘프족',heightCm:187,weightKg:74,
+  unknownName:'푸른 날의 태도를 든 흑발 엘프',requiresStoryIntroduction:true,
+  persona:'엘프족 태오. 187cm, 74kg. 성격은 냉정하고 냉철하며 태도를 사용한다. 처음 등장하는 계기는 사용자 입력과 현장 근거를 따른다.',
+  preferredWeapons:['sword'],
+  lookLabels:{attack:'태도 공격',cutscene:'태도를 뽑는 순간 · 컷신'},
+  motion:{name:'낮게 몸을 틀어 태도를 뽑기',lean:-3.5,step:6.5,turn:12,side:8.5,tempo:.97},
+  looks:{
+    default:fullImage('taeo-standing.webp',720,1080),
+    casual:fullImage('taeo-casual.webp',720,1080),
+    rear:fullImage('taeo-rear.webp',720,1080),
+    help:fullImage('taeo-talk.webp',720,1080),
+    attack:fullImage('taeo-cutscene.webp',720,1080),
+    cutscene:fullImage('taeo-cutscene.webp',720,1080),
+  },
+  sd:{default:fullImage('taeo-sd.webp',512,512)},
+  combatSprite:combatAtlas('taeo',1,.97),
+});
 get('fafnir').looks.casual=fullImage('fafnir-casual.webp',720,1080);
 get('fenri').looks.casual=fullImage('fenri-casual.webp',720,1080);
 function get(id){return records.find(r=>r.id===id)||null;}
