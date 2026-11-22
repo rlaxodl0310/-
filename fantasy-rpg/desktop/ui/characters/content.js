@@ -287,6 +287,43 @@ records.push({
   sd:{default:fullImage('espada-sd.webp',512,512)},
   combatSprite:combatAtlas('espada',.93,1.12),
 });
+records.push({
+  id:'restia',name:'레스티아',age:null,species:'인간족',heightCm:165,weightKg:47,
+  unknownName:'은발의 레이피어 검사',requiresStoryIntroduction:true,
+  persona:'인간족 레스티아. 165cm, 47kg. 예의 바르고 상대를 세심하게 살피지만 승부가 걸리면 쉽게 물러서지 않는다. 레이피어를 사용한다.',
+  preferredWeapons:['rapier'],
+  lookLabels:{smile:'예의 바른 미소',focus:'승부에 집중하기',attack:'레이피어 공격'},
+  motion:{name:'발끝을 옮겨 가볍게 찌르기',lean:3.5,step:6.25,turn:5.5,side:7.5,tempo:1.09},
+  looks:{
+    default:fullImage('restia-standing.webp',720,1080),
+    rear:fullImage('restia-rear.webp',720,1080),
+    casual:fullImage('restia-casual.webp',720,1080),
+    help:fullImage('restia-talk.webp',720,1080),
+    smile:fullImage('restia-smile.webp',720,1080),
+    focus:fullImage('restia-focus.webp',720,1080),
+    attack:fullImage('restia-cutscene.webp',720,1080),
+    cutscene:fullImage('restia-cutscene.webp',720,1080),
+  },
+  sd:{default:fullImage('restia-sd.webp',512,512)},
+  combatSprite:combatAtlas('restia',.94,1.09),
+},{
+  id:'lir',name:'리르',age:null,species:'늑대 수인',heightCm:167,weightKg:52,
+  unknownName:'남색과 흰색 머리의 늑대 수인',requiresStoryIntroduction:true,
+  persona:'늑대 수인 리르. 167cm, 52kg. 낯선 일행에게 먼저 말을 걸고 뒤처진 동료에게 속도를 맞춘다. 자기 몫을 맡기는 데 서툴고 걱정이 앞서면 동료의 결정까지 대신하려 한다. 잘못을 알면 직접 사과한다. 무기와 과거는 미정이다.',
+  preferredWeapons:[],
+  lookLabels:{smile:'자신만만한 미소',thanks:'쑥스러운 감사',cutscene:'도움을 받아들이는 순간 · 컷신'},
+  motion:{name:'발을 넓게 디디며 자세 낮추기',lean:-2.5,step:5.75,turn:8.5,side:10.5,tempo:1.03},
+  looks:{
+    default:fullImage('lir-standing.webp',720,1080),
+    rear:fullImage('lir-rear.webp',720,1080),
+    help:fullImage('lir-talk.webp',720,1080),
+    smile:fullImage('lir-smile.webp',720,1080),
+    thanks:fullImage('lir-thanks.webp',720,1080),
+    cutscene:fullImage('lir-cutscene.webp',720,1080),
+  },
+  sd:{default:fullImage('lir-sd.webp',512,512)},
+  combatSprite:combatAtlas('lir',.95,1.03),
+});
 get('fafnir').looks.casual=fullImage('fafnir-casual.webp',720,1080);
 get('fenri').looks.casual=fullImage('fenri-casual.webp',720,1080);
 function get(id){return records.find(r=>r.id===id)||null;}
