@@ -435,6 +435,25 @@ records.push({
   sd:{default:fullImage('spina-sd.webp',512,512)},
   combatSprite:combatAtlas('spina',.94,1.01),
 });
+records.push({
+  id:'halo',name:'헤일로',age:null,species:'라쿤 수인',heightCm:178,weightKg:67,
+  unknownName:'붉은 머리의 라쿤 수인',origin:'fantasy',requiresStoryIntroduction:true,
+  persona:'라쿤 수인 헤일로. 178cm, 67kg. 쾌활하며 낯선 일행의 긴장을 농담으로 푼다. 길이 막히면 우회로부터 찾고, 자기 실수까지 농담으로 넘기려다 신뢰를 잃곤 한다.',
+  preferredWeapons:['greatsword'],
+  lookLabels:{help:'농담으로 인사하기',reaction:'어색하게 사과하기',cutscene:'붉은 대검을 휘두르기 · 컷신'},
+  motion:{name:'어깨를 틀어 붉은 대검 휘두르기',lean:7.25,step:6.4,turn:-11.25,side:9.25,tempo:1.07},
+  looks:{
+    default:fullImage('halo-standing.webp',720,1080),
+    casual:fullImage('halo-casual.webp',720,1080),
+    rear:fullImage('halo-rear.webp',720,1080),
+    help:fullImage('halo-talk.webp',720,1080),
+    reaction:fullImage('halo-reaction.webp',720,1080),
+    attack:fullImage('halo-cutscene.webp',720,1080),
+    cutscene:fullImage('halo-cutscene.webp',720,1080),
+  },
+  sd:{default:fullImage('halo-sd.webp',512,512)},
+  combatSprite:combatAtlas('halo',.97,1.07),
+});
 get('fafnir').looks.casual=fullImage('fafnir-casual.webp',720,1080);
 get('fenri').looks.casual=fullImage('fenri-casual.webp',720,1080);
 function get(id){return records.find(r=>r.id===id)||null;}
