@@ -167,6 +167,7 @@ records.push({
   motion:{name:'검을 낮게 두고 짧게 비켜 베기',lean:-4,step:4.5,turn:-11,side:8,tempo:.98},
   looks:{
     default:fullImage('rosie-standing.webp',720,1080),
+    casual:fullImage('rosie-casual.webp',720,1080),
     rear:fullImage('rosie-rear.webp',720,1080),
     help:fullImage('rosie-talk.webp',720,1080),
     attack:fullImage('rosie-sword.webp',720,1080),
