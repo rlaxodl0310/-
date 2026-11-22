@@ -158,6 +158,22 @@ records.push({
   },
   sd:{default:fullImage('palanus-sd.webp',512,512)},
   combatSprite:combatAtlas('palanus',.96,.88),
+},{
+  id:'rosie',name:'로지',age:null,species:'인간족',heightCm:167,weightKg:49,
+  unknownName:'남색 베일을 쓴 은발 인간족',requiresStoryIntroduction:true,
+  persona:'인간족 로지. 167cm, 49kg. 검을 사용한다. 예의 바르고 낯선 사람부터 챙기지만 부당한 일에는 부드러운 말투로도 단호하게 맞선다. 사소한 농담을 문자 그대로 받아들이는 면이 있다. 나이·출신·직업·전용 기술·첫 만남은 미정이다.',
+  preferredWeapons:['sword'],
+  lookLabels:{attack:'검 공격',cutscene:'말없이 결심하는 순간 · 컷신'},
+  motion:{name:'검을 낮게 두고 짧게 비켜 베기',lean:-4,step:4.5,turn:-11,side:8,tempo:.98},
+  looks:{
+    default:fullImage('rosie-standing.webp',720,1080),
+    rear:fullImage('rosie-rear.webp',720,1080),
+    help:fullImage('rosie-talk.webp',720,1080),
+    attack:fullImage('rosie-sword.webp',720,1080),
+    cutscene:fullImage('rosie-cutscene.webp',720,1080),
+  },
+  sd:{default:fullImage('rosie-sd.webp',512,512)},
+  combatSprite:combatAtlas('rosie',.95,.98),
 });
 function get(id){return records.find(r=>r.id===id)||null;}
 function appearance(id,{look='default',pose='default'}={}){const r=get(id);return r?.looks[pose==='default'?look:pose]||r?.looks.default||null;}
