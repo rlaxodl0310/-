@@ -270,6 +270,23 @@ records.push({
   sd:{default:fullImage('trude-sd.webp',512,512)},
   combatSprite:combatAtlas('trude',.96,1.08),
 });
+records.push({
+  id:'espada',name:'에스파다',age:null,species:'인간족',heightCm:164,weightKg:44,
+  unknownName:'연보라색 긴 머리의 인간족',requiresStoryIntroduction:true,
+  persona:'인간족 에스파다. 164cm, 44kg. 말수가 적고 관찰력이 좋다. 긴장한 동료에게 무심한 듯 농담을 건네며 단검을 사용한다. 첫 만남과 합류 조건은 미정이다.',
+  preferredWeapons:['dagger'],
+  lookLabels:{observe:'조용히 관찰하기',attack:'단검을 든 자세'},
+  motion:{name:'상대를 살피며 짧게 발을 옮겨 단검 내밀기',lean:-4.5,step:6,turn:-9.5,side:11,tempo:1.12},
+  looks:{
+    default:fullImage('espada-standing.webp',720,1080),
+    rear:fullImage('espada-rear.webp',720,1080),
+    help:fullImage('espada-talk.webp',720,1080),
+    observe:fullImage('espada-observe.webp',720,1080),
+    attack:fullImage('espada-dagger.webp',720,1080),
+  },
+  sd:{default:fullImage('espada-sd.webp',512,512)},
+  combatSprite:combatAtlas('espada',.93,1.12),
+});
 get('fafnir').looks.casual=fullImage('fafnir-casual.webp',720,1080);
 get('fenri').looks.casual=fullImage('fenri-casual.webp',720,1080);
 function get(id){return records.find(r=>r.id===id)||null;}
