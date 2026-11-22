@@ -6,7 +6,7 @@ function has(id){return Object.prototype.hasOwnProperty.call(entries,id);}
 function ready(id){return images.has(entries[id]?.src);}
 async function load(prefix=''){return Promise.all([...new Set([...Object.values(entries).map(e=>e.src),'assets/cast-movement.png'])].map(src=>new Promise(resolve=>{const im=new Image();im.onload=()=>{images.set(src,im);resolve(true);};im.onerror=()=>resolve(false);im.src=prefix+src;})));}
 function draw(ctx,id,t=0,moving=false,pose=null,progress=0){ctx.clearRect(0,0,86,86);const e=entries[id],im=images.get(e?.src);if(!im)return false;
-const custom=Content.get(id);const frame=custom?(pose==='hit'?6:pose==='attack'?3:pose==='dodge'?(progress<.5?4:5):moving?1+Math.floor(t*7)%2:0):id==='zero'?(moving?1:['guard','dodge'].includes(pose)?2:0):0;
+const custom=Content.get(id);const frame=custom?.pixel.frames.length===1?0:custom?(pose==='hit'?6:pose==='attack'?3:pose==='dodge'?(progress<.5?4:5):moving?1+Math.floor(t*7)%2:0):id==='zero'?(moving?1:['guard','dodge'].includes(pose)?2:0):0;
 let source=im,box=e.frames[frame];const m=movement[id],walking=!custom&&moving&&m,evading=!custom&&pose==='dodge'&&m;
 if((walking||evading)&&images.has('assets/cast-movement.png')){source=images.get('assets/cast-movement.png');const f=evading?(progress<.5?2:3):Math.floor(t*7*(id==='seoha'?.8:id==='nea'?1.2:1))%2;box=m.frames[f];}
 const [x,y,w,h]=box;
