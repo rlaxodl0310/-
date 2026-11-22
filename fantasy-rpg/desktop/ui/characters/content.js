@@ -324,6 +324,26 @@ records.push({
   sd:{default:fullImage('lir-sd.webp',512,512)},
   combatSprite:combatAtlas('lir',.95,1.03),
 });
+records.push({
+  id:'nadan',name:'나단',age:null,species:'인간족',heightCm:156,weightKg:44,
+  unknownName:'키보다 큰 대검을 든 성기사',requiresStoryIntroduction:true,
+  persona:'인간족 성기사 나단. 156cm, 44kg. 성직자와 교주를 호위한다. 천진하고 꾸밈이 없어 의전 용어를 곧이곧대로 받아들이지만, 호위 중에는 위험을 빠르게 알아차린다.',
+  preferredWeapons:['greatsword'],
+  lookLabels:{relief:'안도하며 미소 짓기',escort:'호위 대상에게 손 내밀기',cutscene:'대검을 들어 호위하기 · 컷신',attack:'대검을 들어 호위하기'},
+  motion:{name:'양발로 버티며 긴 대검을 들어 막기',lean:4.25,step:4.75,turn:-7.25,side:6.75,tempo:.91},
+  looks:{
+    default:fullImage('nadan-standing.webp',720,1080),
+    rear:fullImage('nadan-rear.webp',720,1080),
+    help:fullImage('nadan-talk.webp',720,1080),
+    relief:fullImage('nadan-relief.webp',720,1080),
+    escort:fullImage('nadan-escort.webp',720,1080),
+    attack:fullImage('nadan-cutscene.webp',720,1080),
+    cutscene:fullImage('nadan-cutscene.webp',720,1080),
+    casual:fullImage('nadan-casual.webp',720,1080),
+  },
+  sd:{default:fullImage('nadan-sd.webp',512,512)},
+  combatSprite:combatAtlas('nadan',.92,.91),
+});
 get('fafnir').looks.casual=fullImage('fafnir-casual.webp',720,1080);
 get('fenri').looks.casual=fullImage('fenri-casual.webp',720,1080);
 function get(id){return records.find(r=>r.id===id)||null;}
