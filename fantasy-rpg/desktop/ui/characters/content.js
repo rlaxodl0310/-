@@ -250,6 +250,26 @@ records.push({
   sd:{default:fullImage('taeo-sd.webp',512,512)},
   combatSprite:combatAtlas('taeo',1,.97),
 });
+records.push({
+  id:'trude',name:'트루드',age:null,species:'올빼미 수인',heightCm:168,weightKg:51,
+  unknownName:'붉은 머리의 올빼미 수인',requiresStoryIntroduction:true,
+  persona:'올빼미 수인 트루드. 168cm, 51kg. 호기심과 승부욕이 강하며 평소엔 농담을 즐기고 낯선 소리에 민감하다. 청백색 결정 날의 장병기를 사용한다. 첫 만남과 합류 조건은 미정이다.',
+  preferredWeapons:['axe'],
+  lookLabels:{smile:'장난스러운 미소',alert:'낯선 소리에 귀 기울이기',attack:'결정 날 장병기 공격',cutscene:'승부에 집중하는 순간 · 컷신'},
+  motion:{name:'장병기를 몸 옆으로 당겨 휘두르기',lean:6.5,step:5.5,turn:-10.5,side:9.5,tempo:1.08},
+  looks:{
+    default:fullImage('trude-standing.webp',720,1080),
+    casual:fullImage('trude-casual.webp',720,1080),
+    rear:fullImage('trude-rear.webp',720,1080),
+    help:fullImage('trude-talk.webp',720,1080),
+    smile:fullImage('trude-smile.webp',720,1080),
+    alert:fullImage('trude-alert.webp',720,1080),
+    attack:fullImage('trude-cutscene.webp',720,1080),
+    cutscene:fullImage('trude-cutscene.webp',720,1080),
+  },
+  sd:{default:fullImage('trude-sd.webp',512,512)},
+  combatSprite:combatAtlas('trude',.96,1.08),
+});
 get('fafnir').looks.casual=fullImage('fafnir-casual.webp',720,1080);
 get('fenri').looks.casual=fullImage('fenri-casual.webp',720,1080);
 function get(id){return records.find(r=>r.id===id)||null;}
