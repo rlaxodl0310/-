@@ -69,6 +69,7 @@ records.push({
   motion:{name:'앞발로 간격을 재고 가볍게 돌진하기',lean:5,step:6,turn:-5,side:4,tempo:1.08},
   looks:{
     default:fullImage('rachel-standing.webp',720,1080),
+    casual:fullImage('rachel-casual.webp',720,1080),
     rear:fullImage('rachel-rear.webp',720,1080),
     help:fullImage('rachel-talk.webp',720,1080),
     attack:fullImage('rachel-rapier.webp',720,1080),
@@ -84,6 +85,7 @@ records.push({
   motion:{name:'디딤발로 중심을 잡고 크게 휘두르기',lean:10,step:2,turn:15,side:5,tempo:.78},
   looks:{
     default:fullImage('spike-standing.webp',720,1080),
+    casual:fullImage('spike-casual.webp',720,1080),
     rear:fullImage('spike-rear.webp',720,1080),
     help:fullImage('spike-talk.webp',720,1080),
     attack:fullImage('spike-axe.webp',720,1080),
@@ -99,6 +101,7 @@ records.push({
   motion:{name:'한 발 가볍게 디디고 상체를 열기',lean:6,step:8,turn:-7,side:13,tempo:1.12},
   looks:{
     default:fullImage('jave-standing.webp',720,1080),
+    casual:fullImage('jave-casual.webp',720,1080),
     rear:fullImage('jave-rear.webp',720,1080),
     help:fullImage('jave-talk.webp',720,1080),
     ready:fullImage('jave-ready.webp',720,1080),
@@ -106,6 +109,23 @@ records.push({
   },
   sd:{default:fullImage('jave-sd.webp',512,512)},
   combatSprite:combatAtlas('jave',.97,1.12),
+},{
+  id:'aquila',name:'아킬라',age:null,species:'엘프족',heightCm:170,weightKg:50,
+  unknownName:'큰 방패를 든 은회색 머리 엘프',requiresStoryIntroduction:true,
+  persona:'엘프족 아킬라. 170cm, 50kg. 거대한 방패와 대검을 쓴다. 과묵하고 관찰력이 좋다. 위험할 때 먼저 앞에 서고 약속을 무겁게 여긴다. 혼자 감당하려다 도움을 늦게 청하기도 한다. 나이·출신·직업·전용 기술·첫 만남은 미정이다.',
+  preferredWeapons:['shield','greatsword'],lookLabels:{attack:'대검 공격',guard:'대형 방패 방어',cutscene:'앞을 막아서는 순간 · 컷신'},
+  motion:{name:'방패 쪽 발을 굳히고 짧게 디디기',lean:7,step:2.5,turn:11,side:3,tempo:.81},
+  looks:{
+    default:fullImage('aquila-standing.webp',720,1080),
+    casual:fullImage('aquila-casual.webp',720,1080),
+    rear:fullImage('aquila-rear.webp',720,1080),
+    help:fullImage('aquila-talk.webp',720,1080),
+    guard:fullImage('aquila-guard.webp',720,1080),
+    attack:fullImage('aquila-sword.webp',720,1080),
+    cutscene:fullImage('aquila-cutscene.webp',720,1080),
+  },
+  sd:{default:fullImage('aquila-sd.webp',512,512)},
+  combatSprite:combatAtlas('aquila',.96,.81),
 });
 function get(id){return records.find(r=>r.id===id)||null;}
 function appearance(id,{look='default',pose='default'}={}){const r=get(id);return r?.looks[pose==='default'?look:pose]||r?.looks.default||null;}
