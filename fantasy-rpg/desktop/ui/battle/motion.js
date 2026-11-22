@@ -11,6 +11,7 @@ const profiles={
  nea:{name:'낮게 움츠리고 옆으로 빠지기',lean:9,step:6,turn:14,side:-18,tempo:1.2},
  zero:{name:'작은 도약과 날개로 균형 잡기',lean:0,step:9,turn:-9,side:5,tempo:.8}
 };
+const Content=typeof module==='object'&&module.exports?require('../characters/content.js'):globalThis.CharacterContent||{records:[]};for(const r of Content.records)profiles[r.id]=r.motion;
 function keys(id,type,weapon='gauntlet',reach={x:26,y:0},reduced=false){
  const p=profiles[id]||profiles.taei;
  const k=(offset,x=0,y=0,r=0,sx=1,sy=1)=>({offset,transform:`translate(${x}px,${y}px) rotate(${r}deg) scale(${sx},${sy})`});

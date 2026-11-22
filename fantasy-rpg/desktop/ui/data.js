@@ -1,4 +1,5 @@
 (function(root){
+ const Content=typeof module==='object'&&module.exports?require('./characters/content.js'):root.CharacterContent||{records:[],get:()=>null,displayName:()=>null};
  const assets={yui:'assets/yui-expressions.png',yuiSD:'assets/sd-yui.png',yuiCG:'assets/yui-cutscenes.png',yeogyeong:'assets/yeogyeong-expressions.png',yeogyeongSD:'assets/sd-yeogyeong.png'};
  const player={id:'taei',name:'김태이',age:18,grade:'고등학교 2학년'};
  const actors={nea:'네아','dogyeom-childhood-friend':'임소윤',yui:'한유이',yuiUnknown:'검은 단발의 여성',narrator:'상황',yeogyeong:'차여경'};
@@ -42,7 +43,8 @@
   }}
  ];
  const catalog=[{id:'nea',name:'네아',age:18},{id:'yui',name:'한유이',age:20},{id:'taei',name:'김태이',age:18},{id:'yeogyeong',name:'차여경',age:null},{id:'dogyeom',name:'백도겸',age:null},{id:'seoha',name:'윤서하',age:null},{id:'woojin',name:'정우진',age:null},{id:'zero',name:'제로',age:null},{id:'dogyeom-childhood-friend',name:'임소윤',age:null}];
+ for(const r of Content.records){catalog.push({id:r.id,name:r.name,age:r.age});actors[r.id]=r.name;profiles[r.id]={name:r.name,text:r.persona};}
  const initiallyKnown=['taei','yeogyeong','dogyeom'];
- const data={catalog,initiallyKnown,version:3,saveVersion:2,player,actors,profiles,publicFacts:{nea:{name:'네아',age:18},yui:{name:'한유이',age:20},yeogyeong:{name:'차여경',age:null}},events,assets,emotions:['평상시','작은 웃음','걱정·의아함','놀람','짜증','집중']};
+ const data={content:Content,catalog,initiallyKnown,version:3,saveVersion:2,player,actors,profiles,publicFacts:{nea:{name:'네아',age:18},yui:{name:'한유이',age:20},yeogyeong:{name:'차여경',age:null}},events,assets,emotions:['평상시','작은 웃음','걱정·의아함','놀람','짜증','집중']};
  if(typeof module!=='undefined'&&module.exports)module.exports=data;else root.StoryKitData=data;
 })(globalThis);
