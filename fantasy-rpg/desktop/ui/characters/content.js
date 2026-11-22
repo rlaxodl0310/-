@@ -47,9 +47,13 @@ const previews=[{
   preferredWeapons:[],
   looks:{
     default:fullImage('selsi-standing.webp',720,1080),
+    rear:fullImage('selsi-rear.webp',720,1080),
     help:fullImage('selsi-talk.webp',720,1080),
+    ready:fullImage('selsi-ready.webp',720,1080),
+    sigh:fullImage('selsi-sigh.webp',720,1080),
   },
   sd:{default:fullImage('selsi-sd.webp',512,512)},
+  combatSprite:combatAtlas('selsi',.96,.85),
 }];
 function get(id){return records.find(r=>r.id===id)||null;}
 function appearance(id,{look='default',pose='default'}={}){const r=get(id);return r?.looks[pose==='default'?look:pose]||r?.looks.default||null;}
