@@ -65,7 +65,7 @@ records.push({
   id:'rachel',name:'레이첼',age:null,species:'엘프족',heightCm:172,weightKg:54,
   unknownName:'금발의 엘프',origin:'fantasy',requiresStoryIntroduction:true,
   persona:'엘프족 공주 레이첼. 172cm, 54kg. 귀족으로 고상하게 자랐고 레이피어를 사용한다. 벌레를 무서워한다. 나이·가문명·출신지·첫 만남·전용 기술은 미정이다. 사용자가 이름을 불러도 게임 속 인물은 소개되기 전까지 정체를 알지 못한다. 참고 그림의 불꽃은 능력이 아니다.',
-  preferredWeapons:['rapier'],
+  preferredWeapons:['rapier'],lookLabels:{attack:'레이피어 공격'},
   motion:{name:'앞발로 간격을 재고 가볍게 돌진하기',lean:5,step:6,turn:-5,side:4,tempo:1.08},
   looks:{
     default:fullImage('rachel-standing.webp',720,1080),
@@ -76,6 +76,21 @@ records.push({
   },
   sd:{default:fullImage('rachel-sd.webp',512,512)},
   combatSprite:combatAtlas('rachel',.98,1.08),
+},{
+  id:'spike',name:'스파이크',age:null,species:'인간·엘프 혼혈',heightCm:195,weightKg:91,
+  unknownName:'거대한 도끼를 든 거구',requiresStoryIntroduction:true,
+  persona:'인간과 엘프 혼혈 스파이크. 195cm, 91kg의 거구. 거대한 도끼를 쓰고 말과 행동이 시원시원하며 성격은 불같다. 나이·출신지·첫 만남·전용 기술은 미정이다. 얼음이나 번개 능력을 임의로 부여하지 않는다.',
+  preferredWeapons:['axe'],lookLabels:{attack:'도끼 공격'},
+  motion:{name:'디딤발로 중심을 잡고 크게 휘두르기',lean:10,step:2,turn:15,side:5,tempo:.78},
+  looks:{
+    default:fullImage('spike-standing.webp',720,1080),
+    rear:fullImage('spike-rear.webp',720,1080),
+    help:fullImage('spike-talk.webp',720,1080),
+    attack:fullImage('spike-axe.webp',720,1080),
+    irritated:fullImage('spike-irritated.webp',720,1080),
+  },
+  sd:{default:fullImage('spike-sd.webp',512,512)},
+  combatSprite:combatAtlas('spike',1,.78),
 });
 function get(id){return records.find(r=>r.id===id)||null;}
 function appearance(id,{look='default',pose='default'}={}){const r=get(id);return r?.looks[pose==='default'?look:pose]||r?.looks.default||null;}
