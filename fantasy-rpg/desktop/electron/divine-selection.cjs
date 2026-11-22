@@ -1,6 +1,6 @@
 'use strict';
 const Engine=require('./selection-engine.cjs');
-const BEASTS=[{id:'npc_kallistra',name:'칼리스트라',classification:'신수',epithetProposal:'잿빛 왕관의 태양',mode:null}];
+const BEASTS=[{id:'npc_kallistra',name:'칼리스트라',classification:'신수',epithetProposal:'잿빛 왕관의 태양',mode:null},{id:'npc_belkarion',name:'벨카리온',classification:'신수',epithetProposal:'폭풍 너머의 영원',mode:null}];
 const fields={kind:{type:'string',enum:['offer','accept','decline']},chooserId:{type:'string'},targetId:{type:'string'},eventIds:{type:'array',minItems:1,maxItems:6,items:{type:'string'}},quote:{type:'string'}};
 const SCHEMA={type:'array',maxItems:1,items:{type:'object',additionalProperties:false,required:Object.keys(fields),properties:fields}};
 function frame(s){const present=['taei',...s.present,...(s.locals||[]).map(n=>n.id)],choosers=BEASTS.filter(b=>(s.locals||[]).some(n=>n.id===b.id&&n.name===b.name)).map(b=>b.id);return{present,choosers,candidates:present.filter(id=>!BEASTS.some(b=>b.id===id)),events:s.ledger,minutes:s.minutes||0};}
