@@ -22,7 +22,7 @@
 
 장화의 얼굴과 의상은 사용자가 확정한 [대화·경계·마력실 시전·피격 시트](assets/janghwa-approved-interactions.png)를 기준으로 삼는다. 이후 자세나 표정을 바꿀 때도 이 시트의 얼굴형·눈매·머리 모양과 붉은 상의 및 안쪽 레이스의 구성을 유지한다.
 
-일반 SD와 전투 SD는 [김태이의 초기 전투 SD](../fantasy-rpg/assets/sd-taei-fighter.png), [차여경의 초기 SD](../fantasy-rpg/assets/sd-yeogyeong.png)에서 보이는 약 2~3등신 비율을 기준으로 삼는다. 의상과 얼굴 특징을 간결하게 남기고, 작은 게임 표시 크기에서 자세가 읽히는지 확인한다.
+일반 SD와 전투 SD는 [김태이의 초기 전투 SD](../fantasy-rpg/assets/sd-taei-fighter.png), [차여경의 초기 SD](../fantasy-rpg/assets/sd-yeogyeong.png)에서 보이는 약 2~3등신 비율을 기준으로 삼는다. 의상과 얼굴 특징을 간결하게 남기고, 작은 게임 표시 크기에서 자세가 읽히는지 확인한다. 캐릭터 컷아웃은 실루엣 바깥이 투명해야 한다. 밝은 배경과 어두운 배경에 각각 올려 안개, 반투명 사각형, 격자선이 남는지 확인한다.
 
 ## 핵심 규칙
 

@@ -126,6 +126,22 @@ records.push({
   },
   sd:{default:fullImage('aquila-sd.webp',512,512)},
   combatSprite:combatAtlas('aquila',.96,.81),
+},{
+  id:'kiriel',name:'키리엘',age:null,species:'엘프족',heightCm:170,weightKg:53,
+  unknownName:'큰 활을 든 갈색 머리 엘프',requiresStoryIntroduction:true,
+  persona:'엘프족 키리엘. 170cm, 53kg. 활을 쓰는 원거리 딜러다. 관찰력이 좋고 건조한 농담을 던진다. 멀리서 동료의 빈틈을 먼저 알아채지만 급할수록 짧게 경고해 오해를 사기도 한다. 나이·출신·전용 기술·첫 만남은 미정이다.',
+  preferredWeapons:['bow'],combatStyle:'bow',roles:['ranged'],
+  lookLabels:{attack:'활 조준과 사격',cutscene:'위험을 알아챈 순간 · 컷신'},
+  motion:{name:'발을 옆으로 옮기고 차분히 겨누기',lean:-3,step:5.5,turn:-9,side:14,tempo:1.02},
+  looks:{
+    default:fullImage('kiriel-standing.webp',720,1080),
+    rear:fullImage('kiriel-rear.webp',720,1080),
+    help:fullImage('kiriel-talk.webp',720,1080),
+    attack:fullImage('kiriel-bow.webp',720,1080),
+    cutscene:fullImage('kiriel-cutscene.webp',720,1080),
+  },
+  sd:{default:fullImage('kiriel-sd.webp',512,512)},
+  combatSprite:combatAtlas('kiriel',.96,1.02),
 });
 function get(id){return records.find(r=>r.id===id)||null;}
 function appearance(id,{look='default',pose='default'}={}){const r=get(id);return r?.looks[pose==='default'?look:pose]||r?.looks.default||null;}

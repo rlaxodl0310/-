@@ -48,9 +48,9 @@ function drawCast(ctx,kind,id,time){
   }else if(event?.type==='miss'&&event.evaded&&event.target===id){
     pose='dodge';
   }else if(event?.actor===id){
-    pose=event.type==='cast'||event.type==='projectile'?'attack':event.type;
+    pose=['aim','cast','projectile'].includes(event.type)?'attack':event.type;
   }
-  const progress=event?.type==='projectile'?1:animProgress();
+  const progress=event?.type==='projectile'?1:event?.type==='aim'?0:animProgress();
   return CastSprites.draw(ctx,kind,time,pose==='move',pose,progress);
 }
 function sprite(u,x,y,frame){if(AdditionalMonsterSprites.has(u.kind)){const c=sprite.additionalCanvas||(sprite.additionalCanvas=document.createElement('canvas'));c.width=c.height=86;AdditionalMonsterSprites.draw(c.getContext('2d'),u.kind,frame,animation?.type==='move'&&animation.actor===u.id,animation?.actor===u.id?animation.type:null);ctx.save();ctx.translate(x,y);if(u.team==='enemy')ctx.scale(-1,1);ctx.drawImage(c,-43,-73,86,86);ctx.restore();return;}if(CastSprites.has(u.kind)){const c=sprite.castCanvas||(sprite.castCanvas=document.createElement('canvas'));c.width=86;c.height=86;drawCast(c.getContext('2d'),u.kind,u.id,Date.now()/1000);ctx.drawImage(c,x-43,y-73,86,86);return;}if(RosterArt.has(u.kind)){const c=sprite.rosterCanvas||(sprite.rosterCanvas=document.createElement('canvas'));c.width=86;c.height=86;RosterArt.draw(c.getContext('2d'),u.kind,frame,busy);ctx.save();ctx.translate(x,y);if(u.team==='enemy')ctx.scale(-1,1);ctx.drawImage(c,-43,-60,86,86);ctx.restore();return;}if(u.kind==='lairon'&&!AdditionalMonsterSprites.has(u.kind)){const c=sprite.laironCanvas||(sprite.laironCanvas=document.createElement('canvas'));c.width=86;c.height=86;LaironArt.draw(c.getContext('2d'),frame,busy,animation?.actor===u.id?animation.type:null);ctx.save();ctx.translate(x,y);ctx.scale(-1,1);ctx.drawImage(c,-43,-60,86,86);ctx.restore();return;}

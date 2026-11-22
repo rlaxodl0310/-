@@ -15,6 +15,7 @@
         :record.looks[pose==='attack'?'help':'default']||record.looks.default);
     }
   }
+  const rangedActors=new Set(records.filter(record=>['bow','magic'].includes(record.combatStyle)).map(record=>record.id));
   const ids=[...new Set([...Object.keys(frames.ready),...records.map(r=>r.id)])];
 
   function character(id,pose='ready'){
@@ -27,6 +28,7 @@
     outer.className='story-fighter '+side;
     outer.dataset.actor=id;
     outer.dataset.pose=pose;
+    if(rangedActors.has(id))outer.dataset.ranged='true';
     if(frame.src.startsWith('battle/assets/'))outer.dataset.sd='true';
     outer.style.setProperty('--offset',index);
     outer.style.aspectRatio=frame.w+' / '+frame.h;

@@ -4,3 +4,14 @@ test('all monster species execute turns, restore saves and remain their own spec
 test('all nine characters and mixed enemies coexist without claiming main companions or new skills',()=>{const b=new B({kind:'lairon',count:1,allies:R.characters.map(c=>c.id)});a.equal(b.living('ally').length,9);a.equal(new Set(b.living('ally').map(u=>u.x+','+u.y)).size,9);a.equal(B.restore(b.save()).units.length,10);const zero=b.units.find(u=>u.kind==='zero');a(zero);a.equal(R.get('zero').damage,0);const events=b.act('guard','enemy-0');a(events.some(e=>e.actor==='zero'&&e.type==='guard'));a(!events.some(e=>e.actor==='zero'&&e.type==='hit'));const mixed=new B({enemies:['por','chitin','moa','lairon','rat'],allies:R.characters.map(c=>c.id)});a.equal(mixed.units.length,14);a.deepEqual(B.restore(mixed.save()).living('enemy').map(u=>u.kind),['por','chitin','moa','lairon','rat']);a.equal(B.skills.filter(s=>s.id==='iron-rush').length,0);});
 
 test('previous preview-only characters can fight and restore in the tactical lab',()=>{const b=new B({allies:['janghwa','selsi'],count:1});const restored=B.restore(b.save());for(const id of ['janghwa','selsi']){a.equal(restored.units.find(u=>u.id===id).kind,id);a.equal(R.get(id).dedicated,true);}a.equal(restored.units.find(u=>u.id==='janghwa').weapon,'magic');a.equal(restored.units.find(u=>u.id==='selsi').weapon,'gauntlet');});
+
+test('a bow companion fires from range instead of entering melee',()=>{
+  const battle=new B({allies:['kiriel'],count:1});
+  const archer=battle.units.find(u=>u.id==='kiriel'),enemy=battle.units.find(u=>u.team==='enemy');
+  enemy.x=archer.x+3;
+  enemy.y=archer.y;
+  const events=battle.act('guard');
+  a(events.some(e=>e.type==='projectile'&&e.actor===archer.id&&e.target===enemy.id&&e.weapon==='bow'));
+  a(!events.some(e=>e.type==='move'&&e.actor===archer.id));
+  a.equal(B.restore(battle.save()).units.find(u=>u.id===archer.id).weapon,'bow');
+});
