@@ -10,3 +10,12 @@
 @media(max-width:1439px){.app>main>header .brand span{display:none}}
 @media(max-width:1279px){.app>main>header{grid-template-columns:minmax(0,1fr);gap:10px;padding:12px 20px}.app>main>header .header-right{grid-template-columns:repeat(5,minmax(0,1fr))}.app>main>header .brand{font-size:23px}}
 @media(max-width:700px){.app>main>header{padding:10px 12px}.app>main>header .header-right{grid-template-columns:repeat(3,minmax(0,1fr))}.app>main>footer{padding:8px 12px;font-size:11px}.app>main .dialogue-wrap{left:4%;right:4%;bottom:16px;max-height:calc(100% - 130px)}}
+#quick-tools-toggle{display:none}
+@media(max-width:700px){
+  .app>main>header{position:relative;z-index:5;align-items:center;min-height:62px;grid-template-columns:minmax(0,1fr) auto}
+  #quick-tools-toggle{display:block;margin:0;min-height:35px}
+  .app>main>header .header-right{display:none;position:absolute;top:100%;left:0;right:0;padding:10px 12px;background:#141d19;border-bottom:1px solid #675c44;box-shadow:0 10px 20px #0005;max-height:60dvh;overflow:auto}
+  .app>main>header #quick-tools-toggle[aria-expanded=true]+.header-right{display:grid}
+  .scene .scene-minimap{top:18px;right:14px;width:min(32%,138px)}
+  .scene #scene-portrait{top:94px;right:10%;width:80%;max-width:none;bottom:clamp(215px,37%,304px)}
+}

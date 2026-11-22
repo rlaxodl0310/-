@@ -32,6 +32,7 @@
     if(frame.src.startsWith('battle/assets/'))outer.dataset.sd='true';
     outer.style.setProperty('--offset',index);
     outer.style.aspectRatio=frame.w+' / '+frame.h;
+    outer.style.setProperty('--art-ratio',frame.w/frame.h);
     image.src=frame.src;
     image.alt='';
     image.style.width=frame.imageWidth/frame.w*100+'%';

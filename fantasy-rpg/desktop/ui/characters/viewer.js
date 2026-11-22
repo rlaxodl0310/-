@@ -50,19 +50,25 @@ window.CharacterContentUI={open(body){
     select.append(option);
   }
   const info=node('p'),bio=node('p'),controls=node('div'),stage=node('div');
-  stage.style.cssText='position:relative;max-width:100%;margin:16px auto;background:#24332c;overflow:hidden';
+  stage.style.cssText='display:grid;place-items:center;max-width:100%;margin:16px auto;background:#24332c;overflow:hidden';
   body.append(select,info,bio,controls,stage);
-  function show(frame,pixel=false,compact=false){
+  function show(frame,pixel=false,kind='art'){
     stage.replaceChildren();
-    const maxWidth=compact?240:Math.min(420,560*frame.w/frame.h);
-    const naturalMultiple=pixel&&frame.w<=maxWidth?frame.w*Math.floor(maxWidth/frame.w):maxWidth;
-    stage.style.width=naturalMultiple+'px';
-    stage.style.aspectRatio=frame.w+'/'+frame.h;
+    const bounds={art:[420,560],portrait:[420,340],scene:[420,420],sd:[240,240]};
+    const [width,height]=bounds[kind];
+    stage.style.width=width+'px';
+    stage.style.aspectRatio=width+'/'+height;
+    stage.dataset.artKind=kind;
+    const crop=node('div');
+    const fit=Math.min(width/frame.w,height/frame.h);
+    const scale=pixel&&fit>=1?Math.floor(fit):fit;
+    crop.style.cssText='position:relative;overflow:hidden;width:'+(frame.w*scale/width*100)+'%;aspect-ratio:'+frame.w+'/'+frame.h;
     const image=node('img');
     image.alt='선택한 캐릭터 외형';
     image.src=frame.src;
     image.style.cssText='position:absolute;max-width:none;width:'+frame.imageWidth/frame.w*100+'%;height:'+frame.imageHeight/frame.h*100+'%;left:'+(-frame.x/frame.w*100)+'%;top:'+(-frame.y/frame.h*100)+'%;'+(pixel?'image-rendering:pixelated;':'');
-    stage.append(image);
+    crop.append(image);
+    stage.append(crop);
   }
   function render(){
     const record=records.find(entry=>entry.id===select.value);
@@ -74,27 +80,27 @@ window.CharacterContentUI={open(body){
     bio.textContent=record.bio?(record.trait?'고유 특성 '+record.trait+' · ':'')+record.bio:'';
     bio.hidden=!bio.textContent;
     const displayed=new Set();
-    const button=(label,frame,pixel=false,compact=false)=>{
+    const button=(label,frame,pixel=false,kind='art')=>{
       const key=[frame.src,frame.x,frame.y,frame.w,frame.h].join(':');
       if(displayed.has(key))return;
       displayed.add(key);
       const control=node('button',label);
-      control.onclick=()=>show(frame,pixel,compact);
+      control.onclick=()=>show(frame,pixel,kind);
       controls.append(control);
     };
-    for(const [key,frame] of Object.entries(record.looks))button(record.lookLabels?.[key]||lookLabels[key]||key,frame);
-    for(const [key,frame] of Object.entries(record.portraits||{}))button('초상화 · '+key,frame);
-    for(const [key,frame] of Object.entries(record.sd))button('SD · '+({default:'기본',alternate:'대체 의상'}[key]||key),frame,false,true);
+    for(const [key,frame] of Object.entries(record.looks))button(record.lookLabels?.[key]||lookLabels[key]||key,frame,false,key.startsWith('컷신 · ')?'scene':'art');
+    for(const [key,frame] of Object.entries(record.portraits||{}))button('초상화 · '+key,frame,false,'portrait');
+    for(const [key,frame] of Object.entries(record.sd))button('SD · '+({default:'기본',alternate:'대체 의상'}[key]||key),frame,false,'sd');
     const pixel=record.pixel;
     pixel?.frames.forEach(([x,y,w,h],index)=>{
       const illustrated=pixel.format==='illustrated-sd';
-      button((illustrated?'전투 SD ':'도트 ')+(index+1),{src:pixel.src,x,y,w,h,imageWidth:pixel.imageWidth,imageHeight:pixel.imageHeight},!illustrated,true);
+      button((illustrated?'전투 SD ':'도트 ')+(index+1),{src:pixel.src,x,y,w,h,imageWidth:pixel.imageWidth,imageHeight:pixel.imageHeight},!illustrated,'sd');
     });
     if(record.combatSprite){
       const clips=['대기','이동','공격','방어','회피','피격'];
       record.combatSprite.frames.forEach((_,i)=>{
         const frame=CharacterContent.combatFrame(record.combatSprite,i);
-        button('전투 · '+clips[Math.floor(i/2)]+' '+(i%2+1),frame,frame.w<=96,true);
+        button('전투 · '+clips[Math.floor(i/2)]+' '+(i%2+1),frame,frame.w<=96,'sd');
       });
     }
     show(record.looks.default||Object.values(record.looks)[0]);

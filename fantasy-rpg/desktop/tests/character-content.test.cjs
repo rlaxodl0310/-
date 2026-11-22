@@ -22,7 +22,7 @@ test('combat atlas selects both frames of all six clips and preserves legacy sav
   const clips = ['idle', 'move', 'attack', 'guard', 'dodge', 'hit'];
   const Battle = require('../ui/battle/engine.js');
   const legacy = new Battle({allies:['cheona','fafnir'],count:1}).save();
-  for (const id of ['fenri', 'cheona', 'fafnir', 'janghwa', 'selsi', 'milia', 'yunseol', 'ariel']) {
+  for (const id of ['fenri', 'cheona', 'fafnir', 'janghwa', 'selsi', 'milia', 'yunseol', 'ariel', 'halo']) {
     const atlas = C.get(id).combatSprite;
     a(loaded.includes('../battle/' + atlas.src));
     const png = fs.readFileSync(path.resolve(__dirname, '../ui/battle', atlas.src));
@@ -58,4 +58,15 @@ test('confirmed transfer profiles and phase-appropriate art are available',()=>{
   a.notEqual(earth.src,fantasy.src);
   a.deepEqual([earth.x,earth.y,earth.w,earth.h],[1024,0,512,512]);
   a.equal(C.transferExpression('woojin','지구',0),null);
+});
+
+test('Earth transfer previews use full figures and the correct Taei outfit',()=>{
+  for(const id of ['taei','dogyeom']){
+    const frame=Object.values(C.transfers[id].looks)[0];
+    a.equal(frame.src,'assets/'+id+'-earth.webp');
+    a.deepEqual([frame.x,frame.y,frame.w,frame.h],[0,0,720,1080]);
+  }
+  a.equal(C.transferExpression('taei','지구',0).src,'assets/taei-earth-expressions.webp');
+  a.equal(C.transferExpression('taei','이세계',0).src,'assets/taei-fighter-expressions.webp');
+  a.equal(C.get('cheona').looks.help.src,'assets/cheona-help.webp');
 });

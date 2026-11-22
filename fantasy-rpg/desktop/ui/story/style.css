@@ -1,5 +1,5 @@
 #story-battle-layers,.story-gallery-layers{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}
-.story-fighter{position:absolute;overflow:hidden;aspect-ratio:1247 / 1261;width:clamp(140px,23vw,390px);height:auto;bottom:18%;left:calc(3% + var(--offset)*13%);filter:drop-shadow(0 8px 8px #0006)}
+.story-fighter{position:absolute;overflow:hidden;aspect-ratio:1247 / 1261;width:clamp(140px,23vw,390px);max-width:calc(var(--art-ratio,1)*min(44vh,430px));height:auto;bottom:18%;left:calc(3% + var(--offset)*13%);filter:drop-shadow(0 8px 8px #0006)}
 .story-fighter img{position:absolute;width:300%;height:300%;max-width:none;object-fit:fill}
 .story-fighter:nth-child(2n){bottom:23%;transform:scale(.87)}
 .story-monster{position:absolute;right:calc(7% + var(--offset)*9%);bottom:24%;width:clamp(100px,18vw,290px);aspect-ratio:1;overflow:hidden;filter:drop-shadow(0 7px 7px #0006)}
