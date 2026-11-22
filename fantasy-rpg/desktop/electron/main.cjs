@@ -31,6 +31,7 @@ function register(){for(const [channel,handler]of Object.entries({
  'quest:simulate':r=>quests.simulate(r?.id),
  'quest:sell':r=>quests.sell(r?.item,r?.quantity),
  'quest:advance':()=>quests.advance(),
+ 'director:npcAppointment':r=>{if(bridge.busy)throw Error('AI 응답을 먼저 마쳐 주세요.');return director.npcAppointment(r);},
  'director:npcMeet':r=>{if(bridge.busy)throw Error('AI 응답을 먼저 마쳐 주세요.');return director.npcMeet(r);},
  'director:slots':()=>director.saveSlots(),
  'director:slot':r=>{if(bridge.busy)throw Error('AI 응답을 먼저 마쳐 주세요.');return director.saveSlotAction(r);},
