@@ -42,6 +42,14 @@ const previews=[{
     alternateCast:fullImage('janghwa-alternate-cast.webp',720,1080),
   },
   sd:{default:fullImage('janghwa-sd.webp',512,512),alternate:fullImage('janghwa-alternate-sd.webp',512,512)},
+},{
+  id:'selsi',name:'셀시',age:null,species:'개구리 수인',heightCm:168,weightKg:50,
+  preferredWeapons:[],
+  looks:{
+    default:fullImage('selsi-standing.webp',720,1080),
+    help:fullImage('selsi-talk.webp',720,1080),
+  },
+  sd:{default:fullImage('selsi-sd.webp',512,512)},
 }];
 function get(id){return records.find(r=>r.id===id)||null;}
 function appearance(id,{look='default',pose='default'}={}){const r=get(id);return r?.looks[pose==='default'?look:pose]||r?.looks.default||null;}
