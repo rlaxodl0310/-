@@ -21,7 +21,7 @@ async function configure(){looks=new LookPacks(path.join(app.getPath('userData')
 async function currentSample(asset){if(asset?.packId==='official-example'&&asset.lookId==='yeogyeong-school')return {...asset,dataURL:'data:image/png;base64,'+(await fs.readFile(path.join(__dirname,'../ui/assets/yeogyeong-standing.png'))).toString('base64'),layout:{columns:1,rows:1}};return asset;}
 function register(){for(const [channel,handler]of Object.entries({
  'diagnostics:status':()=>diagnostics.status(),
- 'diagnostics:start':()=>diagnostics.start(),
+ 'diagnostics:start':r=>diagnostics.start(r),
  'diagnostics:cancel':()=>diagnostics.cancel(),
  'art:asset':key=>assetURL(path.join(__dirname,'../ui'),key),
  'quest:list':()=>quests.read(),
