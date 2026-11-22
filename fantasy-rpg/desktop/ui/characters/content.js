@@ -176,9 +176,9 @@ records.push({
   sd:{default:fullImage('rosie-sd.webp',512,512)},
   combatSprite:combatAtlas('rosie',.95,.98),
 },{
-  id:'ace',name:'에이스',age:18,species:null,heightCm:174,weightKg:62,
+  id:'ace',name:'에이스',age:18,species:'인간족',heightCm:174,weightKg:62,
   unknownName:'하늘색 머리의 검객',requiresStoryIntroduction:true,
-  persona:'18살 에이스. 174cm, 62kg이며 검을 사용한다. 승부를 즐기고 상대의 실력은 솔직하게 인정한다. 패배를 담담하게 받아들인 뒤 혼자 안 풀린 동작을 다시 연습한다. 종족·출신지·직업·전용 기술·첫 만남은 미정이다.',
+  persona:'18살 인간족 에이스. 174cm, 62kg이며 검을 사용한다. 승부를 즐기고 상대의 실력은 솔직하게 인정한다. 패배를 담담하게 받아들인 뒤 혼자 안 풀린 동작을 다시 연습한다. 출신지·직업·전용 기술·첫 만남은 미정이다.',
   preferredWeapons:['sword'],
   lookLabels:{attack:'검 공격',cutscene:'동작을 되짚는 순간 · 컷신'},
   motion:{name:'발을 가볍게 옮기고 간결하게 베기',lean:5.5,step:6,turn:-8,side:12,tempo:1.04},
@@ -191,6 +191,23 @@ records.push({
   },
   sd:{default:fullImage('ace-sd.webp',512,512)},
   combatSprite:combatAtlas('ace',.96,1.04),
+},{
+  id:'evan',name:'에반',age:null,species:'인간족',heightCm:180,weightKg:75,
+  unknownName:'푸른 망토를 두른 검과 방패의 검사',requiresStoryIntroduction:true,
+  persona:'인간족 에반. 180cm, 75kg. 검과 방패를 사용한다. 진중하지만 편한 사람들과는 장난기가 많다. 동료를 많이 잃어 쉽게 정을 주지 않는다. 동료들의 이름과 사건 경위, 나이·출신·직업·전용 기술·첫 만남은 미정이다.',
+  preferredWeapons:['sword','shield'],
+  lookLabels:{attack:'검 공격',guard:'방패 방어',cutscene:'말없이 동료를 떠올리는 순간 · 컷신'},
+  motion:{name:'방패 쪽에 체중을 싣고 검을 휘두르기',lean:8,step:4.5,turn:10,side:2.5,tempo:.92},
+  looks:{
+    default:fullImage('evan-standing.webp',720,1080),
+    rear:fullImage('evan-rear.webp',720,1080),
+    help:fullImage('evan-talk.webp',720,1080),
+    guard:fullImage('evan-guard.webp',720,1080),
+    attack:fullImage('evan-sword.webp',720,1080),
+    cutscene:fullImage('evan-cutscene.webp',720,1080),
+  },
+  sd:{default:fullImage('evan-sd.webp',512,512)},
+  combatSprite:combatAtlas('evan',.98,.92),
 });
 function get(id){return records.find(r=>r.id===id)||null;}
 function appearance(id,{look='default',pose='default'}={}){const r=get(id);return r?.looks[pose==='default'?look:pose]||r?.looks.default||null;}
