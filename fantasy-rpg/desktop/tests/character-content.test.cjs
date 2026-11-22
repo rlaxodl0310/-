@@ -22,7 +22,7 @@ test('combat atlas selects both frames of all six clips and preserves legacy sav
   const clips = ['idle', 'move', 'attack', 'guard', 'dodge', 'hit'];
   const Battle = require('../ui/battle/engine.js');
   const legacy = new Battle({allies:['cheona','fafnir'],count:1}).save();
-  for (const id of ['fenri', 'cheona', 'fafnir', 'janghwa', 'selsi']) {
+  for (const id of ['fenri', 'cheona', 'fafnir', 'janghwa', 'selsi', 'milia', 'yunseol', 'ariel']) {
     const atlas = C.get(id).combatSprite;
     a(loaded.includes('../battle/' + atlas.src));
     const png = fs.readFileSync(path.resolve(__dirname, '../ui/battle', atlas.src));
@@ -39,4 +39,23 @@ test('combat atlas selects both frames of all six clips and preserves legacy sav
     }
   }
   a.deepEqual(Battle.restore(legacy).save(), legacy);
+});
+
+test('Fenri keeps regular full-body artwork separate from combat SD',()=>{
+  const fenri=C.get('fenri');
+  a.equal(fenri.looks.default.src,'assets/fenri-standing.webp');
+  a.match(fenri.sd.default.src,/fenri-combat/);
+});
+
+test('confirmed transfer profiles and phase-appropriate art are available',()=>{
+  const traits={taei:'제로와 함께하는 동반자 특성',dogyeom:'반동',yeogyeong:'유예',seoha:'경계',yui:'잔향','dogyeom-childhood-friend':'보관'};
+  for(const [id,trait]of Object.entries(traits)){
+    a.equal(D.catalog.find(person=>person.id===id).classification,'전이자');
+    a.equal(C.transfers[id].trait,trait);
+  }
+  const earth=C.transferExpression('yeogyeong','지구',2);
+  const fantasy=C.transferExpression('yeogyeong','이세계',2);
+  a.notEqual(earth.src,fantasy.src);
+  a.deepEqual([earth.x,earth.y,earth.w,earth.h],[1024,0,512,512]);
+  a.equal(C.transferExpression('woojin','지구',0),null);
 });

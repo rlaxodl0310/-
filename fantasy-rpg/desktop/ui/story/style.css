@@ -28,6 +28,6 @@ body[data-story-mode=director] .dialogue-wrap{background:linear-gradient(90deg,#
 @keyframes story-enemy-impact{25%{translate:15px -5px;filter:brightness(1.3)}}
 @keyframes story-guard{35%{translate:0 5px}}
 @media(prefers-reduced-motion:reduce){.story-monster{animation:none!important}}
-.story-fighter[data-sd=true]{width:min(150px,24vw)}
+.story-fighter[data-sd=true]{width:min(192px,30vw)}
 .story-fighter[data-ranged=true][data-pose=attack]{animation:story-ranged-report .32s ease-out}
 @keyframes story-ranged-report{25%{translate:-5px 0}55%{translate:2px 0}}

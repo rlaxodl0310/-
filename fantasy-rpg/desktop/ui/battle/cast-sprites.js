@@ -16,7 +16,8 @@ function drawCombat(ctx,atlas,image,t,moving,pose,progress){
   const index=clip.first+phase;
   const [x,y,w,h]=atlas.frames[index];
   const scale=atlas.scale;
-  ctx.imageSmoothingEnabled=false;
+  ctx.imageSmoothingEnabled=w>96;
+  ctx.imageSmoothingQuality='high';
   ctx.drawImage(image,x,y,w,h,43-atlas.anchor[0]*scale,81-atlas.anchor[1]*scale,w*scale,h*scale);
 }
 function has(id){return Object.prototype.hasOwnProperty.call(entries,id);}

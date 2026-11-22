@@ -43,6 +43,10 @@
   }}
  ];
  const catalog=[{id:'nea',name:'네아',age:18},{id:'yui',name:'한유이',age:20},{id:'taei',name:'김태이',age:18},{id:'yeogyeong',name:'차여경',age:null},{id:'dogyeom',name:'백도겸',age:null},{id:'seoha',name:'윤서하',age:null},{id:'woojin',name:'정우진',age:null},{id:'zero',name:'제로',age:null},{id:'dogyeom-childhood-friend',name:'임소윤',age:null}];
+ for(const person of catalog){
+   const transfer=Content.transfers?.[person.id];
+   if(transfer)Object.assign(person,{age:transfer.age,classification:'전이자'});
+ }
  for(const r of Content.records){catalog.push({id:r.id,name:r.name,age:r.age,heightCm:r.heightCm,weightKg:r.weightKg});actors[r.id]=r.name;profiles[r.id]={name:r.name,text:r.persona};}
  const initiallyKnown=['taei','yeogyeong','dogyeom'];
  const data={content:Content,catalog,initiallyKnown,version:3,saveVersion:2,player,actors,profiles,publicFacts:{nea:{name:'네아',age:18},yui:{name:'한유이',age:20},yeogyeong:{name:'차여경',age:null}},events,assets,emotions:['평상시','작은 웃음','걱정·의아함','놀람','짜증','집중']};
