@@ -61,6 +61,21 @@ records.push({
   sd:{default:fullImage('selsi-sd.webp',512,512)},
   combatSprite:combatAtlas('selsi',.96,.85),
   motion:{name:'상체를 느슨하게 두고 한 걸음 비키기',lean:-2,step:4,turn:5,side:11,tempo:.85},
+},{
+  id:'rachel',name:'레이첼',age:null,species:'엘프족',heightCm:172,weightKg:54,
+  unknownName:'금발의 엘프',origin:'fantasy',requiresStoryIntroduction:true,
+  persona:'엘프족 공주 레이첼. 172cm, 54kg. 귀족으로 고상하게 자랐고 레이피어를 사용한다. 벌레를 무서워한다. 나이·가문명·출신지·첫 만남·전용 기술은 미정이다. 사용자가 이름을 불러도 게임 속 인물은 소개되기 전까지 정체를 알지 못한다. 참고 그림의 불꽃은 능력이 아니다.',
+  preferredWeapons:['rapier'],
+  motion:{name:'앞발로 간격을 재고 가볍게 돌진하기',lean:5,step:6,turn:-5,side:4,tempo:1.08},
+  looks:{
+    default:fullImage('rachel-standing.webp',720,1080),
+    rear:fullImage('rachel-rear.webp',720,1080),
+    help:fullImage('rachel-talk.webp',720,1080),
+    attack:fullImage('rachel-rapier.webp',720,1080),
+    startled:fullImage('rachel-startled.webp',720,1080),
+  },
+  sd:{default:fullImage('rachel-sd.webp',512,512)},
+  combatSprite:combatAtlas('rachel',.98,1.08),
 });
 function get(id){return records.find(r=>r.id===id)||null;}
 function appearance(id,{look='default',pose='default'}={}){const r=get(id);return r?.looks[pose==='default'?look:pose]||r?.looks.default||null;}
