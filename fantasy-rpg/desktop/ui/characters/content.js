@@ -37,6 +37,7 @@ records.push({
   motion:{name:'손목을 돌려 실을 뻗기',lean:2,step:4,turn:-8,side:6,tempo:.94},
   looks:{
     default:fullImage('janghwa-standing.webp',720,1080),
+    casual:fullImage('janghwa-casual.webp',720,1080),
     help:fullImage('janghwa-talk.webp',720,1080),
     guard:fullImage('janghwa-guard.webp',720,1080),
     cast:fullImage('janghwa-cast.webp',720,1080),
@@ -53,6 +54,7 @@ records.push({
   preferredWeapons:[],
   looks:{
     default:fullImage('selsi-standing.webp',720,1080),
+    casual:fullImage('selsi-casual.webp',720,1080),
     rear:fullImage('selsi-rear.webp',720,1080),
     help:fullImage('selsi-talk.webp',720,1080),
     ready:fullImage('selsi-ready.webp',720,1080),
@@ -135,6 +137,7 @@ records.push({
   motion:{name:'발을 옆으로 옮기고 차분히 겨누기',lean:-3,step:5.5,turn:-9,side:14,tempo:1.02},
   looks:{
     default:fullImage('kiriel-standing.webp',720,1080),
+    casual:fullImage('kiriel-casual.webp',720,1080),
     rear:fullImage('kiriel-rear.webp',720,1080),
     help:fullImage('kiriel-talk.webp',720,1080),
     attack:fullImage('kiriel-bow.webp',720,1080),
@@ -151,6 +154,7 @@ records.push({
   motion:{name:'짧게 중심을 옮긴 뒤 대검을 곧게 휘두르기',lean:4,step:6.5,turn:-10,side:8,tempo:.88},
   looks:{
     default:fullImage('palanus-standing.webp',720,1080),
+    casual:fullImage('palanus-casual.webp',720,1080),
     rear:fullImage('palanus-rear.webp',720,1080),
     help:fullImage('palanus-talk.webp',720,1080),
     attack:fullImage('palanus-sword.webp',720,1080),
@@ -184,6 +188,7 @@ records.push({
   motion:{name:'발을 가볍게 옮기고 간결하게 베기',lean:5.5,step:6,turn:-8,side:12,tempo:1.04},
   looks:{
     default:fullImage('ace-standing.webp',720,1080),
+    casual:fullImage('ace-casual.webp',720,1080),
     rear:fullImage('ace-rear.webp',720,1080),
     help:fullImage('ace-talk.webp',720,1080),
     attack:fullImage('ace-sword.webp',720,1080),
@@ -200,6 +205,7 @@ records.push({
   motion:{name:'방패 쪽에 체중을 싣고 검을 휘두르기',lean:8,step:4.5,turn:10,side:2.5,tempo:.92},
   looks:{
     default:fullImage('evan-standing.webp',720,1080),
+    casual:fullImage('evan-casual.webp',720,1080),
     rear:fullImage('evan-rear.webp',720,1080),
     help:fullImage('evan-talk.webp',720,1080),
     guard:fullImage('evan-guard.webp',720,1080),
@@ -208,9 +214,34 @@ records.push({
   },
   sd:{default:fullImage('evan-sd.webp',512,512)},
   combatSprite:combatAtlas('evan',.98,.92),
+},{
+  id:'karin',name:'카린',age:null,species:'인간족',heightCm:165,weightKg:45,
+  unknownName:'꽃잎 장식 지팡이를 든 보라색 머리 인간족',requiresStoryIntroduction:true,
+  persona:'인간족 힐러 카린. 165cm, 45kg. 마음이 따뜻하며 다친 사람에게 먼저 안심시키는 말을 건넨다. 나이·출신지·첫 만남·전용 치유 기술의 세부는 미정이다.',
+  preferredWeapons:['staff'],roles:['healer'],
+  lookLabels:{attack:'지팡이 동작',cutscene:'다친 이를 안심시키는 순간 · 컷신'},
+  motion:{name:'지팡이를 가까이 두고 작은 걸음으로 움직이기',lean:1,step:3.5,turn:4,side:6.5,tempo:.88},
+  looks:{
+    default:fullImage('karin-standing.webp',720,1080),
+    casual:fullImage('karin-casual.webp',720,1080),
+    rear:fullImage('karin-rear.webp',720,1080),
+    help:fullImage('karin-talk.webp',720,1080),
+    attack:fullImage('karin-staff.webp',720,1080),
+    cutscene:fullImage('karin-cutscene.webp',720,1080),
+  },
+  sd:{default:fullImage('karin-sd.webp',512,512)},
+  combatSprite:combatAtlas('karin',.94,.88),
 });
+get('fafnir').looks.casual=fullImage('fafnir-casual.webp',720,1080);
+get('fenri').looks.casual=fullImage('fenri-casual.webp',720,1080);
 function get(id){return records.find(r=>r.id===id)||null;}
 function appearance(id,{look='default',pose='default'}={}){const r=get(id);return r?.looks[pose==='default'?look:pose]||r?.looks.default||null;}
 function displayName(state,id){const r=get(id);if(!r)return null;const introduced=state?.knownIdentities?.[id]===true||(state?.turns||[]).some(t=>(t.panels||[]).some(p=>p.speaker===id&&String(p.text||'').includes(r.name)));return introduced?r.name:r.unknownName;}
-return{records,get,appearance,displayName,combatFrame};
+const legacyCasual={
+  yeogyeong:fullImage('yeogyeong-casual.webp',720,1080),
+  dogyeom:fullImage('dogyeom-casual.webp',720,1080),
+  seoha:fullImage('seoha-casual.webp',720,1080),
+  'dogyeom-childhood-friend':fullImage('soyun-casual.webp',720,1080),
+};
+return{records,legacyCasual,get,appearance,displayName,combatFrame};
 });
