@@ -2,6 +2,7 @@ const {contextBridge,ipcRenderer}=require('electron');
 contextBridge.exposeInMainWorld('lookPacksAPI',Object.freeze({list:()=>ipcRenderer.invoke('looks:list'),importPack:()=>ipcRenderer.invoke('looks:import'),importSample:()=>ipcRenderer.invoke('looks:sample'),toggle:request=>ipcRenderer.invoke('looks:toggle',request),remove:request=>ipcRenderer.invoke('looks:remove',request),preview:request=>ipcRenderer.invoke('looks:preview',request),resolve:request=>ipcRenderer.invoke('looks:resolve',request)}));
 contextBridge.exposeInMainWorld('desktopAI',Object.freeze({
  diagnosticsStatus:()=>ipcRenderer.invoke('diagnostics:status'),diagnosticsStart:r=>ipcRenderer.invoke('diagnostics:start',r),diagnosticsCancel:()=>ipcRenderer.invoke('diagnostics:cancel'),
+ directorNPCTell:r=>ipcRenderer.invoke('director:npcTell',r),
  directorNPCAppointment:r=>ipcRenderer.invoke('director:npcAppointment',r),
  directorNPCMeet:r=>ipcRenderer.invoke('director:npcMeet',r),
  directorSlots:()=>ipcRenderer.invoke('director:slots'),directorSlot:r=>ipcRenderer.invoke('director:slot',r),
