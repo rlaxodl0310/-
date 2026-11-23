@@ -505,6 +505,19 @@ records.push({
  clips:Object.fromEntries(['idle','move','attack','guard','dodge','hit'].map((id,row)=>[id,{frames:[0,1,2,3].map(i=>row*4+i),fps:id==='idle'?5:id==='move'?10:0}]))},
  motion:{name:'두 발로 중심을 잡고 손목을 펼쳐 시전하기',lean:2.35,step:4.35,turn:7.35,side:8.35,tempo:.97},
 });
+records.push({
+ id:'horin',name:'호린',age:null,species:'호랑이 수인',origin:'fantasy',requiresStoryIntroduction:true,
+ unknownName:'금빛 머리의 호랑이 수인',heightCm:147,weightKg:40,preferredWeapons:[],roles:[],trait:null,
+ persona:'호랑이 수인 호린. 147cm, 40kg. 위풍당당하게 보이려 하지만 실제로는 소심하고 겁이 많다. 수인을 향한 차별과 안 좋은 시선을 받으면 귀와 꼬리가 내려간다. 자기 편이 있을 때는 그 뒤에 숨어 빼꼼 상대를 노려보는 귀여운 면이 있다. 기본 닫힌 입은 작은 ㅅ 모양. 금빛 줄무늬 긴 머리와 흰 끝, 연두빛 눈, 둥근 호랑이 귀, 리본이 달린 줄무늬 꼬리. 노랑·검정 재킷, 회색 칼라 셔츠, 빨간 옆 끈과 금장 장식의 검정 반바지, 긴 장갑, 흰 양말과 운동화를 유지한다. 일반 원화는 자연스러운 작은 체격의 전신이며 SD 비율로 바꾸지 않는다. 나이·무기·전투 역할·능력·정수·과거·첫 만남은 미정. 장식과 레퍼런스의 기계 호랑이를 실제 장비 기능·펫·동행으로 확정하지 않는다. 현실 등장·자동 파티 합류·이름 선공개·전이자 고유 특성 없음.',
+ lookLabels:{default:'기본 전신 · 일반 비율',proud:'당당한 척하기',afraid:'귀와 꼬리가 내려간 모습',hide:'편 뒤에서 빼꼼 · 상황 예시',cutscene:'편 뒤에서 빼꼼 · 상황 예시'},
+ looks:{default:fullImage('horin-standing.webp',1024,1536),proud:fullImage('horin-standing.webp',1024,1536),rear:crop('horin-poses.webp',1024,1536,0,0,512,768),afraid:crop('horin-poses.webp',1024,1536,512,0,512,768),help:crop('horin-poses.webp',1024,1536,0,768,512,768),hide:crop('horin-poses.webp',1024,1536,512,768,512,768),cutscene:crop('horin-poses.webp',1024,1536,512,768,512,768)},
+ portraits:{default:crop('horin-standing.webp',1024,1536,120,0,650,700),afraid:crop('horin-poses.webp',1024,1536,570,0,454,420)},
+ sd:{default:crop('horin-combat.webp',1024,1536,0,0,256,256)},
+ pixel:{src:'assets/horin-combat.webp',battleSrc:'../assets/horin-combat.webp',frames:Array.from({length:24},(_,i)=>[i%4*256,Math.floor(i/4)*256,256,256]),imageWidth:1024,imageHeight:1536},
+ combatSprite:{src:'../assets/horin-combat.webp',frames:Array.from({length:24},(_,i)=>[i%4*256,Math.floor(i/4)*256,256,256]),imageWidth:1024,imageHeight:1536,anchor:[128,248],scale:.30,tempo:1.07,pixelated:true,
+ clips:Object.fromEntries(['idle','move','attack','guard','dodge','hit'].map((id,row)=>[id,{frames:[0,1,2,3].map(i=>row*4+i),fps:id==='idle'?5:id==='move'?10:0}]))},
+ motion:{name:'조심스러운 발걸음과 귀를 낮추는 회피',lean:1.73,step:3.37,turn:-6.63,side:7.47,tempo:1.07},
+});
 get('fafnir').looks.casual=fullImage('fafnir-casual.webp',720,1080);
 get('fenri').looks.casual=fullImage('fenri-casual.webp',720,1080);
 function get(id){return records.find(r=>r.id===id)||null;}
