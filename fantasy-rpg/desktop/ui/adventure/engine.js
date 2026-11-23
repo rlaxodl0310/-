@@ -13,6 +13,7 @@
       require("../escort/personal.js"),
       require("../mining/model.js"),
       require("../association/dynamic-contracts.js"),
+      require("../rescue/model.js"),
     );
   else
     r.Adventure = f(
@@ -28,8 +29,9 @@
       r.PersonalEscort,
       r.MiningQuest,
       r.DynamicContracts,
+      r.RescueQuest,
     );
-})(globalThis, (Growth, XP, Rules, Money, Geo, Facilities, Essences, Party, Escort, Personal, Mining, Dynamic) => {
+})(globalThis, (Growth, XP, Rules, Money, Geo, Facilities, Essences, Party, Escort, Personal, Mining, Dynamic, Rescue) => {
   "use strict";
   const clone = (x) => JSON.parse(JSON.stringify(x)),
     fail = (m) => {
@@ -49,6 +51,7 @@
       supply: { reward: 24, xp: 36, count: 2 },
       caravan: { reward: 160, xp: 90, count: 3 },
       escort: { reward: 180, xp: 110, count: 3 },
+      rescue: { reward: 100, xp: 70, count: 1 },
       mining: { reward: 120, xp: 80, count: 4 },
     }),
   });
@@ -83,6 +86,7 @@
     if(Escort)Escort.validate(s);
     if(Personal)Personal.validate(s);
     if(Mining)Mining.validate(s);
+    if(Rescue)Rescue.validate(s);
     if(Dynamic)Dynamic.validate(s);
     return expire(s);
   }
@@ -154,13 +158,14 @@
       s.player = Growth.recalculate(s.player);
     }
     for (const q of s.adventure.quests)
-      if (["open", "accepted"].includes(q.status) && s.minutes > q.deadline && !(q.type==='caravan'&&Escort?.ready(s,q)) && !(q.type==='escort'&&Personal?.ready(s,q)) && !(q.type==='mining'&&Mining?.ready(s,q))) {
+      if (["open", "accepted"].includes(q.status) && s.minutes > q.deadline && !(q.type==='caravan'&&Escort?.ready(s,q)) && !(q.type==='escort'&&Personal?.ready(s,q)) && !(q.type==='mining'&&Mining?.ready(s,q)) && !(q.type==='rescue'&&Rescue?.ready(s,q))) {
         q.status = "expired";
         Money.release(s.adventure.economy, q.id);
       }
     if(Escort)Escort.expire(s);
     if(Personal)Personal.expire(s);
     if(Mining)Mining.expire(s);
+    if(Rescue)Rescue.expire(s);
     if(Party&&s.partyRewards){Party.validate(s);Party.expire(s);}
     return s;
   }
@@ -279,6 +284,7 @@
   function ready(s, q) {
     if(q.type==='caravan')return Escort?Escort.ready(s,q):false;
     if(q.type==='escort')return Personal?Personal.ready(s,q):false;
+    if(q.type==='rescue')return Rescue?Rescue.ready(s,q):false;
     if(q.type==='mining')return Mining?Mining.ready(s,q):false;
     return q.type === "supply"
       ? s.adventure.inventory.filter(i=>i.kind==='material'&&!i.partyLootId).reduce((n,i)=>n+i.quantity,0) >= q.target
@@ -296,6 +302,7 @@
     if(Escort)state=Escort.observe(previous,state);
     if(Personal)state=Personal.observe(previous,state);
     if(Mining)state=Mining.observe(previous,state);
+    if(Rescue)state=Rescue.observe(previous,state);
     if (state.era !== "fantasy") return state;
     const old = previous.combat,
       battle = state.combat,
@@ -520,6 +527,7 @@
         rule: "본편 의뢰는 실제 게시판 수락/목표 수행/접수소 제출로 정산한다. AI의 대사만으로 돈·경험치·소지품을 만들지 않는다.",
       };
     return {
+      rescue: Rescue?Rescue.context(s):null,
       quests: s.adventure.quests
         .filter(
           (q) =>
