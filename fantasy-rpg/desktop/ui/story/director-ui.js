@@ -6,9 +6,9 @@ async function call(method,arg){if(!window.desktopAI?.[method])throw Error('AI ì
 function monsterLayer(parent,id,index,actorId='enemy-'+index){const f=StoryMonsterFrames[id];if(!f)return;const frame=document.createElement('div'),im=document.createElement('img');frame.className='story-monster';frame.dataset.monster=id;frame.dataset.actor=actorId;frame.dataset.pose=poseFor(actorId);frame.style.setProperty('--offset',index);frame.style.aspectRatio=f.w+' / '+f.h;im.src=f.src;im.alt=CombatRoster.get(id).name;im.style.width=f.imageWidth/f.w*100+'%';im.style.height=f.imageHeight/f.h*100+'%';im.style.left=-f.x/f.w*100+'%';im.style.top=-f.y/f.h*100+'%';frame.append(im);parent.append(frame);}
 function poseFor(id){return poseOverride?.[id]||'ready';}
 function streetEntry(){
- const profile=DistrictModel.storyStreet(state,WorldFacilities.records);
+ const profile=DistrictModel.storyStreet(state,GameGeography.records,WorldFacilities.records,StoryKitData);
  if(!profile||!window.desktopAI?.directorStreetReturn)return null;
- return ()=>DistrictUI.open({...profile,name:GameGeography.records.find(place=>place.id===profile.location)?.name,
+ return ()=>DistrictUI.open({...profile,
   position:state.streetVisits?.[profile.location]?.position,
   async onReturn({position,target}){
    state=await call('directorStreetReturn',{revision:state.revision,position,targetId:target?.id??null});

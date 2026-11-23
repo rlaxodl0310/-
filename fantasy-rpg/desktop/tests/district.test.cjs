@@ -10,3 +10,22 @@ t('illustrated street coordinates map a clicked tile back to the same walking ce
   a.deepEqual(D.streetCell(point),{x,y});
  }
 });
+
+t('every registered village reuses the walk map with its own reachable facilities',()=>{
+ const G=require('../ui/map/geography.js'),F=require('../ui/map/facilities.js'),data=require('../ui/data.js');
+ const villages=G.records.filter(place=>place.kind==='village');
+ a(villages.length>1);
+ for(const village of villages){
+  const state={era:'fantasy',location:village.id,visited:['fantasy:'+village.id],present:['taeo'],locals:[{id:'npc_current',name:'길을 지나던 주민'}]};
+  const street=D.storyStreet(state,G.records,F.records,data);
+  a.equal(street.name,village.name);
+  a.deepEqual(street.objects.map(object=>object.id),F.records.filter(f=>f.locationId===village.id).map(f=>f.id));
+  a.deepEqual(street.npcs.map(person=>person.id),['taeo','npc_current']);
+  const map=new Map({width:D.width,height:D.height,start:D.start,blocked:D.blocked(street.objects,street.npcs),diagonal:true});
+  for(const object of street.objects){
+   const access=[[0,0],[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>map.path(object.x+dx,object.y+dy)!==null);
+   a(access,village.id+' '+object.id);
+  }
+  a.equal(D.storyStreet({...state,visited:[]},G.records,F.records,data),null);
+ }
+});

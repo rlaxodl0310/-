@@ -14,18 +14,30 @@ function direction(dx,dy,previous='se'){const p=project({x:dx,y:dy});if(Math.hyp
 function streetPoint(p){return{x:.075+p.x*.85/(width-1),y:.56+p.y*.36/(height-1)};}
 function streetCell(p){return{x:Math.round((p.x-.075)*(width-1)/.85),y:Math.round((p.y-.56)*(height-1)/.36)};}
 function depth(p){return p.x+p.y;}
-const supportedLocation='north-village-01';
-function storyStreet(state,facilities){
- if(state.era!=='fantasy'||state.location!==supportedLocation||state.combat?.status==='playing'||!state.visited?.includes('fantasy:'+supportedLocation))return null;
- const kinds={inn:'inn',shop:'exchange',guild:'hall',fountain:'water'};
- const streetObjects=objects.flatMap(object=>{
-  const facility=facilities.find(item=>item.locationId===state.location&&item.type===kinds[object.id]);
-  return facility?[{...object,id:facility.id,name:facility.name,note:facility.note}]:[];
+// Shared hotspots for the current village illustration. The catalogue supplies the names and services.
+const primarySpots={inn:0,exchange:1,hall:2,water:3};
+const extraSpots=[{x:3,y:2},{x:11,y:2},{x:15,y:2},{x:18,y:4}];
+const firstNPCSpots=npcs.map(({x,y})=>({x,y}));
+function storyStreet(state,geography,facilities,storyData){
+ const village=geography.find(place=>place.id===state.location&&place.kind==='village');
+ if(state.era!=='fantasy'||!village||state.combat?.status==='playing'||!state.visited?.includes('fantasy:'+village.id))return null;
+ let extraIndex=0;
+ const streetObjects=facilities.filter(facility=>facility.locationId===village.id).map(facility=>{
+  const index=primarySpots[facility.type];
+  const nextIndex=Object.hasOwn(primarySpots,facility.type)?null:extraIndex++;
+  const spot=nextIndex===null?objects[index]:extraSpots[nextIndex]||{x:2+(nextIndex-extraSpots.length)*3%16,y:6};
+  return {...spot,id:facility.id,name:facility.name,note:facility.note};
  });
- const present=npcs.filter(npc=>state.present.includes(npc.id));
- const local=(state.locals||[]).filter(npc=>!present.some(person=>person.id===npc.id));
- const streetNPCs=[...present,...local].slice(0,2).map((npc,index)=>({...npc,x:npcs[index].x,y:npcs[index].y}));
- return {location:state.location,objects:streetObjects,npcs:streetNPCs};
+ const people=new Map();
+ for(const id of state.present||[]){
+  const person=storyData.catalog.find(entry=>entry.id===id);
+  if(id!=='taei'&&person)people.set(id,storyData.content.displayName(state,id)||person.name);
+ }
+ for(const person of state.locals||[])if(!people.has(person.id))people.set(person.id,person.name);
+ const streetNPCs=Array.from(people,([id,name],index)=>({id,name,
+  ...(firstNPCSpots[index]||{x:2+((index-2)%6)*3,y:9+Math.floor((index-2)/6)*4}),
+ }));
+ return {location:village.id,name:village.name,objects:streetObjects,npcs:streetNPCs};
 }
-return{width,height,start,objects,npcs,project,unproject,blocked,direction,depth,streetPoint,streetCell,storyStreet,supportedLocation};
+return{width,height,start,objects,npcs,project,unproject,blocked,direction,depth,streetPoint,streetCell,storyStreet};
 });

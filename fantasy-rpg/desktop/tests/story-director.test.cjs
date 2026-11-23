@@ -114,3 +114,18 @@ t('a registered village street visit persists facilities and position across sto
   a.equal(restored.state.location,location);
  }finally{await fs.rm(dir,{recursive:true,force:true});}
 });
+
+t('two village locations retain independent street positions and facility records',async()=>{
+ const {dir,d}=await setup(async()=>answer());
+ try{
+  const first='north-village-01',second='north-village-02';
+  const seed={...initial(),revision:3,era:'fantasy',scene:'exploration',location:first,present:[],visited:['fantasy:'+first]};
+  await d.save(seed);
+  const firstVisit=await d.returnFromStreet({revision:3,position:{x:1,y:0},targetId:first+'-facility-inn'});
+  await d.save({...firstVisit,location:second,visited:[...firstVisit.visited,'fantasy:'+second]});
+  const secondVisit=await d.returnFromStreet({revision:firstVisit.revision,position:{x:17,y:0},targetId:second+'-facility-hall'});
+  a.deepEqual(secondVisit.streetVisits[first],firstVisit.streetVisits[first]);
+  a.deepEqual(secondVisit.streetVisits[second],{position:{x:17,y:0},facilities:[second+'-facility-hall']});
+  await a.rejects(d.returnFromStreet({revision:secondVisit.revision,position:{x:1,y:0},targetId:first+'-facility-inn'}),/가까이/);
+ }finally{await fs.rm(dir,{recursive:true,force:true});}
+});
