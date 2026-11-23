@@ -19,3 +19,46 @@ t('repeated retreat can escape a pursuing melee enemy instead of remaining in a 
 t('chat combat poses follow resolved actors and hit targets in order',()=>{const b=createCombat(['goblin','goblin'],'chat','');b.distance=1;const result=resolveCombat(b,{hp:100,max:100,mana:24},'attack',0);const phases=Art.phases(result.resolution,['taei','janghwa','selsi','enemy-0','enemy-1']);a.equal(phases[0].taei,'attack');a.equal(phases[0]['enemy-0'],'hit');a.equal(phases[1]['enemy-1'],'attack');a.equal(phases[1].taei,'hit');a(!phases.some(p=>p.selsi||p.janghwa));a.deepEqual(Art.phases({intent:'defend',formulaEvents:[{actor:'enemy-0',target:'taei',damage:0}]},['taei','enemy-0']),[{taei:'guard'},{'enemy-0':'attack',taei:'guard'}]);a.deepEqual(Art.phases({formulaEvents:[{actor:'selsi',target:'enemy-1',damage:2}]},['taei','selsi','enemy-1']),[{selsi:'attack','enemy-1':'hit'}]);a.equal(Art.character('janghwa','attack').src,'assets/janghwa-cast.webp');a.equal(Art.character('selsi','hit').src,'battle/assets/selsi-combat.png');});
 
 t('newly linked combatants require a fantasy introduction requested by the player',()=>{const s={...initial(),era:'fantasy',location:require('../ui/map/geography.js').records[0].id};const cast=answer(s,{present:['janghwa','selsi'],focus:'janghwa',panels:[{speaker:'narrator',text:'두 사람이 돌아본다.'}],facts:[]});a.throws(()=>validate(cast,s,'주변을 살핀다'),/등장/);a(validate(cast,s,'장화와 셀시를 부른다'));a.throws(()=>validate({...cast,era:'earth',location:'subway'},initial(),'장화와 셀시를 부른다'),/등장/);});
+
+t('fixed arrival hands off to TangTang and ChatGPT, repairs invalid choices, and resumes without regenerating',async()=>{
+ const D=require('../ui/data.js'),Engine=require('../ui/engine.js'),prologue=new Engine(D);
+ for(const event of D.events){
+  prologue.start(event.id,{location:event.location,members:event.members,viewer:event.viewer});
+  if(event.id==='fantasy_arrival')break;
+  while(prologue.current()){prologue.advance(prologue.current().choices?.[0].id??null);}
+ }
+ const text='바람이 멎자 우묵한 땅 가장자리에서 풀에 걸린 푸른 천 조각과 둥근 돌이 눈에 띈다.';
+ const valid={situation:text,options:[{action:'푸른 천 조각을 살핀다',cue:'푸른 천 조각'},{action:'둥근 돌 주변을 살핀다',cue:'둥근 돌'}]};
+ let calls=0,online=false;
+ const {dir,d}=await setup(async()=>{
+  calls++;
+  if(calls===1)return {...valid,options:[valid.options[0],valid.options[0]]};
+  return valid;
+ });
+ d.bridge.check=async()=>({ready:online,message:'오프라인'});
+ try{
+  await a.rejects(d.enterMeadow({prologue:new Engine(D).serialize()}),/먼저/);
+  await a.rejects(d.enterMeadow({prologue:prologue.serialize()}),/오프라인/);
+  a.equal((await d.read()).revision,0);
+  online=true;
+  const state=await d.enterMeadow({prologue:prologue.serialize()});
+  a.equal(state.location,'arrival_meadow');
+  a.equal(state.minutes,prologue.state.minutes);
+  a.deepEqual(state.choices,valid.options.map(o=>o.action));
+  a.equal(state.arrivalGeneration.exchange.at(-1).actor,'탱탱');
+  a.deepEqual((await d.enterMeadow({prologue:prologue.serialize()})).choices,state.choices);
+  a.equal(calls,2);
+  const {SCHEMA}=require('../electron/story-director.cjs');
+  let subsequent=0;
+  d.bridge.generateStructured=async()=>{
+   subsequent++;
+   const proposal=answer(state,{panels:[{speaker:'narrator',text:'천의 가장자리가 헤져 있다.'}],facts:[],choices:subsequent===1?state.choices:['천의 색을 기억해 둔다','주변 풀을 살핀다']});
+   for(const field of SCHEMA.required)if(!(field in proposal))proposal[field]=[];
+   return proposal;
+  };
+  const next=await d.send({text:state.choices[0],revision:state.revision,requestId:'meadow-followup-001'});
+  a.equal(next.location,'arrival_meadow');
+  a.notDeepEqual(next.choices,state.choices);
+  a.equal(subsequent,2);
+ }finally{await fs.rm(dir,{recursive:true,force:true});}
+});

@@ -38,6 +38,7 @@ function register(){for(const [channel,handler]of Object.entries({
  'director:slot':r=>{if(bridge.busy)throw Error('AI 응답을 먼저 마쳐 주세요.');return director.saveSlotAction(r);},
  'director:restore':r=>{if(bridge.busy)throw Error('진행 중인 AI 응답을 마친 뒤 복구해 주세요.');return director.restorePrevious(r?.revision??null);},
  'director:state':()=>director.read(),
+ 'director:enterMeadow':r=>director.enterMeadow(r),
  'director:send':r=>director.send(r),
  'director:boardRefresh':r=>{if(bridge.busy)throw Error('AI 응답을 먼저 마쳐 주세요.');return director.boardRefresh(r);},
  'director:mining':r=>{if(bridge.busy)throw Error('AI 응답을 먼저 마쳐 주세요.');return director.miningAction(r);},

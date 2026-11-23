@@ -16,6 +16,15 @@ function render(){document.body.classList.toggle('large-text',large);document.bo
  $('footer-place').textContent=places[engine.state.currentLocation]||'현실 · 지하철';
  document.querySelector('.footer-trait').textContent=inFantasy?'첫걸음':'등굣길';
  if(!a){renderChapterEnd(inFantasy);return;}
+ if(event.id==='fantasy_arrival'){
+  SceneStage.render({background:$('scene-art'),portrait:$('scene-portrait'),location:event.location,characterId:null});
+  $('scene-title').textContent='낯선 풀밭';
+  $('scene-place').textContent=places[event.location];
+  $('speaker').textContent='상황';$('emotion').textContent='';
+  $('line').textContent=event.nodes.opening.text;
+  showMeadowHandoff();
+  return;
+ }
  const e=event;$('scene-title').textContent=e.title.split(' · ')[1]||e.title;$('scene-place').textContent=places[e.location]||e.location;$('episode-no').textContent=String(D.events.indexOf(e)+1).padStart(2,'0');const art=$('scene-art');SceneStage.render({background:art,portrait:$('scene-portrait'),location:e.location,characterId:e.chat===false?null:e.owner,emotion:n.emotion,state:engine.state,era:e.era,dialogue:true});LookPacksUI.renderPortrait({element:$('scene-portrait'),characterId:e.owner,era:e.era||'earth',emotion:n.emotion});const last=logs.at(-1),lastIsNPC=last&&last.speaker===actorName(e.owner),shown=lastIsNPC?e.owner:n.speaker;$('speaker').textContent=actorName(shown);$('emotion').textContent=shown==='narrator'?'':D.emotions[n.emotion];$('line').textContent=lastIsNPC?last.text:n.text;$('chat-form').hidden=e.chat===false;$('chat-input').disabled=e.chat===false;$('chat-form').querySelector('button').disabled=e.chat===false;
  $('sd').hidden=!sdOpen||n.sd===undefined;if(n.sd!==undefined){$('sd').style.backgroundImage='url("'+D.assets[e.sdAsset||'sd']+'")';$('sd').style.backgroundPosition=(n.sd%3*50)+'% '+Math.floor(n.sd/3)*100+'%';}$('sd-toggle').setAttribute('aria-pressed',String(sdOpen));$('sd-toggle').hidden=n.sd===undefined;
  if(n.choices)for(const c of n.choices)$('choices').append(button(c.label,()=>advance(c.id)));else $('choices').append(button(n.end?'장면 마치기 →':'이야기 계속 →',()=>advance()));if(e.cg){let viewing=false;const cgButton=button('이벤트 컷신 보기',()=>{viewing=!viewing;if(viewing)SceneStage.cutscene(art,$('scene-portrait'),D.assets[e.cg],e.cgPanel);else SceneStage.render({background:art,portrait:$('scene-portrait'),location:e.location,characterId:e.chat===false?null:e.owner,emotion:n.emotion,state:engine.state,era:e.era,dialogue:true});cgButton.textContent=viewing?'기본 장면으로 돌아가기':'이벤트 컷신 보기';});$('choices').append(cgButton);}}
@@ -33,9 +42,9 @@ function renderChapterEnd(inFantasy){
   $('line').textContent='등굣길 도입부를 마쳤습니다. 이어서 전이 장면을 시작할 수 있습니다.';
   choices.append(button('이세계로 이어가기 →',()=>start(arrival.id)));
  }else if(inFantasy){
-  $('line').textContent=engine.state.flags.includes('arrival_checked_path')
-   ?'숲 가장자리로 이어지는 발자국을 확인했습니다.'
-   :'도랑 아래에서 물이 흐르는 소리를 확인했습니다.';
+  $('line').textContent='눈앞에 낯선 풀밭이 펼쳐져 있습니다.';
+  showMeadowHandoff();
+  return;
  }else{
   $('line').textContent='장면 목록에서 다음 등굣길 장면을 진행할 수 있습니다.';
   choices.append(button('장면 목록 열기',()=>openPanel('chapters')));
@@ -47,6 +56,22 @@ function renderChapterEnd(inFantasy){
  $('chat-form').querySelector('button').disabled=true;
  $('sd').hidden=true;
  $('sd-toggle').hidden=true;
+}
+
+function showMeadowHandoff(){
+ $('chat-form').hidden=true;$('sd').hidden=true;$('sd-toggle').hidden=true;
+ const choices=$('choices'),go=button('주변 살펴보기 →',async()=>{
+  go.disabled=true;
+  try{
+   await DirectorUI.enterMeadow(engine.serialize());
+  }catch(error){
+   $('save-state').textContent=error.message;toast(error.message);
+   go.disabled=false;
+  }
+ });
+ if(window.desktopAI?.directorEnterMeadow)choices.append(go);
+ else choices.append(el('p','데스크톱 앱에서 ChatGPT를 연결하면 풀밭에서 이야기를 이어갈 수 있습니다.'));
+ choices.append(button('진행 저장',()=>openPanel('saves')));
 }
 
 function button(text,fn,cls){const b=document.createElement('button');b.textContent=text;b.onclick=fn;if(cls)b.className=cls;return b;}
