@@ -78,3 +78,19 @@ t('only a visible, level-appropriate registered monster gets an illustration in 
  const fight=answer(state,{scene:'combat',panels:[{speaker:'narrator',text:quote}],facts:[],combat:{...answer(state).combat,importance:'ordinary',monsters:['noxvern']}});
  a.throws(()=>validate(fight,state,'풀밭을 살핀다'),/등급과 수/);
 });
+
+t('optional danger requires a warning and an exit, and leaves three turns between new scares',()=>{
+ const base={...initial(),era:'fantasy',location:'arrival_meadow',scene:'exploration',present:[],focus:'taei'};
+ const state={...base,turns:[{},{}]};
+ const cue='비탈 위에서 작은 돌이 하나 굴러 내려온다.';
+ const response='비탈에서 거리를 두고 살핀다';
+ const proposal=(escape=response)=>answer(state,{panels:[{speaker:'narrator',text:cue}],facts:[],
+  choices:[response,'비탈 위쪽을 올려다본다'],dangerBeats:[{cue,response:escape}]});
+ a.throws(()=>validate(proposal(),base,'주변을 살핀다'),/새 위험 연출/);
+ a.throws(()=>validate(proposal('바로 달려간다'),state,'주변을 살핀다'),/물러나는 선택/);
+ a.doesNotThrow(()=>validate(proposal(),state,'주변을 살핀다'));
+ const recent={...state,turns:[...state.turns,{dangerBeat:{cue,response}},{},{}]};
+ a.throws(()=>validate(proposal(),recent,'주변을 살핀다'),/새 위험 연출/);
+ a.doesNotThrow(()=>validate({...proposal(),dangerBeats:[]},recent,'주변을 살핀다'));
+ a.doesNotThrow(()=>validate(proposal(),{...recent,turns:[...recent.turns,{}]},'주변을 살핀다'));
+});
