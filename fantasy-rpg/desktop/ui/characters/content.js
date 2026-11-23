@@ -493,6 +493,18 @@ records.push({
   sd:{default:fullImage('milia-sd.webp',512,512)},
   combatSprite:combatAtlas('milia',.90,1.11,2),
 });
+records.push({
+ id:'reginleif',name:'레긴레이프',age:null,species:'인간족',origin:'fantasy',requiresStoryIntroduction:true,
+ lookLabels:{cast:'맨손 마법 시전',cutscene:'맨손 마법 시전 · 컷신'},unknownName:'청록빛 긴 머리의 인간족',heightCm:167,weightKg:52,preferredWeapons:[],roles:['mage'],combatStyle:'magic',trait:null,
+ persona:'인간족 맨손 마법 메이지 레긴레이프. 167cm, 52kg. 나이는 미정. 예의 바르고 눈치가 빠르며 약자를 함부로 대하는 사람에게는 웃는 얼굴로도 단호하게 선을 긋는다. 검은 머리와 청록색 안쪽 긴 머리, 연두 눈. 토끼 귀·날개·앞치마·머리띠·어깨 레이스·쟁반 없음. 주름 없는 검정 타이트한 일자 치마. 전용 속성·스킬·정수·과거·첫 만남은 미정. 현실 등장·자동 합류·이름 선공개·전이자 고유 특성 부여 없음.',
+ looks:{default:crop('reginleif-looks.webp',1024,1536,0,0,512,512),rear:crop('reginleif-looks.webp',1024,1536,512,0,512,512),help:crop('reginleif-looks.webp',1024,1536,0,512,512,512),cast:crop('reginleif-looks.webp',1024,1536,512,512,512,512),attack:crop('reginleif-looks.webp',1024,1536,512,512,512,512),cutscene:crop('reginleif-looks.webp',1024,1536,512,512,512,512)},
+ portraits:{default:crop('reginleif-looks.webp',1024,1536,0,1024,512,512)},
+ sd:{default:crop('reginleif-looks.webp',1024,1536,512,1024,512,512)},
+ pixel:{src:'assets/reginleif-combat.webp',battleSrc:'../assets/reginleif-combat.webp',frames:Array.from({length:24},(_,i)=>[i%4*256,Math.floor(i/4)*256,256,256]),imageWidth:1024,imageHeight:1536},
+ combatSprite:{src:'../assets/reginleif-combat.webp',frames:Array.from({length:24},(_,i)=>[i%4*256,Math.floor(i/4)*256,256,256]),imageWidth:1024,imageHeight:1536,anchor:[128,244],scale:.30,tempo:1,pixelated:true,
+ clips:Object.fromEntries(['idle','move','attack','guard','dodge','hit'].map((id,row)=>[id,{frames:[0,1,2,3].map(i=>row*4+i),fps:id==='idle'?5:id==='move'?10:0}]))},
+ motion:{name:'두 발로 중심을 잡고 손목을 펼쳐 시전하기',lean:2.35,step:4.35,turn:7.35,side:8.35,tempo:.97},
+});
 get('fafnir').looks.casual=fullImage('fafnir-casual.webp',720,1080);
 get('fenri').looks.casual=fullImage('fenri-casual.webp',720,1080);
 function get(id){return records.find(r=>r.id===id)||null;}

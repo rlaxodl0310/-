@@ -3,9 +3,9 @@
 const model=root.DistrictModel;
 const background='district/assets/lantern-street.webp';
 const images=new Map();
-function load(npcs=model.npcs){
+function load(npcs=model.npcs,visual=null){
  const stances=root.CastSprites.entries;
- const urls=[background,root.DistrictArt.se.src,...npcs.filter(npc=>stances[npc.id]?.src).map(npc=>'battle/'+stances[npc.id].src)];
+ const urls=[background,...(visual?[visual.src]:[]),root.DistrictArt.se.src,...npcs.filter(npc=>stances[npc.id]?.src).map(npc=>'battle/'+stances[npc.id].src)];
  return Promise.all([...new Set(urls)].map(url=>new Promise(resolve=>{
   const image=new Image();
   image.onload=()=>{images.set(url,image);resolve(true);};
@@ -14,8 +14,9 @@ function load(npcs=model.npcs){
  })));
 }
 class Renderer{
- constructor(canvas,{objects=model.objects,npcs=model.npcs}={}){
+ constructor(canvas,{objects=model.objects,npcs=model.npcs,visual=null}={}){
   this.canvas=canvas;
+  this.visual=visual;
   this.ctx=canvas.getContext('2d');
   if(!this.ctx)throw Error('Canvas unavailable');
   this.distance=0;
@@ -36,8 +37,8 @@ class Renderer{
   this.canvas.height=Math.round(this.height*this.pixelRatio);
  }
  focus(player,instant=false){
-  const image=images.get(background);
-  const ratio=image?image.width/image.height:16/9;
+  const image=images.get(this.visual?.src||background);
+  const ratio=this.visual?this.visual.frame[2]/this.visual.frame[3]:image?image.width/image.height:16/9;
   this.artHeight=Math.max(this.height,this.width/ratio)*this.zoomFactor;
   this.artWidth=this.artHeight*ratio;
   const p=model.streetPoint(player);
@@ -90,8 +91,8 @@ class Renderer{
   const c=this.ctx;
   c.setTransform(this.pixelRatio,0,0,this.pixelRatio,0,0);
   c.fillStyle='#263b33';c.fillRect(0,0,this.width,this.height);
-  const bg=images.get(background);
-  if(bg)c.drawImage(bg,this.offset.x,this.offset.y,this.artWidth,this.artHeight);
+  const bg=images.get(this.visual?.src||background)||images.get(background);
+  if(bg){if(this.visual&&images.has(this.visual.src))c.drawImage(bg,...this.visual.frame,this.offset.x,this.offset.y,this.artWidth,this.artHeight);else c.drawImage(bg,this.offset.x,this.offset.y,this.artWidth,this.artHeight);}
   const terrainTargets=this.targets.filter(target=>!this.npcs.includes(target));
   for(const target of terrainTargets){
    const point=this.screen(target);

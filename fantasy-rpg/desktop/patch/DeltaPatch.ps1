@@ -17,6 +17,11 @@ try {
  }
  if ([InstallationLocator]::Running($folder)) { throw '게임에서 저장하고 종료한 뒤 패치를 다시 실행해 주세요.' }
  $base = Join-Path $folder 'resources\app.asar'
+ $baseHash = [PatchCore]::Hash($base)
+ if ($plan.baseSha256 -ne $baseHash -and $plan.alternatives) {
+  $matchingPlans = @($plan.alternatives | Where-Object { $_.baseSha256 -eq $baseHash })
+  if ($matchingPlans.Count -eq 1) { $plan = $matchingPlans[0] }
+ }
  if ([version]([PatchCore]::InstalledVersion($folder)) -ge [version]$plan.version) { [void][System.Windows.Forms.MessageBox]::Show('이미 이 버전 이상의 게임이 설치되어 있습니다. 소형 패치를 적용하지 않았습니다.','이세계 기록'); exit 0 }
  if ([PatchCore]::Hash($base) -eq $plan.sha256) { [void][System.Windows.Forms.MessageBox]::Show('이미 이 패치가 적용되어 있습니다.','이세계 기록'); exit 0 }
  if ([PatchCore]::Hash($base) -ne $plan.baseSha256) { throw ("이 소형 패치는 제공된 v" + $plan.baseVersion + " 설치본용입니다. 해당 버전을 먼저 적용해 주세요. 기존 게임은 변경하지 않았습니다.") }

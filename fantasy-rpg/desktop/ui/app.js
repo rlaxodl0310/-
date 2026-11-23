@@ -96,6 +96,7 @@ function openPanel(kind){
   for(const [label,panel] of previews)body.append(button(label,()=>openPanel(panel)));
   body.append(el('h3','플레이 테스트'));
   body.append(button('마을 거리 · 2D 탐색',()=>{closePanel();DistrictUI.open();}));
+  for(const theme of DistrictModel.terrainViews)body.append(button('거리 배경 · '+theme.label,()=>{closePanel();const visual=DistrictModel.visualFor({note:({farm:'농촌',coast:'해안',forest:'숲',quarry:'광산',river:'강변',pasture:'목축'})[theme.id]});DistrictUI.open(null,{visual});}));
   for(const [label,href,method] of [['턴제 전투 테스트','battle/','openBattle'],['실시간 전투 테스트','realtime/','openRealtime']]){
    if(window.desktopAI?.[method]){
     body.append(button(label,async()=>{

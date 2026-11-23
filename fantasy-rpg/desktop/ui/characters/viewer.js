@@ -51,7 +51,7 @@ window.CharacterContentUI={open(body){
   }
   const info=node('p'),bio=node('p'),controls=node('div'),stage=node('div');
   stage.style.cssText='display:grid;place-items:center;max-width:100%;margin:16px auto;background:#24332c;overflow:hidden';
-  body.append(select,info,bio,controls,stage);
+  body.append(select,info,bio,stage,controls);
   function show(frame,pixel=false,kind='art'){
     stage.replaceChildren();
     const bounds={art:[420,560],portrait:[420,340],scene:[420,420],sd:[240,240]};
@@ -92,16 +92,17 @@ window.CharacterContentUI={open(body){
     for(const [key,frame] of Object.entries(record.portraits||{}))button('초상화 · '+key,frame,false,'portrait');
     for(const [key,frame] of Object.entries(record.sd))button('SD · '+({default:'기본',alternate:'대체 의상'}[key]||key),frame,false,'sd');
     const pixel=record.pixel;
-    pixel?.frames.forEach(([x,y,w,h],index)=>{
+    if(!record.combatSprite)pixel?.frames.forEach(([x,y,w,h],index)=>{
       const illustrated=pixel.format==='illustrated-sd';
       button((illustrated?'전투 SD ':'도트 ')+(index+1),{src:pixel.src,x,y,w,h,imageWidth:pixel.imageWidth,imageHeight:pixel.imageHeight},!illustrated,'sd');
     });
     if(record.combatSprite){
-      const clips=['대기','이동','공격','방어','회피','피격'];
-      record.combatSprite.frames.forEach((_,i)=>{
-        const frame=CharacterContent.combatFrame(record.combatSprite,i);
-        button('전투 · '+clips[Math.floor(i/2)]+' '+(i%2+1),frame,frame.w<=96,'sd');
-      });
+      const labels={idle:'대기',move:'이동',attack:'공격',guard:'방어',dodge:'회피',hit:'피격'};
+      const definitions=record.combatSprite.clips||Object.fromEntries(Object.keys(labels).map((key,i)=>[key,{frames:[i*2,i*2+1]}]));
+      for(const [key,clip]of Object.entries(definitions))for(const [phase,index]of clip.frames.entries()){
+        const frame=CharacterContent.combatFrame(record.combatSprite,index);
+        button('전투 · '+labels[key]+' '+(phase+1),frame,record.combatSprite.pixelated||frame.w<=96,'sd');
+      }
     }
     show(record.looks.default||Object.values(record.looks)[0]);
   }

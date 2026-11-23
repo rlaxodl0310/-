@@ -11,7 +11,7 @@
       frames[pose]??={};
       const illustration=looks[pose].map(key=>record.looks[key]).find(Boolean);
       frames[pose][record.id]=illustration||(record.combatSprite
-        ?Content.combatFrame(record.combatSprite,index)
+        ?Content.combatFrame(record.combatSprite,record.combatSprite.clips?.[pose==='ready'?'idle':pose==='run'?'move':pose]?.frames?.[pose==='attack'?2:0]??index)
         :record.looks[pose==='attack'?'help':'default']||record.looks.default);
     }
   }

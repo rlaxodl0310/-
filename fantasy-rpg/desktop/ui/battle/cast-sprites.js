@@ -9,14 +9,25 @@ const clips={
   idle:{first:0,fps:3},move:{first:2,fps:9},attack:{first:4},
   guard:{first:6},dodge:{first:8},hit:{first:10},
 };
+function frameAt(atlas,t,moving,pose,progress){
+ const key=Object.hasOwn(clips,pose)?pose:moving?'move':'idle';
+ const clip=atlas.clips?.[key];
+ if(clip){
+  const candidates=clip.frames.filter(index=>Number.isInteger(index)&&atlas.frames[index]);
+  if(!candidates.length)return 0;
+  const p=Number.isFinite(progress)?Math.max(0,Math.min(1,progress)):0;
+  const phase=clip.fps?Math.floor(Math.max(0,Number(t)||0)*clip.fps*(atlas.tempo||1))%candidates.length:Math.min(candidates.length-1,Math.floor(p*candidates.length));
+  return candidates[phase];
+ }
+ const fallback=clips[key];
+ const phase=fallback.fps?Math.floor(Math.max(0,Number(t)||0)*fallback.fps*(atlas.tempo||1))%2:Number(progress>=.5);
+ return fallback.first+phase;
+}
 function drawCombat(ctx,atlas,image,t,moving,pose,progress){
-  const clip=(Object.hasOwn(clips,pose)&&clips[pose])||clips[moving?'move':'idle'];
-  const phase=clip.fps?Math.floor(Math.max(0,t)*clip.fps*atlas.tempo)%2:
-    Number(progress>=.5);
-  const index=clip.first+phase;
+  const index=frameAt(atlas,t,moving,pose,progress);
   const [x,y,w,h]=atlas.frames[index];
   const scale=atlas.scale;
-  ctx.imageSmoothingEnabled=w>96;
+  ctx.imageSmoothingEnabled=!atlas.pixelated&&w>96;
   ctx.imageSmoothingQuality='high';
   ctx.drawImage(image,x,y,w,h,43-atlas.anchor[0]*scale,81-atlas.anchor[1]*scale,w*scale,h*scale);
 }
@@ -34,5 +45,5 @@ const [x,y,w,h]=box;
 // Shared scale for every frame keeps the head/body size stable as legs bend.
 const referenceHeight=(walking||evading)?m.height:e.frames[0][3],scale=Math.min(78/w,(id==='zero'?60:76)/referenceHeight),dw=w*scale,dh=h*scale;
 ctx.imageSmoothingEnabled=false;ctx.save();const breath=Math.sin(t*(id==='yui'?1.5:id==='nea'?3:2))*.35;ctx.translate(43,81+breath);ctx.drawImage(source,x,y,w,h,-dw/2,-dh,dw,dh);ctx.restore();return true;}
-root.CastSprites={has,ready,load,draw,entries};
+root.CastSprites={has,ready,load,draw,entries,frameAt};
 })(globalThis);

@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/fantasy-desktop.yml'
       - 'fantasy-rpg/desktop/**'
+      - 'fantasy-rpg/WORLD_BIBLE.md'
 permissions:
   contents: write
 concurrency:
@@ -26,6 +27,7 @@ jobs:
           cache-dependency-path: fantasy-rpg/desktop/package-lock.json
       - run: npm ci --no-audit --no-fund
       - run: node scripts/prepare-codex.cjs
+      - run: npm run check:world
       - run: npm test
       - run: npm run package:win
       - name: Build and test patch program
@@ -64,40 +66,7 @@ jobs:
           gh release upload $tag release/FantasyStory-Windows-x64.zip release/FantasyStory-Patch.zip release/FantasyStory-Lookpack-Sample.lookpack --clobber --repo rlaxodl0310/-
           if ($LASTEXITCODE -ne 0) { throw 'Release upload failed.' }
           $hash = (Get-FileHash release/FantasyStory-Patch.zip -Algorithm SHA256).Hash
-          @"
-          v0.21.0: 마을 거리의 회전 가능한 3D 프리뷰와 실시간 전투와 수동 일시정지·동료 명령을 추가했습니다.
-          마을 거리: 드래그 회전, Shift 드래그 화면 이동, 휠 확대, 클릭/방향키 이동, 가까이에서 클릭/Space로 미연시 대화. 본편의 현실 시작·저장·동행은 바꾸지 않습니다. 시설 거래/숙박/내부는 후속 작업입니다.
-          실시간 전투: WASD/방향키 이동, J 공격, Q/E 스킬, Space 회피, 적 클릭. 무기와 포지션은 시험 설정입니다. 16종 몬스터, 동료 최대3명, 측면 접근·거리 유지·후퇴·투사체 충돌·공격 중단 판정을 지원합니다.
-          특별한 순간의 선택지와 전술 채팅을 추가했습니다. P/일시정지 버튼으로 전투를 멈춰 아군 상태와 적 대상을 확인하고 인물별 명령을 예약할 수 있습니다. 진행 중에는 선택·타이핑·AI 해석 동안에도 전투가 흐르며, 일시정지 중에는 멈춤을 유지합니다. 현재 구현한 행동만 시도로 변환하고 실제 성공은 엔진이 판정합니다. 기회 만료/전투 변경/자원 부족이면 적용하지 않습니다. 조건부 입력은 다음 기회를 최대15초 기다립니다.
-          브라우저/채팅은 로컬 전술 해석이며 Windows 앱에서는 기존 ChatGPT 구독 로그인을 사용합니다. 실제 계정 응답은 사용자 환경에서 확인해주세요. 유료 API로 전환하지 않습니다.
-          기존 앱은 FantasyStory-Patch.zip을 폴더 전체로 풀어 FantasyStoryPatch.exe를 실행하세요. 먼저 저장 후 게임을 종료해주세요. 로그인과 저장은 유지합니다.
-          신규 설치는 FantasyStory-Windows-x64.zip입니다. 직접 실행하는 패치입니다.
-          Patch SHA256: $hash
-          소유자만 확인하는 초안 릴리스입니다. GitHub 소유자 계정 로그인이 필요합니다.
-          "@ | Set-Content release/notes.txt -Encoding utf8
-          if ($version -eq '0.22.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '세계관과 대화에서 즉석 생성하는 AI 이야기. 일반 전투는 채팅, 누적 사건 근거가 있는 중요 전투는 실시간 조작. 기존 저장 보존. 9명×4자세 투명 전투 원화, 장소4종/몬스터16종 독립 합성. 기존 설치에 패치 ZIP 적용. 실제 AI의 장기 일관성과 전체 특성/장비 판정은 계속 검토 중입니다.' }
-          if ($version -eq '0.22.1') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '로컬 인물 판단 시스템과 ChatGPT의 협력. 인물별 목표/목격 기억/불안/경험을 정리하고 모델의 문맥 피드백과 로컬 검토를 교환합니다. 최대1회 수정 요청, 성공 응답만 원자적으로 저장. 추가 모델 다운로드/API 없음. 로컬은 별도 생성형 언어 모델이 아니며 대사 생성에는 기존 ChatGPT 연결이 필요합니다. 기존 설치에 패치 ZIP 적용, 로그인과 저장 유지.' }
-          if ($version -eq '0.23.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '문맥/관계/현대 대화 예시 업그레이드. 낮은 확신도 피드백의 감정 반영 차단, 인물별 사실/추측/관계/대화 진행 구분, 창작 예시48개 검색, 목격 사건 인용 검사. 외부 코퍼스 재학습 아님. 내부 새40문장 분류18→25정답; 실제 ChatGPT 품질 A/B 미실시. 기존 설치에 패치 적용, 로그인과 저장 유지.' }
-          if ($version -eq '0.24.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '장기 이야기 연속성 보조. 확정 설정/엔진 상태/관찰/추측 구분, 이전 상태 변경 근거 검사, 사건 원문 보존과20턴 인용 묶음, 과거 단서/미해결 문제 재검색, 실패 응답 저장 차단과 직전 저장 복구. 실제 ChatGPT 장기 품질 보장은 아님. 기존 설치에 패치 ZIP 적용, 로그인과 기존 저장 유지.' }
-          if ($version -eq '0.25.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '일반 전투 행동 판정과 NPC 반응 1차 확장. 실제 확인한 물건/거리/부상 조건으로 판정 후 묘사, 상태와 사건 기록 유지, NPC 수락/망설임/거절 및 제한된 자율 반응, 행동 단서 보기. 모든 스킬/정밀 물리/실시간 장애물 동기화는 아직 아님. 기존 설치에 패치 ZIP 적용, 로그인과 저장 유지.' }
-          if ($version -eq '0.26.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '개인 스킬 등록/전투 사용/숙련/제한된 이펙트 레시피 엔진. 실제 보유 근거와 경험을 검사하며 공용 스킬 목록은 비워 둡니다. AI 이야기에서 별도 스킬 실험실을 실행할 수 있습니다. 기존 설치에 패치 적용, 로그인과 저장 유지.' }
-          if ($version -eq '0.27.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '공용 액티브181항목 도감/실행/레시피 이펙트. 체력/마나 스탯1=HP/MP100, 등급 고정, 쿨타임 없음. 기존 자원 비율 보존. AI 이야기에서 도감·시험장을 열 수 있습니다. 수치와 수련 정책은 시제품 균형입니다. 기존 설치에 패치 적용, 로그인과 저장 유지.' }
-          if ($version -eq '0.42.1') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '탱탱 독립 코어0.1.0을 게임 소비자 어댑터에 연결. 프로젝트별 문맥/검증/수정/재시도/출처 분리, 기존 의뢰/후속 호위 규칙과 로그인·저장 보존. 공통 코어는 별도 SDK/CLI로 개발하며 게임 밖 의존성 없이 패키징.' }
-          if ($version -eq '0.42.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '탱탱 ↔ ChatGPT 동적 의뢰: 세계·지도·사건·예산 문맥→전체 계약 제안→탱탱 검토→1회 수정→예치 게시. 기존6종 실제 목표/의뢰인/조건 변화,6시간 게시판 갱신과 수락 계약 보존,미연결 로컬 생성 명시. 기존 로그인과 저장 유지. 구조/던전 수행은 후속.' }
-          if ($version -eq '0.41.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '마석 채굴 시제품: 카르덴 박락 입구 유한 광맥, 실제 조사·채굴·소음·천장 보강·앤트 대화창 전투·철수·납품 정산. 시간/피로/대여 곡괭이/의뢰분 소유권/귀환 후 초과분 회수/저장 연결. 별도 시험장 포함. 기존 로그인과 저장 유지.' }
-          if ($version -eq '0.40.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '학자 개인 호위: 실제AI 경로 동의/거절, 안전·빠른 구간, 계약별 기한·허용 부상·자료·현장 대조, 대화창 의뢰인 보호, 인계·별도 정산, 같은 학자 재회·후속 계약. 실제 시간·피로·정수·기한·파티 분배와 저장 연결. 고정 응답 시험장 포함. 기존 로그인과 저장 유지.' }
-          if ($version -eq '0.39.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '상인단 호위 시제품: 도시→마을 구간 이동/AI 현장 제안/우회·대화창 전투/실제 의뢰인·마차·화물 상태/도착·인계·별도 정산. 피로·정수 만료·기한·파티 분배·원자 저장 연결. 고정 상황 시험장 포함. 기존 로그인과 저장 유지.' }
-          if ($version -eq '0.38.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '파티 보상: 실제 참여XP70/30 분배, 동료 성장/자금 저장, 미분배 전리품 보관과 동의 기반 배정/차액 지급/공동 매각. 계약·AI 동의/거절·예치금 보존·정수 만료·의뢰 수행자 분배 연결. 별도 테스트 제공. 기존 로그인/저장 유지.' }
-          if ($version -eq '0.37.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '휴식/수리: 여관과 사용권 있는 집에서 수면 회복,0~100 피로도/단계별 전투 불이익/100탈진, 대장간과 협회 장비 수리. 돈/시간/정수 만료/의뢰 기한/원자 저장 연결. 별도 테스트 제공. 기존 로그인과 저장 유지.' }
-          if ($version -eq '0.36.1') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '상위 전리품 협회 매입: 잠정3등급 이상 재료/마석/영혼석/정수는 일반 상점에서 판매할 수 없으며 현재 지역 협회에서 매입합니다. 의뢰 예치금과 매입 예산 분리, 기존 로그인과 저장 유지.' }
-          if ($version -eq '0.36.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '본편 상점 거래: 재료/마석/종별 영혼석/시간 감정 정수 매각, 일반 장비/포션 구매와 사용, 시설별 재고/매입자금/영수증 저장. 납품 확보분과 중복 거래 보호, 거래1분에 정수와 의뢰 기한 진행. 별도 거래 테스트 제공. 기존 로그인과 저장 유지.' }
-          if ($version -eq '0.35.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '슬레이어 확정,12종 역할 아이콘, 현재 파티 포지션/겸임 배치와 저장. 일반 전투는 대화창 이름 아래 아이콘 표시. 실시간 전투와 상태 표시에도 배치 전달. 역할 배치만으로 능력/무기를 지급하지 않습니다. 기존 로그인과 저장 유지.' }
-          if ($version -eq '0.34.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '정수0.01%,영혼석0.015% 희귀 드랍. 종/등급별 영혼석 소지품과 비소멸 저장, 기존 전리품 보존, 검증실 정수/영혼석 전환. 기존 로그인과 저장 유지.' }
-          if ($version -eq '0.33.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '본편 토벌/조사/재료납품 수락·수행·귀환·증빙·돈/XP 정산. 현장 전리품 회수, 재료/마석 소지품, 희귀 정수의 생성 후30분 소멸과 흡수. 선택적 AI 안내문과 원자 저장. 기존 로그인/저장 유지, 별도 수행 검증실 포함.' }
-          if ($version -eq '0.32.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '10레벨 구간 경험치 문턱, 몬스터별 차등 XP와 본편 승리 보상, 의뢰 경험치 견적/시험 완료 지급, 이월과3포인트 및 중복 방지. 기존 로그인과 저장 유지.' }
-          if ($version -eq '0.31.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '성장→배분→정수→장비→전투→저장 통합 검증. 레벨 상승당3포인트 내부 보상과 중복 방지. 경험치 곡선은 검증실 전용 초안이며 본편 자동 보상은 미적용. 기존 로그인과 저장 유지.' }
-          if ($version -eq '0.30.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '출처별 능력치 합산, 내 정보의 장비 교체/해제와 정수 흡수, 슬롯/소멸/내구도 검사, 장비 제공 스킬과 숙련 보존, AI 출처 문맥. 성장·장비 검증실 포함. 기존 로그인과 저장 유지.' }
-          if ($version -eq '0.29.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '기본 스탯7개 통일. 급소 적중률은 스킬 옵션만 적용. 물리/마법 공격과 방어 분리, 이전 저장 호환, 내 정보/검증실/AI 문맥 정정. 로그인과 저장 유지.' }
-          if ($version -eq '0.28.0') { Set-Content -Path release/notes.txt -Encoding utf8 -Value '확정 전투 공식: 레벨 보정, 독립 연타, 관통, 부위 방호/급소, 버프 상한/저항, 치유/보호막. 유한1회형은 한계를 넘는 피해가 통과합니다. AI에 공식/실제 예제/판정 인용을 제공하고 검토합니다. AI 이야기에서 전투 공식 검증실 실행. 기존 설치에 패치 적용, 로그인과 저장 유지.' }
+          node scripts/release-notes.cjs release/FantasyStory-Patch.zip | Set-Content release/notes.txt -Encoding utf8
+          if ($LASTEXITCODE -ne 0) { throw 'Release notes generation failed.' }
           gh release edit $tag --target $env:GITHUB_SHA --notes-file release/notes.txt --repo rlaxodl0310/-
           if ($LASTEXITCODE -ne 0) { throw 'Release notes update failed.' }

@@ -18,6 +18,23 @@ function depth(p){return p.x+p.y;}
 const primarySpots={inn:0,exchange:1,hall:2,water:3};
 const extraSpots=[{x:3,y:2},{x:11,y:2},{x:15,y:2},{x:18,y:4}];
 const firstNPCSpots=npcs.map(({x,y})=>({x,y}));
+const terrainViews=[
+ {id:'farm',label:'농촌',pattern:/농촌|농장|곡물|보리|감자|경작|평야|농경/},
+ {id:'coast',label:'해안',pattern:/해안|어촌|생선|해조|어업|항구|선착장|바닷/},
+ {id:'forest',label:'숲',pattern:/숲|벌목|목재|양봉|약초|장작/},
+ {id:'quarry',label:'광산',pattern:/광산|광부|광석|제련|채석|돌을|석공/},
+ {id:'river',label:'강변',pattern:/강변|방앗간|물레|나루|강가|하천|수로/},
+ {id:'pasture',label:'목축',pattern:/목축|목장|고원|구릉|양치기|짐가축|산촌/},
+];
+function visualFor(place){
+ const text=[place?.location,place?.note].filter(Boolean).join(' ');
+ // Specific water/industry descriptions take priority over generic surrounding terrain.
+ const order=[1,4,3,2,5,0],index=order.find(index=>terrainViews[index].pattern.test(text));
+ if(index===undefined)return null;
+ const col=index%2,row=Math.floor(index/2),y=Math.floor(row*1024/3);
+ return {id:terrainViews[index].id,label:terrainViews[index].label,src:'district/assets/terrain-villages.webp',
+  frame:[col*768,y,768,Math.floor((row+1)*1024/3)-y]};
+}
 function storyStreet(state,geography,facilities,storyData){
  const village=geography.find(place=>place.id===state.location&&place.kind==='village');
  if(state.era!=='fantasy'||!village||state.combat?.status==='playing'||!state.visited?.includes('fantasy:'+village.id))return null;
@@ -37,7 +54,7 @@ function storyStreet(state,geography,facilities,storyData){
  const streetNPCs=Array.from(people,([id,name],index)=>({id,name,
   ...(firstNPCSpots[index]||{x:2+((index-2)%6)*3,y:9+Math.floor((index-2)/6)*4}),
  }));
- return {location:village.id,name:village.name,objects:streetObjects,npcs:streetNPCs};
+ return {location:village.id,name:village.name,visual:visualFor(village),objects:streetObjects,npcs:streetNPCs};
 }
-return{width,height,start,objects,npcs,project,unproject,blocked,direction,depth,streetPoint,streetCell,storyStreet};
+return{width,height,start,objects,npcs,project,unproject,blocked,direction,depth,streetPoint,streetCell,storyStreet,visualFor,terrainViews};
 });

@@ -1,7 +1,7 @@
 {
   "name": "fantasy-story-desktop",
   "productName": "Fantasy Story",
-  "version": "0.42.57",
+  "version": "0.42.58",
   "private": true,
   "description": "이세계 기록 · ChatGPT 구독으로 대화하는 데스크톱 비주얼 노벨",
   "main": "electron/main.cjs",
@@ -9,7 +9,9 @@
     "start": "electron .",
     "test": "node --test tests/*.test.cjs",
     "package:win": "node scripts/make-lookpack-sample.cjs && node scripts/package.cjs win32",
-    "package:linux": "node scripts/make-lookpack-sample.cjs && node scripts/package.cjs linux"
+    "package:linux": "node scripts/make-lookpack-sample.cjs && node scripts/package.cjs linux",
+    "check:world": "node scripts/sync-world.cjs --check",
+    "sync:world": "node scripts/sync-world.cjs"
   },
   "devDependencies": {
     "electron": "45.3.3",
