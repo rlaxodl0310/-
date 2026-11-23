@@ -32,7 +32,7 @@
    join:{speaker:'yui',emotion:1,text:'응. 나도 이쪽으로 가. 문 앞은 좀 비켜 있자.',end:true,flags:['known_person_yui','known_age_yui','companion_yui','earth_yui_meeting_done']},
    separate:{speaker:'yui',emotion:0,text:'응, 나도 수업 가는 중이야. 아침부터 사람 많네.',end:true,flags:['known_person_yui','known_age_yui','earth_yui_meeting_done']}
   }},
-  {...common,id:'earth_signal',title:'등굣길 · 잠깐의 깜빡임',entry:'opening',requiresCompleted:['earth_schooltalk'],nodes:{
+  {...common,id:'earth_signal',nextEvent:'fantasy_arrival',title:'등굣길 · 잠깐의 깜빡임',entry:'opening',requiresCompleted:['earth_schooltalk'],nodes:{
    opening:{speaker:'narrator',emotion:0,text:'천장의 조명이 한 번 깜빡인다. 안내 방송이 잠깐 끊겼다가 다시 이어진다. 열차는 여전히 터널을 지나고 있다.',next:'notice'},
    notice:{speaker:'yeogyeong',emotion:2,text:'방금 불 꺼졌었지? 나만 본 거 아니지?',choices:[
     {id:'wait',label:'손잡이를 잡고 잠시 기다린다',next:'wait',minutes:1},
@@ -40,6 +40,15 @@
    wait:{speaker:'yeogyeong',emotion:2,text:'……다시 켜졌네. 잠깐 그랬나 봐.',sd:3,next:'done'},
    look:{speaker:'narrator',emotion:0,text:'문은 닫혀 있다. 몇몇 승객이 천장을 올려다보다가 다시 휴대전화로 시선을 내린다.',next:'done'},
    done:{speaker:'narrator',emotion:0,text:'익숙한 철로 소리가 이어진다. 아직은 평소와 같은 지하철 안이다.',end:true,flags:['earth_prologue_done']}
+  }},
+  {id:'fantasy_arrival',era:'fantasy',owner:'narrator',viewer:'taei',members:[],location:'arrival_meadow',
+   title:'이세계 · 낯선 풀밭',entry:'opening',requiresCompleted:['earth_signal'],chat:false,nodes:{
+    opening:{speaker:'narrator',emotion:0,text:'터널의 소리가 한순간 끊긴다. 손잡이를 쥔 손에 아무것도 걸려 있지 않다. 눈을 뜨자 차가운 풀잎이 뺨을 스친다.',next:'orient'},
+    orient:{speaker:'narrator',emotion:0,text:'바람이 낮은 풀을 눕힌다. 오른편에는 발자국이 드문 흙길이 나 있고, 가까운 곳에는 몸을 낮출 수 있는 얕은 도랑이 있다.',choices:[
+     {id:'path',label:'흙길 쪽으로 걸어가 발자국을 살핀다',minutes:2,next:'path'},
+     {id:'listen',label:'도랑 가장자리에 몸을 낮추고 귀를 기울인다',minutes:1,next:'listen'}]},
+    path:{speaker:'narrator',emotion:0,text:'흙길 가장자리까지 나가니 풀 아래 가려졌던 발자국이 보인다. 발자국은 숲 가장자리를 따라 이어진다.',end:true,flags:['fantasy_arrived','arrival_checked_path']},
+    listen:{speaker:'narrator',emotion:0,text:'도랑 가장자리에 몸을 낮춘다. 풀이 흔들리는 소리 사이로 아래쪽에서 물이 흐르는 소리가 들린다.',end:true,flags:['fantasy_arrived','arrival_listened']}
   }}
  ];
  const catalog=[{id:'nea',name:'네아',age:18},{id:'yui',name:'한유이',age:20},{id:'taei',name:'김태이',age:18},{id:'yeogyeong',name:'차여경',age:null},{id:'dogyeom',name:'백도겸',age:null},{id:'seoha',name:'윤서하',age:null},{id:'woojin',name:'정우진',age:null},{id:'zero',name:'제로',age:null},{id:'dogyeom-childhood-friend',name:'임소윤',age:null}];

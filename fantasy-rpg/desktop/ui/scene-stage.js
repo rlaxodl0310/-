@@ -1,5 +1,5 @@
 const SceneStage=(()=>{
- const backgrounds={earth_subway:'assets/bg-subway.png',subway:'assets/bg-subway.png',earth_platform:'assets/bg-platform.png',platform:'assets/bg-platform.png',earth_station:'assets/bg-station.png',station:'assets/bg-station.png'};
+ const backgrounds={arrival_meadow:'assets/bg-arrival.webp',earth_subway:'assets/bg-subway.png',subway:'assets/bg-subway.png',earth_platform:'assets/bg-platform.png',platform:'assets/bg-platform.png',earth_station:'assets/bg-station.png',station:'assets/bg-station.png'};
  const characters={nea:'assets/nea-atlas.png','nea-travel':'assets/nea-atlas.png',yeogyeong:'assets/yeogyeong-standing.png',yui:'assets/yui-standing.png',seoha:'assets/seoha-standing.png','dogyeom-childhood-friend':'assets/childhood-friend-standing.png'};
  // Portraits are complete approved illustrations; never paste separate heads over bodies.
  for(const r of globalThis.StoryKitData?.content?.records||[])for(const [look,f]of Object.entries(r.looks))characters[look==='default'?r.id:r.id+'-'+look]=f.src;
