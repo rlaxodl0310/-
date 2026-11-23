@@ -62,14 +62,15 @@ class Renderer{
  }
  zoom(factor){this.zoomFactor=Math.min(1.55,Math.max(1,this.zoomFactor*factor));}
  spriteHeight(pos){
-  return Math.max(47,Math.min(142,this.artHeight*(.068+.055*pos.y/(model.height-1))));
+  const baseArtHeight=this.artHeight/this.zoomFactor;
+  return Math.max(47,Math.min(142,baseArtHeight*(.068+.055*pos.y/(model.height-1))))*this.zoomFactor;
  }
  sprite(pos,entry,index){
   const im=images.get(entry.src);
   if(!im)return;
   const {x,y}=this.screen(pos);
   const [sx,sy,w,h]=entry.frames[index];
-  const height=this.spriteHeight(pos)*h/Math.max(...entry.frames.map(frame=>frame[3]));
+  const height=this.spriteHeight(pos);
   const width=w*height/h,c=this.ctx;
   c.fillStyle='#221b1855';
   c.beginPath();c.ellipse(x,y,width*.42,height*.045,0,0,2*Math.PI);c.fill();
