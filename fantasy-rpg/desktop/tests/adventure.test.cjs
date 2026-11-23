@@ -331,7 +331,7 @@ t(
         requestId: "ai-board-first",
         action: { type: "refreshAI" },
       });
-      a.equal(s.adventure.quests.length, 6);
+      a.equal(s.adventure.quests.length, 7);
       a(s.adventure.quests.every((q) => q.flavor));
       a.equal(s.adventure.quests[0].reward, 100);
       s.minutes=360;await d.save(s);

@@ -9,6 +9,7 @@
       onEscort = () => {},
       onMining = () => {},
       onRescue = () => {},
+      onDungeon = () => {},
       onAbsorb = async () => {},
       disabled = false,
       allowAI = true,
@@ -162,11 +163,11 @@
               dialog,
               q.destination !== state.location || Adventure.ready(state, q),
             );
-          const travel = n("button", q.type==='rescue'?"구조 여정 열기":q.type==='mining'?"채굴 여정 열기": ['caravan','escort'].includes(q.type)?"호위 여정 열기":"이동할 말 입력", dialog);
+          const travel = n("button", q.type==='dungeon'?"던전 여정 열기":q.type==='rescue'?"구조 여정 열기":q.type==='mining'?"채굴 여정 열기": ['caravan','escort'].includes(q.type)?"호위 여정 열기":"이동할 말 입력", dialog);
           travel.onclick = () => {
             dialog.close();
             dialog.remove();
-            if(q.type==='rescue'){onRescue();return;}if(q.type==='mining'){onMining();return;}if(['caravan','escort'].includes(q.type)){onEscort(q.type);return;}
+            if(q.type==='dungeon'){onDungeon();return;}if(q.type==='rescue'){onRescue();return;}if(q.type==='mining'){onMining();return;}if(['caravan','escort'].includes(q.type)){onEscort(q.type);return;}
             onTravel(
               Adventure.travelText(
                 Adventure.ready(state, q) ? q.issuerLocation : q.destination,
