@@ -42,6 +42,8 @@ function register(){for(const [channel,handler]of Object.entries({
  'director:enterMeadow':r=>director.enterMeadow(r),
  'director:send':r=>director.send(r),
  'director:boardRefresh':r=>{if(bridge.busy)throw Error('AI 응답을 먼저 마쳐 주세요.');return director.boardRefresh(r);},
+ 'director:npcPartyView':()=>director.npcPartyView(),
+ 'director:npcParty':r=>{if(bridge.busy)throw Error('AI 응답을 먼저 마쳐 주세요.');return director.npcPartyAction(r);},
  'director:dungeon':r=>{if(bridge.busy)throw Error('AI 응답을 먼저 마쳐 주세요.');return director.dungeonAction(r);},
  'director:rescue':r=>{if(bridge.busy)throw Error('AI 응答을 먼저 마쳐 주세요.');return director.rescueAction(r);},
  'director:mining':r=>{if(bridge.busy)throw Error('AI 응답을 먼저 마쳐 주세요.');return director.miningAction(r);},
