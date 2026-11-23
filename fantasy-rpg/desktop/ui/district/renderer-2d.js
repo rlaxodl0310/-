@@ -3,9 +3,9 @@
 const model=root.DistrictModel;
 const background='district/assets/lantern-street.webp';
 const images=new Map();
-function load(){
+function load(npcs=model.npcs){
  const stances=root.CastSprites.entries;
- const urls=[background,root.DistrictArt.se.src,...model.npcs.map(npc=>'battle/'+stances[npc.id].src)];
+ const urls=[background,root.DistrictArt.se.src,...npcs.filter(npc=>stances[npc.id]?.src).map(npc=>'battle/'+stances[npc.id].src)];
  return Promise.all([...new Set(urls)].map(url=>new Promise(resolve=>{
   const image=new Image();
   image.onload=()=>{images.set(url,image);resolve(true);};
@@ -14,7 +14,7 @@ function load(){
  })));
 }
 class Renderer{
- constructor(canvas){
+ constructor(canvas,{objects=model.objects,npcs=model.npcs}={}){
   this.canvas=canvas;
   this.ctx=canvas.getContext('2d');
   if(!this.ctx)throw Error('Canvas unavailable');
@@ -23,7 +23,8 @@ class Renderer{
   this.zoomFactor=1;
 
   this.offset={x:0,y:0};
-  this.targets=[...model.objects.filter(item=>item.name),...model.npcs];
+  this.npcs=npcs;
+  this.targets=[...objects.filter(item=>item.name),...npcs];
   this.resize();
  }
  resize(){
@@ -56,7 +57,7 @@ class Renderer{
  objectAt(x,y){
   return this.targets.find(target=>{
    const p=this.screen(target);
-   if(model.npcs.includes(target))return Math.hypot(x-p.x,y-p.y+this.spriteHeight(target)*.55)<26;
+   if(this.npcs.includes(target))return Math.hypot(x-p.x,y-p.y+this.spriteHeight(target)*.55)<26;
    return Math.abs(x-p.x)<45&&Math.abs(y-p.y+23)<22;
   });
  }
@@ -91,7 +92,7 @@ class Renderer{
   c.fillStyle='#263b33';c.fillRect(0,0,this.width,this.height);
   const bg=images.get(background);
   if(bg)c.drawImage(bg,this.offset.x,this.offset.y,this.artWidth,this.artHeight);
-  const terrainTargets=this.targets.filter(target=>!model.npcs.includes(target));
+  const terrainTargets=this.targets.filter(target=>!this.npcs.includes(target));
   for(const target of terrainTargets){
    const point=this.screen(target);
    c.fillStyle=near===target?'#ffe0a1':'#eace97';
@@ -100,15 +101,16 @@ class Renderer{
    if(near!==target)this.label(target.name,point.x,point.y-22);
   }
   const walk=map.route.length?[1,2,3,2][Math.floor(this.distance*3.6)%4]:0;
-  const sprites=model.npcs.map(npc=>{
+  const sprites=this.npcs.flatMap(npc=>{
    const entry=root.CastSprites.entries[npc.id];
-   return {pos:npc,entry:{src:'battle/'+entry.src,frames:entry.frames},index:0};
+   if(!entry?.src){const p=this.screen(npc);this.label(npc.name,p.x,p.y-45);return [];}
+   return [{pos:npc,entry:{src:'battle/'+entry.src,frames:entry.frames},index:0}];
   });
   sprites.push({pos:p,entry:root.DistrictArt[this.direction],index:walk});
   sprites.sort((a,b)=>a.pos.y-b.pos.y);
   for(const sprite of sprites)this.sprite(sprite.pos,sprite.entry,sprite.index);
   if(near){
-   const point=this.screen(near),lift=model.npcs.includes(near)?this.spriteHeight(near)+15:36;
+   const point=this.screen(near),lift=this.npcs.includes(near)?this.spriteHeight(near)+15:36;
    this.label(near.name+' · Space',point.x,point.y-lift);
   }
  }

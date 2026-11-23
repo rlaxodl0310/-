@@ -94,3 +94,23 @@ t('optional danger requires a warning and an exit, and leaves three turns betwee
  a.doesNotThrow(()=>validate({...proposal(),dangerBeats:[]},recent,'주변을 살핀다'));
  a.doesNotThrow(()=>validate(proposal(),{...recent,turns:[...recent.turns,{}]},'주변을 살핀다'));
 });
+
+t('a registered village street visit persists facilities and position across story save slots',async()=>{
+ const {dir,d}=await setup(async()=>answer());
+ try{
+  const location='north-village-01';
+  const state={...initial(),revision:3,era:'fantasy',scene:'exploration',location,
+   present:['yeogyeong'],visited:['earth:subway','fantasy:'+location]};
+  await d.save(state);
+  const inn=location+'-facility-inn';
+  await a.rejects(d.returnFromStreet({revision:3,position:{x:8,y:12},targetId:inn}),/가까이/);
+  const visit=await d.returnFromStreet({revision:3,position:{x:1,y:0},targetId:inn});
+  a.deepEqual(visit.streetVisits[location],{position:{x:1,y:0},facilities:[inn]});
+  a.match(visit.ledger.at(-1).text,/작은 여관/);
+  await d.saveSlotAction({action:'save',slot:1,revision:visit.revision});
+  const moved=await d.returnFromStreet({revision:visit.revision,position:{x:2,y:0}});
+  const restored=await d.saveSlotAction({action:'load',slot:1,revision:moved.revision});
+  a.deepEqual(restored.state.streetVisits,visit.streetVisits);
+  a.equal(restored.state.location,location);
+ }finally{await fs.rm(dir,{recursive:true,force:true});}
+});

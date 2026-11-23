@@ -9,10 +9,23 @@ const objects=[
 const npcs=[{id:'yeogyeong',name:'차여경',x:9,y:11},{id:'yui',name:'한유이',x:12,y:8}];
 function project(p){return{x:(p.x-p.y)*42,y:(p.x+p.y)*21};}
 function unproject(p){return{x:(p.x/42+p.y/21)/2,y:(p.y/21-p.x/42)/2};}
-function blocked(){const out=[];for(const o of objects)if(o.solid){const [dx,dy,w,h]=o.solid;for(let x=0;x<w;x++)for(let y=0;y<h;y++)out.push({x:o.x+dx+x,y:o.y+dy+y});}for(const n of npcs)out.push({x:n.x,y:n.y});return out;}
+function blocked(streetObjects=objects,streetNPCs=npcs){const out=[];for(const o of streetObjects)if(o.solid){const [dx,dy,w,h]=o.solid;for(let x=0;x<w;x++)for(let y=0;y<h;y++)out.push({x:o.x+dx+x,y:o.y+dy+y});}for(const n of streetNPCs)out.push({x:n.x,y:n.y});return out;}
 function direction(dx,dy,previous='se'){const p=project({x:dx,y:dy});if(Math.hypot(dx,dy)<.0001)return previous;return p.y>=0?(p.x>=0?'se':'sw'):(p.x>=0?'ne':'nw');}
 function streetPoint(p){return{x:.075+p.x*.85/(width-1),y:.56+p.y*.36/(height-1)};}
 function streetCell(p){return{x:Math.round((p.x-.075)*(width-1)/.85),y:Math.round((p.y-.56)*(height-1)/.36)};}
 function depth(p){return p.x+p.y;}
-return{width,height,start,objects,npcs,project,unproject,blocked,direction,depth,streetPoint,streetCell};
+const supportedLocation='north-village-01';
+function storyStreet(state,facilities){
+ if(state.era!=='fantasy'||state.location!==supportedLocation||state.combat?.status==='playing'||!state.visited?.includes('fantasy:'+supportedLocation))return null;
+ const kinds={inn:'inn',shop:'exchange',guild:'hall',fountain:'water'};
+ const streetObjects=objects.flatMap(object=>{
+  const facility=facilities.find(item=>item.locationId===state.location&&item.type===kinds[object.id]);
+  return facility?[{...object,id:facility.id,name:facility.name,note:facility.note}]:[];
+ });
+ const present=npcs.filter(npc=>state.present.includes(npc.id));
+ const local=(state.locals||[]).filter(npc=>!present.some(person=>person.id===npc.id));
+ const streetNPCs=[...present,...local].slice(0,2).map((npc,index)=>({...npc,x:npcs[index].x,y:npcs[index].y}));
+ return {location:state.location,objects:streetObjects,npcs:streetNPCs};
+}
+return{width,height,start,objects,npcs,project,unproject,blocked,direction,depth,streetPoint,streetCell,storyStreet,supportedLocation};
 });
