@@ -31,3 +31,6 @@ body[data-story-mode=director] .dialogue-wrap{background:linear-gradient(90deg,#
 .story-fighter[data-sd=true]{width:min(192px,30vw)}
 .story-fighter[data-ranged=true][data-pose=attack]{animation:story-ranged-report .32s ease-out}
 @keyframes story-ranged-report{25%{translate:-5px 0}55%{translate:2px 0}}
+
+#story-battle-layers[data-presentation=sighting] .story-monster{right:calc(12% + var(--offset)*24%);bottom:31%;width:clamp(120px,23vw,350px)}
+@media(max-width:700px){#story-battle-layers[data-presentation=sighting] .story-monster{right:calc(8% + var(--offset)*28%);bottom:43%;width:clamp(96px,26vw,210px)}}

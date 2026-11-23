@@ -62,3 +62,19 @@ t('fixed arrival hands off to TangTang and ChatGPT, repairs invalid choices, and
   a.equal(subsequent,2);
  }finally{await fs.rm(dir,{recursive:true,force:true});}
 });
+
+t('only a visible, level-appropriate registered monster gets an illustration in a dialogue panel',()=>{
+ const state={...initial(),era:'fantasy',location:'arrival_meadow',present:[],focus:'taei'};
+ const quote='풀 사이로 슬라임 한 마리가 모습을 드러낸다.';
+ const candidate=(id='slime',speaker='narrator')=>answer(state,{
+  panels:[{speaker,text:quote}],present:speaker==='narrator'?[]:[speaker],facts:[],
+  monsterAppearances:[{id,panel:0,evidence:quote}],
+ });
+ a.deepEqual(validate(candidate(),state,'풀밭을 살핀다').monsterAppearances,[{id:'slime',panel:0,evidence:quote}]);
+ a.throws(()=>validate(candidate('noxvern'),state,'풀밭을 살핀다'),/몬스터/);
+ a.throws(()=>validate(candidate('goblin'),state,'풀밭을 살핀다'),/몬스터 원화/);
+ a.throws(()=>validate(candidate('ten-star-monster'),state,'풀밭을 살핀다'),/몬스터/);
+ a.throws(()=>validate(candidate('slime','yeogyeong'),{...state,present:['yeogyeong']},'슬라임 이야기를 듣는다'),/몬스터 원화/);
+ const fight=answer(state,{scene:'combat',panels:[{speaker:'narrator',text:quote}],facts:[],combat:{...answer(state).combat,importance:'ordinary',monsters:['noxvern']}});
+ a.throws(()=>validate(fight,state,'풀밭을 살핀다'),/등급과 수/);
+});
