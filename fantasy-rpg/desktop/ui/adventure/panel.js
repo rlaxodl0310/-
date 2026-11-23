@@ -11,6 +11,7 @@
       onAbsorb = async () => {},
       disabled = false,
       allowAI = true,
+      showLab = true,
     } = {},
   ) {
     const n = (tag, text, parent = body) => {
@@ -72,7 +73,7 @@
         body,
         !Adventure.association(state),
       );
-    const generatorLab=n("a","탱탱 생성 시험 · 본편과 분리");generatorLab.href="association/generator-lab.html";
+    if(showLab){const generatorLab=n("a","탱탱 생성 시험 · 본편과 분리");generatorLab.href="association/generator-lab.html";}
     const board = n("div", "");
     board.className = "wooden-quest-board";
     const papers = n("div", "", board);

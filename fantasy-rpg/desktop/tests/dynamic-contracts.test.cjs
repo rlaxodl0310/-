@@ -18,3 +18,32 @@ t('local fallback is labeled honestly, varies over ten refreshes and never refil
 t('insufficient budget rejects the whole batch; changed generated objectives fail load validation',()=>{let s=seed();s.adventure.economy.initialTotal-=s.adventure.economy.issuers.association;s.adventure.economy.issuers.association=0;const before=JSON.stringify(s);a.throws(()=>gen(s),/예치/);a.equal(JSON.stringify(s),before);const n=gen(seed());n.adventure.quests[0].target++;a.throws(()=>A.ensure(n),/원본/);});
 t('normal director refresh uses the generator once, restores it from save and auto entry does not reroll before six hours',async()=>{const dir=await fs.mkdtemp(path.join(os.tmpdir(),'tangtang-'));try{const d=new StoryDirector(path.join(dir,'s.json'),{check:async()=>({ready:false})});await d.save({...initial(),era:'fantasy',location:'north-city-01',minutes:0});const req={revision:0,requestId:'tangtang-board-001'};let s=await d.boardRefresh(req);a.equal(s.adventure.generation.serial,1);a.deepEqual(await d.read(),s);a.deepEqual(await d.boardRefresh({...req,revision:s.revision,requestId:'tangtang-board-002'}),s);await a.rejects(d.adventureAction({revision:s.revision,requestId:'tangtang-manual-003',action:{type:'refresh'}}),/6시간/);a.deepEqual(await d.adventureAction({...req,action:{type:'refresh'}}),s);}finally{await fs.rm(dir,{recursive:true,force:true});}});
 t('reunion followup goes through 탱탱 and ChatGPT while preserving the exact completed client identity',async()=>{let s=A.apply(seed('north-city-01'),{type:'refresh'}),q=s.adventure.quests.find(q=>q.type==='escort'),id=q.id;q.personal.contract={variant:'archive',...E.policy.variants.archive};q.deadline=480;s=A.apply(s,{type:'accept',questId:id});s=E.routeProposal(s,{type:'propose-route',questId:id,path:'safe'});s=E.opinion(s,id,{decision:'accept',text:'그 길로 가겠습니다.'});s=E.apply(s,{type:'start',questId:id});for(let i=0;i<3;i++)s=E.apply(s,{type:'advance',questId:id});s=E.apply(s,{type:'handover',questId:id});s=A.apply(s,{type:'submit',questId:id});const contact=s.personalContacts[0];s=E.reunite(s,{type:'reunite',contactId:contact.id});const staged=E.reunite(s,{type:'followup',contactId:contact.id}),before=JSON.stringify(s);let calls=0;const n=await G.followup(s,staged,{check:async()=>({ready:true}),generateStructured:async()=>{calls++;const p=D.local(s).plans.find(p=>p.type==='escort');p.clientLabel=contact.name;p.purpose='지난 접수 이후 새로운 이동 일정이 생겨 동행을 요청했습니다.';return p;}});const next=n.adventure.quests.at(-1);a.equal(calls,1);a.equal(next.personal.client.id,contact.id);a.equal(next.personal.client.name,contact.name);a.equal(next.generated.source,'ai');a(next.personal.exchange.some(x=>x.actor==='ChatGPT'));a.equal(JSON.stringify(s),before);a.notEqual(next.id,id);a.equal(next.status,'open');a.equal(n.adventure.economy.wallet,180);A.ensure(n);});
+
+t('a village hall opens its own jointly generated board and accepted contracts restore from saves',async()=>{
+ const facilities=require('../ui/map/facilities.js');
+ const street=require('../ui/district/model.js');
+ const geography=require('../ui/map/geography.js');
+ const storyData=require('../ui/data.js');
+ const location='north-village-02';
+ const starting={...seed(location),revision:4,visited:['fantasy:'+location]};
+ const hall=location+'-facility-hall';
+ const profile=street.storyStreet(starting,geography.records,facilities.records,storyData);
+ a.deepEqual(profile.objects.find(o=>o.id===hall).services,['quest-board']);
+ a.equal(profile.objects.find(o=>o.id===location+'-facility-water').services.length,0);
+ let visited;
+ const bridge={check:async()=>({ready:true}),generateStructured:async()=>D.local(visited)};
+ const dir=await fs.mkdtemp(path.join(os.tmpdir(),'village-board-'));
+ const director=new StoryDirector(path.join(dir,'story.json'),bridge);
+ try{
+  await director.save(starting);
+  visited=await director.returnFromStreet({revision:4,position:{x:17,y:0},targetId:hall});
+  const generated=await director.boardRefresh({revision:visited.revision,requestId:'village-board-refresh'});
+  a.equal(generated.adventure.generation.boards[location].source,'ai');
+  const q=generated.adventure.quests.find(q=>q.issuerLocation===location&&q.status==='open');
+  const accepted=await director.adventureAction({revision:generated.revision,requestId:'village-board-accept',action:{type:'accept',questId:q.id}});
+  await director.saveSlotAction({revision:accepted.revision,slot:1,action:'save'});
+  const {state}=await director.saveSlotAction({revision:accepted.revision,slot:1,action:'load'});
+  a.equal(state.adventure.quests.find(item=>item.id===q.id).status,'accepted');
+  a.deepEqual(state.streetVisits[location].position,{x:17,y:0});
+ }finally{await fs.rm(dir,{recursive:true,force:true});}
+});

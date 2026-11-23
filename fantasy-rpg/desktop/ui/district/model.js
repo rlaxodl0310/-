@@ -26,7 +26,7 @@ function storyStreet(state,geography,facilities,storyData){
   const index=primarySpots[facility.type];
   const nextIndex=Object.hasOwn(primarySpots,facility.type)?null:extraIndex++;
   const spot=nextIndex===null?objects[index]:extraSpots[nextIndex]||{x:2+(nextIndex-extraSpots.length)*3%16,y:6};
-  return {...spot,id:facility.id,name:facility.name,note:facility.note};
+  return {...spot,id:facility.id,name:facility.name,note:facility.note,services:facility.services};
  });
  const people=new Map();
  for(const id of state.present||[]){

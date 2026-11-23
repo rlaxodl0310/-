@@ -53,9 +53,7 @@
     }),
   });
   function association(state) {
-    return Facilities.records.some(
-      (f) => f.locationId === state.location && f.type === "association",
-    );
+    return Facilities.hasService(state.location,"quest-board");
   }
   function ensure(state) {
     const s = clone(state);
@@ -191,7 +189,7 @@
   }
   function refresh(s) {
     if (!association(s))
-      fail("협회 접수소가 있는 도시/마을에서 게시판을 확인해 주세요.");
+      fail("의뢰 게시판이 있는 도시나 마을에서 확인해 주세요.");
     const a = s.adventure,
       previous = a.refreshes[s.location];
     if (previous !== undefined && s.minutes - previous < policy.refreshMinutes) {
