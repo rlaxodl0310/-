@@ -10,10 +10,28 @@ function note(speaker,text){logs.push({speaker,text});if(logs.length>300)logs.sh
 function start(id){try{if(engine.state.active){toast('현재 장면을 마치거나 새 장면으로 전환해 주세요.');return;}const e=engine.event(id);engine.start(id,{location:e.location,members:[...e.members],viewer:e.viewer});note('장면',e.title);note(actorName(engine.current().speaker),engine.current().text);persist();closePanel();render();}catch(error){toast(error.message);}}
 function advance(choice=null){try{const finished=engine.state.active.id;const n=engine.current();if(n?.choices){const selected=n.choices.find(c=>c.id===choice);if(selected)note('선택',selected.label);}engine.advance(choice);if(engine.current())note(actorName(engine.current().speaker),engine.current().text);else{note('기록','장면을 마쳤습니다.');const next=engine.event(finished).nextEvent;if(next){start(next);return;}}persist();render();}catch(error){toast(error.message);}}
 function render(){document.body.classList.toggle('large-text',large);document.body.classList.toggle('no-motion',!motion);const a=engine.state.active,n=engine.current();$('elapsed').textContent=engine.state.minutes+'분';$('choices').replaceChildren();if(!GeographyUI.mini($('scene-minimap'),engine.state,()=>openPanel('map'))) ExplorationMap.render($('scene-minimap'),engine.state,{compact:true,view:engine.state.currentLocation?.startsWith('earth_')?'local':'world',onOpen:()=>openPanel('map')});
- if(!a){SceneStage.render({background:$('scene-art'),portrait:$('scene-portrait'),location:'earth_subway',characterId:null});$('scene-title').textContent='등굣길의 다음 순간';$('scene-place').textContent='현실 · 지하철';$('speaker').textContent='이야기 기록';$('emotion').textContent='장면 완료';$('line').textContent='현실 도입부를 마쳤습니다. 다음 사건은 이어서 준비 중입니다.\n아직 이세계로 전송되지는 않았습니다.';const b=button('장면 목록 열기',()=>openPanel('chapters'));$('choices').append(b);$('chat-input').disabled=true;$('chat-form').querySelector('button').disabled=true;$('sd').hidden=true;return;}
+ if(!a){renderPrologueEnd();return;}
  const e=engine.event(a.id);$('scene-title').textContent=e.title.split(' · ')[1]||e.title;$('scene-place').textContent=places[e.location]||e.location;$('episode-no').textContent=String(D.events.indexOf(e)+1).padStart(2,'0');const art=$('scene-art');SceneStage.render({background:art,portrait:$('scene-portrait'),location:e.location,characterId:e.owner,emotion:n.emotion,state:engine.state,era:e.era,dialogue:true});LookPacksUI.renderPortrait({element:$('scene-portrait'),characterId:e.owner,era:e.era||'earth',emotion:n.emotion});const last=logs.at(-1),lastIsNPC=last&&last.speaker===actorName(e.owner),shown=lastIsNPC?e.owner:n.speaker;$('speaker').textContent=actorName(shown);$('emotion').textContent=shown==='narrator'?'':D.emotions[n.emotion];$('line').textContent=lastIsNPC?last.text:n.text;$('chat-input').disabled=false;$('chat-form').querySelector('button').disabled=false;
  $('sd').hidden=!sdOpen||n.sd===undefined;if(n.sd!==undefined){$('sd').style.backgroundImage='url("'+D.assets[e.sdAsset||'sd']+'")';$('sd').style.backgroundPosition=(n.sd%3*50)+'% '+Math.floor(n.sd/3)*100+'%';}$('sd-toggle').setAttribute('aria-pressed',String(sdOpen));$('sd-toggle').hidden=n.sd===undefined;
  if(n.choices)for(const c of n.choices)$('choices').append(button(c.label,()=>advance(c.id)));else $('choices').append(button(n.end?'장면 마치기 →':'이야기 계속 →',()=>advance()));if(e.cg){let viewing=false;const cgButton=button('이벤트 컷신 보기',()=>{viewing=!viewing;if(viewing)SceneStage.cutscene(art,$('scene-portrait'),D.assets[e.cg],e.cgPanel);else SceneStage.render({background:art,portrait:$('scene-portrait'),location:e.location,characterId:e.owner,emotion:n.emotion,state:engine.state,era:e.era,dialogue:true});cgButton.textContent=viewing?'기본 장면으로 돌아가기':'이벤트 컷신 보기';});$('choices').append(cgButton);}}
+function renderPrologueEnd(){
+ SceneStage.render({background:$('scene-art'),portrait:$('scene-portrait'),location:'earth_subway',characterId:null});
+ $('scene-title').textContent='현실 도입부 완료';
+ $('scene-place').textContent='현실 · 지하철';
+ $('speaker').textContent='이야기 기록';
+ $('emotion').textContent='';
+ $('line').textContent='준비된 등굣길 장면을 모두 마쳤습니다. 진행을 저장하거나 지금까지의 대화를 다시 볼 수 있습니다.';
+ const choices=$('choices');
+ choices.append(button('진행 저장',()=>openPanel('saves')),button('대화 기록 보기',()=>openPanel('journal')));
+ if(window.desktopAI?.directorState){
+  choices.append(button('별도 AI 이야기 열기',()=>openPanel('storychat')));
+ }
+ $('chat-input').disabled=true;
+ $('chat-form').querySelector('button').disabled=true;
+ $('sd').hidden=true;
+ $('sd-toggle').hidden=true;
+}
+
 function button(text,fn,cls){const b=document.createElement('button');b.textContent=text;b.onclick=fn;if(cls)b.className=cls;return b;}
 function el(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
 function closePanel(){$('panel').hidden=true;$('scrim').hidden=true;returnFocus?.focus();}
@@ -21,12 +39,12 @@ let developerMode=false;
 function openPanel(kind){
  if(kind==='developer'&&!developerMode)kind='settings';if(busy){toast("AI 응답을 기다리는 중입니다. 완료 후 이동해 주세요.");return;}returnFocus=document.activeElement;const body=$('panel-body');$('panel').dataset.mode=kind;body.replaceChildren();const title={developer:'개발자 모드',characterlab:'캐릭터 외형 미리보기',diagnostics:'AI 협업 진단',chapters:'이야기 장면',status:'플레이어 정보',cast:'파티 / 동행',codex:'캐릭터 도감',monsters:'몬스터 도감',journal:'지나온 대화',saves:'저장과 불러오기',settings:'환경 설정',appearance:'평소 일러스트 · 외형팩',mining:'마석 채굴 의뢰',personalEscort:'학자 개인 호위',escort:'상인단 호위 여정',rewards:'파티 경험치·전리품 분배',services:'휴식·장비 수리',shop:'상점·협회 거래',roles:'파티 역할 배치',adventure:'본편 의뢰·소지품',quests:'협회 의뢰 게시판',storychat:'실시간 AI 이야기',world:'알게 된 세계',map:'탐험 지도',maptest:'도시·마을 탐험 테스트'};$('panel-title').textContent=title[kind];if(kind==='characterlab'){CharacterContentUI.open(body);$('panel').hidden=false;$('scrim').hidden=false;$('close-panel').focus();return;}if(kind==='diagnostics'){AIDiagnosticsUI.open(body);$('panel').hidden=false;$('scrim').hidden=false;$('close-panel').focus();return;}if(typeof DirectorUI!=='undefined'&&DirectorUI.panel(kind,body)){$('panel').hidden=false;$('scrim').hidden=false;$('close-panel').focus();return;}
  if(kind==='chapters'){body.append(el('p','플레이어는 김태이입니다. 현실의 등굣길부터 순서대로 진행합니다.','muted'));for(const e of D.events){const done=engine.state.completed.includes(e.id),active=engine.state.active?.id===e.id;const b=button((done?'✓ ':active?'▶ ':'')+e.title+(done?' · 완료':''),()=>{if(active){closePanel();return;}if(engine.state.active){if(!confirm('현재 장면을 중단하고 새 장면으로 전환할까요? 현재까지의 대화는 기록에 남습니다.'))return;engine.abandon();}start(e.id);},'scene-card');b.disabled=done||(e.requiresCompleted||[]).some(id=>!engine.state.completed.includes(id));body.append(b);}body.append(button('처음부터 새로 시작',()=>{if(confirm('현실의 등굣길부터 다시 시작할까요? 수동 저장 슬롯은 유지됩니다.')){engine=new E(D);logs=[];LookPacksUI.setEquipment({});blocked=false;start(D.events[0].id);}}));}
- if(kind==='map')GeographyUI.panel(body,()=>engine.state,{onTest:()=>openPanel('maptest')});
+ if(kind==='map')GeographyUI.panel(body,()=>engine.state,{onTest:developerMode?()=>openPanel('maptest'):null});
  if(kind==='maptest')GeographyUI.testPanel(body);
  if(kind==='developer'){
   const previews=[
    ['전체 캐릭터 도감','codex'],['캐릭터 외형과 동작','characterlab'],['이야기 장면','chapters'],
-   ['채팅 이야기와 전투','storychat'],['도시·마을 탐험','maptest'],['의뢰와 소지품','adventure'],
+   ['별도 AI 이야기','storychat'],['도시·마을 탐험','maptest'],['의뢰와 소지품','adventure'],
    ['협회 의뢰','quests'],['상점','shop'],['휴식·수리','services'],['마석 채굴','mining'],
    ['개인 호위','personalEscort'],['상인단 호위','escort'],['역할 배치','roles'],
    ['파티 보상 분배','rewards'],['외형팩','appearance'],['저장과 불러오기','saves'],
@@ -34,8 +52,19 @@ function openPanel(kind){
   ];
   body.append(el('p','도감의 미발견 인물을 미리 볼 수 있습니다. 이야기·의뢰·저장 메뉴에서 실행하는 작업은 현재 진행에 반영됩니다.','muted'));
   for(const [label,panel] of previews)body.append(button(label,()=>openPanel(panel)));
-  for(const [label,href] of [['턴제 전투 테스트','battle/'],['실시간 전투 테스트','realtime/']]){
-   const link=el('a',label,'outline');link.href=href;body.append(link);
+  body.append(el('h3','플레이 테스트'));
+  body.append(button('마을 거리 · 2D 탐색',()=>{closePanel();DistrictUI.open();}));
+  for(const [label,href,method] of [['턴제 전투 테스트','battle/','openBattle'],['실시간 전투 테스트','realtime/','openRealtime']]){
+   if(window.desktopAI?.[method]){
+    body.append(button(label,async()=>{
+     const result=await window.desktopAI[method]();
+     if(!result.ok)toast(result.error);
+    }));
+   }else{
+    const link=el('a',label,'outline');
+    link.href=href;
+    body.append(link);
+   }
   }
   body.append(button('개발자 모드 끄기',()=>{developerMode=false;openPanel('settings');}));
  }
@@ -82,15 +111,12 @@ try{const raw=localStorage.getItem(KEY);if(raw)apply(JSON.parse(raw));else start
 const unfinished=GameAI.pending();if(unfinished&&unfinished.scene===engine.state.active?.id&&unfinished.node===engine.state.active?.node)$("chat-input").value=unfinished.text;
 GameAI.check();
 
-$('battle-launch').onclick=async()=>{const result=await desktopAI.openBattle();if(!result.ok)toast(result.error);};
 
 function walkBuilding(target){
  const old=document.querySelector('.walk-dialogue');old?.remove();const box=document.createElement('section');box.className='walk-dialogue';box.setAttribute('role','dialog');box.setAttribute('aria-label',target.label+' 상호작용');const name=document.createElement('strong');name.textContent=target.label;const text=document.createElement('p');text.textContent=target.note||'건물 앞에 도착했다. 내부 사건과 실제 이용 기능은 아직 연결되지 않았다.';const back=document.createElement('button');back.textContent='탐색으로 돌아가기';back.onclick=()=>box.remove();box.append(name,text,back);document.body.append(box);back.focus();
 }
 $('walk-launch').onclick=()=>{if(busy){toast('대화 응답을 기다리는 중입니다.');return;}const event=engine.state.active?engine.event(engine.state.active.id):null;const owner=event?.owner;const allowed=owner&&owner!=='taei'&&CharacterOrigins.allowed(owner,{era:event?.era||'earth',location:event?.location||'earth_subway'});WalkUI.open({background:SceneStage.backgrounds[event?.location]||SceneStage.backgrounds.earth_subway,npc:allowed?{id:owner,name:actorName(owner)}:null,label:'현재 장면 · 이동 시제품',onTalk:()=>{$('chat-input').focus();toast('기존 대화 화면으로 돌아왔습니다.');}});};
-$('town-walk-test').onclick=()=>{if(!busy)DistrictUI.open();};
 
-$('realtime-launch').onclick=async()=>{if(busy)return;const result=await desktopAI.openRealtime();if(!result.ok)toast(result.error);};
 
 const quickToolsToggle=$('quick-tools-toggle'),quickTools=$('quick-tools');
 function setQuickTools(open){quickToolsToggle.setAttribute('aria-expanded',String(open));}
