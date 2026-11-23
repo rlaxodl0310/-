@@ -374,6 +374,7 @@
     return s;
   }
   function apply(state, action, { requestId, createCombat } = {}) {
+    if(action.type==='hunt'&&Object.values(state.transports?.trips||{}).some(t=>t.status==='active'&&[t.carrierId,t.targetId].includes('taei')))fail('먼저 부축·운반 관계를 정리해 주세요.');
     if (state.era !== "fantasy") fail("이세계에서 사용할 수 있습니다.");
     if (state.combat?.status === "playing") fail("전투를 먼저 마쳐 주세요.");
     if (state.player.hp <= 0) fail("전투 불능 상태에서는 수행할 수 없습니다.");

@@ -1,7 +1,7 @@
 {
   "name": "fantasy-story-desktop",
   "productName": "Fantasy Story",
-  "version": "0.42.63",
+  "version": "0.42.64",
   "private": true,
   "description": "이세계 기록 · ChatGPT 구독으로 대화하는 데스크톱 비주얼 노벨",
   "main": "electron/main.cjs",
