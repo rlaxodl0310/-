@@ -159,3 +159,10 @@ AI 이야기: 김태이로 말하거나 행동을 입력. NPC 대사/주변 묘�
 `ui/arrival/model.js`는 실제 방문·시설·동행자에서 읽기 전용 안내와 원화 선택을 만들고, `StoryDirector.save`가 이전 본편 위치와 비교해 도착을 기록한다. 슬롯 복원은 `restore:true`로 관측을 건너뛴다. `arrivalDismiss`는 기존 모험 revision/요청 ID 경로로 확인 상태만 저장한다. AI `arrivalContext`는 실제 현재 지역·시설과 실행 없는 보상/회복/합류 금지 규칙을 제공한다. `ArrivalUI`와 `CityPanorama.onFacility`가 기존 거래/휴식/게시판/운항 UI에 연결된다. 기존 실제 마을 거리의 시설 상호작용도 같은 디스패치를 사용한다.
 
 도시36곳 원화, 마을 지형 공통 원화76곳, 원화 미등록 마을41곳을 구분한다.590개 자동 검증과 실제 DirectorUI의 도착 안내·도시 배경·동행 원화·구역 지도→선택 상점·여관·확인 상태 저장·모바일390px를 검증했다. 실제 계정 AI 품질과 Windows 네이티브 실행은 미검증이다.
+
+
+## v0.42.70 출발 준비
+
+`ui/preparation/model.js`는 의뢰·도로망·시간표·실제 파티 자원·소모품·손상 장비·정수 기한을 읽는 공통 견적/확인 항목 모델이다. `electron/preparation-actions.cjs`는 탱탱과 기존 ChatGPT 브리지로 현재 항목 ID만 우선순위 선택하게 한다. `prepSelect/prepReview`는 기존 Director 모험 요청 revision/중복 처리로 저장하며 별도 자원 실행 API를 만들지 않는다. `preparationContext`는 현재 선택 의뢰 자료를 자유 대화에도 전달한다. 자료 fingerprint가 다르면 이전 조언을 재사용하지 않는다.
+
+실제 의뢰서와 이야기 HUD에서 PreparationUI를 열고, 기존 상점/휴식/여정/운항 UI의 실행 후 복귀 버튼을 유지한다. 특수 계약은 기존 수행 패널로 연결한다.599개 자동 검증 및 실제 DirectorUI 의뢰서→준비→로컬 조언→실제 빵 구매→복귀→최신 자원/오래된 조언 표시→해당 목적지 여정,390px를 검증한다. 연결 모델의 검증은 제어된 provider를 사용하며 실제 계정 품질과 Windows 실행은 별도다.

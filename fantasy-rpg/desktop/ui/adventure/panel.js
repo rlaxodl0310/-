@@ -6,6 +6,7 @@
     onAction,
     {
       onTravel = () => {},
+      onPrepare = () => {},
       onCombat = () => {},
       onEscort = () => {},
       onMining = () => {},
@@ -136,6 +137,7 @@
           "남은 기한 · " + Math.max(0, q.deadline - state.minutes) + "분",
           dialog,
         );
+        const prep=n('button','출발 준비 확인',dialog);prep.disabled=disabled;prep.onclick=()=>{dialog.close();dialog.remove();onPrepare(q.id);};
         if (q.observation) n("p", "조사 기록 · " + q.observation, dialog);
         if(q.type==='hunt'&&typeof HuntFieldUI!=='undefined'){const enter=n('button','일러스트 현장 열기',dialog);enter.onclick=()=>{dialog.close();dialog.remove();HuntFieldUI.open(state,q.id,onAction,{onTravel,onCombat});};}
         if (q.status === "open")
