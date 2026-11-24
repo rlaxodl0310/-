@@ -2,7 +2,7 @@ const fs=require('node:fs');(async()=>{const target=await(await fetch('http://12
 
 const H=require('../tests/helpers/companion-talk.cjs'),assert=require('node:assert/strict');const h=await H.ready();try{
 await run(`window.qaState=${JSON.stringify(h.s)};window.qaRequest=null;window.desktopAI={directorState:async()=>({ok:true,data:qaState})};`);
-for(const[api,method]of Object.entries({directorAdventure:'adventureAction',directorSend:'send'}))await run(`desktopAI[${JSON.stringify(api)}]=async req=>{qaRequest={method:${JSON.stringify(method)},req};return await new Promise(resolve=>window.qaResolve=resolve);};`);
+for(const[api,method]of Object.entries({directorAdventure:'adventureAction',directorSend:'send',directorCommand:'command'}))await run(`desktopAI[${JSON.stringify(api)}]=async req=>{qaRequest={method:${JSON.stringify(method)},req};return await new Promise(resolve=>window.qaResolve=resolve);};`);
 await run('DirectorUI.init()');await delay(120);
 async function processAction(){const {method,req}=await run('qaRequest');h.s=await h.d[method](req);await run(`qaState=${JSON.stringify(h.s)};qaResolve({ok:true,data:qaState});`);await delay(90);}
 async function press(text){await run(`[...document.querySelectorAll('#panel-body button')].find(b=>!b.disabled&&b.textContent===${JSON.stringify(text)}).click()`);}
@@ -38,5 +38,13 @@ assert.equal(h.s.turnReview.at(-1).changes.minutes.after,beforeWithdrawal+5);
 assert(await run("document.getElementById('turn-summary').textContent.includes('시간')"));
 
 assert(await run(`![...document.querySelectorAll('#choices button')].some(b=>b.textContent.startsWith('조심스럽게 접근'))`));
-assert.equal(errors.length,0);console.log(JSON.stringify({passed:true,provider:'controlled fixture, not live ChatGPT account',checks:['main NPC dialogue','target request survives UI routing','consent without observation','disabled observation without eligible clues','explicit ten minute observation from main screen','companion fatigue rounded for display','refusal without action','mobile390 no panel overflow','compound input reaches the story director unchanged','main-story withdrawal produces a turn summary','no JavaScript exceptions'],exchanges:h.s.companions.exchanges.length,observations:h.q().tracking.observations,minutes:h.s.minutes}));
+assert(await run("document.querySelector('#chat-form').firstElementChild.id==='story-chat-mode'"));
+await run("document.querySelector('#story-chat-mode button:last-child').click();document.getElementById('chat-input').value='지금 어디야?';document.getElementById('chat-form').requestSubmit()");
+assert.deepEqual(await run('({method:qaRequest.method,text:qaRequest.req.text})'),{method:'command',text:'/질문 지금 어디야?'});
+await run("qaResolve({ok:true,data:{text:'검수용 직접 답변'}})");
+await delay(90);
+assert(await run("document.getElementById('story-command-result').textContent==='검수용 직접 답변'"));
+assert(await run("document.querySelector('#story-chat-mode button:last-child').getAttribute('aria-pressed')==='true'"));
+await run("document.querySelector('#story-chat-mode button:first-child').click()");
+assert.equal(errors.length,0);console.log(JSON.stringify({passed:true,provider:'controlled fixture, not live ChatGPT account',checks:['main NPC dialogue','target request survives UI routing','consent without observation','disabled observation without eligible clues','explicit ten minute observation from main screen','companion fatigue rounded for display','refusal without action','mobile390 no panel overflow','compound input reaches the story director unchanged','main-story withdrawal produces a turn summary','chat modes route story and direct input separately','no JavaScript exceptions'],exchanges:h.s.companions.exchanges.length,observations:h.q().tracking.observations,minutes:h.s.minutes}));
 }finally{await h.close();}await call('Page.close');ws.close();})().catch(e=>{console.error(e);process.exit(1);});

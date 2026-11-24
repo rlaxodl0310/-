@@ -33,7 +33,7 @@ function render(){if(!state||!enabled)return;let companionHud=$('companion-hud')
   }else delete layer.dataset.presentation;
  }else delete layer.dataset.presentation;
  if(state.era==='fantasy'&&!combat&&!PassageHost.onboard(state)){const art=ArrivalModel.art(state);if(art){background.style.backgroundImage='url("'+art.src+'")';background.style.backgroundSize=art.size;background.style.backgroundPosition=art.position;}else if(GameGeography.records.find(p=>p.id===state.location)?.kind==='village'){background.style.backgroundImage='linear-gradient(145deg,#1e3027,#3a4433,#192820)';background.style.backgroundSize='cover';}else if(state.location!=='arrival_meadow'){background.style.backgroundImage='url("assets/combat/locations.png")';background.style.backgroundSize='200% 200%';background.style.backgroundPosition='0% 0%';}}
- renderTurnContext();$('elapsed').textContent=(state.minutes||0)+'분';$('scene-era').textContent=state.era==='fantasy'?'이세계':'현실';$('episode-no').textContent='LIVE · '+String(state.revision).padStart(2,'0');$('scene-title').textContent=combat?(combat.mode==='realtime'?'중요한 대치':'엇갈리는 공방'):'이어지는 이야기';$('scene-place').textContent=state.era==='earth'?({subway:'현실 · 지하철',platform:'현실 · 승강장',station:'현실 · 역 대합실'})[state.location]:GameGeography.records.find(x=>x.id===state.location)?.name||(state.location==='arrival_meadow'?'이세계 · 낯선 풀밭':state.location);if(PassageHost.onboard(state)){const ride=PassageHost.onboard(state);$('scene-title').textContent=ride.phase==='incident'?'운항 조정 안내':'운항 중';$('scene-place').textContent=ride.name+' · '+ride.progress+'/'+ride.duration+'분';background.style.backgroundImage=ride.mode==='ship'?'linear-gradient(150deg,#122c39,#264d56,#182c32)':ride.mode==='airship'?'linear-gradient(150deg,#202a41,#414767,#243743)':'linear-gradient(150deg,#30271e,#4d4937,#202d26)';background.style.backgroundSize='cover';}$('save-state').textContent=working?'상황과 기억을 확인하는 중…':'이야기 자동 저장 · '+state.revision+'번째 대화';$('chat-input').disabled=working||combat?.mode==='realtime'&&combat.status==='playing';$('chat-input').maxLength=1000;document.querySelector('#chat-form button').disabled=working;$('sd').hidden=true;$('scene-minimap').hidden=true;const footer=document.querySelector('main>footer');footer.querySelector('.footer-trait').textContent=combat?'HP '+state.player.hp+'/'+state.player.max:'실시간 생성 이야기';footer.children[2].textContent=$('scene-place').textContent;}
+ renderTurnContext();$('elapsed').textContent=(state.minutes||0)+'분';$('scene-era').textContent=state.era==='fantasy'?'이세계':'현실';$('episode-no').textContent='LIVE · '+String(state.revision).padStart(2,'0');$('scene-title').textContent=combat?(combat.mode==='realtime'?'중요한 대치':'엇갈리는 공방'):'이어지는 이야기';$('scene-place').textContent=state.era==='earth'?({subway:'현실 · 지하철',platform:'현실 · 승강장',station:'현실 · 역 대합실'})[state.location]:GameGeography.records.find(x=>x.id===state.location)?.name||(state.location==='arrival_meadow'?'이세계 · 낯선 풀밭':state.location);if(PassageHost.onboard(state)){const ride=PassageHost.onboard(state);$('scene-title').textContent=ride.phase==='incident'?'운항 조정 안내':'운항 중';$('scene-place').textContent=ride.name+' · '+ride.progress+'/'+ride.duration+'분';background.style.backgroundImage=ride.mode==='ship'?'linear-gradient(150deg,#122c39,#264d56,#182c32)':ride.mode==='airship'?'linear-gradient(150deg,#202a41,#414767,#243743)':'linear-gradient(150deg,#30271e,#4d4937,#202d26)';background.style.backgroundSize='cover';}$('save-state').textContent=working?'상황과 기억을 확인하는 중…':'이야기 자동 저장 · '+state.revision+'번째 대화';$('chat-input').disabled=working||combat?.mode==='realtime'&&combat.status==='playing';$('chat-input').maxLength=1000;document.querySelector('#chat-form button[type=submit]').disabled=working;showChatMode();$('sd').hidden=true;$('scene-minimap').hidden=true;const footer=document.querySelector('main>footer');footer.querySelector('.footer-trait').textContent=combat?'HP '+state.player.hp+'/'+state.player.max:'실시간 생성 이야기';footer.children[2].textContent=$('scene-place').textContent;}
 function skillFx(){const r=state?.turns.at(-1)?.resolution,parent=$('story-battle-layers')?.hidden?$('scene-art'):$('story-battle-layers');if(!r?.visual||!parent)return;const canvas=document.createElement('canvas');canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none';canvas.width=Math.max(1,parent.clientWidth);canvas.height=Math.max(1,parent.clientHeight);parent.append(canvas);const ctx=canvas.getContext('2d'),start=performance.now(),reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;function frame(now){if(!canvas.isConnected)return;const age=(now-start)/1000;ctx.clearRect(0,0,canvas.width,canvas.height);SkillEffects.draw(ctx,{x:canvas.width*.63,y:canvas.height*.52,face:{x:1,y:0},visual:r.visual},p=>p,42,age,reduced);if(age<.55)requestAnimationFrame(frame);else canvas.remove();}requestAnimationFrame(frame);}
 function stopReplay(){
   for(const timer of replayTimers)clearTimeout(timer);
@@ -63,8 +63,52 @@ function playResolution(){
   };
   show(0);
 }
+let directChat=false;
+function showChatMode(){
+ let modes=$('story-chat-mode');
+ if(!modes){
+  modes=document.createElement('div');
+  modes.id='story-chat-mode';
+  modes.setAttribute('role','group');
+  modes.setAttribute('aria-label','채팅 종류');
+  for(const [direct,label] of [[false,'상황 진행'],[true,'ChatGPT에게 직접']]){
+   const button=document.createElement('button');
+   button.type='button';
+   button.textContent=label;
+   button.onclick=()=>{directChat=direct;showChatMode();$('chat-input').focus();};
+   modes.append(button);
+  }
+  $('chat-form').prepend(modes);
+ }
+ [...modes.children].forEach((button,index)=>{
+  button.setAttribute('aria-pressed',String(Boolean(index)===directChat));
+  button.disabled=working;
+ });
+ $('chat-input').placeholder=directChat?'ChatGPT에게 직접 질문 · /도움말':'게임 속 대화나 행동 · /도움말';
+}
+async function sendCommand(text){
+ stopReplay();
+ working=true;
+ render();
+ let result=$('story-command-result');
+ if(!result){
+  result=document.createElement('p');
+  result.id='story-command-result';
+  result.setAttribute('role','status');
+  $('chat-form').after(result);
+ }
+ try{
+  const reply=await call('directorCommand',{text,revision:state.revision});
+  if(reply.state)activate(reply.state);
+  result.textContent=reply.text;
+  $('chat-input').value='';
+ }catch(e){result.textContent=e.message;}
+ finally{working=false;render();$('chat-input').focus();}
+}
 async function send(text){
   if(working||!text?.trim())return;
+  if(text.trimStart().startsWith('/'))return sendCommand(text.trim());
+  if($('story-command-result'))$('story-command-result').textContent='';
   if(companionTarget?.kind==='observe'){
     const {reason}=CompanionTalk.capability(state,companionTarget);
     if(reason){toast(reason);return;}
@@ -91,7 +135,11 @@ async function send(text){
 async function launch(){if(working)return;working=true;try{await call('directorLaunch',{revision:state.revision});}catch(e){toast(e.message);}finally{working=false;}}
 function activate(next){
  companionTarget=null;pending=null;state=next;panelIndex=0;
- $('chat-form').onsubmit=e=>{e.preventDefault();send($('chat-input').value.trim());};
+ $('chat-form').onsubmit=e=>{
+  e.preventDefault();
+  const text=$('chat-input').value.trim();
+  if(text)send(directChat&&!text.startsWith('/')?'/질문 '+text:text);
+ };
  render();
 }
 async function enterMeadow(prologue){

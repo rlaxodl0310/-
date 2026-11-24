@@ -43,6 +43,7 @@ function register(){for(const [channel,handler]of Object.entries({
  'director:streetReturn':r=>director.returnFromStreet(r),
  'director:enterMeadow':r=>director.enterMeadow(r),
  'director:send':r=>director.send(r),
+ 'director:command':r=>director.command(r),
  'director:boardRefresh':r=>{if(bridge.busy)throw Error('AI 응답을 먼저 마쳐 주세요.');return director.boardRefresh(r);},
  'director:transportView':()=>director.transportView(),
  'director:transport':r=>{if(bridge.busy)throw Error('AI 응답을 먼저 마쳐 주세요.');return director.transportAction(r);},

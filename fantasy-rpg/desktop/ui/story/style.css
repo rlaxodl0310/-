@@ -34,3 +34,9 @@ body[data-story-mode=director] .dialogue-wrap{background:linear-gradient(90deg,#
 
 #story-battle-layers[data-presentation=sighting] .story-monster{right:calc(12% + var(--offset)*24%);bottom:31%;width:clamp(120px,23vw,350px)}
 @media(max-width:700px){#story-battle-layers[data-presentation=sighting] .story-monster{right:calc(8% + var(--offset)*28%);bottom:43%;width:clamp(96px,26vw,210px)}}
+
+#story-chat-mode{display:flex;gap:2px;flex-shrink:0}
+#chat-form #story-chat-mode button{width:auto;height:auto;min-height:34px;padding:4px 7px;border:1px solid #ced6bd40;background:#182319;color:var(--paper);font-size:.72rem;line-height:1.2}
+#chat-form #story-chat-mode button[aria-pressed="true"]{background:#bcc8a8;color:#233023}
+#story-command-result{margin:6px 0;color:var(--paper);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.84rem}
+@media(max-width:560px){#story-chat-mode{flex-direction:column}#chat-form #story-chat-mode button{min-height:24px;padding:3px 5px}}
