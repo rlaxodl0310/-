@@ -5,4 +5,19 @@ function observeMany(state,events){const s=structuredClone(state||empty());for(c
 function observe(state,event){return observeMany(state,[event]);}
 function tell(state,{id,eventId,from,to,contact,allowForward=false,explicit=false,policy={}}){if(![id,eventId,from,to].every(safe)||typeof allowForward!=='boolean'||typeof explicit!=='boolean')throw Error('정보 전달 식별자나 정책이 잘못되었습니다.');const s=structuredClone(state||empty()),signature=JSON.stringify({eventId,from,to,contact,allowForward,explicit,policy});if(s.receipts[id]){if(s.receipts[id].signature!==signature)throw Error('같은 정보 전달 ID의 내용이 다릅니다.');return s;}if(typeof id!=='string'||!id||from===to||!contact||!contact.id||!Number.isFinite(contact.minutes)||!Array.isArray(contact.participants)||!contact.participants.includes(from)||!contact.participants.includes(to))throw Error('실제 접촉 경로가 필요합니다.');const knowledge=s.actors[from]?.[eventId];if(!knowledge)throw Error('전달자가 모르는 사건입니다.');if(knowledge.trail.includes(to))throw Error('순환 소문은 새로운 근거가 아닙니다.');const caution=Number.isFinite(policy.caution)?policy.caution:.5,stress=Number.isFinite(policy.stress)?policy.stress:0,blocked=!explicit&&(!knowledge.allowForward||caution>=.8||(Number.isFinite(policy.trust)&&policy.trust<.2));if(blocked){s.receipts[id]={signature,status:'withheld',eventId,from,to,contact:structuredClone(contact)};return s;}const received={eventId,kind:'heard',from,confidence:Math.max(.1,Math.min(.85,knowledge.confidence*(stress>=.75?.5:.8))),trail:[...knowledge.trail,to],receiptId:id,allowForward};s.actors[to]??={};if(s.actors[to][eventId]?.kind!=='observed'&&(!s.actors[to][eventId]||s.actors[to][eventId].confidence<received.confidence))s.actors[to][eventId]=received;s.receipts[id]={signature,status:'shared',eventId,from,to,contact:structuredClone(contact),confidence:received.confidence,reaction:received.confidence<.5?'verify':'consider'};return s;}
 function known(state,actorId,eventId){return state?.actors?.[actorId]?.[eventId]||null;}
-module.exports={empty,observeMany,observe,tell,known};
+function provenance(world,actorId,event){
+ if(!event||!safe(event.id)||!safe(actorId))return null;
+ if((event.witnesses||['taei']).includes(actorId))
+  return {eventId:event.id,kind:'observed',from:null,confidence:1};
+ const entry=known(world.socialInformation,actorId,event.id);
+ return entry?.kind==='heard'?{...entry}:null;
+}
+function facts(world,actorId,kind,limit){
+ const rows=[];
+ for(let i=(world.ledger||[]).length-1;i>=0&&rows.length<limit;i--){
+  const event=world.ledger[i],record=provenance(world,actorId,event);
+  if(record?.kind===kind)rows.push({...record,text:event.text});
+ }
+ return rows.reverse();
+}
+module.exports={empty,observeMany,observe,tell,known,provenance,facts};

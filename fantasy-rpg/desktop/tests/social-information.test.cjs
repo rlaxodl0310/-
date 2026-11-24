@@ -10,3 +10,41 @@ t('generic information engine rejects unsafe identifiers and non-boolean forward
 t('host-provided low trust can withhold an otherwise forwardable rumor',()=>{let d=E.observe(null,{eventId:'event-1',witnesses:['a']});d=E.tell(d,{id:'first',eventId:'event-1',from:'a',to:'b',contact,explicit:true,allowForward:true});d=E.tell(d,{id:'second',eventId:'event-1',from:'b',to:'c',contact,policy:{trust:.1}});a.equal(d.receipts.second.status,'withheld');a.equal(d.actors.c,undefined);});
 
 t('narrator rules explicitly distinguish verified hearsay from direct observation',()=>{const {RULES}=require('../electron/story-director.cjs');a(RULES.includes('socialInformationContext'));a(RULES.includes('전언을 직접 목격이나 확정 사실처럼 말하지 않는다'));});
+
+t('encounter outcomes and observations use the same witnessed and reported knowledge rules',async()=>{
+ const dir=await fs.mkdtemp(path.join(os.tmpdir(),'shared-knowledge-'));
+ try{
+  const d=new StoryDirector(path.join(dir,'story.json'),{});
+  let state=await d.save({...initial(),era:'fantasy',location:'north-village-01',party:['yeogyeong']});
+  const listener=state.npcLife.actors[0].id;
+  state=await d.npcMeet({revision:state.revision,id:listener});
+  state.combat=require('../ui/story/combat.js').createCombat(['goblin'],'chat','검수');
+  await d.save(state);
+  const action=require('../electron/story-actions.cjs');
+  const after={...state,revision:state.revision+1,combat:{...state.combat,status:'escaped'}};
+  after.ledger.push(...action.events(after,{observations:[{
+   id:'clue-knowledge',location:state.location,confirmed:'발소리를 확인했다.',uncertain:'정확한 방향은 미확인.',
+  }]}));
+  await d.save(after);
+  state=await d.read();
+  const events=state.ledger.filter(e=>['engine-observation','engine-encounter-outcome'].includes(e.source));
+  a.equal(events.length,2);
+  a.equal(E.provenance(state,'yeogyeong',events.find(e=>e.source==='engine-encounter-outcome')).kind,'observed');
+  state=await d.npcMeet({revision:state.revision,id:listener});
+  await d.saveSlotAction({action:'save',slot:1,revision:state.revision});
+  for(const event of events){
+   a.equal(E.provenance(state,listener,event),null);
+   state=await d.npcTell({revision:state.revision,requestId:'share-'+event.id,to:listener,eventId:event.id});
+   const source=S.context(state).actors.find(actor=>actor.id===listener).heard.find(row=>row.eventId===event.id);
+   a.equal(source.kind,'heard');
+   a.equal(source.from,'taei');
+   const frame=Mind.begin(state,'그 일을 기억해요?');
+   for(const [quote,valid] of [['태이에게 전해 들었어요.',true],['내 눈으로 보았어요.',false]]){
+    const reply={panels:[{speaker:listener,text:quote}],knowledgeClaims:[{actorId:listener,eventId:event.id,quote}]};
+    a.equal(Mind.review(reply,state,frame,'그 일을 기억해요?').errors.length===0,valid);
+   }
+  }
+  const restored=(await d.saveSlotAction({action:'load',slot:1,revision:state.revision})).state;
+  a.deepEqual(S.context(restored).actors.find(actor=>actor.id===listener).heard,[]);
+ }finally{await fs.rm(dir,{recursive:true,force:true});}
+});

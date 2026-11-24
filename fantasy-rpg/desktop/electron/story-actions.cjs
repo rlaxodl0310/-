@@ -33,7 +33,14 @@ function resolve(state,plan,frame){if(plan.some(p=>!['observe','inspect','reques
  Observations.capture(state,next,key,resolution);
  return{...next,resolution};}
 function register(state,candidate){const world=clone(state.actionWorld||{locations:{},actors:{}}),key=sceneKey(state);world.locations??={};world.actors??={};world.locations[key]??={objects:[]};for(const o of candidate.sceneObjects||[])if(!world.locations[key].objects.some(old=>old.id===o.id))world.locations[key].objects.push({...o,observedTurn:state.revision});return world;}
-function events(state,resolution){return(resolution?.effects||[]).map((effect,i)=>{const o=objects(state).find(o=>o.id===effect.objectId),label={toppled:'넘어진 상태',open:'열린 상태',closed:'닫힌 상태'}[effect.condition]||'위치가 바뀐 상태';return{id:'action-'+state.revision+'-'+i,turn:state.revision,text:(o?.name||effect.objectId)+'는 '+label+'가 되었다.',evidence:'행동 판정 결과',source:'engine-action',subject:effect.objectId,predicate:effect.condition?'condition':'observation',value:effect.condition||'moved',witnesses:['taei',...state.present]};});}
+function events(state,resolution){const effects=(resolution?.effects||[]).map((effect,i)=>{const o=objects(state).find(o=>o.id===effect.objectId),label={toppled:'넘어진 상태',open:'열린 상태',closed:'닫힌 상태'}[effect.condition]||'위치가 바뀐 상태';return{id:'action-'+state.revision+'-'+i,turn:state.revision,text:(o?.name||effect.objectId)+'는 '+label+'가 되었다.',evidence:'행동 판정 결과',source:'engine-action',subject:effect.objectId,predicate:effect.condition?'condition':'observation',value:effect.condition||'moved',witnesses:['taei',...state.present]};});
+ const observations=(resolution?.observations||[]).map(row=>({
+  id:row.id,turn:state.revision,at:state.minutes,location:row.location,
+  text:row.confirmed+' '+row.uncertain,source:'engine-observation',
+  evidence:'플레이어 관찰 판정',witnesses:['taei'],
+ }));
+ return [...effects,...observations];
+}
 function reference(state,input){
  const result=Observations.resolveReference(state,sceneKey(state),Input.actionClauses(input),objects(state));
  if(!result?.candidates)return result;

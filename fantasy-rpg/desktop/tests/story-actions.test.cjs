@@ -88,6 +88,9 @@ t('observed clues reach the next chat context and a restored slot removes them i
    const found=await d.send({text:'탁자 쪽으로 이동한다. 귀를 기울인다.',requestId:'observation-first',revision:0});
    const [clue]=found.turns.at(-1).resolution.observations;
    a.equal(clue.location,location);
+   const event=found.ledger.find(e=>e.id===clue.id);
+   a.equal(event.source,'engine-observation');
+   a.deepEqual(event.witnesses,['taei']);
    a.equal(clue.confirmed,found.turns.at(-1).resolution.enemyResponse);
    a.match(clue.uncertain,/정확한 방향/);
    a.deepEqual(found.turnReview.at(-1).observations,[clue]);
