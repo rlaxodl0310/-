@@ -486,8 +486,9 @@ records.push({
   lookLabels:{cutscene:'활강막을 펼치기 · 컷신'},
   motion:{name:'가볍게 뛰어 활강막 펼치기',lean:-2.6,step:5.8,turn:6.75,side:12.25,tempo:1.11},
   looks:{
-    default:crop('milia-standing.webp',720,1080,22,157,676,765),
-    rear:crop('milia-rear.webp',720,1080,23,157,675,765),
+    default:fullImage('milia-standing.webp',960,1080),
+    rear:fullImage('milia-rear.webp',960,1080),
+    casual:fullImage('milia-casual.webp',960,1080),
     help:fullImage('milia-talk.webp',720,1080),
     reaction:fullImage('milia-reaction.webp',720,1080),
     cutscene:fullImage('milia-cutscene.webp',720,1080),
@@ -499,7 +500,7 @@ records.push({
  id:'reginleif',name:'레긴레이프',age:null,species:'인간족',origin:'fantasy',requiresStoryIntroduction:true,
  lookLabels:{cast:'맨손 마법 시전',cutscene:'맨손 마법 시전 · 컷신'},unknownName:'청록빛 긴 머리의 인간족',heightCm:167,weightKg:52,preferredWeapons:[],roles:['mage'],combatStyle:'magic',trait:null,
  persona:'인간족 맨손 마법 메이지 레긴레이프. 167cm, 52kg. 나이는 미정. 예의 바르고 눈치가 빠르며 약자를 함부로 대하는 사람에게는 웃는 얼굴로도 단호하게 선을 긋는다. 검은 머리와 청록색 안쪽 긴 머리, 연두 눈. 토끼 귀·날개·앞치마·머리띠·어깨 레이스·쟁반 없음. 주름 없는 검정 타이트한 일자 치마. 전용 속성·스킬·정수·과거·첫 만남은 미정. 현실 등장·자동 합류·이름 선공개·전이자 고유 특성 부여 없음.',
- looks:{default:crop('reginleif-looks.webp',1024,1536,123,0,271,512),rear:crop('reginleif-looks.webp',1024,1536,653,0,243,510),help:crop('reginleif-looks.webp',1024,1536,123,512,270,512),cast:crop('reginleif-looks.webp',1024,1536,545,512,424,512),attack:crop('reginleif-looks.webp',1024,1536,545,512,424,512),cutscene:crop('reginleif-looks.webp',1024,1536,545,512,424,512)},
+ looks:{default:crop('reginleif-standing.webp',720,1080,75,18,570,1044),rear:crop('reginleif-looks.webp',1024,1536,653,0,243,510),help:crop('reginleif-looks.webp',1024,1536,123,512,270,512),cast:crop('reginleif-looks.webp',1024,1536,545,512,424,512),attack:crop('reginleif-looks.webp',1024,1536,545,512,424,512),cutscene:crop('reginleif-looks.webp',1024,1536,545,512,424,512)},
  portraits:{default:crop('reginleif-looks.webp',1024,1536,0,1024,512,512)},
  sd:{default:crop('reginleif-looks.webp',1024,1536,512,1024,512,512)},
  pixel:{src:'assets/reginleif-combat.webp',battleSrc:'../assets/reginleif-combat.webp',frames:Array.from({length:24},(_,i)=>[i%4*256,Math.floor(i/4)*256,256,256]),imageWidth:1024,imageHeight:1536},
@@ -530,7 +531,6 @@ for(const [id,poses] of Object.entries({
   lir:['casual'],
   hebnia:['casual'],
   yunseol:['casual'],
-  milia:['casual'],
   reginleif:['casual'],
   horin:['casual'],
 })){
@@ -541,6 +541,7 @@ for(const [id,height] of [['cheona',464],['fafnir',464],['fenri',465]]){
   records.find(record=>record.id===id).looks.cutscene=fullImage(id+'-cutscene.webp',830,height);
 }
 records.find(record=>record.id==='fenri').looks.help=fullImage('fenri-talk.webp',830,465);
+records.find(record=>record.id==='cheona').looks['컷신 · 팔짱']=fullImage('cheona-folded-arms-cutscene.webp',1672,941);
 for(const id of ['janghwa','selsi','rachel','spike','jave','espada']){
   records.find(record=>record.id===id).looks.cutscene=fullImage(id+'-cutscene.webp',506,506);
 }
@@ -562,7 +563,7 @@ const transfers={
     looks:{'지구 · 등교 복장':fullImage('dogyeom-earth.webp',720,1080),'지구 · 후면 전신':fullImage('dogyeom-earth-rear.webp',720,1080)},
     cutscenes:[['손목 보호대 점검','event-dogyeom-solo.png',1672,941]],expressions:{'이세계':'dogyeom-expressions.png'},solo:[1,4]},
   yeogyeong:{age:18,trait:'유예',bio:'태이와 같은 반. 간호학과 진학을 준비했다. 유예로 한 부위의 부상 상태를 잠시 고정한다.',
-    looks:{'지구 · 교복':fullImage('yeogyeong-standing.png',1011,1556),'지구 · 후면 전신':fullImage('yeogyeong-earth-rear.webp',720,1080),'이세계 · 여행복':crop('yeogyeong-fantasy-outfit.png',1536,1024,938,0,598,1024),'이세계 · 후면 전신':fullImage('yeogyeong-fantasy-rear.webp',720,1080)},
+    looks:{'지구 · 교복':fullImage('yeogyeong-standing.png',1011,1556),'지구 · 후면 전신':fullImage('yeogyeong-earth-rear.webp',720,1080),'이세계 · 여행복':fullImage('yeogyeong-fantasy-standing.webp',720,1080),'이세계 · 후면 전신':fullImage('yeogyeong-fantasy-rear.webp',720,1080)},
     cutscenes:[['교실','event-yeogyeong-classroom.png',1672,941],['복도','event-yeogyeong-corridor.png',1536,1024],['치유 연습','event-yeogyeong-healing.png',1672,941],['성문','event-yeogyeong-gate.png',1536,1024]],
     expressions:{'지구':'yeogyeong-expressions.png','이세계':'yeogyeong-fantasy-expressions.png'},sd:{'지구':'sd-yeogyeong.png','이세계':'sd-yeogyeong-fantasy.png'}},
   seoha:{dialoguePortrait:fullImage('dialogue/seoha.webp',720,540),age:18,trait:'경계',bio:'차분한 표정 뒤로 엉뚱한 생각을 자주 한다. 경계를 넘는 대상의 움직임을 한 차례 끊는다.',
@@ -573,7 +574,7 @@ const transfers={
     cutscenes:[['지구','yui-cutscenes.png',1774,887,2,0],['이세계','yui-cutscenes.png',1774,887,2,1]],
     expressions:{'지구':'yui-expressions.png'},sd:{'상호작용':'sd-yui.png'}},
   woojin:{age:null,trait:null,bio:'지구의 물류 현장 직원으로 제작한 전이자 시안.',
-    looks:{'지구 · 작업복':crop('woojin-design.png',1536,1024,0,0,470,1024),'지구 · 후면 전신':fullImage('woojin-earth-rear.webp',720,1080),'이세계 · 여행복':crop('woojin-design.png',1536,1024,1100,0,436,1024),'이세계 · 후면 전신':fullImage('woojin-fantasy-rear.webp',720,1080)},
+    looks:{'지구 · 작업복':fullImage('woojin-earth-standing.webp',720,1080),'지구 · 후면 전신':fullImage('woojin-earth-rear.webp',720,1080),'이세계 · 여행복':fullImage('woojin-fantasy-standing.webp',720,1080),'이세계 · 후면 전신':fullImage('woojin-fantasy-rear.webp',720,1080)},
     cutscenes:[['매듭 점검','woojin-cutscenes.png',1774,887,2,0],['여관 앞 휴식','woojin-cutscenes.png',1774,887,2,1]],
     expressions:{'이세계':'woojin-expressions.png'},sd:{'상호작용':'sd-woojin.png'}},
   'dogyeom-childhood-friend':{age:null,trait:'보관',bio:'백도겸의 소꿉친구. 보관은 성장하며 개인 아공간으로 발전한다.',

@@ -7,11 +7,15 @@ const transfers={
  "yui":{src:'assets/yui-standing.png',frame:[187,14,480,1747]},
  "dogyeom-childhood-friend":{src:'assets/childhood-friend-standing.png',frame:[298,39,433,1548]},
 };
-function standing(id){
+function standing(id,era){
  if(!id)return null;
+ const wardrobe=root.CharacterContent.transfers[id]?.looks;
+ const fantasy=wardrobe?.['이세계 · 여행복'];
+ const look=(era==='fantasy'&&fantasy)||wardrobe?.['지구 · 작업복'];
+ if(look)return {src:look.src,frame:[look.x,look.y,look.w,look.h]};
  if(Object.hasOwn(transfers,id))return transfers[id];
- const look=root.CharacterContent.get(id)?.looks.default;
- return look?{src:look.src,frame:[look.x,look.y,look.w,look.h]}:null;
+ const native=root.CharacterContent.get(id)?.looks.default;
+ return native?{src:native.src,frame:[native.x,native.y,native.w,native.h]}:null;
 }
 root.WalkCharacter={
  standing,

@@ -6,7 +6,7 @@ function open({background,crop=[0,0,1,1],era,npc,onTalk,onBuilding,buildings=[],
  const canvas=document.createElement('canvas');canvas.width=1000;canvas.height=600;canvas.setAttribute('aria-label','마우스로 목적지나 상호작용 대상을 선택하는 탐색 지도');const ctx=canvas.getContext('2d');const status=document.createElement('p');status.setAttribute('role','status');root.append(bar,canvas,status);document.body.append(root);
  const targets=[...(npc?[{id:npc.id,label:npc.name,type:'npc',x:12,y:7}]:[]),...buildings.map((b,i)=>({...b,type:'building',x:3+i*3,y:3}))];const blocked=[];for(const t of targets)if(t.type==='building')for(let x=t.x-1;x<=t.x+1;x++)for(let y=t.y-2;y<t.y;y++)blocked.push({x,y});const map=new WalkMap.Map({blocked});let pending=null,closed=false,last=0,raf=0,keys=new Set();const im=new Image();im.src=background||'';const art=r.WalkCharacter[era]||r.WalkCharacter.earth,playerImage=new Image();playerImage.src=art.src;
  const camera=new r.WalkCamera.Camera(),walker=new r.WalkCamera.Walker();
- const cast=r.WalkCharacter.standing(npc?.id),npcImage=cast&&new Image();
+ const cast=r.WalkCharacter.standing(npc?.id,era),npcImage=cast&&new Image();
  if(npcImage)npcImage.src=cast.src;
  const project=p=>({x:.06+p.x*.88/(map.width-1),y:.48+p.y*.46/(map.height-1)});
  const screen=p=>camera.project(project(p));

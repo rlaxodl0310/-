@@ -1,6 +1,6 @@
 const SceneStage=(()=>{
  const backgrounds={arrival_meadow:'assets/bg-arrival.webp',earth_subway:'assets/bg-subway.png',subway:'assets/bg-subway.png',earth_platform:'assets/bg-platform.png',platform:'assets/bg-platform.png',earth_station:'assets/bg-station.png',station:'assets/bg-station.png'};
- const characters={nea:'assets/nea-atlas.png','nea-travel':'assets/nea-atlas.png',yeogyeong:'assets/yeogyeong-standing.png',yui:'assets/yui-standing.png',seoha:'assets/seoha-standing.png','dogyeom-childhood-friend':'assets/childhood-friend-standing.png'};
+ const characters={zero:'assets/zero-dragon.webp',nea:'assets/nea-atlas.png','nea-travel':'assets/nea-atlas.png',yeogyeong:'assets/yeogyeong-standing.png',yui:'assets/yui-standing.png',seoha:'assets/seoha-standing.png','dogyeom-childhood-friend':'assets/childhood-friend-standing.png'};
  // Portraits are complete approved illustrations; never paste separate heads over bodies.
  for(const r of globalThis.StoryKitData?.content?.records||[])for(const [look,f]of Object.entries(r.looks))characters[look==='default'?r.id:r.id+'-'+look]=f.src;
  const dialogueIds=new Set([
@@ -27,11 +27,11 @@ const SceneStage=(()=>{
   'dogyeom-childhood-friend':[.50,.36,.19],dogyeom:[.51,.35,.19],espada:[.49,.38,.20],
   evan:[.50,.35,.20],fafnir:[.51,.39,.126],fenri:[.50,.36,.156],halo:[.48,.36,.19],hebnia:[.53,.38,.20],
   hellenia:[.52,.38,.20],janghwa:[.52,.30,.141],jave:[.50,.36,.20],karin:[.58,.37,.20],
-  kiriel:[.52,.38,.21],lir:[.54,.38,.20],milia:[.55,.40,.20],nadan:[.51,.34,.20],
+  kiriel:[.52,.38,.21],lir:[.54,.38,.20],milia:[.47,.42,.153],nadan:[.51,.34,.20],
   nea:[.49,.40,.18],'nea-travel':[.49,.40,.18],palanus:[.52,.38,.19],rachel:[.51,.36,.20],
-  reginleif:[.53,.39,.235],horin:[.50,.31,.195],restia:[.52,.39,.18],rosie:[.51,.37,.18],
+  reginleif:[.46,.28,.175],horin:[.50,.31,.195],restia:[.52,.39,.18],rosie:[.51,.37,.18],
   selsi:[.50,.30,.22],seoha:[.50,.31,.19],spike:[.54,.43,.20],spina:[.50,.40,.18],
-  taei:[.50,.34,.185],taeo:[.52,.38,.19],trude:[.51,.40,.19],woojin:[.51,.36,.20],
+  taei:[.50,.34,.185],taeo:[.47,.33,.14],trude:[.51,.40,.19],woojin:[.51,.36,.20],
   yeogyeong:[.50,.34,.22],yui:[.50,.32,.20],yunseol:[.51,.37,.20],
  };
  const portraitLayout=Object.freeze({width:600,height:460,eyeLine:196,faceHeight:110});

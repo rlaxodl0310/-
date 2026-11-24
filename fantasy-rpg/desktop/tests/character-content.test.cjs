@@ -92,9 +92,25 @@ test('transfer rear views are separate files registered alongside Earth fronts',
 test('full-body frames trim excess sheet margins and use the transparent Taei standing asset',()=>{
   const taeo=C.appearance('taeo'),reginleif=C.appearance('reginleif');
   a(taeo.y>100&&taeo.h<taeo.imageHeight);
-  a(reginleif.x>100&&reginleif.w<reginleif.h);
+  a(reginleif.x>0&&reginleif.w<reginleif.h);
   const frame=C.transfers.taei.looks['이세계 · 격투가'];
   a.equal(frame.src,'assets/taei-fighter-standing.webp');
   a.equal(R.get('taei').art.src,'../'+frame.src);
   a.equal(R.get('taei').art.transparent,true);
+});
+
+test('layered standing assets carry transparency for wide figures and transfer outfits',()=>{
+ const paths=[
+  C.appearance('reginleif').src,
+  ...['default','rear','casual'].map(look=>C.appearance('milia',{look}).src),
+  C.transfers.yeogyeong.looks['이세계 · 여행복'].src,
+  C.transfers.woojin.looks['지구 · 작업복'].src,
+  C.transfers.woojin.looks['이세계 · 여행복'].src,
+  'assets/dialogue/zero.webp',
+ ];
+ for(const src of paths){
+  const bytes=fs.readFileSync(path.resolve(__dirname,'../ui',src));
+  a.equal(bytes.toString('ascii',8,16),'WEBPVP8X',src);
+  a.ok(bytes[20]&0x10,src);
+ }
 });

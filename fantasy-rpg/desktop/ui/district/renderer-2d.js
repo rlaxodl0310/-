@@ -4,7 +4,7 @@ const model=root.DistrictModel;
 const background='district/assets/lantern-street.webp';
 const images=new Map();
 function load(npcs=model.npcs,visual=null){
- const urls=[background,...(visual?[visual.src]:[]),root.WalkCharacter.fantasy.src,...npcs.map(npc=>root.WalkCharacter.standing(npc.id)?.src).filter(Boolean)];
+ const urls=[background,...(visual?[visual.src]:[]),root.WalkCharacter.fantasy.src,...npcs.map(npc=>root.WalkCharacter.standing(npc.id,'fantasy')?.src).filter(Boolean)];
  return Promise.all([...new Set(urls)].map(url=>new Promise(resolve=>{
   const image=new Image();
   image.onload=()=>{images.set(url,image);resolve(true);};
@@ -83,7 +83,7 @@ class Renderer{
    if(near!==target)this.label(target.name,point.x,point.y-22);
   }
   const sprites=this.npcs.flatMap(npc=>{
-   const entry=root.WalkCharacter.standing(npc.id);
+   const entry=root.WalkCharacter.standing(npc.id,'fantasy');
    if(!entry?.src){const p=this.screen(npc);this.label(npc.name,p.x,p.y-45);return [];}
    return [{pos:npc,entry}];
   });
