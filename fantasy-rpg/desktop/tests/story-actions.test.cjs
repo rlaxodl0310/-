@@ -21,3 +21,43 @@ t('approaching a living enemy advances distance but does not claim an attack hit
 t('ordinary observation cannot reset an existing object without an action',()=>{const s=state(),changed={...table(),condition:'broken'};a(A.review(candidate(s,[],[changed],changed.quote),s,'주변을 살핀다').errors.length);});
 t('engine object effects update continuity even when the model omits its own anchor update',()=>{const C=require('../electron/story-continuity.cjs'),s=state(),r=A.resolve(s,[plan()],M.begin(s,'탁자를 엎는다')),next={...s,...r,revision:1};next.ledger=[...s.ledger,...A.events(next,r.resolution)];next.continuity=C.commit(next,candidate(s));a.equal(C.activeAnchors(next).find(a=>a.subject==='wood-table').value,'toppled');a(next.ledger.some(e=>e.source==='engine-action'));a(C.audit(next).ok);});
 t('grounded hints do not promise locked-door opening or moving fixed/heavy objects',()=>{const s=state(),o=A.objects(s)[0];o.fixed=true;o.weight='heavy';o.condition='locked';o.affordances=['tip','open','inspect'];const hints=A.suggestions(s);a(hints.some(h=>h.text.includes('살핀다')));a(!hints.some(h=>/넘어뜨|열어/.test(h.text)));});
+
+t('questions and reported commands leave the encounter unchanged in two regions',async()=>{
+ for(const location of ['north-wild-02','east-wild-01']){
+  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'story-discussion-'));
+  const s=state();
+  s.location=location;
+  s.scene='combat';
+  s.actionWorld={locations:{['fantasy:'+location]:{objects:[{...table(),distance:2}]}},actors:{}};
+  let evidence='뒤로 이동해';
+  const d=new StoryDirector(path.join(dir,'story.json'),{
+   check:async()=>({ready:true}),
+   generateStructured:async()=>candidate(s,[plan('approach',{quote:evidence})],[],'거리가 줄었다.'),
+  });
+  try{
+   await d.save(s);
+   for(const text of ['지금 뒤로 이동해도 돼?','여경이 “뒤로 이동해”라고 말했다.','여경이 뒤로 이동하라고 말했다.']){
+    evidence=text.includes('이동하라고')?'뒤로 이동하':'뒤로 이동해';
+    const before=await d.read();
+    const result=await d.send({text,requestId:'discussion-'+before.revision,revision:before.revision});
+    a.deepEqual(result.combat,before.combat);
+    a.deepEqual(result.player,before.player);
+    a.deepEqual(result.actionWorld,before.actionWorld);
+    a.deepEqual(result.ledger,before.ledger);
+    a.equal(result.minutes,before.minutes);
+    a.match(result.panels[0].text,/확인만/);
+   }
+  }finally{await fs.rm(dir,{recursive:true});}
+ }
+});
+
+t('an explicit action after a question still executes and quoted words cannot support a second action',()=>{
+ const input='여경이 “탁자를 엎는다”라고 말했다. 나무 쪽으로 이동한다.';
+ const s=state();
+ const approach=plan('approach',{quote:'나무 쪽으로 이동한다'});
+ a.deepEqual(A.review(candidate(s,[approach]),s,input).errors,[]);
+ a(A.review(candidate(s,[plan()]),s,input).errors.some(e=>e.includes('인용')));
+ const mixed='지금 뒤로 이동해도 돼? 탁자를 엎는다.';
+ a.deepEqual(A.review(candidate(s,[plan()]),s,mixed).errors,[]);
+ a(A.review(candidate(s,[plan('approach',{quote:'뒤로 이동해'})]),s,mixed).errors.some(e=>e.includes('질문')));
+});
