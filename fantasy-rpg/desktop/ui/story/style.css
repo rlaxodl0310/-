@@ -40,3 +40,6 @@ body[data-story-mode=director] .dialogue-wrap{background:linear-gradient(90deg,#
 #chat-form #story-chat-mode button[aria-pressed="true"]{background:#bcc8a8;color:#233023}
 #story-command-result{margin:6px 0;color:var(--paper);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.84rem}
 @media(max-width:560px){#story-chat-mode{flex-direction:column}#chat-form #story-chat-mode button{min-height:24px;padding:3px 5px}}
+
+#story-command-shortcuts:not([hidden]){display:flex;flex-wrap:wrap;gap:4px;margin:0 0 6px}
+#story-command-shortcuts button{padding:4px 8px;border:1px solid #ced6bd40;border-radius:3px;background:#182319;color:var(--paper);font-size:.75rem}

@@ -39,12 +39,22 @@ assert(await run("document.getElementById('turn-summary').textContent.includes('
 
 assert(await run(`![...document.querySelectorAll('#choices button')].some(b=>b.textContent.startsWith('조심스럽게 접근'))`));
 assert(await run("document.querySelector('#chat-form').firstElementChild.id==='story-chat-mode'"));
-await run("document.querySelector('#story-chat-mode button:last-child').click();document.getElementById('chat-input').value='지금 어디야?';document.getElementById('chat-form').requestSubmit()");
+await run("document.querySelector('#story-chat-mode button[data-mode=direct]').click();document.getElementById('chat-input').value='지금 어디야?';document.getElementById('chat-form').requestSubmit()");
 assert.deepEqual(await run('({method:qaRequest.method,text:qaRequest.req.text})'),{method:'command',text:'/질문 지금 어디야?'});
 await run("qaResolve({ok:true,data:{text:'검수용 직접 답변'}})");
 await delay(90);
 assert(await run("document.getElementById('story-command-result').textContent==='검수용 직접 답변'"));
-assert(await run("document.querySelector('#story-chat-mode button:last-child').getAttribute('aria-pressed')==='true'"));
+assert(await run("document.querySelector('#story-chat-mode button[data-mode=direct]').getAttribute('aria-pressed')==='true'"));
+await run("document.querySelector('#story-chat-mode button[data-mode=command]').click()");
+assert(await run("!document.getElementById('story-command-shortcuts').hidden"));
+await run(`[...document.querySelectorAll('#story-command-shortcuts button')].find(b=>b.textContent==='/되돌리기').click()`);
+assert.equal(await run("document.getElementById('chat-input').value"),'/되돌리기');
+assert.equal(await run("qaRequest.req.text"),'/질문 지금 어디야?');
+await run("document.getElementById('chat-input').value='정리';document.getElementById('chat-form').requestSubmit()");
+assert.deepEqual(await run('({method:qaRequest.method,text:qaRequest.req.text})'),{method:'command',text:'/정리'});
+await run("qaResolve({ok:true,data:{text:'검수용 상황 정리'}})");
+await delay(90);
+assert(await run("document.getElementById('story-command-result').textContent==='검수용 상황 정리'"));
 await run("document.querySelector('#story-chat-mode button:first-child').click()");
-assert.equal(errors.length,0);console.log(JSON.stringify({passed:true,provider:'controlled fixture, not live ChatGPT account',checks:['main NPC dialogue','target request survives UI routing','consent without observation','disabled observation without eligible clues','explicit ten minute observation from main screen','companion fatigue rounded for display','refusal without action','mobile390 no panel overflow','compound input reaches the story director unchanged','main-story withdrawal produces a turn summary','chat modes route story and direct input separately','no JavaScript exceptions'],exchanges:h.s.companions.exchanges.length,observations:h.q().tracking.observations,minutes:h.s.minutes}));
+assert.equal(errors.length,0);console.log(JSON.stringify({passed:true,provider:'controlled fixture, not live ChatGPT account',checks:['main NPC dialogue','target request survives UI routing','consent without observation','disabled observation without eligible clues','explicit ten minute observation from main screen','companion fatigue rounded for display','refusal without action','mobile390 no panel overflow','compound input reaches the story director unchanged','main-story withdrawal produces a turn summary','three chat modes route inputs and shortcuts separately','no JavaScript exceptions'],exchanges:h.s.companions.exchanges.length,observations:h.q().tracking.observations,minutes:h.s.minutes}));
 }finally{await h.close();}await call('Page.close');ws.close();})().catch(e=>{console.error(e);process.exit(1);});

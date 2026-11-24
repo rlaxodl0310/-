@@ -63,7 +63,13 @@ function playResolution(){
   };
   show(0);
 }
-let directChat=false;
+let chatMode='story';
+const chatModes=[
+ ['story','상황 진행','게임 속 대화나 행동 · /도움말'],
+ ['direct','ChatGPT에게 직접','ChatGPT에게 직접 질문 · /도움말'],
+ ['command','명령어','명령어 입력 (예: 정리)'],
+];
+const chatCommands=['도움말','정리','질문','되돌리기','확인','취소'];
 function showChatMode(){
  let modes=$('story-chat-mode');
  if(!modes){
@@ -71,20 +77,41 @@ function showChatMode(){
   modes.id='story-chat-mode';
   modes.setAttribute('role','group');
   modes.setAttribute('aria-label','채팅 종류');
-  for(const [direct,label] of [[false,'상황 진행'],[true,'ChatGPT에게 직접']]){
+  for(const [mode,label] of chatModes){
    const button=document.createElement('button');
    button.type='button';
    button.textContent=label;
-   button.onclick=()=>{directChat=direct;showChatMode();$('chat-input').focus();};
+   button.dataset.mode=mode;
+   button.onclick=()=>{chatMode=mode;showChatMode();$('chat-input').focus();};
    modes.append(button);
   }
   $('chat-form').prepend(modes);
  }
- [...modes.children].forEach((button,index)=>{
-  button.setAttribute('aria-pressed',String(Boolean(index)===directChat));
+ let shortcuts=$('story-command-shortcuts');
+ if(!shortcuts){
+  shortcuts=document.createElement('div');
+  shortcuts.id='story-command-shortcuts';
+  shortcuts.setAttribute('role','group');
+  shortcuts.setAttribute('aria-label','명령어 바로 입력');
+  for(const command of chatCommands){
+   const button=document.createElement('button');
+   button.type='button';
+   button.textContent='/'+command;
+   button.onclick=()=>{
+    $('chat-input').value=button.textContent+(command==='질문'?' ':'');
+    $('chat-input').focus();
+   };
+   shortcuts.append(button);
+  }
+  $('chat-form').before(shortcuts);
+ }
+ for(const button of modes.children){
+  button.setAttribute('aria-pressed',String(button.dataset.mode===chatMode));
   button.disabled=working;
- });
- $('chat-input').placeholder=directChat?'ChatGPT에게 직접 질문 · /도움말':'게임 속 대화나 행동 · /도움말';
+ }
+ shortcuts.hidden=chatMode!=='command';
+ for(const button of shortcuts.children)button.disabled=working;
+ $('chat-input').placeholder=chatModes.find(([mode])=>mode===chatMode)[2];
 }
 async function sendCommand(text){
  stopReplay();
@@ -138,7 +165,9 @@ function activate(next){
  $('chat-form').onsubmit=e=>{
   e.preventDefault();
   const text=$('chat-input').value.trim();
-  if(text)send(directChat&&!text.startsWith('/')?'/질문 '+text:text);
+    if(!text)return;
+  if(text.startsWith('/')||chatMode==='story')send(text);
+  else send((chatMode==='direct'?'/질문 ':'/')+text);
  };
  render();
 }
