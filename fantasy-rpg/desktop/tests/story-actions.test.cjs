@@ -102,3 +102,72 @@ t('observed clues reach the next chat context and a restored slot removes them i
   }finally{await fs.rm(dir,{recursive:true,force:true});}
  }
 });
+
+t('observed references bind the current scene object and slot restore removes later referents',async()=>{
+ for(const location of ['north-wild-02','east-wild-01']){
+  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'story-referent-'));
+  const s=state();
+  s.location=location;
+  s.scene='combat';
+  const site={objects:[table(),{...table(),id:'other-box',name:'상자'}]};
+  s.actionWorld={locations:{['fantasy:'+location]:site},actors:{}};
+  const inspect=plan('inspect',{quote:'탁자를 자세히 살핀다'});
+  const hide=plan('hide',{quote:'아까 확인한 탁자 뒤에 숨는다'});
+  let output=candidate(s,[inspect],[],'탁자를 자세히 살핀다.');
+  let calls=0;
+  const d=new StoryDirector(path.join(dir,'story.json'),{
+   check:async()=>({ready:true}),generateStructured:async()=>{calls++;return output;},
+  });
+  const send=(text,revision)=>d.send({text,revision,requestId:'referent-'+revision});
+  try{
+   await d.save(s);
+   await d.saveSlotAction({action:'save',slot:1,revision:0});
+   const observed=await send(inspect.quote,0);
+   a.equal(observed.turns.at(-1).resolution.observations[0].subject,'wood-table');
+
+   output=candidate(s,[{...hide,target:'other-box'}],[],'상자 뒤에 숨는다.');
+   const mismatch=await send(hide.quote,observed.revision);
+   a.equal(mismatch.combat.round,observed.combat.round);
+   a.match(mismatch.panels[0].text,/탁자/);
+
+   output=candidate(s,[hide],[],'탁자 뒤에서 몸을 가린다.');
+   const hidden=await send(hide.quote,mismatch.revision);
+   a.match(hidden.turns.at(-1).resolution.steps[0].reason,/몸을 가렸다/);
+
+   let current=await d.read();
+   A.objects(current)[0].condition='broken';
+   await d.save(current);
+   output=candidate(s,[hide],[],'망가진 탁자는 엄폐에 쓸 수 없다.');
+   const blocked=await send(hide.quote,current.revision);
+   a.match(blocked.turns.at(-1).resolution.steps[0].reason,/파손/);
+   a.equal(blocked.combat.round,current.combat.round);
+
+   current=await d.read();
+   Object.assign(A.objects(current)[0],{condition:'intact',distance:3});
+   await d.save(current);
+   output=candidate(s,[hide],[],'탁자는 너무 멀다.');
+   const distant=await send(hide.quote,current.revision);
+   a.match(distant.turns.at(-1).resolution.steps[0].reason,/손이 닿지 않는 거리/);
+   a.equal(distant.combat.round,current.combat.round);
+
+   const restored=(await d.saveSlotAction({action:'load',slot:1,revision:distant.revision})).state;
+   const before=calls;
+   const missing=await send(hide.quote,restored.revision);
+   a.equal(calls,before);
+   a.equal(missing.combat.round,restored.combat.round);
+   a.equal(missing.minutes,restored.minutes);
+   a.match(missing.panels[0].text,/어느 물건/);
+  }finally{await fs.rm(dir,{recursive:true,force:true});}
+ }
+});
+
+t('ambiguous objects and unconfirmed sound directions ask for clarification',()=>{
+ const s=state();
+ const site=s.actionWorld.locations['fantasy:'+s.location];
+ site.objects.push({...table(),id:'box',name:'상자'});
+ site.observations=[{subject:'wood-table'},{subject:'box'}];
+ a.match(A.reference(s,'그 물건 뒤에 숨는다.').message,/탁자, 상자/);
+ a.match(A.reference(s,'아까 소리 난 쪽으로 이동한다.').message,/정확한 방향/);
+ a.equal(A.reference(s,'아까 확인한 그 탁자 뒤에 숨는다.').target,'wood-table');
+ a.equal(A.reference(s,'아까 확인한 탁자가 어디야?'),null);
+});

@@ -40,4 +40,38 @@ function context(state, sceneKey) {
   });
 }
 
-module.exports = { capture, context };
+const reference = /(?:아까|방금|전에|조금\s*전에)\s*(?:다시\s*)?(?:확인한|살펴본|살핀|관찰한|들었던|들은|본|보았던|봤던|소리\s*난)|(?:그|저)\s*(?:물건|대상|쪽|방향)|(?:그것|그쪽|저쪽)/u;
+const directional = /(?:소리|기척|방향|그쪽|저쪽|(?:그|저)\s*쪽)/u;
+const generic = /^(?:\s*(?:그\s*)?(?:것|물건|대상|엄폐물|자리)?\s*(?:을|를|에|으로|로|부터|뒤|옆|쪽|근처|다시|자세히|살피|확인|이동|다가|접근|숨|가리|열|닫|밀|넘어|엎|$))/u;
+
+function resolveReference(state, sceneKey, clauses, objects) {
+  const matches = clauses.filter(text => reference.test(text));
+  if (!matches.length) return null;
+  if (matches.length > 1) return { message: '한 번에 어느 관찰 대상을 가리키는지 하나씩 알려 주세요.' };
+  const [clause] = matches;
+  const match = reference.exec(clause);
+  const tail = clause.slice(match.index + match[0].length).trimStart().replace(/^그\s+/u, '');
+  const names = objects.flatMap(object => {
+    const words = object.name.trim().split(/\s+/u);
+    const aliases = [object.name, words.at(-1)];
+    return aliases.filter(alias => alias && tail.startsWith(alias) &&
+      /^(?:$|[\s,.!?]|을|를|에|으로|로|의|뒤|옆|쪽|가|이)/u.test(tail.slice(alias.length))).map(alias => ({ id: object.id, length: alias.length }));
+  });
+  const longest = Math.max(0, ...names.map(item => item.length));
+  const namedIds = new Set(names.filter(item => item.length === longest).map(item => item.id));
+  if (directional.test(match[0]) || !namedIds.size && /^\s*(?:소리|기척|방향|쪽)/u.test(tail))
+    return { message: '그 소리나 기척이 난 정확한 방향은 아직 확인되지 않았어요. 어느 방향을 살필지 알려 주세요.' };
+  const observed = new Set((state.actionWorld?.locations?.[sceneKey]?.observations || []).map(row => row.subject).filter(Boolean));
+  const candidates = objects.filter(object => observed.has(object.id) &&
+    (namedIds.size ? namedIds.has(object.id) : generic.test(tail)));
+  if (candidates.length === 1) return { target: candidates[0].id, name: candidates[0].name, clause };
+  if (candidates.length > 1) {
+    const names = [...new Set(candidates.map(object => object.name))];
+    return { message: '어느 물건을 말하는 건가요? '+(names.length===1
+      ? names[0]+'이 여럿이라 위치를 함께 말해 주세요.'
+      : names.slice(0,4).join(', ')+' 중 무엇인지 알려 주세요.') };
+  }
+  return { message: '이 현장에서 가리킨 물건을 확인할 수 없어요. 어느 물건인지 알려 주세요.' };
+}
+
+module.exports = { capture, context, resolveReference };

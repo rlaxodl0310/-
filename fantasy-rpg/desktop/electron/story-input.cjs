@@ -18,9 +18,13 @@ function isDiscussion(input) {
   return parts.length ? parts.every(informational) : Boolean(input.match(quoted));
 }
 
+function actionClauses(input) {
+  return clauses(input).filter(part => !informational(part));
+}
+
 function supportsAction(input, evidence, verb) {
   // Quoted speech can support an explicit current request to a companion.
-  const active = clauses(input).filter(part => !informational(part));
+  const active = actionClauses(input);
   if (active.some(part => part.includes(evidence))) return true;
   if (verb !== 'request') return false;
   for (const match of input.matchAll(quoted)) {
@@ -32,4 +36,4 @@ function supportsAction(input, evidence, verb) {
   return false;
 }
 
-module.exports = { isDiscussion, supportsAction };
+module.exports = { isDiscussion, actionClauses, supportsAction };
