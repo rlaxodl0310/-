@@ -1,0 +1,54 @@
+{
+  "version": "0.42.101",
+  "characters": {
+    "trude": {
+      "atlas": [
+        1024,
+        1536
+      ],
+      "frames": 24,
+      "transparentFraction": 0.47671763102213544
+    },
+    "halo": {
+      "atlas": [
+        1024,
+        1536
+      ],
+      "frames": 24,
+      "transparentFraction": 0.4745019276936849
+    },
+    "milia": {
+      "atlas": [
+        1024,
+        1536
+      ],
+      "frames": 24,
+      "transparentFraction": 0.40968767801920575
+    }
+  },
+  "portraitCrops": {
+    "trude": [
+      340,
+      220,
+      780,
+      550
+    ],
+    "halo": [
+      420,
+      0,
+      860,
+      330
+    ],
+    "milia": [
+      520,
+      70,
+      960,
+      400
+    ]
+  },
+  "notes": [
+    "Generated approved source art; earlier reference/correction drafts remain separate.",
+    "Halo cutscene extracted from [0,930,512,1536] to preserve raised arms.",
+    "PNG alpha is preserved; RGB values in alpha-zero pixels are not a background."
+  ]
+}
