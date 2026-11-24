@@ -171,3 +171,61 @@ t('ambiguous objects and unconfirmed sound directions ask for clarification',()=
  a.equal(A.reference(s,'아까 확인한 그 탁자 뒤에 숨는다.').target,'wood-table');
  a.equal(A.reference(s,'아까 확인한 탁자가 어디야?'),null);
 });
+
+t('a saved clarification resumes the original action once with a short reply in both regions',async()=>{
+ for(const location of ['north-wild-02','east-wild-01']){
+  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'story-clarification-'));
+  const s=state();
+  s.location=location;
+  s.scene='combat';
+  s.actionWorld={locations:{['fantasy:'+location]:{
+   objects:[table(),{...table(),id:'box',name:'상자'}],
+   observations:[{subject:'wood-table'},{subject:'box'}],
+  }},actors:{}};
+  const original='아까 본 물건 뒤에 숨는다.';
+  const hide=plan('hide',{quote:original.slice(0,-1),target:'box'});
+  const observe=plan('observe',{quote:'주변을 살핀다',target:''});
+  let calls=0;
+  const d=new StoryDirector(path.join(dir,'story.json'),{
+   check:async()=>({ready:true}),
+   generateStructured:async messages=>{
+    calls++;
+    const text=messages.at(-1).content;
+    return text===original?candidate(s,[hide],[],'상자 뒤에서 몸을 가린다.'):
+     candidate(s,[observe],[],'주변을 살핀다.');
+   },
+  });
+  const send=(text,revision,id='clarify-'+revision)=>d.send({text,revision,requestId:id});
+  try{
+   await d.save(s);
+   const waiting=await send(original,0);
+   a.equal(calls,0);
+   a.match(waiting.panels[0].text,/탁자, 상자/);
+   a.equal(waiting.combat.round,s.combat.round);
+   a.equal(waiting.minutes,s.minutes);
+   a.equal(waiting.pendingObservationAction.verb,'hide');
+   await d.saveSlotAction({action:'save',slot:1,revision:waiting.revision});
+
+   const hidden=await send('상자 뒤',waiting.revision,'clarify-choice');
+   a.equal(hidden.turns.at(-1).text,'상자 뒤');
+   a.equal(hidden.turns.at(-1).resolution.steps[0].target,'box');
+   a.equal(hidden.turns.at(-1).resolution.steps[0].verb,'hide');
+   a.equal(hidden.combat.round,waiting.combat.round+1);
+   a.equal(hidden.pendingObservationAction,undefined);
+   a.equal((await send('상자 뒤',waiting.revision,'clarify-choice')).replayed,true);
+   a.equal(calls,2);
+
+   const restored=(await d.saveSlotAction({action:'load',slot:1,revision:hidden.revision})).state;
+   a.equal(restored.pendingObservationAction.revision,restored.revision);
+   const cancelled=await send('취소',restored.revision);
+   a.equal(cancelled.pendingObservationAction,undefined);
+   a.equal(cancelled.combat.round,restored.combat.round);
+   a.equal(calls,2);
+
+   const roundTrip=(await d.saveSlotAction({action:'load',slot:1,revision:cancelled.revision})).state;
+   const changed=await send('주변을 살핀다.',roundTrip.revision);
+   a.equal(changed.pendingObservationAction,undefined);
+   a.equal(changed.turns.at(-1).resolution.steps[0].verb,'observe');
+  }finally{await fs.rm(dir,{recursive:true,force:true});}
+ }
+});

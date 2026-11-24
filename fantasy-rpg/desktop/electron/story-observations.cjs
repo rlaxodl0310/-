@@ -67,11 +67,31 @@ function resolveReference(state, sceneKey, clauses, objects) {
   if (candidates.length === 1) return { target: candidates[0].id, name: candidates[0].name, clause };
   if (candidates.length > 1) {
     const names = [...new Set(candidates.map(object => object.name))];
-    return { message: '어느 물건을 말하는 건가요? '+(names.length===1
+    return { clause, candidates: candidates.map(object=>object.id), message: '어느 물건을 말하는 건가요? '+(names.length===1
       ? names[0]+'이 여럿이라 위치를 함께 말해 주세요.'
       : names.slice(0,4).join(', ')+' 중 무엇인지 알려 주세요.') };
   }
   return { message: '이 현장에서 가리킨 물건을 확인할 수 없어요. 어느 물건인지 알려 주세요.' };
 }
 
-module.exports = { capture, context, resolveReference };
+function followup(state, sceneKey, input, objects) {
+  const pending=state.pendingObservationAction;
+  if (!pending||pending.revision!==state.revision||pending.sceneKey!==sceneKey||
+      pending.combatId!==(state.combat?.id??null)) return null;
+  const answer=input.trim().replace(/[.!。！]+$/u,'').trim();
+  if (/^(?:취소|취소해|취소할게|그만|됐어)$/u.test(answer)) return { cancelled:true };
+  const observed=new Set((state.actionWorld?.locations?.[sceneKey]?.observations||[]).map(row=>row.subject));
+  const matches=objects.filter(object=>{
+    if (!pending.candidates.includes(object.id)||!observed.has(object.id)) return false;
+    const aliases=[object.name,object.name.trim().split(/\s+/u).at(-1)];
+    return aliases.some(alias=>alias&&answer.startsWith(alias)&&
+      /^(?:(?:의|은|는|을|를|이|가)?\s*(?:뒤(?:로|에)?|옆(?:으로|에)?|쪽(?:으로|에)?)?)$/u.test(answer.slice(alias.length)));
+  });
+  if (matches.length>1) return { pending, message:'같은 이름의 물건이 여럿 있어요. 위치와 행동을 함께 말해 주세요.' };
+  if (matches.length===1) return {
+    target:matches[0].id,name:matches[0].name,clause:pending.clause,input:pending.input,verb:pending.verb,
+  };
+  return null;
+}
+
+module.exports = { capture, context, resolveReference, followup };
