@@ -18,6 +18,7 @@ function append(previous, next, {input, resolution, requestId}) {
     changes.combat = { before: previous.combat?.status ?? null, after: next.combat?.status ?? null };
   const row = {
     revision: next.revision, requestId, input, panels: next.panels, changes,
+    observations: resolution?.observations || [],
     steps: (resolution?.steps || []).map(({ reason }) => reason).filter(Boolean),
     reactions: (resolution?.npcReactions || []).filter(r => r.response !== 'autonomous')
       .map(({ actor, response }) => ({ actor, response })),

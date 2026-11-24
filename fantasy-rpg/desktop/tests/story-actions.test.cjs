@@ -61,3 +61,44 @@ t('an explicit action after a question still executes and quoted words cannot su
  a.deepEqual(A.review(candidate(s,[plan()]),s,mixed).errors,[]);
  a(A.review(candidate(s,[plan('approach',{quote:'뒤로 이동해'})]),s,mixed).errors.some(e=>e.includes('질문')));
 });
+
+t('observed clues reach the next chat context and a restored slot removes them in multiple regions',async()=>{
+ for(const location of ['north-wild-02','east-wild-01']){
+  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'story-observation-'));
+  const s=state();
+  s.location=location;
+  s.scene='combat';
+  s.combat.distance=3;
+  s.actionWorld={locations:{['fantasy:'+location]:{objects:[{...table(),distance:2}]}},actors:{}};
+  const observe=plan('observe',{target:'',quote:'귀를 기울인다'});
+  const move=plan('approach',{quote:'탁자 쪽으로 이동한다'});
+  let prompts=[];
+  const d=new StoryDirector(path.join(dir,'story.json'),{
+   check:async()=>({ready:true}),
+   generateStructured:async messages=>{
+    prompts.push(messages[0].content);
+    return messages.at(-1).content.includes('귀를 기울인다')
+      ?candidate(s,[move,observe],[],'탁자에 다가가 주변 소리를 살핀다.')
+      :candidate(s,[],[],'정확한 방향은 아직 확인하지 못했다.');
+   },
+  });
+  try{
+   await d.save(s);
+   await d.saveSlotAction({action:'save',slot:1,revision:0});
+   const found=await d.send({text:'탁자 쪽으로 이동한다. 귀를 기울인다.',requestId:'observation-first',revision:0});
+   const [clue]=found.turns.at(-1).resolution.observations;
+   a.equal(clue.location,location);
+   a.equal(clue.confirmed,found.turns.at(-1).resolution.enemyResponse);
+   a.match(clue.uncertain,/정확한 방향/);
+   a.deepEqual(found.turnReview.at(-1).observations,[clue]);
+   a.equal(A.context(found,'아까 소리',M.begin(found,'아까 소리')).observations[0].freshness,'last-action');
+   prompts=[];
+   const answered=await d.send({text:'아까 소리 난 방향은 어디야?',requestId:'observation-query',revision:found.revision});
+   a(prompts[0].includes(clue.id));
+   a.equal(answered.combat.round,found.combat.round);
+   const restored=(await d.saveSlotAction({action:'load',slot:1,revision:answered.revision})).state;
+   a.deepEqual(A.context(restored,'아까 소리',M.begin(restored,'아까 소리')).observations,[]);
+   a.equal(restored.turnReview,undefined);
+  }finally{await fs.rm(dir,{recursive:true,force:true});}
+ }
+});

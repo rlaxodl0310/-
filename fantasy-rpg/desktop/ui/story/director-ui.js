@@ -150,9 +150,13 @@ function renderTurnContext(){
  const active=(state.adventure?.quests||[]).filter(q=>q.type==='hunt'&&q.status==='accepted'&&q.destination===state.location&&['trail','sighted'].includes(q.tracking?.phase));
  const context=active.map(q=>HuntTracking.context(state,q.id));
  const facts=context.map(c=>c.stale?'오래된 흔적 · 현재 위치와 수 미확인':c.encounter?.confirmed?('확인한 대상 '+c.encounter.count+'마리 · 관찰 거리 '+c.encounter.distance+'칸'):'단서가 남아 있음 · 대상 위치와 수 미확인');
+ const row=state.turnReview?.at(-1);
+ const ride=PassageHost.onboard(state);
+ const sceneKey=ride?'vehicle:'+ride.id:state.era+':'+state.location;
+ const observed=state.actionWorld?.locations?.[sceneKey]?.observations?.at(-1);
+ if(observed)facts.push('마지막 관찰: '+observed.confirmed+' '+observed.uncertain);
  hint.textContent=[...new Set(facts),state.combat?.status==='playing'?'예: 동료에게 기다리라고 말하고, 주변에서 몸을 숨길 곳을 찾는다.':context.length?'예: 동료에게 무엇을 봤는지 묻고, 들리는 소리에 귀를 기울인다.':''].filter(Boolean).join(' / ');
  hint.hidden=!hint.textContent;
- const row=state.turnReview?.at(-1);
  const changes=row?.revision===state.revision?[...reviewChanges(row),...(row.steps||[]).slice(0,2)]:[];
  summary.textContent=changes.length?'이번 턴 · '+changes.join(' · '):'';
  summary.hidden=!summary.textContent;
@@ -167,6 +171,7 @@ function renderReview(body){
   for(const text of [
    ...row.panels.map(p=>(names[p.speaker]||'상황')+': '+p.text),
    ...reviewChanges(row),...(row.steps||[]),
+   ...(row.observations||[]).map(o=>'관찰 · '+o.confirmed+' '+o.uncertain),
    ...(row.reactions||[]).map(r=>(names[r.actor]||'동료')+' · '+({accept:'수락',refuse:'거절',hesitate:'망설임',unavailable:'응답 불가'}[r.response]||r.response)),
   ]){const p=document.createElement('p');p.textContent=text;details.append(p);}
   body.append(details);
