@@ -23,11 +23,20 @@ assert(await run("!document.getElementById('panel-body').textContent.includes('1
 h.stance='refuse';h.quote='지금은 싫어. 조금만 쉬었다가 보자.';await press('단서 관찰 부탁하기');await run("document.getElementById('chat-form').requestSubmit()");await processAction();await run("document.getElementById('companion-hud').click()");assert(await run("document.getElementById('panel-body').textContent.includes('거절')"));assert.equal(h.q().tracking.observations,1);assert.equal(await run("[...document.querySelectorAll('#panel-body button')].filter(b=>b.textContent.includes('관찰 실행')&&!b.disabled).length"),0);
 await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});await delay(100);assert(!await run("document.getElementById('panel-body').scrollWidth>document.getElementById('panel-body').clientWidth+2"));await shot('/dev/shm/companion74-mobile.png');
 await run("document.getElementById('close-panel').click()");
+const freeInput='여경에게 뒤로 빠지라고 말하고 나는 나무 뒤에서 상대를 살핀다.';
+await run(`document.getElementById('chat-input').value=${JSON.stringify(freeInput)};document.getElementById('chat-form').requestSubmit()`);
+assert.deepEqual(await run('({method:qaRequest.method,text:qaRequest.req.text})'),{method:'send',text:freeInput});
+await run("qaResolve({ok:false,error:'시험용 응답 중단'})");
+await delay(90);
+assert.equal(await run("document.getElementById('chat-input').value"),freeInput);
 const beforeWithdrawal=h.s.minutes;
 await run(`[...document.querySelectorAll('#choices button')].find(b=>b.textContent==='물러나 거리 확보 · 5분').click()`);
 await processAction();
 assert.equal(h.q().tracking.phase,'withdrawn');
 assert.equal(h.s.minutes,beforeWithdrawal+5);
+assert.equal(h.s.turnReview.at(-1).changes.minutes.after,beforeWithdrawal+5);
+assert(await run("document.getElementById('turn-summary').textContent.includes('시간')"));
+
 assert(await run(`![...document.querySelectorAll('#choices button')].some(b=>b.textContent.startsWith('조심스럽게 접근'))`));
-assert.equal(errors.length,0);console.log(JSON.stringify({passed:true,provider:'controlled fixture, not live ChatGPT account',checks:['main NPC dialogue','target request survives UI routing','consent without observation','disabled observation without eligible clues','explicit ten minute observation from main screen','companion fatigue rounded for display','refusal without action','mobile390 no panel overflow','main-story follow-up executes actual withdrawal','no JavaScript exceptions'],exchanges:h.s.companions.exchanges.length,observations:h.q().tracking.observations,minutes:h.s.minutes}));
+assert.equal(errors.length,0);console.log(JSON.stringify({passed:true,provider:'controlled fixture, not live ChatGPT account',checks:['main NPC dialogue','target request survives UI routing','consent without observation','disabled observation without eligible clues','explicit ten minute observation from main screen','companion fatigue rounded for display','refusal without action','mobile390 no panel overflow','compound input reaches the story director unchanged','main-story withdrawal produces a turn summary','no JavaScript exceptions'],exchanges:h.s.companions.exchanges.length,observations:h.q().tracking.observations,minutes:h.s.minutes}));
 }finally{await h.close();}await call('Page.close');ws.close();})().catch(e=>{console.error(e);process.exit(1);});

@@ -42,3 +42,15 @@ t('shared follow-up options depend on current clues, registered cover and remain
   a.deepEqual(actions({...s,minutes:s.minutes+31}),[]);
  }
 });
+
+t('expired sightings are historical context and quoted dialogue cannot execute a dedicated command',async()=>{
+ let {s,id}=seed();
+ s=step(s,id,'observe');
+ const stale={...s,minutes:s.minutes+T.policy.signalLifetime+1};
+ const frame=T.context(stale,id);
+ a.equal(frame.encounter,null);
+ a.equal(frame.lastSeen.confirmed,true);
+ a.equal(F.view(stale,id).stale,true);
+ a.deepEqual(frame.clues,[]);
+ await a.rejects(I.resolve(s,offline,{questId:id,text:'동료가 “우회”라고 말했다.',requestId:'quoted-hunt-test'}),/인용/);
+});

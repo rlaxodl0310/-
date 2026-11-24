@@ -1,3 +1,4 @@
+const UpdateBackup=require('./update-backup.cjs');
 const {AIDiagnostics}=require('./ai-diagnostics.cjs');
 const {app,BrowserWindow,ipcMain,dialog,shell,nativeImage}=require('electron');
 const path=require('node:path'),fs=require('node:fs/promises'),{existsSync}=require('node:fs');
@@ -34,6 +35,7 @@ function register(){for(const [channel,handler]of Object.entries({
  'director:npcTell':r=>{if(bridge.busy)throw Error('AI 응답을 먼저 마쳐 주세요.');return director.npcTell(r);},
  'director:npcAppointment':r=>{if(bridge.busy)throw Error('AI 응답을 먼저 마쳐 주세요.');return director.npcAppointment(r);},
  'director:npcMeet':r=>{if(bridge.busy)throw Error('AI 응답을 먼저 마쳐 주세요.');return director.npcMeet(r);},
+ 'director:backups':()=>UpdateBackup.list(app.getPath('userData')),
  'director:slots':()=>director.saveSlots(),
  'director:slot':r=>{if(bridge.busy)throw Error('AI 응답을 먼저 마쳐 주세요.');return director.saveSlotAction(r);},
  'director:restore':r=>{if(bridge.busy)throw Error('진행 중인 AI 응답을 마친 뒤 복구해 주세요.');return director.restorePrevious(r?.revision??null);},
@@ -85,6 +87,6 @@ function register(){for(const [channel,handler]of Object.entries({
  }))ipcMain.handle(channel,async(event,...args)=>{if(event.sender!==window?.webContents||event.senderFrame!==window.webContents.mainFrame||![entry,battleEntry,realtimeEntry].includes(event.senderFrame.url.split('#')[0]))throw Error('허용하지 않는 요청입니다.');try{return{ok:true,data:await handler(...args)};}catch(error){return{ok:false,error:error.message};}});}
 if(!app.requestSingleInstanceLock())app.quit();else{
  app.on('second-instance',()=>{if(window){if(window.isMinimized())window.restore();window.focus();}});
- app.whenReady().then(async()=>{await configure();await rememberInstallation();register();window=new BrowserWindow({width:1380,height:940,minWidth:850,minHeight:700,title:'이세계 기록',backgroundColor:'#111613',autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});window.webContents.setWindowOpenHandler(()=>({action:'deny'}));window.webContents.on('will-navigate',(event,url)=>{if(![entry,battleEntry,realtimeEntry].includes(url.split('#')[0]))event.preventDefault();});window.webContents.session.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));await window.loadURL(entry);window.on('closed',()=>{bridge.stop();window=null;});}).catch(()=>{dialog.showErrorBox('앱 시작 실패','앱 파일을 다시 확인해 주세요.');app.quit();});
+ app.whenReady().then(async()=>{await UpdateBackup.prepare(app.getPath('userData'),app.getVersion());await configure();await rememberInstallation();register();window=new BrowserWindow({width:1380,height:940,minWidth:850,minHeight:700,title:'이세계 기록',backgroundColor:'#111613',autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});window.webContents.setWindowOpenHandler(()=>({action:'deny'}));window.webContents.on('will-navigate',(event,url)=>{if(![entry,battleEntry,realtimeEntry].includes(url.split('#')[0]))event.preventDefault();});window.webContents.session.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));await window.loadURL(entry);window.on('closed',()=>{bridge.stop();window=null;});}).catch(()=>{dialog.showErrorBox('앱 시작 실패','앱 파일을 다시 확인해 주세요.');app.quit();});
  app.on('window-all-closed',()=>app.quit());app.on('before-quit',()=>bridge?.stop());
 }
