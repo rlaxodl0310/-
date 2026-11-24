@@ -1,0 +1,52 @@
+{
+  "version": "0.42.74",
+  "baseCommit": "f4a7093ecb11493a63e31b4c92bdc5deddd53e71",
+  "automated": {
+    "tests": 633,
+    "passed": 633,
+    "failed": 0
+  },
+  "targetedTests": 10,
+  "ui": {
+    "passed": true,
+    "provider": "controlled fixture, not live ChatGPT account",
+    "checks": [
+      "main NPC dialogue",
+      "target request survives UI routing",
+      "consent without observation",
+      "explicit ten minute observation",
+      "refusal without action",
+      "mobile390 no panel overflow",
+      "no JavaScript exceptions"
+    ],
+    "exchanges": 3,
+    "observations": 1,
+    "minutes": 65
+  },
+  "regressionUI": [
+    "PASS continuous actual UI solo 2 real fights, actual HP 84.117648 world minutes 163",
+    "PASS continuous actual UI party 2 real fights, actual HP 84.117648 world minutes 163",
+    "PASS no JS exceptions; full quest/preparation/purchase/equip/travel/tracking/combat/pickup/return/settlement and party payment UI"
+  ],
+  "patch": {
+    "sha256": "839501cab919c7233a398c0dcc6d3507d48fcf4e400995633733cf939ffdeaa9",
+    "targetAsarSHA256": "c5c4b9994a0546ead68f34a2e88aa71dceafd694264ea1fa72d4223a187b5524",
+    "verifiedReconstructionBases": [
+      "0.42.73",
+      "0.42.72",
+      "0.42.71",
+      "0.42.70",
+      "0.42.69",
+      "0.42.68",
+      "0.42.67",
+      "0.42.66",
+      "0.42.58"
+    ],
+    "zipCRC": "passed"
+  },
+  "limitations": [
+    "Controlled provider responses, isolated saves and explicit QA-only NPC physical state; no actual campaign stat grants.",
+    "Live authenticated ChatGPT conversation quality not verified.",
+    "Windows native patch launch not verified; all nine reconstruction hashes verified."
+  ]
+}

@@ -51,7 +51,7 @@
     listen:{speaker:'narrator',emotion:0,text:'도랑 가장자리에 몸을 낮춘다. 풀이 흔들리는 소리 사이로 아래쪽에서 물이 흐르는 소리가 들린다.',end:true,flags:['fantasy_arrived','arrival_listened']}
   }}
  ];
- const catalog=[{id:'nea',name:'네아',age:18},{id:'yui',name:'한유이',age:20,origin:'earth'},{id:'taei',name:'김태이',age:18},{id:'yeogyeong',name:'차여경',age:null},{id:'dogyeom',name:'백도겸',age:null},{id:'seoha',name:'윤서하',age:null},{id:'woojin',name:'정우진',age:null},{id:'zero',name:'제로',age:null},{id:'dogyeom-childhood-friend',name:'임소윤',age:null}];
+ const catalog=[{id:'nea',name:'네아',age:18},{id:'yui',name:'한유이',age:20,origin:'earth'},{id:'taei',name:'김태이',age:18},{id:'yeogyeong',name:'차여경',age:null},{id:'dogyeom',name:'백도겸',age:null},{id:'seoha',name:'윤서하',age:null},{id:'woojin',name:'정우진',age:null},{id:'zero',name:'제로',age:null,communication:'unconfirmed'},{id:'dogyeom-childhood-friend',name:'임소윤',age:null}];
  for(const person of catalog){
    const transfer=Content.transfers?.[person.id];
    if(transfer)Object.assign(person,{age:transfer.age,origin:'earth',classification:'전이자'});
