@@ -395,6 +395,7 @@ records.push(
     motion:{name:'모루에서 경첩을 두드리기',lean:5.25,step:5.25,turn:10.25,side:8.75,tempo:1.02},
     looks:{
     default:fullImage('biscuit-standing.webp',720,1080),
+    casual:fullImage('biscuit-casual.webp',720,1080),
     rear:fullImage('biscuit-rear.webp',720,1080),
     help:fullImage('biscuit-talk.webp',720,1080),
     reaction:fullImage('biscuit-reaction.webp',720,1080),
