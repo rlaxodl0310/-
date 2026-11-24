@@ -9,3 +9,36 @@ t('unobserved monsters and fabricated major encounters cannot bypass the actual 
 t('actual Director chat action is idempotent, uses world time and restores flank state with slots',async()=>{const dir=await fs.mkdtemp(path.join(os.tmpdir(),'hunt71-'));try{let{s,id}=seed();const d=new StoryDirector(path.join(dir,'story.json'),offline);await d.save(s);const req={requestId:'hunt-chat-observe-001',revision:s.revision,action:{type:'trackIntent',questId:id,text:'흔적을 자세히 관찰한다'}};s=await d.adventureAction(req);a.equal(F.view(s,id).tracking.observations,1);a.deepEqual(await d.adventureAction(req),s);a.equal(F.view(s,id).tracking.lastIntent.source,'local');s=await d.adventureAction({requestId:'hunt-chat-circle-001',revision:s.revision,action:{type:'trackIntent',questId:id,text:'엄폐 따라 옆쪽으로 우회한다'}});await d.saveSlotAction({action:'save',slot:1,revision:s.revision});const prior=s;const n=await d.adventureAction({requestId:'hunt-chat-withdraw-001',revision:s.revision,action:{type:'trackIntent',questId:id,text:'철수한다'}});const restored=(await d.saveSlotAction({action:'load',slot:1,revision:n.revision})).state;a.equal(F.view(restored,id).tracking.flanked,true);a.equal(restored.minutes,prior.minutes);a.equal(F.view(restored,id).tracking.phase,'sighted');}finally{await fs.rm(dir,{recursive:true,force:true});}});
 t('distinct clicked clues preserve observation focus and cannot be farmed by repeated clicks',()=>{let{s,id}=seed();s=T.step(s,id,'observe',{clueId:'ground'});a.deepEqual(s.adventure.quests.find(q=>q.id===id).tracking.observedClues,['ground']);a.equal(s.adventure.quests.find(q=>q.id===id).tracking.focus,'terrain');a.throws(()=>T.step(s,id,'observe',{clueId:'ground'}));a.throws(()=>T.step(s,id,'observe',{clueId:'invented'}));s=T.step(s,id,'observe',{clueId:'motion'});a.equal(s.adventure.quests.find(q=>q.id===id).tracking.focus,'movement');});
 t('every registered monster supports the same clue/observation/actual encounter engine and existing art',()=>{const records=require('../ui/monsters/essence-rules.js').records;require('../ui/story/monster-frames.js');for(const m of records){let{s,id}=seed(m.id);a.ok(globalThis.StoryMonsterFrames[m.id]);a.equal(T.clues(s,id).length,3);s=step(s,id,'observe');s=step(s,id,'approach');a.ok(s.combat.enemies.every(e=>e.kind===m.id));}});
+
+t('shared follow-up options depend on current clues, registered cover and remaining time',()=>{
+ const cases=[
+  ['north-wild-02',true],
+  ['east-wild-01',true],
+  ['west-wild-03',false],
+ ];
+ for(const [destination,covered] of cases){
+  let {s,id}=seed();
+  let q=s.adventure.quests.find(q=>q.id===id);
+  q.destination=destination;
+  s.location=destination;
+  delete q.tracking;
+  s=T.begin(s,id,{behaviour:'pack',focus:'movement'});
+  s=step(s,id,'observe');
+  const actions=state=>F.view(state,id).actions.map(action=>action.decision);
+  a.deepEqual(actions(s),covered?['observe','approach','circle','withdraw']:['observe','approach','withdraw']);
+  if(covered){
+   const flanked=step(s,id,'circle');
+   a(!actions(flanked).includes('circle'));
+  }else{
+   const before=JSON.stringify(s);
+   a.throws(()=>step(s,id,'circle'),/엄폐 우회로/);
+   a.equal(JSON.stringify(s),before);
+  }
+  s=step(s,id,'observe');
+  a(!actions(s).includes('observe'));
+  q=s.adventure.quests.find(q=>q.id===id);
+  q.deadline=s.minutes+4;
+  a.deepEqual(actions(s),[]);
+  a.deepEqual(actions({...s,minutes:s.minutes+31}),[]);
+ }
+});
