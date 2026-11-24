@@ -12,6 +12,12 @@ function knownContinent(state,id){const c=continent(id);if(!c)return false;const
 function locations(state,id,{artwork=false,kind='all',parent=null}={}){const c=continent(id);if(!c)throw Error('없는 대륙입니다.');const v=visits(state);return records.filter(p=>p.continent===c.id&&(parent?p.parent===parent:!p.parent)&&(kind==='all'||p.kind===kind)).map(p=>{const known=v.has(p.id);return {id:p.id,continent:c.id,kind:p.kind,point:p.point,known,current:state.currentLocation===p.id,name:known||artwork?p.name:'?',location:known||artwork?p.location||'':null,note:known||artwork?p.note:null,hasChildren:records.some(k=>k.parent===p.id)};});}
 function detail(state,id,{artwork=false}={}){const p=byId.get(id);if(!p)return null;const known=visits(state).has(id);return{id:p.id,kind:p.kind,known,name:known||artwork?p.name:'?',location:known||artwork?p.location||'':null,note:known||artwork?p.note:null,continent:p.continent,parent:p.parent||null};}
 function legacyState(state){const v=visits(state),extra=continents.filter(c=>c.layer==='ground'&&knownContinent(state,c.id)).map(c=>c.mapId);return{...state,visitedLocations:[...v,...extra],currentLocation:continentOf(state.currentLocation)?'erdia_'+continentOf(state.currentLocation):state.currentLocation};}
+function locationArtwork(id){
+ const place=byId.get(id);
+ if(!place||!['village','wilderness'].includes(place.kind))return null;
+ return {src:'assets/geography/'+place.id+'.webp',frame:[0,0,864,486],size:'cover',
+  position:'center',label:place.name+' 풍경',kind:place.kind};
+}
 function fixture(){return{version:1,events:records.map(p=>({id:'visit-'+p.id,location:p.id,members:[],era:'fantasy',entry:'arrive',nodes:{arrive:{end:true,text:p.name}}}))};}
-return{continents,records,continent,continentOf,locations,detail,knownContinent,legacyState,fixture,revision:D.sourceRevision};
+return{locationArtwork,continents,records,continent,continentOf,locations,detail,knownContinent,legacyState,fixture,revision:D.sourceRevision};
 });

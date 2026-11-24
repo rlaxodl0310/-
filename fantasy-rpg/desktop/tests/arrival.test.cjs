@@ -10,3 +10,22 @@ t('dismissal preserves clock, money and dialogue inputs and rejects stale notice
 t('city art exists on disk and selects actual port district after transport arrival',async()=>{for(const p of G.records.filter(p=>p.kind==='city'))await fs.stat(path.join(__dirname,'../ui',Arrival.art(state(p.id)).src));const c=C.services.find(c=>c.mode==='ship'),n=state(c.destination);n.arrivals={version:1,sequence:1,records:[{id:'arrival-1',at:0,location:c.destination,mode:'transport',transportMode:'ship',companions:[],dismissed:false}]};a.equal(Arrival.art(n).kind,'city');a.ok(Arrival.art(n).label.includes(G.records.find(p=>p.id===c.destination).name));});
 t('actual Director arrival, acknowledgment retry, old revision and slot restore keep notice and world together',async()=>{const dir=await fs.mkdtemp(path.join(os.tmpdir(),'arrival69-'));try{const{previous,next}=moved(),d=new StoryDirector(path.join(dir,'story.json'),good);await d.save(previous);await d.save(next);let s=await d.read();a.equal(s.arrivals.records.length,1);await d.saveSlotAction({action:'save',slot:1,revision:s.revision});const req={requestId:'arrival-confirm-001',revision:s.revision,action:{type:'arrivalDismiss',arrivalId:s.arrivals.records[0].id}};const done=await d.adventureAction(req);a.equal(done.arrivals.records.length,1);a.equal(done.arrivals.records[0].dismissed,true);a.deepEqual(await d.adventureAction(req),done);await a.rejects(d.adventureAction({...req,requestId:'arrival-stale-002'}));const elsewhere=G.records.find(p=>p.kind==='village');await d.save({...done,location:elsewhere.id,visitedLocations:[...done.visitedLocations,elsewhere.id],visited:[...done.visited,'fantasy:'+elsewhere.id]});const away=await d.read();a.equal(away.arrivals.records.length,2);const restored=(await d.saveSlotAction({action:'load',slot:1,revision:away.revision})).state;a.equal(restored.location,next.location);a.equal(restored.arrivals.records.length,1);a.equal(restored.arrivals.records[0].dismissed,false);}finally{await fs.rm(dir,{recursive:true,force:true});}});
 t('actual scheduled arrival records only destination and actual passengers after full duration',async()=>{const dir=await fs.mkdtemp(path.join(os.tmpdir(),'arrival-trip69-'));try{const c=C.services.find(c=>c.mode==='coach'),d=new StoryDirector(path.join(dir,'story.json'),good);let s=state(c.origin);s.adventure.economy.wallet=5000;s.adventure.economy.initialTotal+=5000;await d.save(s);let i=0;async function act(action){s=await d.adventureAction({requestId:'arrival-trip-'+String(++i).padStart(6,'0'),revision:s.revision,action});}const q=H.quote(s,c.id,C.next(c,0));await act({type:'passageReserve',serviceId:c.id,departAt:q.departAt,expectedFare:q.total,expectedBags:q.bags});await act({type:'passageWait'});await act({type:'passageBoard'});a.equal(s.arrivals,undefined);while(s.passages.tickets[0].phase!=='arrived')await act({type:'passageAdvance',minutes:360});a.equal(s.arrivals.records.length,1);a.equal(s.arrivals.records[0].mode,'transport');a.equal(s.arrivals.records[0].location,c.destination);a.equal(Arrival.view(s).pending,true);}finally{await fs.rm(dir,{recursive:true,force:true});}});
+
+t('registered village and wild illustrations are distinct and connected to arrival and village streets',async()=>{
+ const {createHash}=require('node:crypto'),District=require('../ui/district/model.js');
+ const pictures=new Set();
+ for(const place of G.records.filter(p=>p.kind!=='city')){
+  const s=state(place.id),art=Arrival.art(s);
+  a.equal(art.src,'assets/geography/'+place.id+'.webp');
+  const data=await fs.readFile(path.join(__dirname,'../ui',art.src));
+  a.equal(data.subarray(8,12).toString(),'WEBP');
+  const digest=createHash('sha256').update(data).digest('hex');
+  a(!pictures.has(digest),place.id);
+  pictures.add(digest);
+  if(place.kind==='village'){
+   const street=District.storyStreet(s,G.records,F.records,require('../ui/data.js'));
+   a.equal(street.visual.src,art.src);
+  }
+ }
+ a.equal(pictures.size,145);
+});

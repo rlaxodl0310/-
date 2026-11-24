@@ -9,7 +9,9 @@ function draw(feedback=''){
  const n=(tag,text,parent=dialog)=>{const e=document.createElement(tag);e.textContent=text;parent.append(e);return e;};
  const head=n('header','');n('small','FIELD JOURNAL · '+v.label,head);const close=n('button','이야기로 돌아가기',head);close.disabled=busy;close.onclick=()=>dialog.close();n('h2',v.q.title,head);
  const steps=n('ol','',head);steps.className='hunt-steps';v.steps.forEach(([label,done])=>{const li=n('li',(done?'✓ ':'')+label,steps);li.dataset.complete=String(done);});
- const stage=n('section','');stage.className='hunt-landscape';stage.dataset.phase=v.tracking?.phase||v.stage;stage.style.backgroundPosition=(v.biome%2*100)+'% '+(Math.floor(v.biome/2)*100)+'%';if(v.finished&&af?.atIssuer&&typeof ArrivalModel!=='undefined'){const art=ArrivalModel.art(state);if(art){stage.style.backgroundImage='url("'+art.src+'")';stage.style.backgroundSize=art.size;stage.style.backgroundPosition=art.position;}}
+ const stage=n('section','');stage.className='hunt-landscape';stage.dataset.phase=v.tracking?.phase||v.stage;stage.style.backgroundPosition=(v.biome%2*100)+'% '+(Math.floor(v.biome/2)*100)+'%';const art=v.finished&&af?.atIssuer&&typeof ArrivalModel!=='undefined'
+ ?ArrivalModel.art(state):v.at?GameGeography.locationArtwork(v.place?.id):null;
+ if(art){stage.style.backgroundImage='url("'+art.src+'")';stage.style.backgroundSize=art.size;stage.style.backgroundPosition=art.position;}
  const title=n('div','',stage);title.className='hunt-location';n('strong',v.place?.name||state.location,title);n('span','경과 '+state.minutes+'분 · 기한 '+v.remaining+'분',title);
  if(typeof StoryBattleArt!=='undefined'){
   const layers=n('div','',stage);layers.className='hunt-actors';for(const [i,id]of ['taei',...(state.party||[]).filter(id=>state.present?.includes(id))].slice(0,3).entries())StoryBattleArt.layer(layers,id,'ally',i,'ready');

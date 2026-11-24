@@ -1,4 +1,4 @@
-(function(r,f){const api=f();if(typeof module==='object'&&module.exports)module.exports=api;else r.DistrictModel=api;})(globalThis,()=>{
+(function(r,f){if(typeof module==='object'&&module.exports)module.exports=f(require('../map/geography.js'));else r.DistrictModel=f(r.GameGeography);})(globalThis,Geo=>{
 const width=20,height=16,start={x:8,y:12};
 const objects=[
  {id:'inn',kind:'inn',name:'달빛 여관',x:1,y:0,width:260,door:.64,solid:[-1,0,1,1]},
@@ -54,7 +54,7 @@ function storyStreet(state,geography,facilities,storyData){
  const streetNPCs=Array.from(people,([id,name],index)=>({id,name,
   ...(firstNPCSpots[index]||{x:2+((index-2)%6)*3,y:9+Math.floor((index-2)/6)*4}),
  }));
- return {location:village.id,name:village.name,visual:visualFor(village),objects:streetObjects,npcs:streetNPCs};
+ return {location:village.id,name:village.name,visual:Geo?.locationArtwork(village.id)||visualFor(village),objects:streetObjects,npcs:streetNPCs};
 }
 return{width,height,start,objects,npcs,project,unproject,blocked,direction,depth,streetPoint,streetCell,storyStreet,visualFor,terrainViews};
 });

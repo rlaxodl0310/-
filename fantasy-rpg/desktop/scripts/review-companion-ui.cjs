@@ -111,5 +111,22 @@ assert.deepEqual(await run('({method:qaRequest.method,decision:qaRequest.req.act
  {method:'adventureAction',decision:'observe'});
 await run("qaResolve({ok:true,data:{...qaState,revision:qaState.revision+5}})");
 await delay(90);
-assert.equal(errors.length,0);console.log(JSON.stringify({passed:true,provider:'controlled fixture, not live ChatGPT account',checks:['main NPC dialogue','target request survives UI routing','consent without observation','disabled observation without eligible clues','explicit ten minute observation from main screen','companion fatigue rounded for display','refusal without action','mobile390 no panel overflow','compound input reaches the story director unchanged','main-story withdrawal produces a turn summary','three chat modes route inputs and shortcuts separately','restore preview renders changes and both buttons follow the command path','journal actions open a targeted rewind preview','restored input is editable without sending until submission','three recommendations use normal story input','quoted recommendation costs render and execute through the existing action engine','no JavaScript exceptions'],exchanges:h.s.companions.exchanges.length,observations:h.q().tracking.observations,minutes:h.s.minutes}));
+await run(`(() => {
+ const location='north-village-01';
+ const profile=DistrictModel.storyStreet({...qaState,era:'fantasy',location,combat:null,visited:['fantasy:'+location]},GameGeography.records,WorldFacilities.records,StoryKitData);
+ DistrictUI.open({...profile,onReturn:async()=>{},onClosed:()=>{}});
+})()`);
+await delay(500);
+assert(await run("DistrictUI.current.renderer.visual.src==='assets/geography/north-village-01.webp'"));
+assert(await run("document.querySelector('.district-root').dataset.ready==='true'"));
+assert(await run(`(() => {
+ const map=DistrictUI.current.map,start=map.player;
+ const route=map.path(start.x+2,start.y+2);
+ return !map.diagonal && route?.length===4 && route.every((step,i)=>{
+  const previous=route[i-1]||start;
+  return Math.abs(step.x-previous.x)+Math.abs(step.y-previous.y)===1;
+ });
+})()`));
+await run("DistrictUI.current.close()");
+assert.equal(errors.length,0);console.log(JSON.stringify({passed:true,provider:'controlled fixture, not live ChatGPT account',checks:['main NPC dialogue','target request survives UI routing','consent without observation','disabled observation without eligible clues','explicit ten minute observation from main screen','companion fatigue rounded for display','refusal without action','mobile390 no panel overflow','compound input reaches the story director unchanged','main-story withdrawal produces a turn summary','three chat modes route inputs and shortcuts separately','restore preview renders changes and both buttons follow the command path','journal actions open a targeted rewind preview','restored input is editable without sending until submission','three recommendations use normal story input','quoted recommendation costs render and execute through the existing action engine','dedicated village artwork loads with cardinal-only click paths','no JavaScript exceptions'],exchanges:h.s.companions.exchanges.length,observations:h.q().tracking.observations,minutes:h.s.minutes}));
 }finally{await h.close();}await call('Page.close');ws.close();})().catch(e=>{console.error(e);process.exit(1);});
