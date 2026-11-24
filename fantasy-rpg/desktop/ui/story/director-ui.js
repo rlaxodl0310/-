@@ -70,7 +70,7 @@ async function send(text){
   if(!pending||pending.text!==text)pending={text,requestId:crypto.randomUUID(),revision:state.revision};
   render();
   try{
-    state=await call('directorSend',pending);
+    const tracked=HuntTracking.active(state);state=tracked&&HuntTracking.intent(text)?await call('directorAdventure',{requestId:pending.requestId,revision:pending.revision,action:{type:'trackIntent',questId:tracked.id,text}}):await call('directorSend',pending);
     pending=null;
     panelIndex=0;
     $('chat-input').value='';

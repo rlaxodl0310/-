@@ -480,7 +480,7 @@
       return expire(s);
     }
     if(action.type==='track')return Tracking.begin(s,q.id,Tracking.local(s,q.id));
-    if(action.type==='trackStep')return Tracking.step(s,q.id,action.decision,{createCombat});
+    if(action.type==='trackStep')return Tracking.step(s,q.id,action.decision,{createCombat,clueId:action.clueId});
     if (action.type === "scout") {
       if(q.type!=='hunt'||q.status!=='accepted'||q.destination!==s.location||ready(s,q))fail('수행 중인 토벌 의뢰의 현장에서 확인해 주세요.');
       if(q.fieldNote?.location===s.location)fail('이미 확인한 현장 기록입니다. 추가 관찰은 대화로 이어가세요.');

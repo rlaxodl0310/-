@@ -166,3 +166,10 @@ AI 이야기: 김태이로 말하거나 행동을 입력. NPC 대사/주변 묘�
 `ui/preparation/model.js`는 의뢰·도로망·시간표·실제 파티 자원·소모품·손상 장비·정수 기한을 읽는 공통 견적/확인 항목 모델이다. `electron/preparation-actions.cjs`는 탱탱과 기존 ChatGPT 브리지로 현재 항목 ID만 우선순위 선택하게 한다. `prepSelect/prepReview`는 기존 Director 모험 요청 revision/중복 처리로 저장하며 별도 자원 실행 API를 만들지 않는다. `preparationContext`는 현재 선택 의뢰 자료를 자유 대화에도 전달한다. 자료 fingerprint가 다르면 이전 조언을 재사용하지 않는다.
 
 실제 의뢰서와 이야기 HUD에서 PreparationUI를 열고, 기존 상점/휴식/여정/운항 UI의 실행 후 복귀 버튼을 유지한다. 특수 계약은 기존 수행 패널로 연결한다.599개 자동 검증 및 실제 DirectorUI 의뢰서→준비→로컬 조언→실제 빵 구매→복귀→최신 자원/오래된 조언 표시→해당 목적지 여정,390px를 검증한다. 연결 모델의 검증은 제어된 provider를 사용하며 실제 계정 품질과 Windows 실행은 별도다.
+
+
+## v0.42.71 현장 채팅과 추적 연출
+
+`HuntTracking`에 단서/확인 개체/추상 관찰 거리/일회 우회 상태를 추가하고 기존 v1 저장은 선택 필드 없이 읽는다. 클릭 단서 ID는 `trackStep.clueId`로 검증한다. `electron/hunt-intent.cjs`는 기존 탱탱/ChatGPT 브리지로 한 행동 enum만 분류하고 `trackIntent`가 기존 Adventure/Services 실행과 revision/중복 처리로 적용한다. 실제 결과 외의 피해·회복·종·수를 모델이 바꾸지 않는다. 본문 UI는 단일 활성 추적의 명확한 행동을 같은 경로에 보내고, 현장 폼은 더 일반적인 문장을 구조화 판단한다. 질문/부정/복합/강제 동료 명령은 실행하지 않는다. 현재 입력/출처/실제 결과는 추적 문맥에 남는다.
+
+`Tracking.guardScene`은 실제 접근 전 임의 전투/미확인 몬스터 등장을 막는다. 실제 조우 이후 중요 전투 전환은 기존 본편 판단을 유지한다.608개 자동 검증과 실제 DirectorUI 단서→관찰 개체→현장 채팅 우회→본문 채팅 접근→대화 전투,390px를 확인한다. 모델 검증은 제어 provider를 사용하며 실제 계정 AI 품질과 Windows 실행은 별도다.
