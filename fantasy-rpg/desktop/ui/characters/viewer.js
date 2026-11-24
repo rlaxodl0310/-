@@ -19,6 +19,7 @@ function transferArt(person){
     looks['컷신 · '+title]=sheetCell(file,width,height,columns,1,index);
   }
   const portraits={},sd={};
+  if(record.dialoguePortrait)portraits['대화 기본']=record.dialoguePortrait;
   for(const era of Object.keys(record.expressions||{})){
     emotions.forEach((label,index)=>{portraits[era+' · '+label]=CharacterContent.transferExpression(person.id,era,index);});
   }
@@ -54,7 +55,7 @@ window.CharacterContentUI={open(body){
   body.append(select,info,bio,stage,controls);
   function show(frame,pixel=false,kind='art'){
     stage.replaceChildren();
-    const bounds={art:[420,560],portrait:[420,340],scene:[420,420],sd:[240,240]};
+    const bounds={art:[600,560],portrait:[420,340],scene:[420,420],sd:[240,240]};
     const [width,height]=bounds[kind];
     stage.style.width=width+'px';
     stage.style.aspectRatio=width+'/'+height;

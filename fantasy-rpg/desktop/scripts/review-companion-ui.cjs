@@ -1,6 +1,33 @@
 const fs=require('node:fs');(async()=>{const target=await(await fetch('http://127.0.0.1:9229/json/new?about:blank',{method:'PUT'})).json(),ws=new WebSocket(target.webSocketDebuggerUrl);await new Promise(r=>ws.onopen=r);let serial=0;const waiting=new Map(),errors=[];ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.id){const p=waiting.get(m.id);waiting.delete(m.id);m.error?p.reject(m.error):p.resolve(m.result);}else if(m.method==='Runtime.exceptionThrown')errors.push(m.params.exceptionDetails.exception?.description||m.params.exceptionDetails.text);};const call=(method,params={})=>new Promise((resolve,reject)=>{const id=++serial;waiting.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}));});const run=async expression=>{const r=await call('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw Error(r.exceptionDetails.exception?.description||r.exceptionDetails.text);return r.result.value;};const delay=ms=>new Promise(r=>setTimeout(r,ms)),shot=async file=>{const p=await call('Page.captureScreenshot',{format:'png'});fs.writeFileSync(file,Buffer.from(p.data,'base64'));};await call('Runtime.enable');await call('Network.enable');await call('Network.setCacheDisabled',{cacheDisabled:true});await call('Page.enable');await call('Emulation.setDeviceMetricsOverride',{width:1366,height:900,deviceScaleFactor:1,mobile:false});await call('Page.navigate',{url:`http://127.0.0.1:${process.env.FANTASY_REVIEW_PORT||8767}/?review=companion74`});await delay(1600);
 
 const H=require('../tests/helpers/companion-talk.cjs'),assert=require('node:assert/strict');const h=await H.ready();try{
+assert(await run(`(() => {
+ const player=document.getElementById('scene-player'),actor=document.getElementById('scene-portrait');
+ const chat=document.getElementById('chat-form').getBoundingClientRect();
+ const left=player.getBoundingClientRect(),right=actor.getBoundingClientRect();
+ return !player.hidden&&!actor.hidden&&player.dataset.character==='taei'&&actor.dataset.character==='yeogyeong'
+  &&left.left<right.left&&Math.max(left.bottom,right.bottom)<=chat.top&&chat.height<=40&&chat.width>=850;
+})()`));
+if(process.env.FANTASY_LAYOUT_SCREENSHOT)await shot(process.env.FANTASY_LAYOUT_SCREENSHOT);
+await run(`(() => {
+ window.walkProbe={};
+ const follow=WalkCamera.Camera.prototype.follow,draw=WalkCamera.Walker.prototype.draw;
+ WalkCamera.Camera.prototype.follow=function(params){follow.call(this,params);walkProbe.offset=this.offset.x;};
+ WalkCamera.Walker.prototype.draw=function(ctx,image,art,...args){
+  draw.call(this,ctx,image,art,...args);
+  if(image?.naturalWidth)walkProbe.art=art.src;
+ };
+ document.getElementById('walk-launch').click();
+})()`);
+await delay(350);
+assert.equal(await run('walkProbe.art'),'map/assets/taei-walk-earth.webp');
+const beforeWalk=await run('walkProbe.offset');
+await run("window.dispatchEvent(new KeyboardEvent('keydown',{code:'ArrowRight'}))");
+await delay(650);
+await run("window.dispatchEvent(new KeyboardEvent('keyup',{code:'ArrowRight'}))");
+assert(await run(`Math.abs(walkProbe.offset-(${beforeWalk}))>20&&Number(document.querySelector('.walk-overlay').dataset.playerX)>11`));
+if(process.env.FANTASY_WALK_SCREENSHOT)await shot(process.env.FANTASY_WALK_SCREENSHOT);
+await run("document.querySelector('.walk-toolbar button').click()");
 await run(`window.qaState=${JSON.stringify(h.s)};window.qaRequest=null;window.desktopAI={directorState:async()=>({ok:true,data:qaState})};`);
 for(const[api,method]of Object.entries({directorAdventure:'adventureAction',directorSend:'send',directorCommand:'command'}))await run(`desktopAI[${JSON.stringify(api)}]=async req=>{qaRequest={method:${JSON.stringify(method)},req};return await new Promise(resolve=>window.qaResolve=resolve);};`);
 await run('DirectorUI.init()');await delay(120);
@@ -127,6 +154,12 @@ assert(await run(`(() => {
   return Math.abs(step.x-previous.x)+Math.abs(step.y-previous.y)===1;
  });
 })()`));
+assert.equal(await run('walkProbe.art'),'map/assets/taei-walk-fantasy.webp');
+const beforeStreet=await run('DistrictUI.current.renderer.camera.offset.x');
+await run("window.dispatchEvent(new KeyboardEvent('keydown',{code:'ArrowRight'}))");
+await delay(650);
+await run("window.dispatchEvent(new KeyboardEvent('keyup',{code:'ArrowRight'}))");
+assert(await run(`Math.abs(DistrictUI.current.renderer.camera.offset.x-(${beforeStreet}))>12`));
 await run("DistrictUI.current.close()");
-assert.equal(errors.length,0);console.log(JSON.stringify({passed:true,provider:'controlled fixture, not live ChatGPT account',checks:['main NPC dialogue','target request survives UI routing','consent without observation','disabled observation without eligible clues','explicit ten minute observation from main screen','companion fatigue rounded for display','refusal without action','mobile390 no panel overflow','compound input reaches the story director unchanged','main-story withdrawal produces a turn summary','three chat modes route inputs and shortcuts separately','restore preview renders changes and both buttons follow the command path','journal actions open a targeted rewind preview','restored input is editable without sending until submission','three recommendations use normal story input','quoted recommendation costs render and execute through the existing action engine','dedicated village artwork loads with cardinal-only click paths','no JavaScript exceptions'],exchanges:h.s.companions.exchanges.length,observations:h.q().tracking.observations,minutes:h.s.minutes}));
+assert.equal(errors.length,0);console.log(JSON.stringify({passed:true,provider:'controlled fixture, not live ChatGPT account',checks:['left and right portraits with compact bottom chat','illustrated movement and following camera in both walk views','main NPC dialogue','target request survives UI routing','consent without observation','disabled observation without eligible clues','explicit ten minute observation from main screen','companion fatigue rounded for display','refusal without action','mobile390 no panel overflow','compound input reaches the story director unchanged','main-story withdrawal produces a turn summary','three chat modes route inputs and shortcuts separately','restore preview renders changes and both buttons follow the command path','journal actions open a targeted rewind preview','restored input is editable without sending until submission','three recommendations use normal story input','quoted recommendation costs render and execute through the existing action engine','dedicated village artwork loads with cardinal-only click paths','no JavaScript exceptions'],exchanges:h.s.companions.exchanges.length,observations:h.q().tracking.observations,minutes:h.s.minutes}));
 }finally{await h.close();}await call('Page.close');ws.close();})().catch(e=>{console.error(e);process.exit(1);});

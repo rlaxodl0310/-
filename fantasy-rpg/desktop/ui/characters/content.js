@@ -63,6 +63,7 @@ records.push({
     ready:fullImage('selsi-ready.webp',720,1080),
     sigh:fullImage('selsi-sigh.webp',720,1080),
   },
+  portraits:{default:fullImage('dialogue/selsi.webp',960,720)},
   sd:{default:fullImage('selsi-sd.webp',512,512)},
   combatSprite:combatAtlas('selsi',.96,.85),
   motion:{name:'상체를 느슨하게 두고 한 걸음 비키기',lean:-2,step:4,turn:5,side:11,tempo:.85},
@@ -207,7 +208,7 @@ records.push({
   lookLabels:{attack:'검 공격',guard:'방패 방어',cutscene:'말없이 동료를 떠올리는 순간 · 컷신'},
   motion:{name:'방패 쪽에 체중을 싣고 검을 휘두르기',lean:8,step:4.5,turn:10,side:2.5,tempo:.92},
   looks:{
-    default:fullImage('evan-standing.webp',720,1080),
+    default:crop('evan-standing.webp',720,1080,12,359,696,708),
     casual:fullImage('evan-casual.webp',720,1080),
     rear:fullImage('evan-rear.webp',720,1080),
     help:fullImage('evan-talk.webp',720,1080),
@@ -390,7 +391,7 @@ records.push(
     unknownName:'은빛 머리의 드워프',requiresStoryIntroduction:true,origin:'fantasy',
     persona:'드워프족 비스킷. 138cm, 43kg. 막 대장장이가 된 신참으로, 유쾌하고 능청스럽다. 이야기가 진행되면서 대장장이로 성장한다.',
     preferredWeapons:[],
-    lookLabels:{help:'능청스러운 윙크',reaction:'만든 경첩을 보여주기',cutscene:'모루에서 경첩을 두드리기 · 컷신'},
+    lookLabels:{help:'웃으며 손인사',reaction:'만든 경첩을 보여주기',cutscene:'모루에서 경첩을 두드리기 · 컷신'},
     motion:{name:'모루에서 경첩을 두드리기',lean:5.25,step:5.25,turn:10.25,side:8.75,tempo:1.02},
     looks:{
     default:fullImage('biscuit-standing.webp',720,1080),
@@ -531,29 +532,29 @@ const legacyCasual={
 };
 const transfers={
   taei:{age:18,trait:'제로와 함께하는 동반자 특성',bio:'지구 출신 고등학교 2학년. 등굣길 지하철에서 전이한다.',
-    looks:{'지구 · 등교 복장':fullImage('taei-earth.webp',720,1080),'이세계 · 격투가':crop('taei-fighter-reference.png',1536,1024,880,0,382,1024)},
+    looks:{'지구 · 등교 복장':fullImage('taei-earth.webp',720,1080),'지구 · 후면 전신':fullImage('taei-earth-rear.webp',720,1080),'이세계 · 격투가':crop('taei-fighter-reference.png',1536,1024,880,0,382,1024)},
     cutscenes:[['건틀릿 점검','taei-fighter-cutscenes.webp',1200,600,2,0],['가드 연습','taei-fighter-cutscenes.webp',1200,600,2,1]],
     expressions:{'지구':'taei-earth-expressions.webp','이세계':'taei-fighter-expressions.webp'},sd:{'격투가':'sd-taei-fighter.webp'}},
   dogyeom:{age:18,trait:'반동',bio:'백금발의 전 복싱 유망주. 부상 흉터를 이레즈미 문신으로 가렸다. 반동으로 받아낸 충격 일부를 타격에 싣는다.',
-    looks:{'지구 · 등교 복장':fullImage('dogyeom-earth.webp',720,1080)},
+    looks:{'지구 · 등교 복장':fullImage('dogyeom-earth.webp',720,1080),'지구 · 후면 전신':fullImage('dogyeom-earth-rear.webp',720,1080)},
     cutscenes:[['손목 보호대 점검','event-dogyeom-solo.png',1672,941]],expressions:{'이세계':'dogyeom-expressions.png'},solo:[1,4]},
   yeogyeong:{age:18,trait:'유예',bio:'태이와 같은 반. 간호학과 진학을 준비했다. 유예로 한 부위의 부상 상태를 잠시 고정한다.',
-    looks:{'지구 · 교복':fullImage('yeogyeong-standing.png',1011,1556),'이세계 · 여행복':crop('yeogyeong-fantasy-outfit.png',1536,1024,938,0,598,1024)},
+    looks:{'지구 · 교복':fullImage('yeogyeong-standing.png',1011,1556),'지구 · 후면 전신':fullImage('yeogyeong-earth-rear.webp',720,1080),'이세계 · 여행복':crop('yeogyeong-fantasy-outfit.png',1536,1024,938,0,598,1024)},
     cutscenes:[['교실','event-yeogyeong-classroom.png',1672,941],['복도','event-yeogyeong-corridor.png',1536,1024],['치유 연습','event-yeogyeong-healing.png',1672,941],['성문','event-yeogyeong-gate.png',1536,1024]],
     expressions:{'지구':'yeogyeong-expressions.png','이세계':'yeogyeong-fantasy-expressions.png'},sd:{'지구':'sd-yeogyeong.png','이세계':'sd-yeogyeong-fantasy.png'}},
-  seoha:{age:18,trait:'경계',bio:'차분한 표정 뒤로 엉뚱한 생각을 자주 한다. 경계를 넘는 대상의 움직임을 한 차례 끊는다.',
-    looks:{'지구 · 교복':fullImage('seoha-standing.png',1024,1536)},
+  seoha:{dialoguePortrait:fullImage('dialogue/seoha.webp',720,540),age:18,trait:'경계',bio:'차분한 표정 뒤로 엉뚱한 생각을 자주 한다. 경계를 넘는 대상의 움직임을 한 차례 끊는다.',
+    looks:{'지구 · 교복':fullImage('seoha-standing.png',1024,1536),'지구 · 후면 전신':fullImage('seoha-earth-rear.webp',720,1080)},
     cutscenes:[['우물가에서 새 관찰','event-seoha-solo.png',1672,941]],expressions:{'이세계':'seoha-expressions.png'},solo:[2,5]},
-  yui:{age:20,trait:'잔향',bio:'태이의 학교를 나온 대학생. 잔향은 현장에 남은 흔적에서 과거를 탐지하는 방향으로 발전한다.',
-    looks:{'지구 · 외출복':fullImage('yui-standing.png',887,1774)},
+  yui:{dialoguePortrait:fullImage('dialogue/yui.webp',720,540),age:20,trait:'잔향',bio:'태이의 학교를 나온 대학생. 잔향은 현장에 남은 흔적에서 과거를 탐지하는 방향으로 발전한다.',
+    looks:{'지구 · 외출복':fullImage('yui-standing.png',887,1774),'지구 · 후면 전신':fullImage('yui-earth-rear.webp',720,1080)},
     cutscenes:[['지구','yui-cutscenes.png',1774,887,2,0],['이세계','yui-cutscenes.png',1774,887,2,1]],
     expressions:{'지구':'yui-expressions.png'},sd:{'상호작용':'sd-yui.png'}},
   woojin:{age:null,trait:null,bio:'지구의 물류 현장 직원으로 제작한 전이자 시안.',
-    looks:{'지구 · 작업복':crop('woojin-design.png',1536,1024,0,0,470,1024),'이세계 · 여행복':crop('woojin-design.png',1536,1024,1100,0,436,1024)},
+    looks:{'지구 · 작업복':crop('woojin-design.png',1536,1024,0,0,470,1024),'지구 · 후면 전신':fullImage('woojin-earth-rear.webp',720,1080),'이세계 · 여행복':crop('woojin-design.png',1536,1024,1100,0,436,1024)},
     cutscenes:[['매듭 점검','woojin-cutscenes.png',1774,887,2,0],['여관 앞 휴식','woojin-cutscenes.png',1774,887,2,1]],
     expressions:{'이세계':'woojin-expressions.png'},sd:{'상호작용':'sd-woojin.png'}},
   'dogyeom-childhood-friend':{age:null,trait:'보관',bio:'백도겸의 소꿉친구. 보관은 성장하며 개인 아공간으로 발전한다.',
-    looks:{'지구 · 교복':fullImage('childhood-friend-standing.png',980,1605)},
+    looks:{'지구 · 교복':fullImage('childhood-friend-standing.png',980,1605),'지구 · 후면 전신':fullImage('soyun-earth-rear.webp',720,1080)},
     sheets:{'지구':'soyun-earth-sheet.webp','이세계':'soyun-fantasy-sheet.webp'}},
 };
 function crop(file,width,height,x,y,w,h){
@@ -569,5 +570,8 @@ function transferExpression(id,era,emotion){
   if(!file)return null;
   return sheetCell(file,1536,1024,3,2,Math.max(0,Math.min(5,Number.isInteger(emotion)?emotion:0)));
 }
-return{records,legacyCasual,transfers,transferExpression,sheetCell,get,appearance,displayName,combatFrame};
+function dialogueFrame(id,era,emotion){
+  return get(id)?.portraits?.default||transfers[id]?.dialoguePortrait||transferExpression(id,era,emotion);
+}
+return{records,legacyCasual,transfers,transferExpression,dialogueFrame,sheetCell,get,appearance,displayName,combatFrame};
 });

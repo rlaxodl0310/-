@@ -17,7 +17,7 @@ function render(){document.body.classList.toggle('large-text',large);document.bo
  document.querySelector('.footer-trait').textContent=inFantasy?'첫걸음':'등굣길';
  if(!a){renderChapterEnd(inFantasy);return;}
  if(event.id==='fantasy_arrival'){
-  SceneStage.render({background:$('scene-art'),portrait:$('scene-portrait'),location:event.location,characterId:null});
+  SceneStage.render({background:$('scene-art'),portrait:$('scene-portrait'),player:$('scene-player'),location:event.location,characterId:null});
   $('scene-title').textContent='낯선 풀밭';
   $('scene-place').textContent=places[event.location];
   $('speaker').textContent='상황';$('emotion').textContent='';
@@ -25,12 +25,12 @@ function render(){document.body.classList.toggle('large-text',large);document.bo
   showMeadowHandoff();
   return;
  }
- const e=event;$('scene-title').textContent=e.title.split(' · ')[1]||e.title;$('scene-place').textContent=places[e.location]||e.location;$('episode-no').textContent=String(D.events.indexOf(e)+1).padStart(2,'0');const art=$('scene-art');SceneStage.render({background:art,portrait:$('scene-portrait'),location:e.location,characterId:e.chat===false?null:e.owner,emotion:n.emotion,state:engine.state,era:e.era,dialogue:true});LookPacksUI.renderPortrait({element:$('scene-portrait'),characterId:e.owner,era:e.era||'earth',emotion:n.emotion});const last=logs.at(-1),lastIsNPC=last&&last.speaker===actorName(e.owner),shown=lastIsNPC?e.owner:n.speaker;$('speaker').textContent=actorName(shown);$('emotion').textContent=shown==='narrator'?'':D.emotions[n.emotion];$('line').textContent=lastIsNPC?last.text:n.text;$('chat-form').hidden=e.chat===false;$('chat-input').disabled=e.chat===false;$('chat-form').querySelector('button').disabled=e.chat===false;
+ const e=event;$('scene-title').textContent=e.title.split(' · ')[1]||e.title;$('scene-place').textContent=places[e.location]||e.location;$('episode-no').textContent=String(D.events.indexOf(e)+1).padStart(2,'0');const art=$('scene-art');SceneStage.render({background:art,portrait:$('scene-portrait'),player:$('scene-player'),location:e.location,characterId:e.chat===false?null:e.owner,emotion:n.emotion,state:engine.state,era:e.era,dialogue:true});if(e.owner!=='taei')LookPacksUI.renderPortrait({element:$('scene-portrait'),characterId:e.owner,era:e.era||'earth',emotion:n.emotion});const last=logs.at(-1),lastIsNPC=last&&last.speaker===actorName(e.owner),shown=lastIsNPC?e.owner:n.speaker;$('speaker').textContent=actorName(shown);$('emotion').textContent=shown==='narrator'?'':D.emotions[n.emotion];$('line').textContent=lastIsNPC?last.text:n.text;$('chat-form').hidden=e.chat===false;$('chat-input').disabled=e.chat===false;$('chat-form').querySelector('button').disabled=e.chat===false;
  $('sd').hidden=!sdOpen||n.sd===undefined;if(n.sd!==undefined){$('sd').style.backgroundImage='url("'+D.assets[e.sdAsset||'sd']+'")';$('sd').style.backgroundPosition=(n.sd%3*50)+'% '+Math.floor(n.sd/3)*100+'%';}$('sd-toggle').setAttribute('aria-pressed',String(sdOpen));$('sd-toggle').hidden=n.sd===undefined;
- if(n.choices)for(const c of n.choices)$('choices').append(button(c.label,()=>advance(c.id)));else $('choices').append(button(n.end?'장면 마치기 →':'이야기 계속 →',()=>advance()));if(e.cg){let viewing=false;const cgButton=button('이벤트 컷신 보기',()=>{viewing=!viewing;if(viewing)SceneStage.cutscene(art,$('scene-portrait'),D.assets[e.cg],e.cgPanel);else SceneStage.render({background:art,portrait:$('scene-portrait'),location:e.location,characterId:e.chat===false?null:e.owner,emotion:n.emotion,state:engine.state,era:e.era,dialogue:true});cgButton.textContent=viewing?'기본 장면으로 돌아가기':'이벤트 컷신 보기';});$('choices').append(cgButton);}}
+ if(n.choices)for(const c of n.choices)$('choices').append(button(c.label,()=>advance(c.id)));else $('choices').append(button(n.end?'장면 마치기 →':'이야기 계속 →',()=>advance()));if(e.cg){let viewing=false;const cgButton=button('이벤트 컷신 보기',()=>{viewing=!viewing;if(viewing)SceneStage.cutscene(art,$('scene-portrait'),D.assets[e.cg],e.cgPanel,$('scene-player'));else SceneStage.render({background:art,portrait:$('scene-portrait'),player:$('scene-player'),location:e.location,characterId:e.chat===false?null:e.owner,emotion:n.emotion,state:engine.state,era:e.era,dialogue:true});cgButton.textContent=viewing?'기본 장면으로 돌아가기':'이벤트 컷신 보기';});$('choices').append(cgButton);}}
 function renderChapterEnd(inFantasy){
  const location=engine.state.currentLocation||'earth_subway';
- SceneStage.render({background:$('scene-art'),portrait:$('scene-portrait'),location,characterId:null});
+ SceneStage.render({background:$('scene-art'),portrait:$('scene-portrait'),player:$('scene-player'),location,characterId:null});
  $('scene-title').textContent=inFantasy?'이세계에서의 첫걸음':'현실 도입부 완료';
  $('scene-place').textContent=places[location]||location;
  $('speaker').textContent='이야기 기록';
@@ -158,7 +158,7 @@ GameAI.check();
 function walkBuilding(target){
  const old=document.querySelector('.walk-dialogue');old?.remove();const box=document.createElement('section');box.className='walk-dialogue';box.setAttribute('role','dialog');box.setAttribute('aria-label',target.label+' 상호작용');const name=document.createElement('strong');name.textContent=target.label;const text=document.createElement('p');text.textContent=target.note||'건물 앞에 도착했다. 내부 사건과 실제 이용 기능은 아직 연결되지 않았다.';const back=document.createElement('button');back.textContent='탐색으로 돌아가기';back.onclick=()=>box.remove();box.append(name,text,back);document.body.append(box);back.focus();
 }
-$('walk-launch').onclick=()=>{if(busy){toast('대화 응답을 기다리는 중입니다.');return;}const event=engine.state.active?engine.event(engine.state.active.id):null;const owner=event?.owner;const allowed=event?.chat!==false&&owner&&owner!=='taei'&&CharacterOrigins.allowed(owner,{era:event?.era||'earth',location:event?.location||'earth_subway'});WalkUI.open({background:SceneStage.backgrounds[engine.state.currentLocation]||SceneStage.backgrounds.earth_subway,npc:allowed?{id:owner,name:actorName(owner)}:null,label:'현재 장면 · 이동 시제품',onTalk:()=>{$('chat-input').focus();toast('기존 대화 화면으로 돌아왔습니다.');}});};
+$('walk-launch').onclick=()=>{if(busy){toast('대화 응답을 기다리는 중입니다.');return;}const event=engine.state.active?engine.event(engine.state.active.id):null;const owner=event?.owner;const allowed=event?.chat!==false&&owner&&owner!=='taei'&&CharacterOrigins.allowed(owner,{era:event?.era||'earth',location:event?.location||'earth_subway'});WalkUI.open({era:event?.era||'earth',background:SceneStage.backgrounds[engine.state.currentLocation]||SceneStage.backgrounds.earth_subway,npc:allowed?{id:owner,name:actorName(owner)}:null,label:'현재 장면 · 직접 이동',onTalk:()=>{$('chat-input').focus();toast('기존 대화 화면으로 돌아왔습니다.');}});};
 
 
 const quickToolsToggle=$('quick-tools-toggle'),quickTools=$('quick-tools');

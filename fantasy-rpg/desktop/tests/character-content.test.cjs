@@ -70,3 +70,21 @@ test('Earth transfer previews use full figures and the correct Taei outfit',()=>
   a.equal(C.transferExpression('taei','이세계',0).src,'assets/taei-fighter-expressions.webp');
   a.equal(C.get('cheona').looks.help.src,'assets/cheona-help.webp');
 });
+
+test('transfer rear views are separate files registered alongside Earth fronts',()=>{
+  const rears=Object.values(C.transfers).map(({looks})=>{
+    const rear=looks['지구 · 후면 전신'];
+    a(rear);
+    a.notEqual(rear.src,Object.values(looks)[0].src);
+    a.deepEqual([rear.w,rear.h],[720,1080]);
+    const bytes=fs.readFileSync(path.resolve(__dirname,'../ui',rear.src));
+    a.equal(bytes.toString('ascii',8,12),'WEBP');
+    return rear.src;
+  });
+  a.equal(new Set(rears).size,rears.length);
+  for(const id of ['seoha','yui','selsi']){
+    const portrait=C.dialogueFrame(id,'지구',4);
+    a.equal(portrait.src,'assets/dialogue/'+id+'.webp');
+    a(fs.existsSync(path.resolve(__dirname,'../ui',portrait.src)));
+  }
+});

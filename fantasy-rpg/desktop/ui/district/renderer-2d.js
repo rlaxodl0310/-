@@ -4,8 +4,7 @@ const model=root.DistrictModel;
 const background='district/assets/lantern-street.webp';
 const images=new Map();
 function load(npcs=model.npcs,visual=null){
- const stances=root.CastSprites.entries;
- const urls=[background,...(visual?[visual.src]:[]),root.DistrictArt.se.src,...npcs.filter(npc=>stances[npc.id]?.src).map(npc=>'battle/'+stances[npc.id].src)];
+ const urls=[background,...(visual?[visual.src]:[]),root.WalkCharacter.fantasy.src,...npcs.map(npc=>root.WalkCharacter.standing(npc.id)?.src).filter(Boolean)];
  return Promise.all([...new Set(urls)].map(url=>new Promise(resolve=>{
   const image=new Image();
   image.onload=()=>{images.set(url,image);resolve(true);};
@@ -19,11 +18,9 @@ class Renderer{
   this.visual=visual;
   this.ctx=canvas.getContext('2d');
   if(!this.ctx)throw Error('Canvas unavailable');
-  this.distance=0;
-  this.direction='se';
-  this.zoomFactor=1;
-
-  this.offset={x:0,y:0};
+  this.walker=new root.WalkCamera.Walker();
+  this.camera=new root.WalkCamera.Camera();
+  this.zoomFactor=1.25;
   this.npcs=npcs;
   this.targets=[...objects.filter(item=>item.name),...npcs];
   this.resize();
@@ -36,25 +33,14 @@ class Renderer{
   this.canvas.width=Math.round(this.width*this.pixelRatio);
   this.canvas.height=Math.round(this.height*this.pixelRatio);
  }
- focus(player,instant=false){
-  const image=images.get(this.visual?.src||background);
-  const ratio=this.visual?this.visual.frame[2]/this.visual.frame[3]:image?image.width/image.height:16/9;
-  this.artHeight=Math.max(this.height,this.width/ratio)*this.zoomFactor;
-  this.artWidth=this.artHeight*ratio;
-  const p=model.streetPoint(player);
-  const x=Math.min(0,Math.max(this.width-this.artWidth,this.width*.5-p.x*this.artWidth));
-  const y=Math.min(0,Math.max(this.height-this.artHeight,this.height*.72-p.y*this.artHeight));
-  const blend=instant?1:.16;
-  this.offset.x+=(x-this.offset.x)*blend;
-  this.offset.y+=(y-this.offset.y)*blend;
+ backdrop(){return images.get(this.visual?.src||background)||images.get(background);}
+ focus(player,snap=false,seconds=0){
+  const bg=this.backdrop(),ratio=this.visual?this.visual.frame[2]/this.visual.frame[3]:bg?bg.width/bg.height:16/9;
+  this.camera.follow({width:this.width,height:this.height,ratio,point:model.streetPoint(player),zoom:this.zoomFactor,seconds,snap});
  }
- screen(pos){
-  const p=model.streetPoint(pos);
-  return {x:p.x*this.artWidth+this.offset.x,y:p.y*this.artHeight+this.offset.y};
- }
- cell(x,y){
-  return model.streetCell({x:(x-this.offset.x)/this.artWidth,y:(y-this.offset.y)/this.artHeight});
- }
+ get distance(){return this.walker.distance;}
+ screen(pos){return this.camera.project(model.streetPoint(pos));}
+ cell(x,y){return model.streetCell(this.camera.unproject({x,y}));}
  objectAt(x,y){
   return this.targets.find(target=>{
    const p=this.screen(target);
@@ -62,16 +48,15 @@ class Renderer{
    return Math.abs(x-p.x)<45&&Math.abs(y-p.y+23)<22;
   });
  }
- zoom(factor){this.zoomFactor=Math.min(1.55,Math.max(1,this.zoomFactor*factor));}
+ zoom(factor){this.zoomFactor=Math.min(1.55,Math.max(1.12,this.zoomFactor*factor));}
  spriteHeight(pos){
-  const baseArtHeight=this.artHeight/this.zoomFactor;
-  return Math.max(47,Math.min(142,baseArtHeight*(.068+.055*pos.y/(model.height-1))))*this.zoomFactor;
+  return Math.max(64,Math.min(235,this.camera.artHeight*(.14+.13*pos.y/(model.height-1))));
  }
- sprite(pos,entry,index){
+ sprite(pos,entry){
   const im=images.get(entry.src);
   if(!im)return;
   const {x,y}=this.screen(pos);
-  const [sx,sy,w,h]=entry.frames[index];
+  const [sx,sy,w,h]=entry.frame;
   const height=this.spriteHeight(pos);
   const width=w*height/h,c=this.ctx;
   c.fillStyle='#221b1855';
@@ -79,20 +64,16 @@ class Renderer{
   c.drawImage(im,sx,sy,w,h,x-width/2,y-height,width,height);
  }
  render(map,time,near,{reduced=false}={}){
-  this.focus(map.player,reduced||!this.lastPlayer);
   const p=map.player;
-  if(this.lastPlayer){
-   const dx=p.x-this.lastPlayer.x,dy=p.y-this.lastPlayer.y;
-   const step=Math.hypot(dx,dy);
-   this.distance+=step;
-   if(step>.0001)this.direction=dy<0?(dx<0?'nw':'ne'):(dx<0?'sw':'se');
-  }
-  this.lastPlayer={...p};
+  this.focus(p,reduced||this.lastTime===undefined,(time-this.lastTime)/1000);
+  this.lastTime=time;
+  this.walker.update(p);
+  const bg=this.backdrop();
+  const {artWidth,artHeight,offset}=this.camera;
   const c=this.ctx;
   c.setTransform(this.pixelRatio,0,0,this.pixelRatio,0,0);
   c.fillStyle='#263b33';c.fillRect(0,0,this.width,this.height);
-  const bg=images.get(this.visual?.src||background)||images.get(background);
-  if(bg){if(this.visual&&images.has(this.visual.src))c.drawImage(bg,...this.visual.frame,this.offset.x,this.offset.y,this.artWidth,this.artHeight);else c.drawImage(bg,this.offset.x,this.offset.y,this.artWidth,this.artHeight);}
+  if(bg){if(this.visual&&images.has(this.visual.src))c.drawImage(bg,...this.visual.frame,offset.x,offset.y,artWidth,artHeight);else c.drawImage(bg,offset.x,offset.y,artWidth,artHeight);}
   const terrainTargets=this.targets.filter(target=>!this.npcs.includes(target));
   for(const target of terrainTargets){
    const point=this.screen(target);
@@ -101,15 +82,18 @@ class Renderer{
    c.beginPath();c.arc(point.x,point.y-10,4,0,Math.PI*2);c.fill();c.stroke();
    if(near!==target)this.label(target.name,point.x,point.y-22);
   }
-  const walk=map.route.length?[1,2,3,2][Math.floor(this.distance*3.6)%4]:0;
   const sprites=this.npcs.flatMap(npc=>{
-   const entry=root.CastSprites.entries[npc.id];
+   const entry=root.WalkCharacter.standing(npc.id);
    if(!entry?.src){const p=this.screen(npc);this.label(npc.name,p.x,p.y-45);return [];}
-   return [{pos:npc,entry:{src:'battle/'+entry.src,frames:entry.frames},index:0}];
+   return [{pos:npc,entry}];
   });
-  sprites.push({pos:p,entry:root.DistrictArt[this.direction],index:walk});
+  sprites.push({pos:p,player:true});
   sprites.sort((a,b)=>a.pos.y-b.pos.y);
-  for(const sprite of sprites)this.sprite(sprite.pos,sprite.entry,sprite.index);
+  const art=root.WalkCharacter.fantasy;
+  for(const sprite of sprites){
+   if(sprite.player)this.walker.draw(c,images.get(art.src),art,this.screen(p),this.spriteHeight(p),reduced);
+   else this.sprite(sprite.pos,sprite.entry);
+  }
   if(near){
    const point=this.screen(near),lift=this.npcs.includes(near)?this.spriteHeight(near)+15:36;
    this.label(near.name+' · Space',point.x,point.y-lift);
