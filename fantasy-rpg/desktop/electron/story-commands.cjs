@@ -94,6 +94,10 @@ async function run(director, request) {
       const target = await targetFor(director,current,pending.turn);
       if (target.hash !== pending.hash) return { text: '직전 저장이 바뀌었어요. /되돌리기 로 다시 확인해 주세요.' };
       const restored = target.state;
+      const selected = current.turnReview?.find(row => row.revision === pending.turn);
+      const original = selected && current.turns.find(turn => turn.id === selected.requestId);
+      const draft = typeof original?.text === 'string' && original.text.trim() &&
+        original.text.length <= 1000 && !original.text.trimStart().startsWith('/') ? original.text : null;
       const revision = Math.max(current.revision, restored.revision) + 1;
       if (restored.pendingObservationAction?.revision === restored.revision)
         restored.pendingObservationAction.revision = revision;
@@ -101,7 +105,7 @@ async function run(director, request) {
       restored.timeline = { id: crypto.randomUUID(), parentId: restored.timeline?.id || null };
       delete restored.saveSlot;
       const state = await director.save(restored, { restore: true, discussion: true });
-      return { text: '선택한 시점으로 돌아왔어요. 복구 직전 상태도 직전 저장으로 보존했어요.', state };
+      return { text: '선택한 시점으로 돌아왔어요. 복구 직전 상태도 직전 저장으로 보존했어요.', state, draft };
     }
 
     const ready = await director.bridge.check();

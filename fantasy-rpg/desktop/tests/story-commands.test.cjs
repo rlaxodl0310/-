@@ -82,7 +82,8 @@ test('targeted rewind retains five checkpoints, restores an earlier branch and k
   await command('/취소');
   assert(original.equals(await fs.readFile(file)));
   await command('/되돌리기 4');
-  const {state:restored}=await command('/확인');
+  const {state:restored,draft}=await command('/확인');
+  assert.equal(draft,'행동 4');
   assert.equal(restored.minutes,15);
   assert.deepEqual(restored.turns.map(t=>t.text),['행동 1','행동 2','행동 3']);
   assert.deepEqual(restored.checkpoints.map(item=>item.turn),[2,3]);

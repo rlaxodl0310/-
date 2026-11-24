@@ -33,7 +33,7 @@ function render(){if(!state||!enabled)return;let companionHud=$('companion-hud')
   }else delete layer.dataset.presentation;
  }else delete layer.dataset.presentation;
  if(state.era==='fantasy'&&!combat&&!PassageHost.onboard(state)){const art=ArrivalModel.art(state);if(art){background.style.backgroundImage='url("'+art.src+'")';background.style.backgroundSize=art.size;background.style.backgroundPosition=art.position;}else if(GameGeography.records.find(p=>p.id===state.location)?.kind==='village'){background.style.backgroundImage='linear-gradient(145deg,#1e3027,#3a4433,#192820)';background.style.backgroundSize='cover';}else if(state.location!=='arrival_meadow'){background.style.backgroundImage='url("assets/combat/locations.png")';background.style.backgroundSize='200% 200%';background.style.backgroundPosition='0% 0%';}}
- renderTurnContext();$('elapsed').textContent=(state.minutes||0)+'분';$('scene-era').textContent=state.era==='fantasy'?'이세계':'현실';$('episode-no').textContent='LIVE · '+String(state.revision).padStart(2,'0');$('scene-title').textContent=combat?(combat.mode==='realtime'?'중요한 대치':'엇갈리는 공방'):'이어지는 이야기';$('scene-place').textContent=state.era==='earth'?({subway:'현실 · 지하철',platform:'현실 · 승강장',station:'현실 · 역 대합실'})[state.location]:GameGeography.records.find(x=>x.id===state.location)?.name||(state.location==='arrival_meadow'?'이세계 · 낯선 풀밭':state.location);if(PassageHost.onboard(state)){const ride=PassageHost.onboard(state);$('scene-title').textContent=ride.phase==='incident'?'운항 조정 안내':'운항 중';$('scene-place').textContent=ride.name+' · '+ride.progress+'/'+ride.duration+'분';background.style.backgroundImage=ride.mode==='ship'?'linear-gradient(150deg,#122c39,#264d56,#182c32)':ride.mode==='airship'?'linear-gradient(150deg,#202a41,#414767,#243743)':'linear-gradient(150deg,#30271e,#4d4937,#202d26)';background.style.backgroundSize='cover';}$('save-state').textContent=working?'상황과 기억을 확인하는 중…':'이야기 자동 저장 · '+state.revision+'번째 대화';$('chat-input').disabled=working||combat?.mode==='realtime'&&combat.status==='playing';$('chat-input').maxLength=1000;document.querySelector('#chat-form button[type=submit]').disabled=working;showChatMode();showRestorePreview();$('sd').hidden=true;$('scene-minimap').hidden=true;const footer=document.querySelector('main>footer');footer.querySelector('.footer-trait').textContent=combat?'HP '+state.player.hp+'/'+state.player.max:'실시간 생성 이야기';footer.children[2].textContent=$('scene-place').textContent;}
+ renderTurnContext();$('elapsed').textContent=(state.minutes||0)+'분';$('scene-era').textContent=state.era==='fantasy'?'이세계':'현실';$('episode-no').textContent='LIVE · '+String(state.revision).padStart(2,'0');$('scene-title').textContent=combat?(combat.mode==='realtime'?'중요한 대치':'엇갈리는 공방'):'이어지는 이야기';$('scene-place').textContent=state.era==='earth'?({subway:'현실 · 지하철',platform:'현실 · 승강장',station:'현실 · 역 대합실'})[state.location]:GameGeography.records.find(x=>x.id===state.location)?.name||(state.location==='arrival_meadow'?'이세계 · 낯선 풀밭':state.location);if(PassageHost.onboard(state)){const ride=PassageHost.onboard(state);$('scene-title').textContent=ride.phase==='incident'?'운항 조정 안내':'운항 중';$('scene-place').textContent=ride.name+' · '+ride.progress+'/'+ride.duration+'분';background.style.backgroundImage=ride.mode==='ship'?'linear-gradient(150deg,#122c39,#264d56,#182c32)':ride.mode==='airship'?'linear-gradient(150deg,#202a41,#414767,#243743)':'linear-gradient(150deg,#30271e,#4d4937,#202d26)';background.style.backgroundSize='cover';}$('save-state').textContent=working?'상황과 기억을 확인하는 중…':'이야기 자동 저장 · '+state.revision+'번째 대화';$('chat-input').disabled=working||combat?.mode==='realtime'&&combat.status==='playing';$('chat-input').maxLength=1000;document.querySelector('#chat-form button[type=submit]').disabled=working;showChatMode();showRestorePreview();showRestoredDraft();$('sd').hidden=true;$('scene-minimap').hidden=true;const footer=document.querySelector('main>footer');footer.querySelector('.footer-trait').textContent=combat?'HP '+state.player.hp+'/'+state.player.max:'실시간 생성 이야기';footer.children[2].textContent=$('scene-place').textContent;}
 function skillFx(){const r=state?.turns.at(-1)?.resolution,parent=$('story-battle-layers')?.hidden?$('scene-art'):$('story-battle-layers');if(!r?.visual||!parent)return;const canvas=document.createElement('canvas');canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none';canvas.width=Math.max(1,parent.clientWidth);canvas.height=Math.max(1,parent.clientHeight);parent.append(canvas);const ctx=canvas.getContext('2d'),start=performance.now(),reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;function frame(now){if(!canvas.isConnected)return;const age=(now-start)/1000;ctx.clearRect(0,0,canvas.width,canvas.height);SkillEffects.draw(ctx,{x:canvas.width*.63,y:canvas.height*.52,face:{x:1,y:0},visual:r.visual},p=>p,42,age,reduced);if(age<.55)requestAnimationFrame(frame);else canvas.remove();}requestAnimationFrame(frame);}
 function stopReplay(){
   for(const timer of replayTimers)clearTimeout(timer);
@@ -113,6 +113,34 @@ function showChatMode(){
  for(const button of shortcuts.children)button.disabled=working;
  $('chat-input').placeholder=chatModes.find(([mode])=>mode===chatMode)[2];
 }
+let restoredDraft=null;
+function showRestoredDraft(){
+ let button=$('story-restore-edit');
+ if(!restoredDraft||restoredDraft.revision!==state.revision){
+  if(button)button.hidden=true;
+  return;
+ }
+ if(!button){
+  button=document.createElement('button');
+  button.id='story-restore-edit';
+  button.type='button';
+  button.textContent='이전 입력 수정하기';
+  button.onclick=()=>{
+   if(working||restoredDraft?.revision!==state.revision)return;
+   chatMode='story';
+   companionTarget=null;
+   pending=null;
+   $('chat-input').value=restoredDraft.text;
+   restoredDraft=null;
+   render();
+   $('chat-input').focus();
+   $('chat-input').setSelectionRange(0,$('chat-input').value.length);
+  };
+  $('story-command-result').after(button);
+ }
+ button.hidden=false;
+ button.disabled=working;
+}
 let restorePreview=null;
 function showRestorePreview(){
  let box=$('story-restore-preview');
@@ -177,7 +205,10 @@ async function sendCommand(text){
  }
  try{
   const reply=await call('directorCommand',{text,revision:state.revision});
-  if(reply.state)activate(reply.state);
+  if(reply.state){
+   activate(reply.state);
+   if(reply.draft)restoredDraft={revision:reply.state.revision,text:reply.draft};
+  }
   restorePreview=reply.preview||null;
   result.textContent=reply.preview?'':reply.text;
   $('chat-input').value='';
@@ -213,7 +244,7 @@ async function send(text){
 }
 async function launch(){if(working)return;working=true;try{await call('directorLaunch',{revision:state.revision});}catch(e){toast(e.message);}finally{working=false;}}
 function activate(next){
- companionTarget=null;pending=null;restorePreview=null;state=next;panelIndex=0;
+ companionTarget=null;pending=null;restorePreview=null;restoredDraft=null;state=next;panelIndex=0;
  $('chat-form').onsubmit=e=>{
   e.preventDefault();
   const text=$('chat-input').value.trim();
