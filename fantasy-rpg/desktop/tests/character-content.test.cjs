@@ -30,10 +30,12 @@ test('combat atlas selects both frames of all six clips and preserves legacy sav
     a.equal(png[25], 6);
     for (const [index, pose] of clips.entries()) {
       for (const phase of [0, 1]) {
-        const fps = pose === 'idle' ? 3 : 9;
+        const clip=atlas.clips?.[pose];
+        const fps=clip?.fps||(pose==='idle'?3:9);
         a(sprites.draw(canvas, id, phase * 1.25 / (fps * atlas.tempo), pose === 'move', pose, phase));
         const [x, y, w, h] = calls.at(-1);
-        a.deepEqual([x,y,w,h], atlas.frames[index * 2 + phase]);
+        const expected=clip?clip.frames[clip.fps?phase:phase?clip.frames.length-1:0]:index*2+phase;
+        a.deepEqual([x,y,w,h],atlas.frames[expected]);
         a(x + w <= width && y + h <= height);
       }
     }

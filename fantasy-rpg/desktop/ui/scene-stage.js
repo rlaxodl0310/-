@@ -25,13 +25,13 @@ const SceneStage=(()=>{
  const portraitFraming={
   ace:[.47,.39,.20],aquila:[.50,.37,.19],ariel:[.52,.40,.18],biscuit:[.51,.335,.135,.025],cheona:[.52,.38,.20],
   'dogyeom-childhood-friend':[.50,.36,.19],dogyeom:[.51,.35,.19],espada:[.49,.38,.20],
-  evan:[.50,.35,.20],fafnir:[.51,.39,.126],fenri:[.50,.36,.156],halo:[.46,.30,.135,.06],hebnia:[.53,.38,.20],
+  evan:[.50,.35,.20],fafnir:[.51,.39,.126],fenri:[.50,.36,.156],halo:[.36,.46,.15],hebnia:[.53,.38,.20],
   hellenia:[.54,.35,.15,.055],janghwa:[.52,.30,.141],jave:[.50,.36,.20],karin:[.58,.37,.20],
-  kiriel:[.52,.38,.21],lir:[.54,.38,.20],milia:[.51,.41,.17,.05],nadan:[.51,.34,.20],
+  kiriel:[.52,.38,.21],lir:[.54,.38,.20],milia:[.55,.39,.17],nadan:[.51,.34,.20],
   nea:[.49,.40,.18],'nea-travel':[.49,.40,.18],palanus:[.52,.38,.19],rachel:[.51,.36,.20],
   reginleif:[.46,.28,.175],horin:[.50,.31,.195],restia:[.52,.39,.18],rosie:[.51,.37,.18],
   selsi:[.50,.30,.22],seoha:[.50,.31,.19],spike:[.54,.43,.20],spina:[.50,.40,.18],
-  taei:[.50,.34,.185],taeo:[.47,.33,.14],trude:[.55,.365,.14,.12],woojin:[.51,.36,.20],
+  taei:[.50,.34,.185],taeo:[.47,.33,.14],trude:[.445,.495,.13],woojin:[.51,.36,.20],
   yeogyeong:[.50,.34,.22],yui:[.53,.34,.145],yunseol:[.51,.37,.20],
  };
  const portraitLayout=Object.freeze({width:600,height:460,eyeLine:196,faceHeight:110});

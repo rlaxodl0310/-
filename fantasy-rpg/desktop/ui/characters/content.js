@@ -480,7 +480,7 @@ records.push({
 });
 records.push({
   id:'milia',name:'밀리아',age:null,species:'날도마뱀 수인',heightCm:155,weightKg:42,
-  unknownName:'연푸른 머리와 보랏빛 활강막을 지닌 수인',origin:'fantasy',requiresStoryIntroduction:true,
+  unknownName:'연보라 머리와 보랏빛 활강막을 지닌 수인',origin:'fantasy',requiresStoryIntroduction:true,
   persona:'날도마뱀 수인 밀리아. 155cm, 42kg. 작은 약속을 기억한다. 친구가 걱정되면 구실을 만들어 먼저 찾아가지만 자신이 도움을 청할 때는 망설인다. 무기와 전용 전투 기술은 미정이다.',
   preferredWeapons:[],
   lookLabels:{cutscene:'활강막을 펼치기 · 컷신'},
@@ -575,6 +575,27 @@ for(const [id,[width,height]] of Object.entries({
 function get(id){return records.find(r=>r.id===id)||null;}
 function appearance(id,{look='default',pose='default'}={}){const r=get(id);return r?.looks[pose==='default'?look:pose]||r?.looks.default||null;}
 function displayName(state,id){const r=get(id);if(!r)return null;const introduced=state?.knownIdentities?.[id]===true||(state?.turns||[]).some(t=>(t.panels||[]).some(p=>p.speaker===id&&String(p.text||'').includes(r.name)));return introduced?r.name:r.unknownName;}
+// Approved appearance revision: one source per character across VN art and battle clips.
+for(const [id,scale,tempo]of [['trude',.32,1.08],['halo',.33,1.07],['milia',.30,1.11]]){
+ const record=records.find(r=>r.id===id),cell=256;
+ const bodySize=id==='milia'?[960,1080]:[720,1080];
+ record.looks={...record.looks,default:fullImage(id+'-standing.webp',...bodySize),rear:fullImage(id+'-rear.webp',...bodySize),casual:fullImage(id+'-casual.webp',...bodySize),help:fullImage(id+'-talk.webp',720,1080),reaction:fullImage(id+'-reaction.webp',720,1080),cutscene:fullImage('cutscenes/'+id+'.webp',720,1080)};
+ if(record.looks.attack)record.looks.attack=record.looks.cutscene;
+ record.looks.smile=fullImage(id+'-smile.webp',720,1080);
+ record.looks.alert=fullImage(id+'-alert.webp',720,1080);
+ record.portraits={...(record.portraits||{}),default:fullImage('dialogue/'+id+'.webp',720,540)};
+ record.combatSprite={src:'assets/'+id+'-combat.png',frames:Array.from({length:24},(_,i)=>[i%4*cell,Math.floor(i/4)*cell,cell,cell]),imageWidth:1024,imageHeight:1536,anchor:[128,244],scale,tempo,pixelated:true,
+  clips:Object.fromEntries(['idle','move','attack','guard','dodge','hit'].map((clip,row)=>[clip,{frames:[0,1,2,3].map(i=>row*4+i),fps:clip==='idle'?5:clip==='move'?10:0}]))};
+ record.pixel={src:'battle/assets/'+id+'-combat.png',battleSrc:'assets/'+id+'-combat.png',frames:[[0,0,256,256]],imageWidth:1024,imageHeight:1536};
+ record.lookLabels={...(record.lookLabels||{}),casual:'전투복 · 휴식 자세',smile:id==='milia'?'부드러운 미소':'미소',alert:'주위를 살피기',reaction:'조용히 반응하기'};
+}
+get('trude').persona+=' 흰 몸통 의상과 붉은·금색 비대칭 다리 갑주, 붉고 흰 큰 깃털 날개가 현재 외형이다. 팔 아래에 여분 다리 갑옷을 추가하지 않는다.';
+get('halo').persona+=' 검은 상의·은빛 갑주·흰 바지·푸른 천 자락과 큰 붉은 대검을 유지한다.';
+get('milia').persona+=' 나긋하고 부드럽게 웃는 얼굴, 연보라 머리·뿔·보라 활강막과 비늘 꼬리, 흰 상의·검정 코르셋·보라 치마·흰 스타킹을 유지한다. 인형은 없다.';
+
+function appearance(id,{look='default',pose='default'}={}){const r=get(id);return r?.looks[pose==='default'?look:pose]||r?.looks.default||null;}
+function displayName(state,id){const r=get(id);if(!r)return null;const introduced=state?.knownIdentities?.[id]===true||(state?.turns||[]).some(t=>(t.panels||[]).some(p=>p.speaker===id&&String(p.text||'').includes(r.name)));return introduced?r.name:r.unknownName;}
+
 const legacyCasual={
   yeogyeong:fullImage('yeogyeong-casual.webp',720,1080),
   dogyeom:fullImage('dogyeom-casual.webp',720,1080),

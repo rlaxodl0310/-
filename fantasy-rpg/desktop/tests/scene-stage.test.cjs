@@ -21,7 +21,9 @@ test('dialogue framing matches faces across sources and trims the Earth Yeogyeon
   ['fafnir',{src:'assets/dialogue/fafnir.webp',w:720,h:540},.51,.39,.126],
   ['janghwa',{src:'assets/dialogue/janghwa.webp',w:720,h:540},.52,.30,.141],
   ['reginleif',{src:'assets/reginleif-looks.webp',w:512,h:512},.46,.28,.175],
-  ['milia',{src:'assets/dialogue/milia.webp',w:720,h:540},.51,.41,.17,.05],
+  ['milia',{src:'assets/dialogue/milia.webp',w:720,h:540},.55,.39,.17],
+  ['trude',{src:'assets/dialogue/trude.webp',w:720,h:540},.445,.495,.13],
+  ['halo',{src:'assets/dialogue/halo.webp',w:720,h:540},.36,.46,.15],
   ['taeo',{src:'assets/dialogue/taeo.webp',w:960,h:720},.47,.33,.14],
  ];
  for(const [id,frame,eyeX,eyeY,face,artTop] of samples){
