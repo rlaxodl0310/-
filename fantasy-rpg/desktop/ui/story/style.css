@@ -43,3 +43,8 @@ body[data-story-mode=director] .dialogue-wrap{background:linear-gradient(90deg,#
 
 #story-command-shortcuts:not([hidden]){display:flex;flex-wrap:wrap;gap:4px;margin:0 0 6px}
 #story-command-shortcuts button{padding:4px 8px;border:1px solid #ced6bd40;border-radius:3px;background:#182319;color:var(--paper);font-size:.75rem}
+
+#story-restore-preview:not([hidden]){margin:8px 0;padding:8px 10px;border:1px solid #ced6bd40;background:#182319}
+#story-restore-preview h3,#story-restore-preview p{margin:0 0 6px}
+#story-restore-preview li{margin-bottom:4px}
+#story-restore-preview button{margin-right:6px;padding:5px 10px}

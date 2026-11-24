@@ -20,6 +20,27 @@ async function previous(director) {
   }
 }
 
+function observations(state) {
+  return Object.values(state.actionWorld?.locations || {}).flatMap(site => site.observations || []);
+}
+
+function restorePreview(current, target) {
+  const round = state => Number.isFinite(state.combat?.round) ? state.combat.round : null;
+  const targetObservations = new Set(observations(target).map(row => JSON.stringify(row)));
+  const removed = observations(current).filter(row => !targetObservations.has(JSON.stringify(row)));
+  const currentTurn = current.turnReview?.at(-1) || current.turns.at(-1);
+  const targetTurn = target.turnReview?.at(-1) || target.turns.at(-1);
+  return {
+    revision: current.revision,
+    current: { location: place(current), minutes: current.minutes, round: round(current) },
+    target: { location: place(target), minutes: target.minutes, round: round(target) },
+    lastAction: currentTurn && JSON.stringify(currentTurn)!==JSON.stringify(targetTurn)
+      ? currentTurn.input || currentTurn.text || currentTurn.panels?.at(-1)?.text || null : null,
+    removedObservationCount: removed.length,
+    removedObservations: removed.slice(-4).map(row => row.confirmed).filter(Boolean),
+  };
+}
+
 async function run(director, request) {
   const text = typeof request?.text === 'string' ? request.text.trim() : '';
   if (!text.startsWith('/') || text.length > 1000) throw Error('채팅 명령을 확인해 주세요.');
@@ -42,9 +63,10 @@ async function run(director, request) {
     if (name === '되돌리기') {
       const target = await previous(director);
       director.pendingCommandRestore = { revision: current.revision, hash: target.hash };
-      return { text: '직전 저장으로 돌아갈 수 있어요. ' + place(target.state) + ' · ' +
-        target.state.minutes + '분 · 기록 ' + target.state.revision +
-        '번째. /확인 을 입력하면 복구하고, /취소 를 입력하면 유지해요.' };
+      return {
+        text: '직전 저장 · ' + place(target.state) + ' · ' + target.state.minutes + '분',
+        preview: restorePreview(current,target.state),
+      };
     }
     if (name === '확인') {
       const pending = director.pendingCommandRestore;
