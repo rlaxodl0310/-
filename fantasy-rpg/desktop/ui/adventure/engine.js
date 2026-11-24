@@ -141,6 +141,7 @@
         )
       )
         fail("전리품 출처 기록이 잘못되었습니다.");
+    for (const q of a.quests) if(q.fieldNote&&(!Number.isFinite(q.fieldNote.at)||q.fieldNote.at<0||q.fieldNote.location!==q.destination||q.fieldNote.species!==q.species||q.fieldNote.source!=='quest-report'))fail("현장 확인 기록이 잘못되었습니다.");
     for (const q of a.quests)
       if (
         !policy.contracts[q.type] ||
@@ -374,15 +375,15 @@
     return s;
   }
   function apply(state, action, { requestId, createCombat } = {}) {
-    if(action.type==='hunt'&&Object.values(state.transports?.trips||{}).some(t=>t.status==='active'&&[t.carrierId,t.targetId].includes('taei')))fail('먼저 부축·운반 관계를 정리해 주세요.');
+    if(['hunt','scout'].includes(action.type)&&Object.values(state.transports?.trips||{}).some(t=>t.status==='active'&&[t.carrierId,t.targetId].includes('taei')))fail('먼저 부축·운반 관계를 정리해 주세요.');
     if (state.era !== "fantasy") fail("이세계에서 사용할 수 있습니다.");
     if (state.combat?.status === "playing") fail("전투를 먼저 마쳐 주세요.");
     if (state.player.hp <= 0) fail("전투 불능 상태에서는 수행할 수 없습니다.");
-    if(Rules.fatigue(state.player).exhausted&&['hunt','survey'].includes(action.type))fail('탈진 상태에서는 먼저 수면이 필요합니다.');
+    if(Rules.fatigue(state.player).exhausted&&['hunt','survey','scout'].includes(action.type))fail('탈진 상태에서는 먼저 수면이 필요합니다.');
     const s = ensure(state),
       a = s.adventure;
     let q;
-    if (["accept", "submit", "survey", "hunt"].includes(action.type)) {
+    if (["accept", "submit", "survey", "hunt", "scout"].includes(action.type)) {
       q = a.quests.find((q) => q.id === action.questId);
       if (!q) fail("존재하지 않는 의뢰입니다.");
     }
@@ -465,6 +466,14 @@
       q.observation = Geo.records.find((p) => p.id === s.location).note;
       return expire(s);
     }
+    if (action.type === "scout") {
+      if(q.type!=='hunt'||q.status!=='accepted'||q.destination!==s.location||ready(s,q))fail('수행 중인 토벌 의뢰의 현장에서 확인해 주세요.');
+      if(q.fieldNote?.location===s.location)fail('이미 확인한 현장 기록입니다. 추가 관찰은 대화로 이어가세요.');
+      if(s.minutes+5>q.deadline)fail('현장 확인 중 의뢰 기한을 넘깁니다.');
+      s.minutes+=5;
+      q.fieldNote={location:s.location,at:s.minutes,species:q.species,source:'quest-report',terrain:Geo.records.find(p=>p.id===s.location)?.note||''};
+      return expire(s);
+    }
     if (action.type === "hunt") {
       if (
         q.type !== "hunt" ||
@@ -480,6 +489,7 @@
         "chat",
         q.title,
       );
+      s.combat.adventureQuestId=q.id;
       s.scene = "combat";
       return s;
     }
@@ -552,6 +562,7 @@
           flavor: q.flavor || "",
           destination: q.destination,
           issuer: q.issuerLocation,
+          fieldNote: q.fieldNote||null,
           progress: q.progress,
           target: q.target,
           ready: ready(s, q),

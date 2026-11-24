@@ -6,6 +6,7 @@
     onAction,
     {
       onTravel = () => {},
+      onCombat = () => {},
       onEscort = () => {},
       onMining = () => {},
       onRescue = () => {},
@@ -76,6 +77,7 @@
         !Adventure.association(state),
       );
     if(showLab){const generatorLab=n("a","탱탱 생성 시험 · 본편과 분리");generatorLab.href="association/generator-lab.html";}
+    if(typeof HuntFieldUI!=='undefined')for(const q of a?.quests||[]){if(q.type!=='hunt'||q.status!=='accepted')continue;const entry=n('button','의뢰 현장 · '+q.title);entry.className='hunt-hud';entry.onclick=()=>HuntFieldUI.open(state,q.id,onAction,{onTravel,onCombat});}
     const board = n("div", "");
     board.className = "wooden-quest-board";
     const papers = n("div", "", board);
@@ -135,6 +137,7 @@
           dialog,
         );
         if (q.observation) n("p", "조사 기록 · " + q.observation, dialog);
+        if(q.type==='hunt'&&typeof HuntFieldUI!=='undefined'){const enter=n('button','일러스트 현장 열기',dialog);enter.onclick=()=>{dialog.close();dialog.remove();HuntFieldUI.open(state,q.id,onAction,{onTravel,onCombat});};}
         if (q.status === "open")
           button(
             "의뢰 수락",
