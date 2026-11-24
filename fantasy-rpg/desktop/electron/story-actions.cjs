@@ -38,6 +38,7 @@ function events(state,resolution){const effects=(resolution?.effects||[]).map((e
   id:row.id,turn:state.revision,at:state.minutes,location:row.location,
   text:row.confirmed+' '+row.uncertain,source:'engine-observation',
   evidence:'플레이어 관찰 판정',witnesses:['taei'],
+  ...(row.encounterId&&resolution.enemyResponse&&row.subject===null?{risk:{location:row.location}}:{}),
  }));
  return [...effects,...observations];
 }

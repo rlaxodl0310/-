@@ -30,6 +30,7 @@ function record(previous,next) {
   const text=labels[after.status]+(remaining===null?' 남은 상대 수는 미확인이다.':remaining?' 남은 상대 '+remaining+'개체.':'');
   next.ledger.push({
     id,turn:next.revision,at:next.minutes,era:previous.era,location:previous.location,
+    ...((after.status==='escaped'||after.status==='lost')&&remaining>0?{risk:{location:previous.location}}:{}),
     source:'engine-encounter-outcome',questId:after.adventureQuestId??null,text,witnesses,outcome,
   });
 }
