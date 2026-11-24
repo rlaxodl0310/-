@@ -1,0 +1,65 @@
+{
+  "version": "0.42.73",
+  "automatedTests": {
+    "passed": 623,
+    "failed": 0
+  },
+  "ui": {
+    "engine": "actual DirectorUI + StoryDirector in Chromium",
+    "cycles": [
+      {
+        "party": false,
+        "actualFights": 2,
+        "status": "completed",
+        "remainingHP": 84.117648,
+        "worldMinutes": 163
+      },
+      {
+        "party": true,
+        "actualFights": 2,
+        "status": "completed",
+        "remainingHP": 84.117648,
+        "worldMinutes": 163,
+        "questRewardCopper": 152,
+        "moneySharesCopper": {
+          "taei": 76,
+          "yeogyeong": 76
+        },
+        "yeogyeongXPInThisCase": 0
+      }
+    ],
+    "jsExceptions": 0,
+    "mobileWidth": 390,
+    "horizontalOverflow": false
+  },
+  "fixtures": {
+    "isolatedSaves": true,
+    "testBudgetCopper": 5000,
+    "preAgreedParty": true,
+    "provider": "controlled structured responses",
+    "enemyHPOrVictoryForced": false,
+    "startingStatsBoosted": false,
+    "expirationCaseUsesKnownInventoryFixture": true
+  },
+  "verified": [
+    "generated quest acceptance, preparation, paid purchase and equipment",
+    "real road traversal and repeated real combat",
+    "real damage and drop generation, manual pickup, return and settlement",
+    "shared reward conservation and contribution-based XP",
+    "real flee, enemy identity/HP retention and slot restore",
+    "paid inn time expires essence and original quest deadline",
+    "purchase rollback on slot load",
+    "duplicate settlement rejected"
+  ],
+  "fixes": [
+    "clear ended combat and show exploration when new tracking starts",
+    "hide battle replay control when current scene does not match last combat result",
+    "display registered target grade and remaining count in preparation",
+    "show history heading after settlement"
+  ],
+  "limits": [
+    "actual account ChatGPT dialogue and long-term context quality not evaluated",
+    "Windows native execution not evaluated",
+    "one initial grade2 draven loss was observed; game difficulty was not changed"
+  ]
+}
