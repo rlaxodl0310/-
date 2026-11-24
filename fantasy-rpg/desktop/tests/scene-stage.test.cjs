@@ -29,3 +29,17 @@ test('dialogue framing matches faces across sources and trims the Earth Yeogyeon
   assert.equal(g.inset,id==='yeogyeong'?4:0);
  }
 });
+
+test('light portrait matte is removed without changing alpha or opaque highlights',()=>{
+ const data=new Uint8ClampedArray(7*7*4);
+ const put=(x,y,rgba)=>data.set(rgba,(y*7+x)*4);
+ const get=(x,y)=>Array.from(data.slice((y*7+x)*4,(y*7+x)*4+4));
+ put(3,3,[65,47,34,255]);
+ put(2,3,[210,204,201,93]);
+ put(4,3,[233,230,229,255]);
+ put(5,3,[235,232,229,95]);
+ load().cleanPortraitEdge({data,width:7,height:7});
+ assert.deepEqual(get(2,3),[65,47,34,93]);
+ assert.deepEqual(get(4,3),[233,230,229,255]);
+ assert.deepEqual(get(5,3),[235,232,229,95]);
+});

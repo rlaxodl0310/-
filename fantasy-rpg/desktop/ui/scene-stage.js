@@ -55,7 +55,28 @@ const SceneStage=(()=>{
   canvas.getContext('2d').drawImage(body,frame.x+inset,frame.y+inset,frame.w-2*inset,frame.h-2*inset,
    x+inset*w/frame.w,y+inset*h/frame.h,w*(1-2*inset/frame.w),h*(1-2*inset/frame.h));
  }
- function sprite(characterId,emotion=0,frame=null){const key=frame?[characterId,frame.src,frame.x,frame.y,frame.w,frame.h].join(':'):characterId+':0';if(cache.has(key))return cache.get(key);const task=(async()=>{const body=await load(frame?.src||characters[characterId]),canvas=document.createElement('canvas'),record=(globalThis.StoryKitData?.content?.records||[]).find(r=>characterId===r.id||characterId.startsWith(r.id+'-'));if(frame){drawExpression(canvas,body,{...frame,w:frame.w||body.naturalWidth,h:frame.h||body.naturalHeight},characterId);}else if(record){const key=characterId===record.id?'default':characterId.slice(record.id.length+1),f=record.looks[key]||record.looks.default;canvas.width=f.w;canvas.height=f.h;canvas.getContext('2d').drawImage(body,f.x,f.y,f.w,f.h,0,0,f.w,f.h);}else if(['nea','nea-travel'].includes(characterId)){const f=NeaData.record.frames[characterId==='nea-travel'?'travel':'poor'];canvas.width=f.w;canvas.height=f.h;canvas.getContext('2d').drawImage(body,f.x,f.y,f.w,f.h,0,0,f.w,f.h);}else{canvas.width=body.naturalWidth||body.width;canvas.height=body.naturalHeight||body.height;canvas.getContext('2d').drawImage(body,0,0);}const url=canvas.toDataURL('image/png');ready.set(key,url);return url;})();cache.set(key,task);task.catch(()=>cache.delete(key));if(cache.size>24){const oldest=cache.keys().next().value;cache.delete(oldest);ready.delete(oldest);}return task;}
+ // Replace light matte contamination at the alpha edge with the adjacent artwork color.
+ // Keep the alpha coverage and all opaque pixels to preserve antialiasing and light clothing.
+ function cleanPortraitEdge({data,width,height}){
+  for(let y=1;y<height-1;y++)for(let x=1;x<width-1;x++){
+   const i=(y*width+x)*4,alpha=data[i+3];
+   if(alpha<10||alpha>215)continue;
+   const low=Math.min(data[i],data[i+1],data[i+2]),high=Math.max(data[i],data[i+1],data[i+2]);
+   if(low<125||high-low>35)continue;
+   if([-4,4,-width*4,width*4].every(offset=>data[i+offset+3]>alpha-12))continue;
+   let neighbor=-1,distance=10;
+   for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){
+    const d=dx*dx+dy*dy;
+    if(d>=distance||x+dx<0||x+dx>=width||y+dy<0||y+dy>=height)continue;
+    const j=i+(dy*width+dx)*4;
+    if(data[j+3]<235)continue;
+    neighbor=j;distance=d;
+   }
+   if(neighbor<0||(data[i]+data[i+1]+data[i+2])-(data[neighbor]+data[neighbor+1]+data[neighbor+2])<54)continue;
+   for(let c=0;c<3;c++)data[i+c]=data[neighbor+c];
+  }
+ }
+ function sprite(characterId,emotion=0,frame=null){const key=frame?[characterId,frame.src,frame.x,frame.y,frame.w,frame.h].join(':'):characterId+':0';if(cache.has(key))return cache.get(key);const task=(async()=>{const body=await load(frame?.src||characters[characterId]),canvas=document.createElement('canvas'),record=(globalThis.StoryKitData?.content?.records||[]).find(r=>characterId===r.id||characterId.startsWith(r.id+'-'));if(frame){drawExpression(canvas,body,{...frame,w:frame.w||body.naturalWidth,h:frame.h||body.naturalHeight},characterId);}else if(record){const key=characterId===record.id?'default':characterId.slice(record.id.length+1),f=record.looks[key]||record.looks.default;canvas.width=f.w;canvas.height=f.h;canvas.getContext('2d').drawImage(body,f.x,f.y,f.w,f.h,0,0,f.w,f.h);}else if(['nea','nea-travel'].includes(characterId)){const f=NeaData.record.frames[characterId==='nea-travel'?'travel':'poor'];canvas.width=f.w;canvas.height=f.h;canvas.getContext('2d').drawImage(body,f.x,f.y,f.w,f.h,0,0,f.w,f.h);}else{canvas.width=body.naturalWidth||body.width;canvas.height=body.naturalHeight||body.height;canvas.getContext('2d').drawImage(body,0,0);}const context=canvas.getContext('2d');const pixels=context.getImageData(0,0,canvas.width,canvas.height);cleanPortraitEdge(pixels);context.putImageData(pixels,0,0);const url=canvas.toDataURL('image/png');ready.set(key,url);return url;})();cache.set(key,task);task.catch(()=>cache.delete(key));if(cache.size>24){const oldest=cache.keys().next().value;cache.delete(oldest);ready.delete(oldest);}return task;}
  function lockPortrait(portrait,characterId,emotion=0){const token=(tokens.get(portrait)||0)+1;tokens.set(portrait,token);if(!characters[characterId]||typeof Image==='undefined'||typeof document==='undefined')return;emotion=Math.max(0,Math.min(5,Number.isInteger(emotion)?emotion:0));if(identityMode(characterId)==='integrated')emotion=0;portrait.dataset.identityMode=identityMode(characterId);const key=characterId+':'+emotion;portrait.style.backgroundSize='contain';portrait.style.backgroundPosition='center bottom';if(ready.has(key)){portrait.style.backgroundImage='url("'+ready.get(key)+'")';portrait.style.visibility='visible';portrait.dataset.faceLocked=String(identityMode(characterId)==='original-head');portrait.dataset.spriteReady='true';return;}portrait.dataset.spriteReady='loading';portrait.style.visibility='hidden';sprite(characterId,emotion).then(url=>{if(tokens.get(portrait)!==token)return;portrait.style.backgroundImage='url("'+url+'")';portrait.style.visibility='visible';portrait.dataset.faceLocked=String(identityMode(characterId)==='original-head');portrait.dataset.spriteReady='true';}).catch(()=>{if(tokens.get(portrait)!==token)return;portrait.style.visibility='visible';portrait.dataset.spriteReady='error';});}
  function render({background,portrait,location,characterId,emotion=0,state=null,era=null,dialogue=false,player=null}){const bg=backgrounds[location]||backgrounds.earth_subway;
   background.style.backgroundImage='url("'+bg+'")';background.style.backgroundSize='cover';background.style.backgroundPosition='center';background.dataset.location=location;background.dataset.cutscene='false';
@@ -77,5 +98,5 @@ const SceneStage=(()=>{
     });
   }else lockPortrait(portrait,characterId,emotion);}
  function cutscene(background,portrait,url,panel,player){background.style.backgroundImage='url("'+url+'")';background.style.backgroundSize=panel===undefined?'cover':'200% 100%';background.style.backgroundPosition=panel===undefined?'center':panel*100+'% center';background.dataset.cutscene='true';portrait.hidden=true;if(player)player.hidden=true;}
- return {render,cutscene,backgrounds,characters,faces,lockPortrait,headDimensions,identityMode,portraitLayout,portraitGeometry,drawPortrait};
+ return {render,cutscene,backgrounds,characters,faces,lockPortrait,headDimensions,identityMode,portraitLayout,portraitGeometry,drawPortrait,cleanPortraitEdge};
 })();
