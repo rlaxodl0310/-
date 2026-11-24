@@ -54,3 +54,19 @@ t('expired sightings are historical context and quoted dialogue cannot execute a
  a.deepEqual(frame.clues,[]);
  await a.rejects(I.resolve(s,offline,{questId:id,text:'동료가 “우회”라고 말했다.',requestId:'quoted-hunt-test'}),/인용/);
 });
+
+t('story recommendations quote executable tracking actions and diversify the next choices',()=>{
+ const Recommendations=require('../electron/story-recommendations.cjs');
+ const {s,id}=seed();
+ const options=T.options(s,id);
+ const cards=Recommendations.build(s);
+ a.equal(cards.length,3);
+ a.deepEqual(cards.map(card=>card.action.decision),['observe','withdraw','approach']);
+ for(const card of cards){
+  a.equal(card.minutes,options.find(option=>option.decision===card.action.decision).minutes);
+  a.equal(card.action.questId,id);
+ }
+ const q=s.adventure.quests.find(quest=>quest.id===id);
+ q.deadline=s.minutes+1;
+ a(Recommendations.build(s).every(card=>!card.action&&!card.minutes));
+});

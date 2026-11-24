@@ -301,6 +301,16 @@ function reviewChanges(row){
   key==='combat'?(statuses[value]||'종료 또는 미개시'):Number.isInteger(value)?String(value):value.toFixed(1);
  return Object.entries(row.changes||{}).map(([key,{before,after}])=>labels[key]+' '+format(key,before)+' → '+format(key,after));
 }
+let recommendationState=null,recommendationChoices=null;
+async function runRecommendedAction(action){
+ if(working)return;
+ working=true;render();
+ try{
+  state=await call('directorAdventure',{requestId:crypto.randomUUID(),revision:state.revision,action});
+  panelIndex=0;
+ }catch(e){toast(e.message);}
+ finally{working=false;render();}
+}
 function renderRecommendations(){
  let list=$('story-recommendations');
  if(!list){
@@ -312,30 +322,46 @@ function renderRecommendations(){
  }
  list.replaceChildren();
  const combat=state.combat?.status==='playing';
- const lastPanel=panelIndex>=state.panels.length-1;
- list.hidden=!lastPanel||Boolean(companionTarget)||chatMode!=='story'||combat&&state.combat.mode==='realtime';
+ list.hidden=panelIndex<state.panels.length-1||Boolean(companionTarget)||chatMode!=='story'||combat&&state.combat.mode==='realtime';
  if(list.hidden)return;
- const choices=[];
- if(!combat){
-  for(const proposal of state.npcActionProposals||[]){
-   if(proposal.location!==state.location||!['offered','held'].includes(proposal.status)||
-      !state.present.includes(proposal.actorId)&&!state.locals?.some(actor=>actor.id===proposal.actorId))continue;
-   const destination=GameGeography.records.find(place=>place.id===proposal.target)?.name||proposal.target;
-   choices.push({label:destination+' 우회 제안 수락',input:'우회 제안 수락 '+proposal.id});
-  }
+ if(window.desktopAI?.directorRecommendations&&recommendationState!==state){
+  const snapshot=state;
+  recommendationState=snapshot;
+  recommendationChoices=null;
+  call('directorRecommendations').then(result=>{
+   if(state!==snapshot||result.revision!==snapshot.revision)return;
+   recommendationChoices=result.choices;
+   renderRecommendations();
+  }).catch(()=>{
+   if(state!==snapshot)return;
+   recommendationChoices=undefined;
+   renderRecommendations();
+  });
  }
- const fallback=combat?['적의 움직임을 살핀다.','방어하며 상황을 살핀다.','뒤로 물러나 거리를 확보한다.']:
-  ['주변에서 확인할 수 있는 단서를 살핀다.','들리는 소리에 귀를 기울인다.','잠시 기다리며 주변 반응을 본다.'];
- for(const input of [...(state.choices||[]),...(state.actionWorld?.suggestions||[]).map(row=>row.text),...fallback]){
-  if(input?.trim()&&!choices.some(choice=>choice.label===input))choices.push({label:input,input});
- }
- for(const choice of choices.slice(0,3)){
+ if(recommendationChoices===null&&window.desktopAI?.directorRecommendations)return;
+ const fallback=['주변 단서를 살핀다.','곁에 있는 인물에게 말을 건다.','잠시 기다리며 주변 반응을 본다.'];
+ const choices=recommendationChoices||[...new Set([...(state.choices||[]),...fallback])]
+  .slice(0,3).map(input=>({label:input,input}));
+ function addButton(choice,parent){
   const button=document.createElement('button');
   button.type='button';
   button.textContent=choice.label;
   button.disabled=working;
-  button.onclick=()=>send(choice.input);
-  list.append(button);
+  if(Number.isFinite(choice.minutes)||choice.condition){
+   const info=document.createElement('small');
+   info.textContent=[Number.isFinite(choice.minutes)?choice.minutes+'분':null,choice.condition].filter(Boolean).join(' · ');
+   button.append(info);
+  }
+  button.onclick=()=>choice.action?runRecommendedAction(choice.action):send(choice.input);
+  parent.append(button);
+ }
+ for(const choice of choices.slice(0,3)){
+  if(!choice.compare){addButton(choice,list);continue;}
+  const details=document.createElement('details'),summary=document.createElement('summary');
+  summary.textContent=choice.label;
+  details.append(summary);
+  for(const offer of choice.compare)addButton(offer,details);
+  list.append(details);
  }
 }
 function renderTurnContext(){
@@ -407,15 +433,7 @@ function renderObservationChoices(button){
   const choices=stale?[{label:'오래된 흔적 다시 확인',minutes:HuntTracking.policy.searchMinutes}]:actions;
   for(const {decision,label,minutes} of choices){
    const caption=(available.length>1?q.title+' · ':'')+label+' · '+minutes+'분';
-   const control=button(caption,async()=>{
-    if(working)return;
-    working=true;render();
-    try{
-     state=await call('directorAdventure',{requestId:crypto.randomUUID(),revision:state.revision,action:decision?{type:'trackStep',questId:q.id,decision}:{type:'track',questId:q.id}});
-     panelIndex=0;
-    }catch(e){toast(e.message);}
-    finally{working=false;render();}
-   });
+   const control=button(caption,()=>runRecommendedAction(decision?{type:'trackStep',questId:q.id,decision}:{type:'track',questId:q.id}));
    control.disabled=working;
   }
  }

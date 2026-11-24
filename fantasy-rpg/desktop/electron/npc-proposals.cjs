@@ -20,6 +20,14 @@ function options(state){
   ['offered','held'].includes(row.status)&&row.location===state.location&&Risk.available(state,row.actorId));
 }
 
+function quote(state,candidate){
+ if(candidate.kind!=='detour')throw Error('이 제안을 실행할 행동을 확인할 수 없어요.');
+ const route=Risk.detour(state,candidate.eventId,candidate.actorId,candidate.target);
+ if(JSON.stringify(route.legs.map(leg=>leg.edgeId))!==JSON.stringify(candidate.edges))
+  throw Error('검토했던 경로가 바뀌었어요. 우회로를 다시 확인해 주세요.');
+ return Journey.quoteStart(state,{destination:candidate.target,mode:'safe'});
+}
+
 async function apply(state,text,bridge,requestId){
  const decision=intent(text);
  if(!decision)throw Error('제안에 답할 행동을 확인해 주세요.');
@@ -33,10 +41,7 @@ async function apply(state,text,bridge,requestId){
  const [candidate]=candidates;
  let next=structuredClone(state);
  if(decision.decision==='accept'){
-  if(candidate.kind!=='detour')throw Error('이 제안을 실행할 행동을 확인할 수 없어요.');
-  const route=Risk.detour(next,candidate.eventId,candidate.actorId,candidate.target);
-  if(JSON.stringify(route.legs.map(leg=>leg.edgeId))!==JSON.stringify(candidate.edges))
-   throw Error('검토했던 경로가 바뀌었어요. 우회로를 다시 확인해 주세요.');
+  quote(next,candidate);
   next=await Journey.apply(next,{type:'journeyStart',destination:candidate.target,mode:'safe'},bridge,requestId);
  }
  const status={accept:'accepted',hold:'held',decline:'declined'}[decision.decision];
@@ -45,4 +50,4 @@ async function apply(state,text,bridge,requestId){
  return {state:next,text:messages[status]};
 }
 
-module.exports={intent,options,apply};
+module.exports={intent,options,apply,quote};

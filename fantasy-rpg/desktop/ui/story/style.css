@@ -51,3 +51,7 @@ body[data-story-mode=director] .dialogue-wrap{background:linear-gradient(90deg,#
 
 #story-recommendations:not([hidden]){display:flex;flex-wrap:wrap;gap:5px;margin:0 0 6px}
 #story-recommendations button{padding:4px 9px;min-width:0;max-width:100%;overflow-wrap:anywhere;border:1px solid #ced6bd40;background:#182319;color:var(--paper);font-size:.8rem}
+
+#story-recommendations button small{display:block;color:var(--muted);margin-top:3px}
+#story-recommendations details{max-width:100%;border:1px solid #ced6bd40;padding:4px 8px}
+#story-recommendations details button{display:block;margin-top:4px}

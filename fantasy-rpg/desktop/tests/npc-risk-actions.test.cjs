@@ -58,6 +58,12 @@ test('a chat acceptance starts the reviewed journey once and closed routes prese
  try{
   const s=Risk.apply(scene(),proposal('detour','north-village-01','다른 길로 우회하자.'),{requestId:'detour-offer'});
   const [offer]=s.npcActionProposals;
+  const recommendations=require('../electron/story-recommendations.cjs');
+  const [quoted]=recommendations.build(s);
+  assert.equal(quoted.minutes,5);
+  assert.match(quoted.input,/우회 제안 수락/);
+  assert(!recommendations.build({...s,networkClosures:offer.edges}).some(row=>row.input===quoted.input));
+
   await d.save({...s,npcActionProposals:[offer,{...offer,id:'second-offer'}]});
   await assert.rejects(d.send({text:'그 길로 가자',requestId:'pick-route-ambiguous',revision:0}),/어느 제안/);
   const original=await d.read();

@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('desktopAI',Object.freeze({
  directorNPCTell:r=>ipcRenderer.invoke('director:npcTell',r),
  directorNPCAppointment:r=>ipcRenderer.invoke('director:npcAppointment',r),
  directorNPCMeet:r=>ipcRenderer.invoke('director:npcMeet',r),
+ directorRecommendations:()=>ipcRenderer.invoke('director:recommendations'),
  directorBackups:()=>ipcRenderer.invoke('director:backups'),
  directorCommand:r=>ipcRenderer.invoke('director:command',r),
  directorSlots:()=>ipcRenderer.invoke('director:slots'),directorSlot:r=>ipcRenderer.invoke('director:slot',r),

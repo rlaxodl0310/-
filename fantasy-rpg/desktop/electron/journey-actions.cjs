@@ -6,8 +6,14 @@ async function plan(s,bridge,requestId,{route=null,camp=false}={}){const t=s.jou
 function passage(s,staged){const n=Services.advance(s,staged);return A.ensure(n);}
 function scene(s,trip){if(s.combat?.status!=='playing')s.combat=null;s.present=trip.actors.filter(id=>id!=='taei');s.locals=[];s.focus=s.present[0]||'taei';s.scene='dialogue';}
 function targets(s){return[...new Set(s.adventure.quests.filter(q=>q.type==='hunt'&&q.status==='accepted'&&q.destination===s.location).map(q=>q.species))];}
+function quoteStart(s,action){
+ H.guardBase(s);
+ if(s.journeys?.trip&&!['arrived','stopped'].includes(s.journeys.trip.phase))fail('진행 중인 여정을 먼저 마쳐 주세요.');
+ if((s.player.fatigue||0)>=100)fail('탈진 상태에서는 먼저 휴식이 필요합니다.');for(const id of H.party(s)){const a=require('../ui/rescue/transport-host.js').actor(s,id);if(a&&(!a.canWalk||a.hp<=0))fail('스스로 이동할 수 없는 동행자는 실제 운반이 필요합니다.');}const route=H.route(s,action.destination,action.mode);
+ return {route,minutes:5};
+}
 async function apply(state,action,bridge,requestId,{createCombat}={}){let s=A.ensure(state);H.guardBase(s);s.journeys??=J.initial();const before=clone(s);let w=s.journeys,t=w.trip;
- if(action.type==='journeyStart'){if((s.player.fatigue||0)>=100)fail('탈진 상태에서는 먼저 휴식이 필요합니다.');for(const id of H.party(s)){const a=require('../ui/rescue/transport-host.js').actor(s,id);if(a&&(!a.canWalk||a.hp<=0))fail('스스로 이동할 수 없는 동행자는 실제 운반이 필요합니다.');}const route=H.route(s,action.destination,action.mode),proposal=await plan(s,bridge,requestId,{route});s.minutes+=5;s.journeys=J.start(w,route,action.mode,H.party(s),proposal,s.minutes);scene(s,s.journeys.trip);return passage(before,s);}
+ if(action.type==='journeyStart'){const {route,minutes}=quoteStart(s,action),proposal=await plan(s,bridge,requestId,{route});s.minutes+=minutes;s.journeys=J.start(w,route,action.mode,H.party(s),proposal,s.minutes);scene(s,s.journeys.trip);return passage(before,s);}
  if(action.type==='journeyAdvance'){if(t?.position!==s.location||t?.phase!=='travelling')fail('현재 위치와 다음 구간을 확인하세요.');if(t.actors.some(id=>id!=='taei'&&(!(s.party||[]).includes(id)||!(s.present||[]).includes(id))))fail('출발 때 확인한 동행자가 현재 함께 있지 않습니다.');if((s.player.fatigue||0)>=100)fail('탈진 상태에서는 이동할 수 없습니다.');if(t.pendingHazard===null){const p=await plan(s,bridge,requestId);s.journeys=J.prepare(w,p.hazard,p.source);w=s.journeys;t=w.trip;}const q=J.quote(t);if((s.player.fatigue||0)+q.minutes/30>=100)fail('이 구간을 끝까지 이동하면 탈진합니다. 현재 위치에서 먼저 휴식하세요.');s.minutes+=q.minutes;s.location=q.location;s.visitedLocations=[...new Set([...(s.visitedLocations||[]),s.location])];s.visited=[...new Set([...(s.visited||[]),'fantasy:'+s.location])];s.journeys=J.arrive(w,s.location,s.minutes);scene(s,s.journeys.trip);return passage(before,s);}
  if(action.type==='journeyResolve'){const mins=action.decision==='inspect'?10:action.decision==='detour'?25:null;if(mins===null)fail('실제 조사 또는 우회 대응을 선택하세요.');s.minutes+=mins;s.journeys=J.resolve(w,s.minutes,action.decision);return passage(before,s);}
  if(action.type==='journeyStop'){s.journeys=J.stop(w,s.minutes);return s;}
@@ -17,4 +23,4 @@ async function apply(state,action,bridge,requestId,{createCombat}={}){let s=A.en
  const seed=Rules.hash(camp.id+':'+camp.uses+':'+s.minutes),interrupted=seed%100<q.risk,minutes=interrupted?Math.max(30,q.minutes/2):q.minutes,foodUsed=Math.ceil(minutes/120)*q.members.length,recovery=q.recovery*minutes/q.minutes;
  s.minutes+=minutes;s.adventure.commerce.supplies.bread-=foodUsed;s.player.fatigue=Math.max(0,(s.player.fatigue||0)-recovery);if(action.guardId){const p=s.npcExpeditionProfiles[action.guardId];p.fatigue=Math.min(100,(p.fatigue||0)+minutes/30);}camp.uses++;camp.disturbance=interrupted;camp.guardId=action.guardId||null;camp.lastSleep={at:s.minutes,minutes,foodUsed,recovery,interrupted,guardId:camp.guardId};J.note(w,s.minutes,interrupted?'camp-interrupted':'camp-sleep',interrupted?'주변 기척 때문에 야영을 일찍 중단했다. 실제 잔 시간만큼 피로만 회복했고 HP·MP는 변하지 않았다.':'예정한 야영을 마쳤다. 식량을 사용해 피로만 회복했다. HP·MP·부상 치료는 별도다.');return A.ensure(s);}
  fail('지원하지 않는 여정 행동입니다.');}
-module.exports={apply,plan,targets};
+module.exports={apply,plan,targets,quoteStart};
