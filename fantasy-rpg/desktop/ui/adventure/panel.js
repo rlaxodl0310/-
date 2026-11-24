@@ -154,8 +154,8 @@
           );
           if (q.type === "hunt")
             button(
-              "대상 추적·전투 시작",
-              { type: "hunt", questId: q.id },
+              "현장 추적 여정 시작",
+              { type: "track", questId: q.id },
               dialog,
               q.destination !== state.location || Adventure.ready(state, q),
             );

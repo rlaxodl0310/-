@@ -15,6 +15,7 @@
       require("../association/dynamic-contracts.js"),
       require("../rescue/model.js"),
       require("../dungeon/model.js"),
+      require("./tracking.js"),
     );
   else
     r.Adventure = f(
@@ -32,8 +33,9 @@
       r.DynamicContracts,
       r.RescueQuest,
       r.DungeonQuest,
+      r.HuntTracking,
     );
-})(globalThis, (Growth, XP, Rules, Money, Geo, Facilities, Essences, Party, Escort, Personal, Mining, Dynamic, Rescue, Dungeon) => {
+})(globalThis, (Growth, XP, Rules, Money, Geo, Facilities, Essences, Party, Escort, Personal, Mining, Dynamic, Rescue, Dungeon, Tracking) => {
   "use strict";
   const clone = (x) => JSON.parse(JSON.stringify(x)),
     fail = (m) => {
@@ -108,6 +110,7 @@
     )
       fail("본편 모험 기록이 잘못되었습니다.");
     Money.check(a.economy);
+    for(const q of a.quests)Tracking?.validate(q.tracking,q);
     if (
       a.inventory
         .filter((i) => i.kind === "material")
@@ -306,6 +309,7 @@
         (a.economy.inventory.monster_scrap || 0) + item.quantity;
   }
   function observe(previous, state) {
+    if(Tracking)state=Tracking.observe(previous,state);
     if(Escort)state=Escort.observe(previous,state);
     if(Personal)state=Personal.observe(previous,state);
     if(Mining)state=Mining.observe(previous,state);
@@ -383,7 +387,7 @@
     const s = ensure(state),
       a = s.adventure;
     let q;
-    if (["accept", "submit", "survey", "hunt", "scout"].includes(action.type)) {
+    if (["accept", "submit", "survey", "hunt", "scout", "track", "trackStep"].includes(action.type)) {
       q = a.quests.find((q) => q.id === action.questId);
       if (!q) fail("존재하지 않는 의뢰입니다.");
     }
@@ -466,6 +470,8 @@
       q.observation = Geo.records.find((p) => p.id === s.location).note;
       return expire(s);
     }
+    if(action.type==='track')return Tracking.begin(s,q.id,Tracking.local(s,q.id));
+    if(action.type==='trackStep')return Tracking.step(s,q.id,action.decision,{createCombat});
     if (action.type === "scout") {
       if(q.type!=='hunt'||q.status!=='accepted'||q.destination!==s.location||ready(s,q))fail('수행 중인 토벌 의뢰의 현장에서 확인해 주세요.');
       if(q.fieldNote?.location===s.location)fail('이미 확인한 현장 기록입니다. 추가 관찰은 대화로 이어가세요.');
@@ -475,6 +481,7 @@
       return expire(s);
     }
     if (action.type === "hunt") {
+      if(q.tracking)fail("이 의뢰는 추적 화면에서 관찰·접근·철수를 선택해 주세요.");
       if (
         q.type !== "hunt" ||
         q.status !== "accepted" ||
@@ -562,6 +569,7 @@
           flavor: q.flavor || "",
           destination: q.destination,
           issuer: q.issuerLocation,
+          tracking: q.type==='hunt'?Tracking?.context(s,q.id)||null:null,
           fieldNote: q.fieldNote||null,
           progress: q.progress,
           target: q.target,
