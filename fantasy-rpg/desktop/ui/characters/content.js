@@ -512,7 +512,7 @@ records.push({
  id:'horin',name:'호린',age:null,species:'호랑이 수인',origin:'fantasy',requiresStoryIntroduction:true,
  unknownName:'금빛 머리의 호랑이 수인',heightCm:147,weightKg:40,preferredWeapons:[],roles:[],trait:null,
  persona:'호랑이 수인 호린. 147cm, 40kg. 위풍당당하게 보이려 하지만 실제로는 소심하고 겁이 많다. 수인을 향한 차별과 안 좋은 시선을 받으면 귀와 꼬리가 내려간다. 자기 편이 있을 때는 그 뒤에 숨어 빼꼼 상대를 노려보는 귀여운 면이 있다. 기본 닫힌 입은 작은 ㅅ 모양. 금빛 줄무늬 긴 머리와 흰 끝, 연두빛 눈, 둥근 호랑이 귀, 리본이 달린 줄무늬 꼬리. 노랑·검정 재킷, 회색 칼라 셔츠, 빨간 옆 끈과 금장 장식의 검정 반바지, 긴 장갑, 흰 양말과 운동화를 유지한다. 일반 원화는 자연스러운 작은 체격의 전신이며 SD 비율로 바꾸지 않는다. 나이·무기·전투 역할·능력·정수·과거·첫 만남은 미정. 장식과 레퍼런스의 기계 호랑이를 실제 장비 기능·펫·동행으로 확정하지 않는다. 현실 등장·자동 파티 합류·이름 선공개·전이자 고유 특성 없음.',
- lookLabels:{default:'기본 전신 · 일반 비율',proud:'당당한 척하기',afraid:'귀와 꼬리가 내려간 모습',hide:'편 뒤에서 빼꼼 · 상황 예시',cutscene:'편 뒤에서 빼꼼 · 상황 예시'},
+ lookLabels:{default:'기본 전신 · 일반 비율',proud:'당당한 척하기',afraid:'귀와 꼬리가 내려간 모습',hide:'편 뒤에서 빼꼼 · 자세',cutscene:'편 뒤에서 빼꼼 · 컷신'},
  looks:{default:fullImage('horin-standing.webp',1024,1536),proud:fullImage('horin-standing.webp',1024,1536),rear:crop('horin-poses.webp',1024,1536,0,0,512,768),afraid:crop('horin-poses.webp',1024,1536,512,0,512,768),help:crop('horin-poses.webp',1024,1536,0,768,512,768),hide:crop('horin-poses.webp',1024,1536,512,768,512,768),cutscene:crop('horin-poses.webp',1024,1536,512,768,512,768)},
  portraits:{default:crop('horin-standing.webp',1024,1536,120,0,650,700),afraid:crop('horin-poses.webp',1024,1536,570,0,454,420)},
  sd:{default:crop('horin-combat.webp',1024,1536,0,0,256,256)},
@@ -544,10 +544,6 @@ records.find(record=>record.id==='fenri').looks.help=fullImage('fenri-talk.webp'
 records.find(record=>record.id==='cheona').looks['컷신 · 팔짱']=fullImage('cheona-folded-arms-cutscene.webp',1672,941);
 for(const id of ['janghwa','selsi','rachel','spike','jave','espada']){
   records.find(record=>record.id===id).looks.cutscene=fullImage(id+'-cutscene.webp',506,506);
-}
-// Head and sole positions in the front frame, measured independently of gear.
-for(const [id,body] of Object.entries({taeo:[10,697],trude:[32,1054,22],restia:[10,856],nadan:[88,1010]})){
-  records.find(record=>record.id===id).looks.default.body=body;
 }
 for(const [id,[width,height]] of Object.entries({
   trude:[879,879],
@@ -589,6 +585,41 @@ for(const [id,scale,tempo]of [['trude',.32,1.08],['halo',.33,1.07],['milia',.30,
  record.pixel={src:'battle/assets/'+id+'-combat.png',battleSrc:'assets/'+id+'-combat.png',frames:[[0,0,256,256]],imageWidth:1024,imageHeight:1536};
  record.lookLabels={...(record.lookLabels||{}),casual:'전투복 · 휴식 자세',smile:id==='milia'?'부드러운 미소':'미소',alert:'주위를 살피기',reaction:'조용히 반응하기'};
 }
+const fafnir=get('fafnir');
+fafnir.looks.attack=fafnir.looks.help;
+fafnir.looks.help=fullImage('fafnir-talk.webp',720,1080);
+fafnir.portraits={...fafnir.portraits,default:{...fullImage('dialogue/fafnir.webp',720,540),anchor:[.50,.39,.19,.065]}};
+
+const fenri=get('fenri');
+fenri.looks['컷신 · 숲속 대화']=fenri.looks.help;
+fenri.looks.help=fullImage('fenri-conversation.webp',720,1080);
+
+const narrativeScenes={
+ aquila:'성문에서 방패를 내려놓는 순간',
+ kiriel:'숲속에서 활시위를 점검하는 순간',
+ palanus:'훈련장에서 대검을 살피는 순간',
+ rosie:'궁전 창가에서 쉬는 순간',
+ ace:'달빛 아래 다리에서 멈춰 선 순간',
+ evan:'성벽에서 지도를 살피는 순간',
+ karin:'제단의 등불을 돌보는 순간',
+ lir:'눈 덮인 초소에서 기척을 듣는 순간',
+ trude:'성벽 위에서 도끼를 내려놓고 쉬는 순간',
+ spina:'작업대에서 사슬검을 손질하는 순간',
+ halo:'모닥불 옆에 대검을 내려놓는 순간',
+ milia:'천문대에서 프리즘의 빛을 바라보는 순간',
+};
+for(const [id,title] of Object.entries(narrativeScenes)){
+ const record=get(id);
+ record.looks.cutscene=fullImage('cutscenes/'+id+'-story.webp',886,442);
+ record.lookLabels={...record.lookLabels,cutscene:title+' · 컷신'};
+}
+
+for(const id of ['aquila','kiriel','palanus','rosie','ace','evan','karin','spina']){
+ const record=get(id);
+ record.looks.reaction={...fullImage(id+'-reaction.webp',720,640),kind:'portrait'};
+ record.lookLabels={...record.lookLabels,reaction:'대화 표정'};
+}
+
 get('trude').persona+=' 흰 몸통 의상과 붉은·금색 비대칭 다리 갑주, 붉고 흰 큰 깃털 날개가 현재 외형이다. 팔 아래에 여분 다리 갑옷을 추가하지 않는다.';
 get('halo').persona+=' 검은 상의·은빛 갑주·흰 바지·푸른 천 자락과 큰 붉은 대검을 유지한다.';
 get('milia').persona+=' 나긋하고 부드럽게 웃는 얼굴, 연보라 머리·뿔·보라 활강막과 비늘 꼬리, 흰 상의·검정 코르셋·보라 치마·흰 스타킹을 유지한다. 인형은 없다.';
@@ -627,8 +658,76 @@ const transfers={
     expressions:{'이세계':'woojin-expressions.png'},sd:{'상호작용':'sd-woojin.png'}},
   'dogyeom-childhood-friend':{age:null,trait:'보관',bio:'백도겸의 소꿉친구. 보관은 성장하며 개인 아공간으로 발전한다.',
     looks:{'지구 · 교복':fullImage('childhood-friend-standing.png',980,1605),'지구 · 후면 전신':fullImage('soyun-earth-rear.webp',720,1080)},
-    sheets:{'지구':'soyun-earth-sheet.webp','이세계':'soyun-fantasy-sheet.webp'}},
+    gallerySheets:{
+      '지구':{file:'soyun-earth-sheet.webp',height:1293,portraits:[396,0,798,557],sd:[393,983,806,310]},
+      '이세계':{file:'soyun-fantasy-sheet.webp',height:1294,portraits:[365,0,830,557],sd:[365,977,837,317]},
+    },
+    cutscenes:[
+      ['지구 · 지하철에서 책 읽기','cutscenes/soyun-earth-reading.webp',382,390],
+      ['지구 · 종이 건네기','cutscenes/soyun-earth-note.webp',398,390],
+      ['이세계 · 아공간 연습','cutscenes/soyun-fantasy-practice.webp',401,388],
+      ['이세계 · 우물가에서 물건 보관','cutscenes/soyun-fantasy-well.webp',412,388],
+    ]},
 };
+// [crown, soles, visible top, visible bottom] in frame coordinates.
+const standingBounds={
+  cheona:{default:[6,761],help:[30,1050],rear:[26,1056],casual:[26,1054]},
+  fafnir:{default:[3,615],help:[22,1051],casual:[24,1056],rear:[22,1051]},
+  fenri:{default:[60,1054,25,1054],casual:[26,1053],rear:[60,1052,27,1056],help:[105,1054,71,1055]},
+  janghwa:{default:[26,1054],rear:[27,1054],casual:[24,1056],help:[24,1055]},
+  selsi:{default:[24,1056],casual:[24,1056],rear:[25,1056],help:[24,1055]},
+  rachel:{default:[25,1056],casual:[24,1056],rear:[24,1056],help:[24,1056]},
+  spike:{default:[149,1056,24,1056],casual:[24,1056],rear:[142,1055,25,1056],help:[157,1055,25,1056]},
+  jave:{default:[24,1056],casual:[24,1056],rear:[50,1041],help:[40,1049]},
+  aquila:{default:[28,1056,24,1056],casual:[27,1052],rear:[39,1034],help:[24,1055]},
+  kiriel:{default:[45,1055,24,1056],casual:[24,1056],rear:[45,1056,24,1056],help:[24,1056]},
+  palanus:{default:[124,1045,24,1056],casual:[24,1056],rear:[117,1049,24,1056],help:[118,1054,24,1055]},
+  rosie:{default:[24,1056],casual:[27,1052],rear:[24,1056],help:[24,1056]},
+  ace:{default:[24,1056],casual:[24,1056],rear:[25,1055],help:[24,1056]},
+  evan:{default:[9,697],casual:[24,1056],rear:[10,836,10,837],help:[335,1056]},
+  karin:{default:[24,1056],casual:[24,1056],rear:[30,1050],help:[30,1050]},
+  taeo:{default:[10,706],casual:[76,1003],rear:[11,668,10,669],help:[207,872]},
+  trude:{default:[352,1009,221,1010],casual:[404,1029,377,1032],rear:[401,997,356,1053],help:[400,1009,370,1053],smile:[375,1024,342,1025],alert:[402,1012,369,1053],reaction:[402,1012,369,1053]},
+  espada:{default:[64,1016],rear:[45,1034],casual:[27,1053]},
+  restia:{default:[10,859],rear:[10,830],casual:[28,1052],help:[243,837]},
+  lir:{default:[62,1047,32,1047],rear:[62,1044,36,1044],casual:[26,1054]},
+  nadan:{default:[88,1010,53,1026],rear:[86,1010,54,1025],help:[246,838,229,851],casual:[10,812]},
+  hebnia:{default:[48,1035,45,1035],rear:[37,1042],casual:[24,1052]},
+  hellenia:{default:[26,1034],rear:[45,1034],casual:[10,885]},
+  biscuit:{default:[28,1028,27,1056],casual:[28,1056],rear:[24,1052],help:[27,1053]},
+  yunseol:{default:[81,1017,63,1017],rear:[89,984,63,985],casual:[27,1052]},
+  spina:{default:[53,884,10,884],rear:[53,1052,28,1052],casual:[56,1023]},
+  halo:{default:[318,1035,317,1035],casual:[177,1050],rear:[198,1050],help:[212,1050,212,1051],reaction:[191,1050,191,1051]},
+  ariel:{default:[27,1053],rear:[28,1053],casual:[24,1052]},
+  milia:{default:[90,1019,49,1020],rear:[45,1050,25,1050],casual:[51,1050,25,1050],help:[245,1050,224,1050],reaction:[252,1050,236,1050]},
+  reginleif:{default:[10,1034],rear:[9,501],help:[4,505],casual:[28,1053]},
+  horin:{default:[49,1509,13,1509],rear:[13,768],casual:[28,1052]},
+};
+for(const [id,looks] of Object.entries(standingBounds)){
+ for(const [key,body] of Object.entries(looks))get(id).looks[key].body=body;
+}
+for(const id of ['halo','milia']){
+ const {looks}=get(id);
+ looks.smile=looks.help;
+ looks.alert=looks.reaction;
+}
+
+const transferStandingBounds={
+  "taei":{"지구 · 교복":[27,1053],"지구 · 후면 전신":[26,1054],"이세계 · 격투가":[25,1055],"이세계 · 후면 전신":[28,1052]},
+  "dogyeom":{"지구 · 등교 복장":[27,1052],"지구 · 후면 전신":[27,1053],"casual":[24,1056]},
+  "yeogyeong":{"지구 · 교복":[12,1539],"지구 · 후면 전신":[27,1053],"이세계 · 여행복":[26,1053],"이세계 · 후면 전신":[27,1052],"casual":[24,1056]},
+  "seoha":{"지구 · 교복":[9,1520],"지구 · 후면 전신":[27,1053],"casual":[24,1056]},
+  "yui":{"지구 · 외출복":[13,1762],"지구 · 후면 전신":[27,1053]},
+  "woojin":{"지구 · 작업복":[26,1054],"지구 · 후면 전신":[25,1053],"이세계 · 여행복":[26,1054],"이세계 · 후면 전신":[27,1052]},
+  "dogyeom-childhood-friend":{"지구 · 교복":[38,1587],"지구 · 후면 전신":[26,1054],"casual":[25,1048]},
+};
+for(const [id,looks] of Object.entries(transferStandingBounds)){
+ for(const [key,body] of Object.entries(looks)){
+  const frame=key==='casual'?legacyCasual[id]:transfers[id].looks[key];
+  frame.body=body;
+ }
+}
+
 function crop(file,width,height,x,y,w,h){
   return {...fullImage(file,width,height),x,y,w,h};
 }

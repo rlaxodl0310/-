@@ -11,3 +11,5 @@
 
 .story-live-portrait{width:min(100%,280px);aspect-ratio:1;margin-inline:auto;background-size:300% 200%;background-repeat:no-repeat}#panel-body form textarea{width:100%;min-height:80px}#panel-body section{margin-top:20px}#panel-body form+button{margin-top:8px}.header-right{flex-wrap:wrap}
 .nea-controls{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.nea-full,.nea-sd{display:block;max-width:100%;height:auto;margin:16px auto}.nea-full{width:360px}.nea-sd{width:300px}
+
+#panel[data-mode='characterlab']{width:min(790px,100%)}

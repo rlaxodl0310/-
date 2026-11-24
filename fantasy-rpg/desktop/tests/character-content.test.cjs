@@ -125,3 +125,32 @@ test('dialogue portraits follow registered era and share the expression-sheet in
  a.equal(C.dialogueFrame('seoha','이세계',0).src,'assets/seoha-expressions.png');
  for(let emotion=0;emotion<6;emotion++)a.equal(C.transferExpression('yeogyeong','지구',emotion).inset,4);
 });
+
+test('narrative CGs have their own art and Fafnir uses different sprites for speech and attack',()=>{
+  const battleArt=require('../ui/story/art.js');
+  for(const record of C.records){
+    const scene=record.looks.cutscene;
+    a(scene.w>=scene.h,record.id);
+    for(const [kind,frame] of Object.entries(record.looks)){
+      if(kind==='cutscene')continue;
+      a.notDeepEqual(frame,scene,record.id+' '+kind);
+    }
+  }
+  const fafnir=C.get('fafnir');
+  a.equal(fafnir.looks.help.src,'assets/fafnir-talk.webp');
+  a.equal(C.dialogueFrame('fafnir','이세계',0).src,'assets/dialogue/fafnir.webp');
+  a.equal(battleArt.character('fafnir','attack'),fafnir.looks.attack);
+  a.equal(fafnir.looks.attack.x,630);
+  const baseline=C.get('cheona').looks.default;
+  const standardHeight=560*(baseline.body[1]-baseline.body[0])/baseline.h;
+  const fullBodies=[
+    ...C.records.flatMap(record=>['default','rear','casual'].map(key=>record.looks[key])),
+    ...Object.values(C.transfers).flatMap(record=>Object.values(record.looks)),
+    ...Object.values(C.legacyCasual),
+  ];
+  for(const frame of fullBodies){
+    const [head,soles,top=head,bottom=soles]=frame.body;
+    a(0<=top&&top<=head&&head<soles&&soles<=bottom&&bottom<=frame.h,frame.src);
+    a(frame.w*standardHeight/(soles-head)<=720,frame.src);
+  }
+});
