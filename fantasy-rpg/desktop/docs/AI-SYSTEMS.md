@@ -152,3 +152,10 @@ AI 이야기: 김태이로 말하거나 행동을 입력. NPC 대사/주변 묘�
 `passage/core.js`는 예약·탑승·지연·도착·취소·미탑승과 일회 환불 상태를 담당한다. `catalog.js`는 실제 교통망/시설에서 운항편과 조정 가능한 정책1을 만들고 `host.js`가 실제 승객·짐·위치·상태를 검증한다. `electron/passage-actions.cjs`는 기존 Director의 revision/idempotency·장부·시간·세이브 경로를 쓴다. 연결된 ChatGPT는 탱탱이 허용한 clear/weather/traffic 중 제안할 뿐 운임·목적지·보상을 직접 쓰지 않는다. 차량 물체는 `vehicle:<ticketId>`로 육지 물체와 분리한다. 영구 지리 시간/운임 미정 값은 유지하며 시험 시간표와 구분한다.
 
 582개 자동 검증 통과. 실제 브라우저 PassageUI와 Director로 결제 전 확인, 실제 납부, 대기·탑승·수면·도착 및390px 화면을 확인했다. 실제 계정 모델 품질과 Windows 네이티브 실행은 미검증이다.
+
+
+## v0.42.69 도착·지역 플레이 연결
+
+`ui/arrival/model.js`는 실제 방문·시설·동행자에서 읽기 전용 안내와 원화 선택을 만들고, `StoryDirector.save`가 이전 본편 위치와 비교해 도착을 기록한다. 슬롯 복원은 `restore:true`로 관측을 건너뛴다. `arrivalDismiss`는 기존 모험 revision/요청 ID 경로로 확인 상태만 저장한다. AI `arrivalContext`는 실제 현재 지역·시설과 실행 없는 보상/회복/합류 금지 규칙을 제공한다. `ArrivalUI`와 `CityPanorama.onFacility`가 기존 거래/휴식/게시판/운항 UI에 연결된다. 기존 실제 마을 거리의 시설 상호작용도 같은 디스패치를 사용한다.
+
+도시36곳 원화, 마을 지형 공통 원화76곳, 원화 미등록 마을41곳을 구분한다.590개 자동 검증과 실제 DirectorUI의 도착 안내·도시 배경·동행 원화·구역 지도→선택 상점·여관·확인 상태 저장·모바일390px를 검증했다. 실제 계정 AI 품질과 Windows 네이티브 실행은 미검증이다.
