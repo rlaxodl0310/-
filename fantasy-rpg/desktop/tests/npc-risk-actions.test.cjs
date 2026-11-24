@@ -51,3 +51,32 @@ test('the story director commits risk responses and slot restoration rewinds kno
   assert.equal(Knowledge.provenance(restored,'dogyeom',state.ledger[0]),null);
  }finally{await fs.rm(dir,{recursive:true,force:true});}
 });
+
+test('a chat acceptance starts the reviewed journey once and closed routes preserve the current state',async()=>{
+ const dir=await fs.mkdtemp(path.join(os.tmpdir(),'npc-proposal-'));
+ const d=new StoryDirector(path.join(dir,'story.json'),{check:async()=>({ready:false})});
+ try{
+  const s=Risk.apply(scene(),proposal('detour','north-village-01','다른 길로 우회하자.'),{requestId:'detour-offer'});
+  const [offer]=s.npcActionProposals;
+  await d.save({...s,npcActionProposals:[offer,{...offer,id:'second-offer'}]});
+  await assert.rejects(d.send({text:'그 길로 가자',requestId:'pick-route-ambiguous',revision:0}),/어느 제안/);
+  const original=await d.read();
+  assert.equal(original.minutes,s.minutes);
+  const blocked={...s,networkClosures:offer.edges};
+  await d.save(blocked);
+  await assert.rejects(d.send({text:'그 길로 가자',requestId:'pick-route-closed',revision:0}),/경로/);
+  assert.equal((await d.read()).minutes,s.minutes);
+  await d.save(s);
+  await d.saveSlotAction({action:'save',slot:1,revision:0});
+  const held=await d.send({text:'우회 제안 보류',requestId:'hold-route',revision:0});
+  assert.equal(held.minutes,s.minutes);
+  assert.equal(held.npcActionProposals[0].status,'held');
+  const accept={text:'우회 제안 수락 '+offer.id,requestId:'pick-route-valid',revision:held.revision};
+  const accepted=await d.send(accept);
+  assert.equal(accepted.journeys.trip.destination,offer.target);
+  assert.equal(accepted.npcActionProposals[0].status,'accepted');
+  assert.equal((await d.send(accept)).minutes,accepted.minutes);
+  const restored=(await d.saveSlotAction({action:'load',slot:1,revision:accepted.revision})).state;
+  assert.equal(restored.npcActionProposals[0].status,'offered');
+ }finally{await fs.rm(dir,{recursive:true,force:true});}
+});

@@ -48,3 +48,6 @@ body[data-story-mode=director] .dialogue-wrap{background:linear-gradient(90deg,#
 #story-restore-preview h3,#story-restore-preview p{margin:0 0 6px}
 #story-restore-preview li{margin-bottom:4px}
 #story-restore-preview button{margin-right:6px;padding:5px 10px}
+
+#story-recommendations:not([hidden]){display:flex;flex-wrap:wrap;gap:5px;margin:0 0 6px}
+#story-recommendations button{padding:4px 9px;min-width:0;max-width:100%;overflow-wrap:anywhere;border:1px solid #ced6bd40;background:#182319;color:var(--paper);font-size:.8rem}

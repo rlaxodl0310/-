@@ -40,6 +40,16 @@ function context(s){
   };
 }
 
+function detour(s,eventId,actorId,target){
+ const event=s.ledger.find(row=>row.id===eventId);
+ if(!active(s)||!available(s,actorId)||!event?.risk?.location||!Information.provenance(s,actorId,event))
+  throw Error('현재 검토할 수 있는 우회 제안이 없어요.');
+ const route=Journey.route(s,target,'safe');
+ if(target===event.risk.location||route.legs.some(leg=>leg.location===event.risk.location))
+  throw Error('해당 위험 지점을 피하는 등록 경로가 없습니다.');
+ return route;
+}
+
 function apply(state,result,{requestId=null}={}){
   const proposals=result.npcRiskActions||[];
   if(!Array.isArray(proposals)||proposals.length>2)throw Error('위험 대응 제안을 확인하세요.');
@@ -73,17 +83,25 @@ function apply(state,result,{requestId=null}={}){
         });
       }
     }else{
-      route=Journey.route(s,p.target,'safe');
-      if(p.target===event.risk.location||route.legs.some(leg=>leg.location===event.risk.location))
-        throw Error('해당 위험 지점을 피하는 등록 경로가 없습니다.');
+      route=detour(s,p.eventId,p.actorId,p.target);
     }
     if(!requestId)continue;
     const response={actorId:p.actorId,eventId:event.id,kind:p.action,target:p.target,
       source:source.kind,from:source.from,at:s.minutes,location:s.location};
-    if(route)response.route=route.legs.map(leg=>leg.location);
+    if(route){
+      response.route=route.legs.map(leg=>leg.location);
+      const pending=s.npcActionProposals||[];
+      if(!pending.some(row=>row.eventId===event.id&&row.actorId===p.actorId&&row.target===p.target&&
+        row.location===s.location&&['offered','held'].includes(row.status))){
+        s.npcActionProposals=[...pending,{
+          id:requestId+'-'+index,kind:'detour',status:'offered',actorId:p.actorId,eventId:event.id,
+          location:s.location,target:p.target,edges:route.legs.map(leg=>leg.edgeId),
+        }].slice(-12);
+      }
+    }
     s.npcRiskResponses=[...(s.npcRiskResponses||[]),response].slice(-32);
   }
   return requestId?s:state;
 }
 
-module.exports={SCHEMA,apply,context};
+module.exports={SCHEMA,apply,context,available,detour};
