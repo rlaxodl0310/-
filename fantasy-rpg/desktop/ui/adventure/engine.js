@@ -17,6 +17,7 @@
       require("../dungeon/model.js"),
       require("./tracking.js"),
       require("../journey/host.js"),
+      require("../passage/host.js"),
     );
   else
     r.Adventure = f(
@@ -36,8 +37,9 @@
       r.DungeonQuest,
       r.HuntTracking,
       r.JourneyHost,
+      r.PassageHost,
     );
-})(globalThis, (Growth, XP, Rules, Money, Geo, Facilities, Essences, Party, Escort, Personal, Mining, Dynamic, Rescue, Dungeon, Tracking, Journey) => {
+})(globalThis, (Growth, XP, Rules, Money, Geo, Facilities, Essences, Party, Escort, Personal, Mining, Dynamic, Rescue, Dungeon, Tracking, Journey, Passage) => {
   "use strict";
   const clone = (x) => JSON.parse(JSON.stringify(x)),
     fail = (m) => {
@@ -89,7 +91,9 @@
         if (loot.soulStone === undefined) loot.soulStone = false;
         if (loot.dropVersion === undefined) loot.dropVersion = 1;
       }
+    if(Passage&&s.passages)Object.assign(s,Passage.tick(s));
     validate(s.adventure);
+    if(Passage)Passage.validate(s);
     if(Journey)Journey.validate(s);
     if(Escort)Escort.validate(s);
     if(Personal)Personal.validate(s);
@@ -383,6 +387,7 @@
     return s;
   }
   function apply(state, action, { requestId, createCombat } = {}) {
+    if(Passage)Passage.guard(state);
     if(['hunt','scout'].includes(action.type)&&Object.values(state.transports?.trips||{}).some(t=>t.status==='active'&&[t.carrierId,t.targetId].includes('taei')))fail('먼저 부축·운반 관계를 정리해 주세요.');
     if (state.era !== "fantasy") fail("이세계에서 사용할 수 있습니다.");
     if (state.combat?.status === "playing") fail("전투를 먼저 마쳐 주세요.");
