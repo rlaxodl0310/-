@@ -74,5 +74,12 @@ await run("qaResolve({ok:true,data:{text:'복구 완료',state:{...qaState,minut
 await delay(90);
 assert(await run("document.getElementById('story-restore-preview').hidden && document.getElementById('elapsed').textContent==='65분'"));
 
-assert.equal(errors.length,0);console.log(JSON.stringify({passed:true,provider:'controlled fixture, not live ChatGPT account',checks:['main NPC dialogue','target request survives UI routing','consent without observation','disabled observation without eligible clues','explicit ten minute observation from main screen','companion fatigue rounded for display','refusal without action','mobile390 no panel overflow','compound input reaches the story director unchanged','main-story withdrawal produces a turn summary','three chat modes route inputs and shortcuts separately','restore preview renders changes and both buttons follow the command path','no JavaScript exceptions'],exchanges:h.s.companions.exchanges.length,observations:h.q().tracking.observations,minutes:h.s.minutes}));
+await run("document.querySelector('[data-panel=journal]').click()");
+const checkpoint=await run("qaState.checkpoints.at(-1).turn");
+await run(`[...document.querySelectorAll('#panel-body button')].filter(b=>b.textContent==='이 행동 직전으로').at(-1).click()`);
+assert.equal(await run("qaRequest.req.text"),'/되돌리기 '+checkpoint);
+await run(`qaResolve({ok:true,data:{text:'미리보기',preview:{revision:qaState.revision+1,selectedTurn:qaState.checkpoints.at(-1).turn,selectedAction:'거리 확보',current:{location:'수림',minutes:65,round:null},target:{location:'수림',minutes:60,round:null},removedTurnCount:2,removedActionCount:1,removedObservationCount:0,removedObservations:[]}}})`);
+await delay(90);
+assert(await run("document.getElementById('story-restore-preview').textContent.includes('채팅 2턴')"));
+assert.equal(errors.length,0);console.log(JSON.stringify({passed:true,provider:'controlled fixture, not live ChatGPT account',checks:['main NPC dialogue','target request survives UI routing','consent without observation','disabled observation without eligible clues','explicit ten minute observation from main screen','companion fatigue rounded for display','refusal without action','mobile390 no panel overflow','compound input reaches the story director unchanged','main-story withdrawal produces a turn summary','three chat modes route inputs and shortcuts separately','restore preview renders changes and both buttons follow the command path','journal actions open a targeted rewind preview','no JavaScript exceptions'],exchanges:h.s.companions.exchanges.length,observations:h.q().tracking.observations,minutes:h.s.minutes}));
 }finally{await h.close();}await call('Page.close');ws.close();})().catch(e=>{console.error(e);process.exit(1);});

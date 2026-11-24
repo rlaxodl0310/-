@@ -136,7 +136,12 @@ function showRestorePreview(){
   return element;
  };
  const {current,target}=preview;
- add('h3','직전 저장으로 돌아가기');
+ add('h3',preview.selectedTurn?'선택한 행동 직전으로 돌아가기':'직전 저장으로 돌아가기');
+ if(preview.selectedAction)add('p','선택한 행동 · '+preview.selectedAction);
+ const removed=[];
+ if(preview.removedTurnCount)removed.push('채팅 '+preview.removedTurnCount+'턴');
+ if(preview.removedActionCount)removed.push('그 외 행동 '+preview.removedActionCount+'개');
+ if(removed.length)add('p','되돌아갈 기록 · '+removed.join(' · '));
  add('p','장소 '+(current.location===target.location?target.location:current.location+' → '+target.location));
  add('p','경과 시간 '+current.minutes+'분 → '+target.minutes+'분');
  if(current.round!==null||target.round!==null)
@@ -298,6 +303,14 @@ function renderReview(body){
    ...(row.observations||[]).map(o=>'관찰 · '+o.confirmed+' '+o.uncertain),
    ...(row.reactions||[]).map(r=>(names[r.actor]||'동료')+' · '+({accept:'수락',refuse:'거절',hesitate:'망설임',unavailable:'응답 불가'}[r.response]||r.response)),
   ]){const p=document.createElement('p');p.textContent=text;details.append(p);}
+  if(window.desktopAI?.directorCommand&&state.checkpoints?.some(item=>item.turn===row.revision)){
+   const rewind=document.createElement('button');
+   rewind.type='button';
+   rewind.textContent='이 행동 직전으로';
+   rewind.disabled=working;
+   rewind.onclick=()=>{if(!working){closePanel();sendCommand('/되돌리기 '+row.revision);}};
+   details.append(rewind);
+  }
   body.append(details);
  }
  body.lastElementChild?.setAttribute('open','');

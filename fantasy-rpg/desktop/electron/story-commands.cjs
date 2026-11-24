@@ -2,6 +2,7 @@
 
 const fs = require('node:fs/promises');
 const crypto = require('node:crypto');
+const Checkpoints = require('./story-checkpoints.cjs');
 const Geography = require('../ui/map/geography.js');
 
 const help = '/정리 현재 상황 · /질문 내용 게임 밖에서 질문 · /되돌리기 직전 저장 미리 보기 · /확인 복구 · /취소 복구 취소';
@@ -24,14 +25,29 @@ function observations(state) {
   return Object.values(state.actionWorld?.locations || {}).flatMap(site => site.observations || []);
 }
 
-function restorePreview(current, target) {
+function targetFor(director,current,turn){
+  if(turn===null)return previous(director);
+  const {state,payload}=Checkpoints.restore(current,turn);
+  return {state,hash:digest(payload)};
+}
+
+function restorePreview(current, target, selectedTurn) {
   const round = state => Number.isFinite(state.combat?.round) ? state.combat.round : null;
   const targetObservations = new Set(observations(target).map(row => JSON.stringify(row)));
   const removed = observations(current).filter(row => !targetObservations.has(JSON.stringify(row)));
   const currentTurn = current.turnReview?.at(-1) || current.turns.at(-1);
   const targetTurn = target.turnReview?.at(-1) || target.turns.at(-1);
+  const previousTurns = new Set(target.turns.map(turn=>turn.id));
+  const previousActions = new Set((target.turnReview||[]).map(row=>row.requestId).filter(Boolean));
+  const removedTurns = current.turns.filter(turn=>!previousTurns.has(turn.id));
+  const removedActions = (current.turnReview||[]).filter(row=>row.requestId&&
+    !previousActions.has(row.requestId)&&!current.turns.some(turn=>turn.id===row.requestId));
+  const selected = current.turnReview?.find(row=>row.revision===selectedTurn);
   return {
-    revision: current.revision,
+    revision: current.revision, selectedTurn,
+    selectedAction: selected?.input || selected?.panels?.at(-1)?.text || null,
+    removedTurnCount: removedTurns.length,
+    removedActionCount: removedActions.length,
     current: { location: place(current), minutes: current.minutes, round: round(current) },
     target: { location: place(target), minutes: target.minutes, round: round(target) },
     lastAction: currentTurn && JSON.stringify(currentTurn)!==JSON.stringify(targetTurn)
@@ -46,7 +62,7 @@ async function run(director, request) {
   if (!text.startsWith('/') || text.length > 1000) throw Error('채팅 명령을 확인해 주세요.');
   const [, name, argument = ''] = text.match(/^\/(\S*)(?:\s+([\s\S]*))?$/u);
   if (name === '도움말' && !argument) return { text: help };
-  if (!['정리', '질문', '되돌리기', '확인', '취소'].includes(name) || (name === '질문') !== Boolean(argument))
+  if (!['정리', '질문', '되돌리기', '확인', '취소'].includes(name) || (name === '질문' ? !argument : name === '되돌리기' ? Boolean(argument)&&!/^\d{1,15}$/u.test(argument) : Boolean(argument)))
     return { text: '명령 형식을 확인해 주세요. ' + help };
 
   if (director.busy || director.activeHandoff) throw Error('진행 중인 장면이나 전투를 먼저 마쳐 주세요.');
@@ -61,11 +77,13 @@ async function run(director, request) {
       return { text: '되돌리기를 취소했어요.' };
     }
     if (name === '되돌리기') {
-      const target = await previous(director);
-      director.pendingCommandRestore = { revision: current.revision, hash: target.hash };
+      director.pendingCommandRestore = null;
+      const turn=argument ? Number(argument) : null;
+      const target = await targetFor(director,current,turn);
+      director.pendingCommandRestore = { revision: current.revision, hash: target.hash, turn };
       return {
-        text: '직전 저장 · ' + place(target.state) + ' · ' + target.state.minutes + '분',
-        preview: restorePreview(current,target.state),
+        text: '복구 대상 · ' + place(target.state) + ' · ' + target.state.minutes + '분',
+        preview: restorePreview(current,target.state,turn),
       };
     }
     if (name === '확인') {
@@ -73,7 +91,7 @@ async function run(director, request) {
       director.pendingCommandRestore = null;
       if (!pending || pending.revision !== current.revision)
         return { text: '/되돌리기 로 복구할 상태를 먼저 확인해 주세요.' };
-      const target = await previous(director);
+      const target = await targetFor(director,current,pending.turn);
       if (target.hash !== pending.hash) return { text: '직전 저장이 바뀌었어요. /되돌리기 로 다시 확인해 주세요.' };
       const restored = target.state;
       const revision = Math.max(current.revision, restored.revision) + 1;
@@ -83,7 +101,7 @@ async function run(director, request) {
       restored.timeline = { id: crypto.randomUUID(), parentId: restored.timeline?.id || null };
       delete restored.saveSlot;
       const state = await director.save(restored, { restore: true, discussion: true });
-      return { text: '직전 저장으로 돌아왔어요. 복구 직전 상태도 직전 저장으로 보존했어요.', state };
+      return { text: '선택한 시점으로 돌아왔어요. 복구 직전 상태도 직전 저장으로 보존했어요.', state };
     }
 
     const ready = await director.bridge.check();
