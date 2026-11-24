@@ -1184,7 +1184,8 @@
     "infrastructure": [
       "환승 운송",
       "도매시장",
-      "대형 창고"
+      "대형 창고",
+      "비행선 정박장"
     ],
     "visualDraft": "Action isekai anime/webtoon background; practical architecture and working livelihoods. 북부·서부 육로 합류점 / 환승 운송, 도매시장, 대형 창고",
     "asset": "assets/cities/central-city-03.png",
@@ -1195,7 +1196,8 @@
         "facilities": [
           "coach_station",
           "association",
-          "inn"
+          "inn",
+          "air_dock"
         ]
       },
       {
@@ -1545,7 +1547,8 @@
     "location": "북쪽의 큰 부속 섬",
     "infrastructure": [
       "부유 광물 가공",
-      "항행 장비 제작"
+      "항행 장비 제작",
+      "소형 비행선 정박장"
     ],
     "visualDraft": "Action isekai anime/webtoon background; practical architecture and working livelihoods. 북쪽의 큰 부속 섬 / 부유 광물 가공, 항행 장비 제작",
     "asset": "assets/cities/sky-city-04.png",
@@ -1565,7 +1568,8 @@
         "facilities": [
           "air_workshop",
           "smith",
-          "equipment_shop"
+          "equipment_shop",
+          "air_dock"
         ]
       },
       {

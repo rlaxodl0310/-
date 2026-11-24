@@ -196,7 +196,7 @@ t(
   },
 );
 t(
-  "director full loop: board→accept→AI travel→real combat→pickup→return→cash/XP→reload, with atomic replay",
+  "director full loop: board→accept→graph travel→real combat→pickup→return→cash/XP→reload, with atomic replay",
   async () => {
     const fs = require("node:fs/promises"),
       os = require("node:os"),
@@ -208,6 +208,7 @@ t(
         check: async () => ({ ready: true }),
         generateStructured: async (messages,schema) => {
           if(schema.properties.plans)return sampleContracts(await d.read());
+          if(schema.properties.weather)return{weather:'clear',hazard:'clear'};
           const s = await d.read(),
             moving = !!bridge.travel;
           return {
@@ -258,13 +259,12 @@ t(
         supply = find(s, "supply");
       await perform({ type: "accept", questId: q.id });
       await perform({ type: "accept", questId: supply.id });
-      bridge.travel = q.destination;
-      s = await d.send({
-        revision: s.revision,
-        requestId: "travel-to-site",
-        text: A.locationName(q.destination) + "로 이동한다",
-      });
-      bridge.travel = null;
+      const travel=async destination=>{await perform({type:'journeyStart',destination,mode:'fast'});while(!['arrived','stopped'].includes(s.journeys.trip.phase)){await perform(s.journeys.trip.phase==='incident'?{type:'journeyResolve',decision:'inspect'}:{type:'journeyAdvance'});}};
+      bridge.travel=q.destination;
+      await a.rejects(d.send({revision:s.revision,requestId:'blocked-ai-teleport',text:A.locationName(q.destination)+'로 이동한다'}));
+      a.equal((await d.read()).location,s.location);
+      bridge.travel=null;
+      await travel(q.destination);
       await perform({ type: "hunt", questId: q.id });
       for (let i = 0; i < 5 && s.combat.status === "playing"; i++)
         s = await d.send({
@@ -277,13 +277,7 @@ t(
       a(s.player.experience.total > 0);
       for (const loot of s.adventure.ground)
         await perform({ type: "pickup", lootId: loot.id });
-      bridge.travel = q.issuerLocation;
-      s = await d.send({
-        revision: s.revision,
-        requestId: "travel-back-home",
-        text: A.locationName(q.issuerLocation) + "로 이동한다",
-      });
-      bridge.travel = null;
+      await travel(q.issuerLocation);
       const req = {
         revision: s.revision,
         requestId: "submit-hunt-once",

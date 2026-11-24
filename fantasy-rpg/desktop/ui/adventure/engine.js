@@ -16,6 +16,7 @@
       require("../rescue/model.js"),
       require("../dungeon/model.js"),
       require("./tracking.js"),
+      require("../journey/host.js"),
     );
   else
     r.Adventure = f(
@@ -34,8 +35,9 @@
       r.RescueQuest,
       r.DungeonQuest,
       r.HuntTracking,
+      r.JourneyHost,
     );
-})(globalThis, (Growth, XP, Rules, Money, Geo, Facilities, Essences, Party, Escort, Personal, Mining, Dynamic, Rescue, Dungeon, Tracking) => {
+})(globalThis, (Growth, XP, Rules, Money, Geo, Facilities, Essences, Party, Escort, Personal, Mining, Dynamic, Rescue, Dungeon, Tracking, Journey) => {
   "use strict";
   const clone = (x) => JSON.parse(JSON.stringify(x)),
     fail = (m) => {
@@ -88,6 +90,7 @@
         if (loot.dropVersion === undefined) loot.dropVersion = 1;
       }
     validate(s.adventure);
+    if(Journey)Journey.validate(s);
     if(Escort)Escort.validate(s);
     if(Personal)Personal.validate(s);
     if(Mining)Mining.validate(s);
@@ -309,6 +312,7 @@
         (a.economy.inventory.monster_scrap || 0) + item.quantity;
   }
   function observe(previous, state) {
+    if(Journey)state=Journey.observe(previous,state);
     if(Tracking)state=Tracking.observe(previous,state);
     if(Escort)state=Escort.observe(previous,state);
     if(Personal)state=Personal.observe(previous,state);
