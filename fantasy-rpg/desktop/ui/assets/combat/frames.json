@@ -73,13 +73,13 @@
       "imageHeight": 1261
     },
     "zero": {
-      "src": "assets/combat/cast-atlas.png",
-      "x": 812,
-      "y": 886,
-      "w": 426,
-      "h": 346,
-      "imageWidth": 1247,
-      "imageHeight": 1261
+      "src": "battle/assets/zero-spectral.webp",
+      "x": 16,
+      "y": 33,
+      "w": 708,
+      "h": 672,
+      "imageWidth": 2172,
+      "imageHeight": 724
     }
   },
   "attack": {
@@ -156,13 +156,13 @@
       "imageHeight": 1261
     },
     "zero": {
-      "src": "assets/combat/cast-attack.png",
-      "x": 812,
-      "y": 850,
-      "w": 424,
-      "h": 378,
-      "imageWidth": 1247,
-      "imageHeight": 1261
+      "src": "battle/assets/zero-spectral.webp",
+      "x": 759,
+      "y": 105,
+      "w": 687,
+      "h": 584,
+      "imageWidth": 2172,
+      "imageHeight": 724
     }
   },
   "hit": {
@@ -239,13 +239,13 @@
       "imageHeight": 1261
     },
     "zero": {
-      "src": "assets/combat/cast-hit.png",
-      "x": 829,
-      "y": 876,
-      "w": 409,
-      "h": 364,
-      "imageWidth": 1247,
-      "imageHeight": 1261
+      "src": "battle/assets/zero-spectral.webp",
+      "x": 1543,
+      "y": 17,
+      "w": 487,
+      "h": 690,
+      "imageWidth": 2172,
+      "imageHeight": 724
     }
   },
   "run": {
@@ -322,13 +322,35 @@
       "imageHeight": 1261
     },
     "zero": {
-      "src": "assets/combat/cast-run.png",
-      "x": 810,
-      "y": 906,
-      "w": 421,
-      "h": 309,
-      "imageWidth": 1247,
-      "imageHeight": 1261
+      "src": "battle/assets/zero-spectral.webp",
+      "x": 759,
+      "y": 105,
+      "w": 687,
+      "h": 584,
+      "imageWidth": 2172,
+      "imageHeight": 724
+    }
+  },
+  "guard": {
+    "zero": {
+      "src": "battle/assets/zero-spectral.webp",
+      "x": 1543,
+      "y": 17,
+      "w": 487,
+      "h": 690,
+      "imageWidth": 2172,
+      "imageHeight": 724
+    }
+  },
+  "dodge": {
+    "zero": {
+      "src": "battle/assets/zero-spectral.webp",
+      "x": 759,
+      "y": 105,
+      "w": 687,
+      "h": 584,
+      "imageWidth": 2172,
+      "imageHeight": 724
     }
   }
 }

@@ -19,6 +19,7 @@ function transferArt(person){
     looks['컷신 · '+title]=sheetCell(file,width,height,columns,1,index);
   }
   const portraits={},sd={};
+  if(record.earthPortrait)portraits['지구 · 대화 기본']=record.earthPortrait;
   if(record.dialoguePortrait)portraits['대화 기본']=record.dialoguePortrait;
   for(const era of Object.keys(record.expressions||{})){
     emotions.forEach((label,index)=>{portraits[era+' · '+label]=CharacterContent.transferExpression(person.id,era,index);});
@@ -51,23 +52,32 @@ window.CharacterContentUI={open(body){
     select.append(option);
   }
   const info=node('p'),bio=node('p'),controls=node('div'),stage=node('div');
-  stage.style.cssText='display:grid;place-items:center;max-width:100%;margin:16px auto;background:#24332c;overflow:hidden';
+  stage.style.cssText='display:grid;place-items:center;max-width:100%;margin:16px auto;background:#24332c;overflow:hidden;position:relative';
   body.append(select,info,bio,stage,controls);
   function show(frame,pixel=false,kind='art'){
     stage.replaceChildren();
-    const bounds={art:[600,560],portrait:[420,340],scene:[420,420],sd:[240,240]};
+    const bounds={art:[600,560],portrait:[420,340],scene:[600,420],sd:[240,240]};
     const [width,height]=bounds[kind];
     stage.style.width=width+'px';
     stage.style.aspectRatio=width+'/'+height;
     stage.dataset.artKind=kind;
     const crop=node('div');
-    const fit=Math.min(width/frame.w,height/frame.h);
-    const scale=pixel&&fit>=1?Math.floor(fit):fit;
-    crop.style.cssText='position:relative;overflow:hidden;width:'+(frame.w*scale/width*100)+'%;aspect-ratio:'+frame.w+'/'+frame.h;
+    const inset=frame.inset||0;
+    const x=frame.x+inset,y=frame.y+inset,w=frame.w-2*inset,h=frame.h-2*inset;
+    const fit=Math.min(width/w,height/h);
+    let scale=pixel&&fit>=1?Math.floor(fit):fit;
+    let position='position:relative;';
+    if(kind==='art'&&frame.body){
+      const [head,soles,artTop=0]=frame.body;
+      const floor=height*.94;
+      scale=Math.min(width/w,height*.78/(soles-head),floor/(soles-artTop));
+      position='position:absolute;left:50%;transform:translateX(-50%);top:'+((floor-soles*scale)/height*100)+'%;';
+    }
+    crop.style.cssText=position+'overflow:hidden;width:'+(w*scale/width*100)+'%;aspect-ratio:'+w+'/'+h;
     const image=node('img');
     image.alt='선택한 캐릭터 외형';
     image.src=frame.src;
-    image.style.cssText='position:absolute;max-width:none;width:'+frame.imageWidth/frame.w*100+'%;height:'+frame.imageHeight/frame.h*100+'%;left:'+(-frame.x/frame.w*100)+'%;top:'+(-frame.y/frame.h*100)+'%;'+(pixel?'image-rendering:pixelated;':'');
+    image.style.cssText='position:absolute;max-width:none;width:'+frame.imageWidth/w*100+'%;height:'+frame.imageHeight/h*100+'%;left:'+(-x/w*100)+'%;top:'+(-y/h*100)+'%;'+(pixel?'image-rendering:pixelated;':'');
     crop.append(image);
     stage.append(crop);
   }
@@ -89,7 +99,7 @@ window.CharacterContentUI={open(body){
       control.onclick=()=>show(frame,pixel,kind);
       controls.append(control);
     };
-    for(const [key,frame] of Object.entries(record.looks))button(record.lookLabels?.[key]||lookLabels[key]||key,frame,false,key.startsWith('컷신 · ')?'scene':'art');
+    for(const [key,frame] of Object.entries(record.looks))button(record.lookLabels?.[key]||lookLabels[key]||key,frame,false,(key==='cutscene'||key.startsWith('컷신 · '))?'scene':'art');
     for(const [key,frame] of Object.entries(record.portraits||{}))button('초상화 · '+key,frame,false,'portrait');
     for(const [key,frame] of Object.entries(record.sd))button('SD · '+({default:'기본',alternate:'대체 의상'}[key]||key),frame,false,'sd');
     const pixel=record.pixel;

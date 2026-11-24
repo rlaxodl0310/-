@@ -7,7 +7,7 @@ const SceneStage=(()=>{
   'nea','nea-travel','yui','taei','yeogyeong','dogyeom','seoha','woojin','zero','dogyeom-childhood-friend',
   ...(globalThis.StoryKitData?.content?.records||[]).map(record=>record.id),
  ]);
- const faces={},cache=new Map(),ready=new Map(),tokens=new WeakMap();
+ const faces={},cache=new Map(),ready=new Map(),tokens=new WeakMap(),cutsceneTokens=new WeakMap();
  const load=async url=>{if(typeof window!=='undefined'&&window.sceneArtAPI&&!url.startsWith('data:')){const r=await window.sceneArtAPI.asset(url);if(!r.ok)throw Error(r.error);url=r.data;}return new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error('캐릭터 원화를 불러오지 못했습니다.'));im.src=url;});};
  function headDimensions(cw,ch,cropHeight){return{width:430,height:Math.round(cropHeight*ch/cw)};}
  function identityMode(characterId){return characters[characterId]?'integrated':'none';}
@@ -23,30 +23,32 @@ const SceneStage=(()=>{
   'woojin-expressions.png':[.50,.32,.19],
  };
  const portraitFraming={
-  ace:[.47,.39,.20],aquila:[.50,.37,.19],ariel:[.52,.40,.18],biscuit:[.51,.355,.145],cheona:[.52,.38,.20],
+  ace:[.47,.39,.20],aquila:[.50,.37,.19],ariel:[.52,.40,.18],biscuit:[.51,.335,.135,.025],cheona:[.52,.38,.20],
   'dogyeom-childhood-friend':[.50,.36,.19],dogyeom:[.51,.35,.19],espada:[.49,.38,.20],
-  evan:[.50,.35,.20],fafnir:[.51,.39,.126],fenri:[.50,.36,.156],halo:[.48,.36,.19],hebnia:[.53,.38,.20],
-  hellenia:[.52,.38,.20],janghwa:[.52,.30,.141],jave:[.50,.36,.20],karin:[.58,.37,.20],
-  kiriel:[.52,.38,.21],lir:[.54,.38,.20],milia:[.47,.42,.153],nadan:[.51,.34,.20],
+  evan:[.50,.35,.20],fafnir:[.51,.39,.126],fenri:[.50,.36,.156],halo:[.46,.30,.135,.06],hebnia:[.53,.38,.20],
+  hellenia:[.54,.35,.15,.055],janghwa:[.52,.30,.141],jave:[.50,.36,.20],karin:[.58,.37,.20],
+  kiriel:[.52,.38,.21],lir:[.54,.38,.20],milia:[.51,.41,.17,.05],nadan:[.51,.34,.20],
   nea:[.49,.40,.18],'nea-travel':[.49,.40,.18],palanus:[.52,.38,.19],rachel:[.51,.36,.20],
   reginleif:[.46,.28,.175],horin:[.50,.31,.195],restia:[.52,.39,.18],rosie:[.51,.37,.18],
   selsi:[.50,.30,.22],seoha:[.50,.31,.19],spike:[.54,.43,.20],spina:[.50,.40,.18],
-  taei:[.50,.34,.185],taeo:[.47,.33,.14],trude:[.51,.40,.19],woojin:[.51,.36,.20],
-  yeogyeong:[.50,.34,.22],yui:[.50,.32,.20],yunseol:[.51,.37,.20],
+  taei:[.50,.34,.185],taeo:[.47,.33,.14],trude:[.55,.365,.14,.12],woojin:[.51,.36,.20],
+  yeogyeong:[.50,.34,.22],yui:[.53,.34,.145],yunseol:[.51,.37,.20],
  };
  const portraitLayout=Object.freeze({width:600,height:460,eyeLine:196,faceHeight:110});
  function portraitGeometry(characterId,frame){
   const file=frame.src.split('/').at(-1);
-  const anchor=expressionFraming[file]||portraitFraming[characterId];
+  const anchor=frame.anchor||expressionFraming[file]||portraitFraming[characterId];
   const {width,height,eyeLine,faceHeight}=portraitLayout;
   if(!anchor){
    const ratio=Math.min(width/frame.w,height/frame.h),w=frame.w*ratio,h=frame.h*ratio;
    return {inset:0,x:(width-w)/2,y:height-h,w,h};
   }
-  const [eyeX,eyeY,face]=anchor;
-  const h=faceHeight/face,w=h*frame.w/frame.h;
+  const [eyeX,eyeY,face,artTop]=anchor;
+  const heightForFace=faceHeight/face;
+  const h=artTop===undefined?heightForFace:Math.min(heightForFace,(eyeLine-8)/(eyeY-artTop));
+  const w=h*frame.w/frame.h;
   // The Earth expression sheet includes a faint line at the edge of each cell.
-  const inset=file==='yeogyeong-expressions.png'?4:0;
+  const inset=frame.inset??(file==='yeogyeong-expressions.png'?4:0);
   return {inset,x:width/2-eyeX*w,y:eyeLine-eyeY*h,w,h};
  }
  function drawExpression(canvas,body,frame,characterId){
@@ -79,6 +81,7 @@ const SceneStage=(()=>{
  function sprite(characterId,emotion=0,frame=null){const key=frame?[characterId,frame.src,frame.x,frame.y,frame.w,frame.h].join(':'):characterId+':0';if(cache.has(key))return cache.get(key);const task=(async()=>{const body=await load(frame?.src||characters[characterId]),canvas=document.createElement('canvas'),record=(globalThis.StoryKitData?.content?.records||[]).find(r=>characterId===r.id||characterId.startsWith(r.id+'-'));if(frame){drawExpression(canvas,body,{...frame,w:frame.w||body.naturalWidth,h:frame.h||body.naturalHeight},characterId);}else if(record){const key=characterId===record.id?'default':characterId.slice(record.id.length+1),f=record.looks[key]||record.looks.default;canvas.width=f.w;canvas.height=f.h;canvas.getContext('2d').drawImage(body,f.x,f.y,f.w,f.h,0,0,f.w,f.h);}else if(['nea','nea-travel'].includes(characterId)){const f=NeaData.record.frames[characterId==='nea-travel'?'travel':'poor'];canvas.width=f.w;canvas.height=f.h;canvas.getContext('2d').drawImage(body,f.x,f.y,f.w,f.h,0,0,f.w,f.h);}else{canvas.width=body.naturalWidth||body.width;canvas.height=body.naturalHeight||body.height;canvas.getContext('2d').drawImage(body,0,0);}const context=canvas.getContext('2d');const pixels=context.getImageData(0,0,canvas.width,canvas.height);cleanPortraitEdge(pixels);context.putImageData(pixels,0,0);const url=canvas.toDataURL('image/png');ready.set(key,url);return url;})();cache.set(key,task);task.catch(()=>cache.delete(key));if(cache.size>24){const oldest=cache.keys().next().value;cache.delete(oldest);ready.delete(oldest);}return task;}
  function lockPortrait(portrait,characterId,emotion=0){const token=(tokens.get(portrait)||0)+1;tokens.set(portrait,token);if(!characters[characterId]||typeof Image==='undefined'||typeof document==='undefined')return;emotion=Math.max(0,Math.min(5,Number.isInteger(emotion)?emotion:0));if(identityMode(characterId)==='integrated')emotion=0;portrait.dataset.identityMode=identityMode(characterId);const key=characterId+':'+emotion;portrait.style.backgroundSize='contain';portrait.style.backgroundPosition='center bottom';if(ready.has(key)){portrait.style.backgroundImage='url("'+ready.get(key)+'")';portrait.style.visibility='visible';portrait.dataset.faceLocked=String(identityMode(characterId)==='original-head');portrait.dataset.spriteReady='true';return;}portrait.dataset.spriteReady='loading';portrait.style.visibility='hidden';sprite(characterId,emotion).then(url=>{if(tokens.get(portrait)!==token)return;portrait.style.backgroundImage='url("'+url+'")';portrait.style.visibility='visible';portrait.dataset.faceLocked=String(identityMode(characterId)==='original-head');portrait.dataset.spriteReady='true';}).catch(()=>{if(tokens.get(portrait)!==token)return;portrait.style.visibility='visible';portrait.dataset.spriteReady='error';});}
  function render({background,portrait,location,characterId,emotion=0,state=null,era=null,dialogue=false,player=null}){const bg=backgrounds[location]||backgrounds.earth_subway;
+  cutsceneTokens.delete(background);
   background.style.backgroundImage='url("'+bg+'")';background.style.backgroundSize='cover';background.style.backgroundPosition='center';background.dataset.location=location;background.dataset.cutscene='false';
   const context={location,emotion,state,era,dialogue};
   drawPortrait(portrait,characterId==='taei'&&player?null:characterId,context);
@@ -97,6 +100,26 @@ const SceneStage=(()=>{
       portrait.style.visibility='visible';portrait.dataset.spriteReady='error';
     });
   }else lockPortrait(portrait,characterId,emotion);}
- function cutscene(background,portrait,url,panel,player){background.style.backgroundImage='url("'+url+'")';background.style.backgroundSize=panel===undefined?'cover':'200% 100%';background.style.backgroundPosition=panel===undefined?'center':panel*100+'% center';background.dataset.cutscene='true';portrait.hidden=true;if(player)player.hidden=true;}
+ function cutscene(background,portrait,url,panel,player){
+  const token={};
+  cutsceneTokens.set(background,token);
+  background.style.backgroundImage=panel===undefined?'url("'+url+'")':'none';
+  background.style.backgroundSize='contain';
+  background.style.backgroundPosition='center';
+  background.style.backgroundRepeat='no-repeat';
+  background.dataset.cutscene='true';
+  portrait.hidden=true;
+  if(player)player.hidden=true;
+  if(panel===undefined||typeof Image==='undefined')return;
+  return load(url).then(image=>{
+   if(cutsceneTokens.get(background)!==token)return;
+   const canvas=document.createElement('canvas');
+   canvas.width=Math.floor(image.naturalWidth/2);canvas.height=image.naturalHeight;
+   canvas.getContext('2d').drawImage(image,panel*canvas.width,0,canvas.width,canvas.height,0,0,canvas.width,canvas.height);
+   background.style.backgroundImage='url("'+canvas.toDataURL()+'")';
+  }).catch(()=>{
+   if(cutsceneTokens.get(background)===token)background.dataset.cutscene='error';
+  });
+ }
  return {render,cutscene,backgrounds,characters,faces,lockPortrait,headDimensions,identityMode,portraitLayout,portraitGeometry,drawPortrait,cleanPortraitEdge};
 })();

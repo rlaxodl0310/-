@@ -114,3 +114,12 @@ test('layered standing assets carry transparency for wide figures and transfer o
   a.ok(bytes[20]&0x10,src);
  }
 });
+
+test('dialogue portraits follow registered era and share the expression-sheet inset',()=>{
+ a.equal(C.dialogueFrame('dogyeom','지구',0).src,'assets/dogyeom-earth.webp');
+ a.equal(C.dialogueFrame('woojin','지구',0).src,'assets/woojin-earth-standing.webp');
+ a.equal(C.dialogueFrame('dogyeom','이세계',0).src,'assets/dogyeom-expressions.png');
+ a.equal(C.dialogueFrame('woojin','이세계',0).src,'assets/woojin-expressions.png');
+ a.equal(C.dialogueFrame('seoha','이세계',0).src,'assets/seoha-expressions.png');
+ for(let emotion=0;emotion<6;emotion++)a.equal(C.transferExpression('yeogyeong','지구',emotion).inset,4);
+});

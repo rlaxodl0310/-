@@ -255,24 +255,24 @@ records.push({
   combatSprite:combatAtlas('taeo',1,.97),
 });
 records.push({
-  id:'trude',name:'트루드',age:null,species:'올빼미 수인',heightCm:168,weightKg:51,
-  unknownName:'붉은 머리의 올빼미 수인',requiresStoryIntroduction:true,
-  persona:'올빼미 수인 트루드. 168cm, 51kg. 호기심과 승부욕이 강하며 평소엔 농담을 즐기고 낯선 소리에 민감하다. 청백색 결정 날의 장병기를 사용한다. 첫 만남과 합류 조건은 미정이다.',
+  id:'trude',name:'트루드',age:null,species:'눈올빼미 수인',heightCm:168,weightKg:51,
+  unknownName:'붉은 머리의 눈올빼미 수인',requiresStoryIntroduction:true,
+  persona:'눈올빼미 수인 트루드. 168cm, 51kg. 호기심과 승부욕이 강하며 평소엔 농담을 즐기고 낯선 소리에 민감하다. 청백색 날의 거대한 양손 도끼를 사용한다. 첫 만남과 합류 조건은 미정이다.',
   preferredWeapons:['axe'],
-  lookLabels:{smile:'장난스러운 미소',alert:'낯선 소리에 귀 기울이기',attack:'결정 날 장병기 공격',cutscene:'승부에 집중하는 순간 · 컷신'},
-  motion:{name:'장병기를 몸 옆으로 당겨 휘두르기',lean:6.5,step:5.5,turn:-10.5,side:9.5,tempo:1.08},
+  lookLabels:{smile:'장난스러운 미소',alert:'낯선 소리에 귀 기울이기',attack:'양손 도끼 공격',cutscene:'승부에 집중하는 순간 · 컷신'},
+  motion:{name:'양손 도끼를 몸 옆으로 당겨 휘두르기',lean:6.5,step:5.5,turn:-10.5,side:9.5,tempo:1.08},
   looks:{
-    default:fullImage('trude-standing.webp',720,1080),
-    casual:fullImage('trude-casual.webp',720,1080),
-    rear:fullImage('trude-rear.webp',720,1080),
-    help:fullImage('trude-talk.webp',720,1080),
-    smile:fullImage('trude-smile.webp',720,1080),
-    alert:fullImage('trude-alert.webp',720,1080),
-    attack:fullImage('trude-cutscene.webp',720,1080),
-    cutscene:fullImage('trude-cutscene.webp',720,1080),
+    default:fullImage('trude-standing.webp',960,1080),
+    casual:fullImage('trude-casual.webp',960,1080),
+    rear:fullImage('trude-rear.webp',960,1080),
+    help:fullImage('trude-talk.webp',720,540),
+    smile:fullImage('trude-smile.webp',720,540),
+    alert:fullImage('trude-alert.webp',720,540),
+    attack:fullImage('trude-cutscene.webp',960,1080),
+    cutscene:fullImage('trude-cutscene.webp',960,1080),
   },
   sd:{default:fullImage('trude-sd.webp',512,512)},
-  combatSprite:combatAtlas('trude',.96,1.08),
+  combatSprite:combatAtlas('trude',0.96,1.08,2),
 });
 records.push({
   id:'espada',name:'에스파다',age:null,species:'인간족',heightCm:164,weightKg:44,
@@ -448,16 +448,16 @@ records.push({
   lookLabels:{help:'농담으로 인사하기',reaction:'어색하게 사과하기',cutscene:'붉은 대검을 휘두르기 · 컷신'},
   motion:{name:'어깨를 틀어 붉은 대검 휘두르기',lean:7.25,step:6.4,turn:-11.25,side:9.25,tempo:1.07},
   looks:{
-    default:crop('halo-standing.webp',720,1080,18,220,684,824),
-    casual:fullImage('halo-casual.webp',720,1080),
-    rear:crop('halo-rear.webp',720,1080,33,226,654,818),
-    help:fullImage('halo-talk.webp',720,1080),
-    reaction:fullImage('halo-reaction.webp',720,1080),
-    attack:fullImage('halo-cutscene.webp',720,1080),
+    default:fullImage('halo-standing.webp',960,1080),
+    casual:fullImage('halo-casual.webp',960,1080),
+    rear:fullImage('halo-rear.webp',960,1080),
+    help:fullImage('halo-talk.webp',720,540),
+    reaction:fullImage('halo-reaction.webp',720,540),
+    attack:fullImage('halo-cutscene.webp',960,1080),
     cutscene:fullImage('halo-cutscene.webp',720,1080),
   },
   sd:{default:fullImage('halo-sd.webp',512,512)},
-  combatSprite:combatAtlas('halo',.97,1.07,2),
+  combatSprite:combatAtlas('halo',0.97,1.07,2),
 });
 records.push({
   id:'ariel',name:'아리엘',age:null,species:'인간족',heightCm:164,weightKg:48,
@@ -489,12 +489,12 @@ records.push({
     default:fullImage('milia-standing.webp',960,1080),
     rear:fullImage('milia-rear.webp',960,1080),
     casual:fullImage('milia-casual.webp',960,1080),
-    help:fullImage('milia-talk.webp',720,1080),
-    reaction:fullImage('milia-reaction.webp',720,1080),
+    help:fullImage('milia-talk.webp',720,540),
+    reaction:fullImage('milia-reaction.webp',720,540),
     cutscene:fullImage('milia-cutscene.webp',720,1080),
   },
   sd:{default:fullImage('milia-sd.webp',512,512)},
-  combatSprite:combatAtlas('milia',.90,1.11,2),
+  combatSprite:combatAtlas('milia',0.9,1.11,2),
 });
 records.push({
  id:'reginleif',name:'레긴레이프',age:null,species:'인간족',origin:'fantasy',requiresStoryIntroduction:true,
@@ -545,6 +545,33 @@ records.find(record=>record.id==='cheona').looks['컷신 · 팔짱']=fullImage('
 for(const id of ['janghwa','selsi','rachel','spike','jave','espada']){
   records.find(record=>record.id===id).looks.cutscene=fullImage(id+'-cutscene.webp',506,506);
 }
+// Head and sole positions in the front frame, measured independently of gear.
+for(const [id,body] of Object.entries({taeo:[10,697],trude:[32,1054,22],restia:[10,856],nadan:[88,1010]})){
+  records.find(record=>record.id===id).looks.default.body=body;
+}
+for(const [id,[width,height]] of Object.entries({
+  trude:[879,879],
+  milia:[879,879],
+  jave:[760,504],
+  spike:[760,504],
+  rachel:[760,504],
+  selsi:[760,504],
+  biscuit:[1672,941],
+  espada:[1672,941],
+  janghwa:[760,504],
+  horin:[760,504],
+  reginleif:[760,504],
+  ariel:[760,504],
+  halo:[1672,941],
+  yunseol:[760,504],
+  hellenia:[760,504],
+  hebnia:[879,879],
+  nadan:[760,504],
+  restia:[760,504],
+  taeo:[760,504],
+})){
+  records.find(record=>record.id===id).looks.cutscene=fullImage('cutscenes/'+id+'.webp',width,height);
+}
 function get(id){return records.find(r=>r.id===id)||null;}
 function appearance(id,{look='default',pose='default'}={}){const r=get(id);return r?.looks[pose==='default'?look:pose]||r?.looks.default||null;}
 function displayName(state,id){const r=get(id);if(!r)return null;const introduced=state?.knownIdentities?.[id]===true||(state?.turns||[]).some(t=>(t.panels||[]).some(p=>p.speaker===id&&String(p.text||'').includes(r.name)));return introduced?r.name:r.unknownName;}
@@ -559,7 +586,7 @@ const transfers={
     looks:{'지구 · 교복':fullImage('taei-earth.webp',720,1080),'지구 · 후면 전신':fullImage('taei-earth-rear.webp',720,1080),'이세계 · 격투가':fullImage('taei-fighter-standing.webp',720,1080),'이세계 · 후면 전신':fullImage('taei-fighter-rear.webp',720,1080)},
     cutscenes:[['건틀릿 점검','taei-fighter-cutscenes.webp',1200,600,2,0],['가드 연습','taei-fighter-cutscenes.webp',1200,600,2,1]],
     expressions:{'지구':'taei-earth-expressions.webp','이세계':'taei-fighter-expressions.webp'},sd:{'격투가':'sd-taei-fighter.webp'}},
-  dogyeom:{age:18,trait:'반동',bio:'백금발의 전 복싱 유망주. 부상 흉터를 이레즈미 문신으로 가렸다. 반동으로 받아낸 충격 일부를 타격에 싣는다.',
+  dogyeom:{earthPortrait:{...crop('dogyeom-earth.webp',720,1080,130,0,460,500),anchor:[.51,.245,.095]},age:18,trait:'반동',bio:'백금발의 전 복싱 유망주. 부상 흉터를 이레즈미 문신으로 가렸다. 반동으로 받아낸 충격 일부를 타격에 싣는다.',
     looks:{'지구 · 등교 복장':fullImage('dogyeom-earth.webp',720,1080),'지구 · 후면 전신':fullImage('dogyeom-earth-rear.webp',720,1080)},
     cutscenes:[['손목 보호대 점검','event-dogyeom-solo.png',1672,941]],expressions:{'이세계':'dogyeom-expressions.png'},solo:[1,4]},
   yeogyeong:{age:18,trait:'유예',bio:'태이와 같은 반. 간호학과 진학을 준비했다. 유예로 한 부위의 부상 상태를 잠시 고정한다.',
@@ -573,7 +600,7 @@ const transfers={
     looks:{'지구 · 외출복':fullImage('yui-standing.png',887,1774),'지구 · 후면 전신':fullImage('yui-earth-rear.webp',720,1080)},
     cutscenes:[['지구','yui-cutscenes.png',1774,887,2,0],['이세계','yui-cutscenes.png',1774,887,2,1]],
     expressions:{'지구':'yui-expressions.png'},sd:{'상호작용':'sd-yui.png'}},
-  woojin:{age:null,trait:null,bio:'지구의 물류 현장 직원으로 제작한 전이자 시안.',
+  woojin:{earthPortrait:{...crop('woojin-earth-standing.webp',720,1080,130,0,460,500),anchor:[.54,.21,.085]},age:null,trait:null,bio:'지구의 물류 현장 직원으로 제작한 전이자 시안.',
     looks:{'지구 · 작업복':fullImage('woojin-earth-standing.webp',720,1080),'지구 · 후면 전신':fullImage('woojin-earth-rear.webp',720,1080),'이세계 · 여행복':fullImage('woojin-fantasy-standing.webp',720,1080),'이세계 · 후면 전신':fullImage('woojin-fantasy-rear.webp',720,1080)},
     cutscenes:[['매듭 점검','woojin-cutscenes.png',1774,887,2,0],['여관 앞 휴식','woojin-cutscenes.png',1774,887,2,1]],
     expressions:{'이세계':'woojin-expressions.png'},sd:{'상호작용':'sd-woojin.png'}},
@@ -592,10 +619,14 @@ function sheetCell(file,width,height,columns,rows,index){
 function transferExpression(id,era,emotion){
   const file=transfers[id]?.expressions?.[era];
   if(!file)return null;
-  return sheetCell(file,1536,1024,3,2,Math.max(0,Math.min(5,Number.isInteger(emotion)?emotion:0)));
+  const frame=sheetCell(file,1536,1024,3,2,Math.max(0,Math.min(5,Number.isInteger(emotion)?emotion:0)));
+  if(id==='yeogyeong'&&era==='지구')frame.inset=4;
+  return frame;
 }
 function dialogueFrame(id,era,emotion){
-  return get(id)?.portraits?.default||transfers[id]?.dialoguePortrait||transferExpression(id,era,emotion);
+  const transfer=transfers[id];
+  const earth=era==='지구'?transfer?.earthPortrait||transfer?.dialoguePortrait:null;
+  return get(id)?.portraits?.default||earth||transferExpression(id,era,emotion)||transfer?.dialoguePortrait;
 }
 return{records,legacyCasual,transfers,transferExpression,dialogueFrame,sheetCell,get,appearance,displayName,combatFrame};
 });
