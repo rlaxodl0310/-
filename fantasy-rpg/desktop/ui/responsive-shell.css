@@ -45,22 +45,22 @@
  z-index:1;
  pointer-events:none;
  min-height:0;
- margin:clamp(64px,12vh,120px) 5% 0;
+ margin:clamp(50px,9vh,100px) 3% 0;
 }
 .scene-actors>#scene-player,.scene-actors>#scene-portrait{
  position:absolute;
  top:0;
  bottom:0;
- width:42%;
- max-width:460px;
+ width:49%;
+ max-width:640px;
  height:auto;
  background-repeat:no-repeat;
  background-position:center bottom;
  background-size:contain;
  filter:drop-shadow(0 8px 8px #0005);
 }
-.scene-actors>#scene-player{left:2%}
-.scene-actors>#scene-portrait{right:2%}
+.scene-actors>#scene-player{left:0}
+.scene-actors>#scene-portrait{right:0}
 .app>main .scene .dialogue-wrap{
  position:relative;
  grid-row:2;
@@ -91,7 +91,7 @@
 .scene .dialogue-footer{margin-top:3px}
 @media(max-width:560px){
  .scene-actors{margin-inline:2%}
- .scene-actors>#scene-player,.scene-actors>#scene-portrait{width:48%}
+ .scene-actors>#scene-player,.scene-actors>#scene-portrait{width:50%}
  .app>main .scene .dialogue-wrap{width:96%;padding:6px}
  .scene #chat-form{flex-wrap:wrap}
  .scene #story-chat-mode{flex:0 0 100%;flex-direction:row}

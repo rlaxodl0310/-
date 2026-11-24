@@ -12,3 +12,20 @@ test('Soyun uses an integrated illustration without the old head overlay',()=>{c
 test('native Nea never renders on Earth or the unknown-background subway fallback',()=>{const Stage=load();for(const location of ['earth_subway','platform','station','unregistered'])for(const characterId of ['nea','nea-travel']){const background=layer(),portrait=layer();Stage.render({background,portrait,location,characterId});assert.equal(portrait.hidden,true);assert.equal(portrait.style.backgroundImage,'none');assert.equal(portrait.dataset.character,'');}});
 
 test('every registered full-body portrait bypasses separate expression head overlays',()=>{const Stage=load();assert.equal(Object.keys(Stage.faces).length,0);for(const id of Object.keys(Stage.characters))assert.equal(Stage.identityMode(id),'integrated');assert.equal(Stage.identityMode('missing'),'none');});
+
+test('dialogue framing matches faces across sources and trims the Earth Yeogyeong sheet border',()=>{
+ const Stage=load(),size=Stage.portraitLayout;
+ const samples=[
+  ['taei',{src:'assets/taei-earth-expressions.webp',w:512,h:512},.51,.32,.22],
+  ['yeogyeong',{src:'assets/yeogyeong-expressions.png',w:512,h:512},.535,.37,.22],
+  ['fafnir',{src:'assets/dialogue/fafnir.webp',w:720,h:540},.51,.39,.126],
+  ['janghwa',{src:'assets/dialogue/janghwa.webp',w:720,h:540},.52,.30,.141],
+ ];
+ for(const [id,frame,eyeX,eyeY,face] of samples){
+  const g=Stage.portraitGeometry(id,frame);
+  assert(Math.abs(g.x+eyeX*g.w-size.width/2)<1e-6);
+  assert(Math.abs(g.y+eyeY*g.h-size.eyeLine)<1e-6);
+  assert(Math.abs(g.h*face-size.faceHeight)<1e-6);
+  assert.equal(g.inset,id==='yeogyeong'?4:0);
+ }
+});

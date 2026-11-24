@@ -34,7 +34,11 @@ function open(story=null,{visual=null}={}){current?.close();const M=r.DistrictMo
  else if(target.id==='shop')show('천막 아래 약초와 작은 여행용품이 진열되어 있다. 유리병 사이로 등불이 반짝인다.',[['진열대를 살펴본다.',()=>show('식량과 밧줄, 등불 같은 물건이 보인다. 상품 거래는 아직 연결하지 않은 제작 구간이다.',[['거리로 돌아간다.',resume]])],['둘러보고 돌아간다.',resume]]);
  else if(target.id==='guild')show('문 위에 협회 문장이 걸려 있다. 안쪽에서 종이를 넘기는 소리와 낮은 말소리가 들린다.',[['입구 안내문을 읽는다.',()=>show('의뢰 접수와 보고를 받는 곳이다. 이 거리의 실제 게시판 연결과 내부 공간은 다음 제작 단계다.',[['거리로 돌아간다.',resume]])],['거리를 더 둘러본다.',resume]]);
  else show('분수의 물결에 등불이 잘게 부서진다. 돌바닥 위로 작은 물소리가 이어진다.',[['잠시 바라본 뒤 돌아선다.',resume]]);
- if(['yeogyeong','yui'].includes(target.id)){const portrait=document.createElement('div');portrait.className='district-vn-portrait '+target.id;portrait.setAttribute('aria-label',target.name+' 기존 일러스트');portrait.style.backgroundImage='url("assets/'+(target.id==='yui'?'yui-cutscenes.png':'yeogyeong-fantasy-outfit.png')+'")';dialogue.prepend(portrait);}
+ if(npcs.includes(target)){
+  const portrait=document.createElement('div');portrait.className='district-vn-portrait';
+  SceneStage.drawPortrait(portrait,target.id,{era:'fantasy',dialogue:true});
+  dialogue.prepend(portrait);
+ }
  }
  function approach(target){if(dialogue)return;keys.clear();if(map.nearest([target],1.25)){talk(target);return;}const candidates=[];if(map.free(target.x,target.y))candidates.push({x:target.x,y:target.y});else for(const [dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])if(map.free(target.x+dx,target.y+dy))candidates.push({x:target.x+dx,y:target.y+dy});const plans=candidates.map(p=>({p,path:map.path(p.x,p.y)})).filter(v=>v.path!==null).sort((a,b)=>a.path.length-b.path.length);if(!plans.length){status.textContent='가까이 갈 수 있는 길을 찾지 못했습니다.';return;}if(map.go(plans[0].p.x,plans[0].p.y)){pending=target;status.textContent=target.name+' 쪽으로 이동 중';}}
  destinations.onchange=()=>{const t=targets.find(t=>t.id===destinations.value);if(t)approach(t);destinations.value='';};interact.onclick=()=>{if(dialogue)return;const t=map.nearest(targets,1.4);if(t)talk(t);else status.textContent='인물이나 출입구 가까이에서 상호작용해 주세요.';};
