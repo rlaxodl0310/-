@@ -8,6 +8,17 @@ assert(await run(`(() => {
  return !player.hidden&&!actor.hidden&&player.dataset.character==='taei'&&actor.dataset.character==='yeogyeong'
   &&left.left<right.left&&Math.max(left.bottom,right.bottom)<=chat.top&&chat.height<=40&&chat.width>=850;
 })()`));
+assert(await run(`(() => {
+ const header=document.querySelector('.app>main>header'),toggle=document.getElementById('quick-tools-toggle');
+ const menu=document.getElementById('quick-tools');
+ if(!menu.hidden||header.offsetHeight>54||getComputedStyle(header).backgroundColor!=='rgb(11, 11, 11)')return false;
+ toggle.focus();toggle.click();
+ if(menu.hidden||menu.querySelectorAll('.menu-group').length!==3)return false;
+ const item=menu.querySelector('[data-panel="settings"]');item.focus();item.click();
+ if(!menu.hidden||document.getElementById('panel').dataset.mode!=='settings')return false;
+ document.getElementById('close-panel').click();
+ return document.activeElement===toggle;
+})()`));
 if(process.env.FANTASY_LAYOUT_SCREENSHOT)await shot(process.env.FANTASY_LAYOUT_SCREENSHOT);
 await run(`(() => {
  window.walkProbe={};
@@ -161,5 +172,5 @@ await delay(650);
 await run("window.dispatchEvent(new KeyboardEvent('keyup',{code:'ArrowRight'}))");
 assert(await run(`Math.abs(DistrictUI.current.renderer.camera.offset.x-(${beforeStreet}))>12`));
 await run("DistrictUI.current.close()");
-assert.equal(errors.length,0);console.log(JSON.stringify({passed:true,provider:'controlled fixture, not live ChatGPT account',checks:['left and right portraits with compact bottom chat','illustrated movement and following camera in both walk views','main NPC dialogue','target request survives UI routing','consent without observation','disabled observation without eligible clues','explicit ten minute observation from main screen','companion fatigue rounded for display','refusal without action','mobile390 no panel overflow','compound input reaches the story director unchanged','main-story withdrawal produces a turn summary','three chat modes route inputs and shortcuts separately','restore preview renders changes and both buttons follow the command path','journal actions open a targeted rewind preview','restored input is editable without sending until submission','three recommendations use normal story input','quoted recommendation costs render and execute through the existing action engine','dedicated village artwork loads with cardinal-only click paths','no JavaScript exceptions'],exchanges:h.s.companions.exchanges.length,observations:h.q().tracking.observations,minutes:h.s.minutes}));
+assert.equal(errors.length,0);console.log(JSON.stringify({passed:true,provider:'controlled fixture, not live ChatGPT account',checks:['compact black grouped menu and focus return','left and right portraits with compact bottom chat','illustrated movement and following camera in both walk views','main NPC dialogue','target request survives UI routing','consent without observation','disabled observation without eligible clues','explicit ten minute observation from main screen','companion fatigue rounded for display','refusal without action','mobile390 no panel overflow','compound input reaches the story director unchanged','main-story withdrawal produces a turn summary','three chat modes route inputs and shortcuts separately','restore preview renders changes and both buttons follow the command path','journal actions open a targeted rewind preview','restored input is editable without sending until submission','three recommendations use normal story input','quoted recommendation costs render and execute through the existing action engine','dedicated village artwork loads with cardinal-only click paths','no JavaScript exceptions'],exchanges:h.s.companions.exchanges.length,observations:h.q().tracking.observations,minutes:h.s.minutes}));
 }finally{await h.close();}await call('Page.close');ws.close();})().catch(e=>{console.error(e);process.exit(1);});

@@ -88,3 +88,13 @@ test('transfer rear views are separate files registered alongside Earth fronts',
     a(fs.existsSync(path.resolve(__dirname,'../ui',portrait.src)));
   }
 });
+
+test('full-body frames trim excess sheet margins and use the transparent Taei standing asset',()=>{
+  const taeo=C.appearance('taeo'),reginleif=C.appearance('reginleif');
+  a(taeo.y>100&&taeo.h<taeo.imageHeight);
+  a(reginleif.x>100&&reginleif.w<reginleif.h);
+  const frame=C.transfers.taei.looks['이세계 · 격투가'];
+  a.equal(frame.src,'assets/taei-fighter-standing.webp');
+  a.equal(R.get('taei').art.src,'../'+frame.src);
+  a.equal(R.get('taei').art.transparent,true);
+});

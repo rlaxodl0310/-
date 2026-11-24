@@ -1,27 +1,41 @@
-/* The shell owns viewport sizing; toolbar wrapping must contribute to its height. */
-.app>main{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100vh;height:100dvh;min-width:0}
-.app>main>header{height:auto;min-height:84px;display:grid;grid-template-columns:max-content minmax(0,1fr);padding:14px 24px;gap:18px;box-sizing:border-box}
-.app>main>header .brand{white-space:nowrap}
-.app>main>header .header-right{display:grid;grid-template-columns:repeat(4,minmax(72px,120px));justify-content:end;gap:6px;min-width:0}
-.app>main>header .header-right>*{min-width:0;margin:0;min-height:38px;font-size:11px;padding:7px 5px;box-sizing:border-box;text-align:center;overflow-wrap:anywhere}
-.app>main>.scene{height:auto;min-height:0;min-width:0}
-.app>main>footer{height:auto;min-height:54px;box-sizing:border-box;flex-wrap:wrap;gap:8px 22px;padding:12px 24px}
-
-@media(max-width:1439px){.app>main>header .brand span{display:none}}
-@media(max-width:1279px){.app>main>header{grid-template-columns:minmax(0,1fr);gap:10px;padding:12px 20px}.app>main>header .header-right{grid-template-columns:repeat(4,minmax(0,1fr))}.app>main>header .brand{font-size:23px}}
-@media(max-width:700px){.app>main>header{padding:10px 12px}.app>main>header .header-right{grid-template-columns:repeat(2,minmax(0,1fr))}.app>main>footer{padding:8px 12px;font-size:11px}}
-#quick-tools-toggle{display:none}
-@media(max-width:700px){
-  .app>main>header{position:relative;z-index:5;align-items:center;min-height:62px;grid-template-columns:minmax(0,1fr) auto}
-  #quick-tools-toggle{display:block;margin:0;min-height:35px}
-  .app>main>header .header-right{display:none;position:absolute;top:100%;left:0;right:0;padding:10px 12px;background:#141d19;border-bottom:1px solid #675c44;box-shadow:0 10px 20px #0005;max-height:60dvh;overflow:auto}
-  .app>main>header #quick-tools-toggle[aria-expanded=true]+.header-right{display:grid}
-  .scene .scene-minimap{top:18px;right:14px;width:min(32%,138px)}
-
+/* Keep navigation compact and leave the story stage the remaining viewport. */
+.app{padding-left:0}
+.app>main{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100dvh;min-width:0}
+.app>main>header{
+ position:relative;z-index:5;
+ display:flex;align-items:center;gap:10px;
+ min-height:46px;height:auto;padding:5px 12px;
+ background:#0b0b0b;border-bottom:1px solid #292929;
 }
+.app>main>header .brand{font-size:clamp(13px,2.1vw,20px);white-space:nowrap;letter-spacing:.04em}
+.app>main>header .header-right{display:flex;flex-wrap:nowrap;gap:4px;margin-left:auto}
+.app>main>header button{
+ background:#191919;border:1px solid #383838;border-radius:4px;
+ color:#f0eee7;font-size:12px;min-height:32px;padding:5px 8px;white-space:nowrap;
+}
+.app>main>header button:hover,.app>main>header button[aria-expanded=true]{background:#303030}
+#quick-tools{
+ position:absolute;top:calc(100% + 5px);left:8px;
+ width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 58px);overflow:auto;
+ padding:7px;background:#101010;border:1px solid #363636;
+ border-radius:6px;box-shadow:0 10px 26px #000a;
+}
+#quick-tools[hidden]{display:none}
+.menu-group{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:4px}
+.menu-group+.menu-group{border-top:1px solid #282828;margin-top:4px}
+.menu-group>p{grid-column:1/-1;color:#c1c1c1;font-size:11px;margin:4px 0}
+.app>main>header .menu-group button{white-space:normal;text-align:left}
+.app>main>footer{
+ min-height:31px;height:auto;padding:4px 12px;gap:4px 12px;
+ background:#0b0b0b;line-height:1.2;flex-wrap:wrap;
+}
+.app>main>footer>span:first-child{font-size:12px}
+@media(max-width:700px){.scene .scene-minimap{top:18px;right:14px;width:min(32%,138px)}}
+@media(max-width:390px){.app>main>header{gap:5px;padding-inline:5px}.app>main>header button{padding-inline:5px}}
 .app>main>.scene{
  display:grid;
  grid-template-rows:minmax(0,1fr) auto;
+ height:auto;min-height:0;min-width:0;
 }
 .scene .scene-top{position:absolute;inset:0 0 auto;z-index:2}
 .scene .scene-caption{display:none}
@@ -56,7 +70,7 @@
  max-width:none;
  margin:0 auto 12px;
  padding:8px 12px;
- background:#101913ed;
+ background:#111111ed;
  border-radius:6px;
  min-width:0;
 }

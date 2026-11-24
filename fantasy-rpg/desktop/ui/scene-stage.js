@@ -13,7 +13,7 @@ const SceneStage=(()=>{
  function identityMode(characterId){return characters[characterId]?'integrated':'none';}
  // Sheet coordinates are measured in each cell as fractions of its width and height.
  const expressionFraming={
-  'taei-earth-expressions.webp':[.50,.40,.21],
+  'taei-earth-expressions.webp':[.50,.31,.25],
   'taei-fighter-expressions.webp':[.51,.36,.22],
   'dogyeom-expressions.png':[.53,.38,.15],
   'yeogyeong-expressions.png':[.50,.39,.20],

@@ -1,6 +1,6 @@
 (function(root){
 const transfers={
- "taei":{src:'assets/taei-earth.webp',frame:[210,27,300,1024]},
+ "taei":{src:'assets/taei-earth.webp',frame:[217, 27, 285, 1026]},
  "dogyeom":{src:'assets/dogyeom-earth.webp',frame:[176,28,366,1024]},
  "yeogyeong":{src:'assets/yeogyeong-standing.png',frame:[258,13,450,1525]},
  "seoha":{src:'assets/seoha-standing.png',frame:[313,9,422,1510]},
@@ -17,8 +17,8 @@ root.WalkCharacter={
  standing,
  earth:{
   src:'map/assets/taei-walk-earth.webp',
-  front:[[91, 16, 151, 569], [361, 19, 229, 563], [713, 18, 136, 564], [970, 20, 263, 561]],
-  back:[[92, 642, 144, 567], [342, 646, 255, 564], [707, 646, 169, 563], [967, 647, 260, 562]],
+  front:[[88, 15, 152, 571], [343, 16, 247, 570], [693, 16, 139, 568], [950, 17, 285, 569]],
+  back:[[85, 642, 153, 570], [327, 644, 272, 569], [689, 644, 189, 568], [951, 644, 273, 569]],
  },
  fantasy:{
   src:'map/assets/taei-walk-fantasy.webp',

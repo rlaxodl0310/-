@@ -1,5 +1,5 @@
 (function(r,f){if(typeof module==='object'&&module.exports)module.exports=f();else r.CharacterContent=f();})(globalThis,()=>{
-const records=[{"id": "cheona", "name": "천아", "age": 19, "species": "뱀 수인", "origin": "fantasy", "unknownName": "은백색 머리의 뱀 수인", "preferredWeapons": ["dagger"], "trait": null, "looks": {"default": {"src": "assets/cheona-looks.webp", "x": 0, "y": 0, "w": 512, "h": 768, "imageWidth": 1024, "imageHeight": 1536}, "street": {"src": "assets/cheona-looks.webp", "x": 512, "y": 0, "w": 512, "h": 768, "imageWidth": 1024, "imageHeight": 1536}, "help": {"src": "assets/cheona-looks.webp", "x": 512, "y": 768, "w": 512, "h": 768, "imageWidth": 1024, "imageHeight": 1536}, "fallen": {"src": "assets/cheona-fallen.webp", "x": 0, "y": 0, "w": 1211, "h": 1299, "imageWidth": 1211, "imageHeight": 1299}, "sleep": {"src": "assets/cheona-sleep.webp", "x": 0, "y": 0, "w": 640, "h": 1536, "imageWidth": 1024, "imageHeight": 1536}}, "sd": {"default": {"src": "assets/cheona-sd.webp", "x": 0, "y": 0, "w": 600, "h": 656, "imageWidth": 1199, "imageHeight": 1312}, "playful": {"src": "assets/cheona-sd.webp", "x": 600, "y": 0, "w": 599, "h": 656, "imageWidth": 1199, "imageHeight": 1312}, "surprised": {"src": "assets/cheona-sd.webp", "x": 0, "y": 656, "w": 600, "h": 656, "imageWidth": 1199, "imageHeight": 1312}, "street": {"src": "assets/cheona-sd.webp", "x": 600, "y": 656, "w": 599, "h": 656, "imageWidth": 1199, "imageHeight": 1312}, "sleep": {"src": "assets/cheona-sleep.webp", "x": 640, "y": 820, "w": 384, "h": 716, "imageWidth": 1024, "imageHeight": 1536}}, "pixel": {"src": "assets/cheona-pixels.webp", "frames": [[0, 0, 443, 443], [443, 0, 444, 443], [887, 0, 443, 443], [1330, 0, 444, 443], [0, 443, 443, 444], [443, 443, 444, 444], [887, 443, 443, 444], [1330, 443, 444, 444]], "height": 443, "imageWidth": 1774, "imageHeight": 887}, "motion": {"name": "상체를 비껴 흐르듯 짧게 빠지기", "lean": -6, "step": 5, "turn": -13, "side": 12, "tempo": 1.15}, "persona": "뱀 수인 천아. 19살. 직업·태이와의 과거 관계·성격 세부는 미정. 단검류를 주로 사용하지만 전투 직업·정수·스킬을 임의 부여하지 않는다. 은백색 긴 머리, 나른한 보랏빛 눈, 밝은 피부와 갈라진 뱀 혀. 별도 뱀 동반자는 없다. 현대식 흰 재킷·보라 안감·연두 배색과 흰 나시·회색 스타킹·운동화가 기본. 나시는 평소와 앉은 장면 모두 한 겹이며 검정 이너를 새로 추가하지 않는다. 검정·연두 대체 의상은 모자 없이 메시와 안쪽 옷을 분리한다. 현실에는 등장하지 않는다. 만남·호감·파티 합류는 미정이다. 전이자 고유 특성 없음. 잠옷은 검정·흰 프릴 상의와 앞치마, 옆트임 있는 검정 일자 치마, 발끝을 덮는 스타킹이며 구두는 신지 않는다. 잠옷으로 자동 갈아입거나 장면을 강제하지 않는다. 키 167cm, 몸무게 46kg. 이는 설정 정보이며 상대가 알기 전 대사로 자동 공개하지 않는다.", "portraits": {"sleep": {"src": "assets/cheona-sleep.webp", "x": 640, "y": 45, "w": 384, "h": 540, "imageWidth": 1024, "imageHeight": 1536}}, "heightCm": 167, "weightKg": 46}, {"id": "fafnir", "name": "파프니르", "age": 20, "species": "수룡 수인", "origin": "fantasy", "unknownName": "푸른 머리의 수룡 수인", "preferredWeapons": ["magic"], "roles": ["mage"], "combatStyle": "magic", "trait": null, "looks": {"default": {"src": "assets/fafnir-looks.webp", "x": 0, "y": 0, "w": 630, "h": 623, "imageWidth": 1261, "imageHeight": 1247}, "help": {"src": "assets/fafnir-looks.webp", "x": 630, "y": 0, "w": 631, "h": 623, "imageWidth": 1261, "imageHeight": 1247}, "fallen": {"src": "assets/fafnir-looks.webp", "x": 0, "y": 623, "w": 630, "h": 624, "imageWidth": 1261, "imageHeight": 1247}}, "sd": {"default": {"src": "assets/fafnir-looks.webp", "x": 630, "y": 623, "w": 631, "h": 624, "imageWidth": 1261, "imageHeight": 1247}}, "pixel": {"src": "assets/fafnir-looks.webp", "frames": [[630, 623, 631, 624]], "height": 624, "imageWidth": 1261, "imageHeight": 1247, "format": "illustrated-sd"}, "motion": {"name": "몸을 틀어 거리를 지키며 마나 모으기", "lean": 4, "step": 3, "turn": 8, "side": 7, "tempo": 0.9}, "persona": "20살 여성 수룡 수인 파프니르. 마법을 주로 쓰는 메이지. 자기 종족의 강함을 알고 자부심과 자기주장이 강한 말괄양이로 차별에도 주눅들지 않는다. 푸른 앞머리와 밝은 금발 안쪽 긴 머리, 작은 뿔, 검정·금색 의상과 작고 유연한 유기적 비늘·지느러미 꼬리를 유지한다. 로봇 같은 거대한 꼬리로 되돌리지 않는다. 전용 속성·스킬·정수·과거·태이와의 관계는 미정. 현실에 등장하거나 파티에 자동 합류하지 않는다. 전이자 전용 고유 특성 없음. 키 154cm, 몸무게 53kg. 이는 설정 정보이며 상대가 알기 전 대사로 자동 공개하지 않는다.", "heightCm": 154, "weightKg": 53}];
+const records=[{"id": "cheona", "name": "천아", "age": 19, "species": "뱀 수인", "origin": "fantasy", "unknownName": "은백색 머리의 뱀 수인", "preferredWeapons": ["dagger"], "trait": null, "looks": {"default": {"src": "assets/cheona-looks.webp", "x": 0, "y": 0, "w": 512, "h": 768, "imageWidth": 1024, "imageHeight": 1536}, "street": {"src": "assets/cheona-looks.webp", "x": 512, "y": 0, "w": 512, "h": 768, "imageWidth": 1024, "imageHeight": 1536}, "help": {"src": "assets/cheona-looks.webp", "x": 512, "y": 768, "w": 512, "h": 768, "imageWidth": 1024, "imageHeight": 1536}, "fallen": {"src": "assets/cheona-fallen.webp", "x": 0, "y": 0, "w": 1211, "h": 1299, "imageWidth": 1211, "imageHeight": 1299}, "sleep": {"src": "assets/cheona-sleep.webp", "x": 0, "y": 0, "w": 640, "h": 1536, "imageWidth": 1024, "imageHeight": 1536}}, "sd": {"default": {"src": "assets/cheona-sd.webp", "x": 0, "y": 0, "w": 600, "h": 656, "imageWidth": 1199, "imageHeight": 1312}, "playful": {"src": "assets/cheona-sd.webp", "x": 600, "y": 0, "w": 599, "h": 656, "imageWidth": 1199, "imageHeight": 1312}, "surprised": {"src": "assets/cheona-sd.webp", "x": 0, "y": 656, "w": 600, "h": 656, "imageWidth": 1199, "imageHeight": 1312}, "street": {"src": "assets/cheona-sd.webp", "x": 600, "y": 656, "w": 599, "h": 656, "imageWidth": 1199, "imageHeight": 1312}, "sleep": {"src": "assets/cheona-sleep.webp", "x": 640, "y": 820, "w": 384, "h": 716, "imageWidth": 1024, "imageHeight": 1536}}, "pixel": {"src": "assets/cheona-pixels.webp", "frames": [[0, 0, 443, 443], [443, 0, 444, 443], [887, 0, 443, 443], [1330, 0, 444, 443], [0, 443, 443, 444], [443, 443, 444, 444], [887, 443, 443, 444], [1330, 443, 444, 444]], "height": 443, "imageWidth": 1774, "imageHeight": 887}, "motion": {"name": "상체를 비껴 흐르듯 짧게 빠지기", "lean": -6, "step": 5, "turn": -13, "side": 12, "tempo": 1.15}, "persona": "뱀 수인 천아. 19살. 직업·태이와의 과거 관계·성격 세부는 미정. 단검류를 주로 사용하지만 전투 직업·정수·스킬을 임의 부여하지 않는다. 은백색 긴 머리, 나른한 보랏빛 눈, 밝은 피부와 갈라진 뱀 혀. 별도 뱀 동반자는 없다. 현대식 흰 재킷·보라 안감·연두 배색과 흰 나시·회색 스타킹·운동화가 기본. 나시는 평소와 앉은 장면 모두 한 겹이며 검정 이너를 새로 추가하지 않는다. 검정·연두 대체 의상은 모자 없이 메시와 안쪽 옷을 분리한다. 현실에는 등장하지 않는다. 만남·호감·파티 합류는 미정이다. 전이자 고유 특성 없음. 잠옷은 검정·흰 프릴 상의와 앞치마, 옆트임 있는 검정 일자 치마, 발끝을 덮는 스타킹이며 구두는 신지 않는다. 잠옷으로 자동 갈아입거나 장면을 강제하지 않는다. 키 167cm, 몸무게 46kg. 이는 설정 정보이며 상대가 알기 전 대사로 자동 공개하지 않는다.", "portraits": {"sleep": {"src": "assets/cheona-sleep.webp", "x": 640, "y": 45, "w": 384, "h": 540, "imageWidth": 1024, "imageHeight": 1536}}, "heightCm": 167, "weightKg": 46}, {"id": "fafnir", "name": "파프니르", "age": 20, "species": "수룡 수인", "origin": "fantasy", "unknownName": "푸른 머리의 수룡 수인", "preferredWeapons": ["magic"], "roles": ["mage"], "combatStyle": "magic", "trait": null, "looks": {"default": {"src": "assets/fafnir-looks.webp", "x": 167, "y": 0, "w": 363, "h": 623, "imageWidth": 1261, "imageHeight": 1247}, "help": {"src": "assets/fafnir-looks.webp", "x": 630, "y": 0, "w": 631, "h": 623, "imageWidth": 1261, "imageHeight": 1247}, "fallen": {"src": "assets/fafnir-looks.webp", "x": 0, "y": 623, "w": 630, "h": 624, "imageWidth": 1261, "imageHeight": 1247}}, "sd": {"default": {"src": "assets/fafnir-looks.webp", "x": 630, "y": 623, "w": 631, "h": 624, "imageWidth": 1261, "imageHeight": 1247}}, "pixel": {"src": "assets/fafnir-looks.webp", "frames": [[630, 623, 631, 624]], "height": 624, "imageWidth": 1261, "imageHeight": 1247, "format": "illustrated-sd"}, "motion": {"name": "몸을 틀어 거리를 지키며 마나 모으기", "lean": 4, "step": 3, "turn": 8, "side": 7, "tempo": 0.9}, "persona": "20살 여성 수룡 수인 파프니르. 마법을 주로 쓰는 메이지. 자기 종족의 강함을 알고 자부심과 자기주장이 강한 말괄양이로 차별에도 주눅들지 않는다. 푸른 앞머리와 밝은 금발 안쪽 긴 머리, 작은 뿔, 검정·금색 의상과 작고 유연한 유기적 비늘·지느러미 꼬리를 유지한다. 로봇 같은 거대한 꼬리로 되돌리지 않는다. 전용 속성·스킬·정수·과거·태이와의 관계는 미정. 현실에 등장하거나 파티에 자동 합류하지 않는다. 전이자 전용 고유 특성 없음. 키 154cm, 몸무게 53kg. 이는 설정 정보이며 상대가 알기 전 대사로 자동 공개하지 않는다.", "heightCm": 154, "weightKg": 53}];
 get('cheona').looks.help=fullImage('cheona-help.webp',720,1080);
 function combatAtlas(id,scale,tempo,resolution=1){
   const cell=96*resolution;
@@ -210,7 +210,7 @@ records.push({
   looks:{
     default:crop('evan-standing.webp',720,1080,12,359,696,708),
     casual:fullImage('evan-casual.webp',720,1080),
-    rear:fullImage('evan-rear.webp',720,1080),
+    rear:crop('evan-rear.webp',720,1080,9,219,702,846),
     help:fullImage('evan-talk.webp',720,1080),
     guard:fullImage('evan-guard.webp',720,1080),
     attack:fullImage('evan-sword.webp',720,1080),
@@ -244,9 +244,9 @@ records.push({
   lookLabels:{attack:'태도 공격',cutscene:'태도를 뽑는 순간 · 컷신'},
   motion:{name:'낮게 몸을 틀어 태도를 뽑기',lean:-3.5,step:6.5,turn:12,side:8.5,tempo:.97},
   looks:{
-    default:fullImage('taeo-standing.webp',720,1080),
+    default:crop('taeo-standing.webp',720,1080,18,182,684,716),
     casual:fullImage('taeo-casual.webp',720,1080),
-    rear:fullImage('taeo-rear.webp',720,1080),
+    rear:crop('taeo-rear.webp',720,1080,18,200,684,679),
     help:fullImage('taeo-talk.webp',720,1080),
     attack:fullImage('taeo-cutscene.webp',720,1080),
     cutscene:fullImage('taeo-cutscene.webp',720,1080),
@@ -299,8 +299,8 @@ records.push({
   lookLabels:{smile:'예의 바른 미소',focus:'승부에 집중하기',attack:'레이피어 공격'},
   motion:{name:'발끝을 옮겨 가볍게 찌르기',lean:3.5,step:6.25,turn:5.5,side:7.5,tempo:1.09},
   looks:{
-    default:fullImage('restia-standing.webp',720,1080),
-    rear:fullImage('restia-rear.webp',720,1080),
+    default:crop('restia-standing.webp',720,1080,18,105,684,869),
+    rear:crop('restia-rear.webp',720,1080,18,120,684,840),
     casual:fullImage('restia-casual.webp',720,1080),
     help:fullImage('restia-talk.webp',720,1080),
     smile:fullImage('restia-smile.webp',720,1080),
@@ -343,7 +343,7 @@ records.push({
     escort:fullImage('nadan-escort.webp',720,1080),
     attack:fullImage('nadan-cutscene.webp',720,1080),
     cutscene:fullImage('nadan-cutscene.webp',720,1080),
-    casual:fullImage('nadan-casual.webp',720,1080),
+    casual:crop('nadan-casual.webp',720,1080,218,129,284,822),
   },
   sd:{default:fullImage('nadan-sd.webp',512,512)},
   combatSprite:combatAtlas('nadan',.92,.91),
@@ -381,7 +381,7 @@ records.push(
     reaction:fullImage('hellenia-reaction.webp',720,1080),
     cutscene:fullImage('hellenia-cutscene.webp',720,1080),
     guard:fullImage('hellenia-cutscene.webp',720,1080),
-    casual:fullImage('hellenia-casual.webp',720,1080),
+    casual:crop('hellenia-casual.webp',720,1080,185,92,350,895),
     },
     sd:{default:fullImage('hellenia-sd.webp',512,512)},
     combatSprite:combatAtlas('hellenia',0.96,0.93),
@@ -430,7 +430,7 @@ records.push({
   lookLabels:{cutscene:'수줍게 두 팔을 아래로 모으기 · 컷신'},
   motion:{name:'한 걸음 비켜 분절 무기 휘두르기',lean:-3.25,step:5.9,turn:11.5,side:10.75,tempo:1.01},
   looks:{
-    default:fullImage('spina-standing.webp',720,1080),
+    default:crop('spina-standing.webp',720,1080,87,93,546,894),
     rear:fullImage('spina-rear.webp',720,1080),
     casual:fullImage('spina-casual.webp',720,1080),
     help:fullImage('spina-talk.webp',720,1080),
@@ -447,9 +447,9 @@ records.push({
   lookLabels:{help:'농담으로 인사하기',reaction:'어색하게 사과하기',cutscene:'붉은 대검을 휘두르기 · 컷신'},
   motion:{name:'어깨를 틀어 붉은 대검 휘두르기',lean:7.25,step:6.4,turn:-11.25,side:9.25,tempo:1.07},
   looks:{
-    default:fullImage('halo-standing.webp',720,1080),
+    default:crop('halo-standing.webp',720,1080,18,220,684,824),
     casual:fullImage('halo-casual.webp',720,1080),
-    rear:fullImage('halo-rear.webp',720,1080),
+    rear:crop('halo-rear.webp',720,1080,33,226,654,818),
     help:fullImage('halo-talk.webp',720,1080),
     reaction:fullImage('halo-reaction.webp',720,1080),
     attack:fullImage('halo-cutscene.webp',720,1080),
@@ -485,8 +485,8 @@ records.push({
   lookLabels:{cutscene:'활강막을 펼치기 · 컷신'},
   motion:{name:'가볍게 뛰어 활강막 펼치기',lean:-2.6,step:5.8,turn:6.75,side:12.25,tempo:1.11},
   looks:{
-    default:fullImage('milia-standing.webp',720,1080),
-    rear:fullImage('milia-rear.webp',720,1080),
+    default:crop('milia-standing.webp',720,1080,22,157,676,765),
+    rear:crop('milia-rear.webp',720,1080,23,157,675,765),
     help:fullImage('milia-talk.webp',720,1080),
     reaction:fullImage('milia-reaction.webp',720,1080),
     cutscene:fullImage('milia-cutscene.webp',720,1080),
@@ -498,7 +498,7 @@ records.push({
  id:'reginleif',name:'레긴레이프',age:null,species:'인간족',origin:'fantasy',requiresStoryIntroduction:true,
  lookLabels:{cast:'맨손 마법 시전',cutscene:'맨손 마법 시전 · 컷신'},unknownName:'청록빛 긴 머리의 인간족',heightCm:167,weightKg:52,preferredWeapons:[],roles:['mage'],combatStyle:'magic',trait:null,
  persona:'인간족 맨손 마법 메이지 레긴레이프. 167cm, 52kg. 나이는 미정. 예의 바르고 눈치가 빠르며 약자를 함부로 대하는 사람에게는 웃는 얼굴로도 단호하게 선을 긋는다. 검은 머리와 청록색 안쪽 긴 머리, 연두 눈. 토끼 귀·날개·앞치마·머리띠·어깨 레이스·쟁반 없음. 주름 없는 검정 타이트한 일자 치마. 전용 속성·스킬·정수·과거·첫 만남은 미정. 현실 등장·자동 합류·이름 선공개·전이자 고유 특성 부여 없음.',
- looks:{default:crop('reginleif-looks.webp',1024,1536,0,0,512,512),rear:crop('reginleif-looks.webp',1024,1536,512,0,512,512),help:crop('reginleif-looks.webp',1024,1536,0,512,512,512),cast:crop('reginleif-looks.webp',1024,1536,512,512,512,512),attack:crop('reginleif-looks.webp',1024,1536,512,512,512,512),cutscene:crop('reginleif-looks.webp',1024,1536,512,512,512,512)},
+ looks:{default:crop('reginleif-looks.webp',1024,1536,123,0,271,512),rear:crop('reginleif-looks.webp',1024,1536,653,0,243,510),help:crop('reginleif-looks.webp',1024,1536,123,512,270,512),cast:crop('reginleif-looks.webp',1024,1536,545,512,424,512),attack:crop('reginleif-looks.webp',1024,1536,545,512,424,512),cutscene:crop('reginleif-looks.webp',1024,1536,545,512,424,512)},
  portraits:{default:crop('reginleif-looks.webp',1024,1536,0,1024,512,512)},
  sd:{default:crop('reginleif-looks.webp',1024,1536,512,1024,512,512)},
  pixel:{src:'assets/reginleif-combat.webp',battleSrc:'../assets/reginleif-combat.webp',frames:Array.from({length:24},(_,i)=>[i%4*256,Math.floor(i/4)*256,256,256]),imageWidth:1024,imageHeight:1536},
@@ -521,6 +521,28 @@ records.push({
 });
 get('fafnir').looks.casual=fullImage('fafnir-casual.webp',720,1080);
 get('fenri').looks.casual=fullImage('fenri-casual.webp',720,1080);
+for(const [id,poses] of Object.entries({
+  cheona:['rear', 'casual'],
+  fafnir:['rear'],
+  fenri:['rear'],
+  espada:['casual'],
+  lir:['casual'],
+  hebnia:['casual'],
+  yunseol:['casual'],
+  milia:['casual'],
+  reginleif:['casual'],
+  horin:['casual'],
+})){
+  const record=records.find(entry=>entry.id===id);
+  for(const pose of poses)record.looks[pose]=fullImage(id+'-'+pose+'.webp',720,1080);
+}
+for(const [id,height] of [['cheona',464],['fafnir',464],['fenri',465]]){
+  records.find(record=>record.id===id).looks.cutscene=fullImage(id+'-cutscene.webp',830,height);
+}
+records.find(record=>record.id==='fenri').looks.help=fullImage('fenri-talk.webp',830,465);
+for(const id of ['janghwa','selsi','rachel','spike','jave','espada']){
+  records.find(record=>record.id===id).looks.cutscene=fullImage(id+'-cutscene.webp',506,506);
+}
 function get(id){return records.find(r=>r.id===id)||null;}
 function appearance(id,{look='default',pose='default'}={}){const r=get(id);return r?.looks[pose==='default'?look:pose]||r?.looks.default||null;}
 function displayName(state,id){const r=get(id);if(!r)return null;const introduced=state?.knownIdentities?.[id]===true||(state?.turns||[]).some(t=>(t.panels||[]).some(p=>p.speaker===id&&String(p.text||'').includes(r.name)));return introduced?r.name:r.unknownName;}
@@ -532,14 +554,14 @@ const legacyCasual={
 };
 const transfers={
   taei:{age:18,trait:'제로와 함께하는 동반자 특성',bio:'지구 출신 고등학교 2학년. 등굣길 지하철에서 전이한다.',
-    looks:{'지구 · 등교 복장':fullImage('taei-earth.webp',720,1080),'지구 · 후면 전신':fullImage('taei-earth-rear.webp',720,1080),'이세계 · 격투가':crop('taei-fighter-reference.png',1536,1024,880,0,382,1024)},
+    looks:{'지구 · 교복':fullImage('taei-earth.webp',720,1080),'지구 · 후면 전신':fullImage('taei-earth-rear.webp',720,1080),'이세계 · 격투가':fullImage('taei-fighter-standing.webp',720,1080),'이세계 · 후면 전신':fullImage('taei-fighter-rear.webp',720,1080)},
     cutscenes:[['건틀릿 점검','taei-fighter-cutscenes.webp',1200,600,2,0],['가드 연습','taei-fighter-cutscenes.webp',1200,600,2,1]],
     expressions:{'지구':'taei-earth-expressions.webp','이세계':'taei-fighter-expressions.webp'},sd:{'격투가':'sd-taei-fighter.webp'}},
   dogyeom:{age:18,trait:'반동',bio:'백금발의 전 복싱 유망주. 부상 흉터를 이레즈미 문신으로 가렸다. 반동으로 받아낸 충격 일부를 타격에 싣는다.',
     looks:{'지구 · 등교 복장':fullImage('dogyeom-earth.webp',720,1080),'지구 · 후면 전신':fullImage('dogyeom-earth-rear.webp',720,1080)},
     cutscenes:[['손목 보호대 점검','event-dogyeom-solo.png',1672,941]],expressions:{'이세계':'dogyeom-expressions.png'},solo:[1,4]},
   yeogyeong:{age:18,trait:'유예',bio:'태이와 같은 반. 간호학과 진학을 준비했다. 유예로 한 부위의 부상 상태를 잠시 고정한다.',
-    looks:{'지구 · 교복':fullImage('yeogyeong-standing.png',1011,1556),'지구 · 후면 전신':fullImage('yeogyeong-earth-rear.webp',720,1080),'이세계 · 여행복':crop('yeogyeong-fantasy-outfit.png',1536,1024,938,0,598,1024)},
+    looks:{'지구 · 교복':fullImage('yeogyeong-standing.png',1011,1556),'지구 · 후면 전신':fullImage('yeogyeong-earth-rear.webp',720,1080),'이세계 · 여행복':crop('yeogyeong-fantasy-outfit.png',1536,1024,938,0,598,1024),'이세계 · 후면 전신':fullImage('yeogyeong-fantasy-rear.webp',720,1080)},
     cutscenes:[['교실','event-yeogyeong-classroom.png',1672,941],['복도','event-yeogyeong-corridor.png',1536,1024],['치유 연습','event-yeogyeong-healing.png',1672,941],['성문','event-yeogyeong-gate.png',1536,1024]],
     expressions:{'지구':'yeogyeong-expressions.png','이세계':'yeogyeong-fantasy-expressions.png'},sd:{'지구':'sd-yeogyeong.png','이세계':'sd-yeogyeong-fantasy.png'}},
   seoha:{dialoguePortrait:fullImage('dialogue/seoha.webp',720,540),age:18,trait:'경계',bio:'차분한 표정 뒤로 엉뚱한 생각을 자주 한다. 경계를 넘는 대상의 움직임을 한 차례 끊는다.',
@@ -550,7 +572,7 @@ const transfers={
     cutscenes:[['지구','yui-cutscenes.png',1774,887,2,0],['이세계','yui-cutscenes.png',1774,887,2,1]],
     expressions:{'지구':'yui-expressions.png'},sd:{'상호작용':'sd-yui.png'}},
   woojin:{age:null,trait:null,bio:'지구의 물류 현장 직원으로 제작한 전이자 시안.',
-    looks:{'지구 · 작업복':crop('woojin-design.png',1536,1024,0,0,470,1024),'지구 · 후면 전신':fullImage('woojin-earth-rear.webp',720,1080),'이세계 · 여행복':crop('woojin-design.png',1536,1024,1100,0,436,1024)},
+    looks:{'지구 · 작업복':crop('woojin-design.png',1536,1024,0,0,470,1024),'지구 · 후면 전신':fullImage('woojin-earth-rear.webp',720,1080),'이세계 · 여행복':crop('woojin-design.png',1536,1024,1100,0,436,1024),'이세계 · 후면 전신':fullImage('woojin-fantasy-rear.webp',720,1080)},
     cutscenes:[['매듭 점검','woojin-cutscenes.png',1774,887,2,0],['여관 앞 휴식','woojin-cutscenes.png',1774,887,2,1]],
     expressions:{'이세계':'woojin-expressions.png'},sd:{'상호작용':'sd-woojin.png'}},
   'dogyeom-childhood-friend':{age:null,trait:'보관',bio:'백도겸의 소꿉친구. 보관은 성장하며 개인 아공간으로 발전한다.',

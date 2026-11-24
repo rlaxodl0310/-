@@ -79,7 +79,7 @@ function el(tag,text,cls){const n=document.createElement(tag);if(text!==undefine
 function closePanel(){$('panel').hidden=true;$('scrim').hidden=true;returnFocus?.focus();}
 let developerMode=false;
 function openPanel(kind){
- if(kind==='developer'&&!developerMode)kind='settings';if(busy){toast("AI 응답을 기다리는 중입니다. 완료 후 이동해 주세요.");return;}returnFocus=document.activeElement;const body=$('panel-body');$('panel').dataset.mode=kind;body.replaceChildren();const title={companions:'동료와 이야기',preparation:'의뢰 출발 준비',arrival:'도착·지역 안내',passage:'운항편·탑승',journey:'여정·야영',network:'도로망·항로',developer:'개발자 모드',characterlab:'캐릭터 외형 미리보기',diagnostics:'AI 협업 진단',chapters:'이야기 장면',status:'플레이어 정보',cast:'파티 / 동행',codex:'캐릭터 도감',monsters:'몬스터 도감',journal:'지나온 대화',saves:'저장과 불러오기',settings:'환경 설정',appearance:'평소 일러스트 · 외형팩',transport:'부축·운반·인계',npcParties:'독립 공략 파티',dungeon:'던전 공략',rescue:'구조 의뢰',mining:'마석 채굴 의뢰',personalEscort:'학자 개인 호위',escort:'상인단 호위 여정',rewards:'파티 경험치·전리품 분배',services:'휴식·장비 수리',shop:'상점·협회 거래',roles:'파티 역할 배치',adventure:'본편 의뢰·소지품',quests:'협회 의뢰 게시판',storychat:'실시간 AI 이야기',world:'알게 된 세계',map:'탐험 지도',maptest:'도시·마을 탐험 테스트'};$('panel-title').textContent=title[kind];if(kind==='characterlab'){CharacterContentUI.open(body);$('panel').hidden=false;$('scrim').hidden=false;$('close-panel').focus();return;}if(kind==='diagnostics'){AIDiagnosticsUI.open(body);$('panel').hidden=false;$('scrim').hidden=false;$('close-panel').focus();return;}if(typeof DirectorUI!=='undefined'&&DirectorUI.panel(kind,body)){$('panel').hidden=false;$('scrim').hidden=false;$('close-panel').focus();return;}
+ if(kind==='developer'&&!developerMode)kind='settings';if(busy){toast("AI 응답을 기다리는 중입니다. 완료 후 이동해 주세요.");return;}returnFocus=$('quick-tools').contains(document.activeElement)?$('quick-tools-toggle'):document.activeElement;const body=$('panel-body');$('panel').dataset.mode=kind;body.replaceChildren();const title={companions:'동료와 이야기',preparation:'의뢰 출발 준비',arrival:'도착·지역 안내',passage:'운항편·탑승',journey:'여정·야영',network:'도로망·항로',developer:'개발자 모드',characterlab:'캐릭터 외형 미리보기',diagnostics:'AI 협업 진단',chapters:'이야기 장면',status:'플레이어 정보',cast:'파티 / 동행',codex:'캐릭터 도감',monsters:'몬스터 도감',journal:'지나온 대화',saves:'저장과 불러오기',settings:'환경 설정',appearance:'평소 일러스트 · 외형팩',transport:'부축·운반·인계',npcParties:'독립 공략 파티',dungeon:'던전 공략',rescue:'구조 의뢰',mining:'마석 채굴 의뢰',personalEscort:'학자 개인 호위',escort:'상인단 호위 여정',rewards:'파티 경험치·전리품 분배',services:'휴식·장비 수리',shop:'상점·협회 거래',roles:'파티 역할 배치',adventure:'본편 의뢰·소지품',quests:'협회 의뢰 게시판',storychat:'실시간 AI 이야기',world:'알게 된 세계',map:'탐험 지도',maptest:'도시·마을 탐험 테스트'};$('panel-title').textContent=title[kind];if(kind==='characterlab'){CharacterContentUI.open(body);$('panel').hidden=false;$('scrim').hidden=false;$('close-panel').focus();return;}if(kind==='diagnostics'){AIDiagnosticsUI.open(body);$('panel').hidden=false;$('scrim').hidden=false;$('close-panel').focus();return;}if(typeof DirectorUI!=='undefined'&&DirectorUI.panel(kind,body)){$('panel').hidden=false;$('scrim').hidden=false;$('close-panel').focus();return;}
  if(kind==='chapters'){body.append(el('p','플레이어는 김태이입니다. 현실의 등굣길부터 순서대로 진행합니다.','muted'));for(const e of D.events){const done=engine.state.completed.includes(e.id),active=engine.state.active?.id===e.id;const b=button((done?'✓ ':active?'▶ ':'')+e.title+(done?' · 완료':''),()=>{if(active){closePanel();return;}if(engine.state.active){if(!confirm('현재 장면을 중단하고 새 장면으로 전환할까요? 현재까지의 대화는 기록에 남습니다.'))return;engine.abandon();}start(e.id);},'scene-card');b.disabled=done||(e.requiresCompleted||[]).some(id=>!engine.state.completed.includes(id));body.append(b);}body.append(button('처음부터 새로 시작',()=>{if(confirm('현실의 등굣길부터 다시 시작할까요? 수동 저장 슬롯은 유지됩니다.')){engine=new E(D);logs=[];LookPacksUI.setEquipment({});blocked=false;start(D.events[0].id);}}));}
  if(kind==='map')GeographyUI.panel(body,()=>engine.state,{onTest:developerMode?()=>openPanel('maptest'):null});
  if(kind==='maptest')GeographyUI.testPanel(body);
@@ -125,12 +125,34 @@ function openPanel(kind){
  if(kind==='settings'){
   body.append(el('h3','개발자 도구'),button(developerMode?'개발자 도구 열기':'개발자 모드 켜기',()=>{developerMode=true;openPanel('developer');}));
   body.append(el('h3','읽기 설정'),button(large?'기본 글자 크기로':'큰 글자로 읽기',()=>{large=!large;persist();render();openPanel('settings');}),button(motion?'화면 전환 효과 끄기':'화면 전환 효과 켜기',()=>{motion=!motion;persist();render();openPanel('settings');}),el('h3','AI 연결'));
-  const card=el('div',undefined,'connection-card');card.append(el('strong','ChatGPT 구독'),el('small','공식 Codex CLI'));const badge=el('span',GameAI.state.ready?'로그인됨':'로그인 필요');badge.id='connection-badge';card.append(badge);body.append(card);
-  const status=el('p',GameAI.state.message);status.id='ai-load-message';body.append(status);const code=el('pre',GameAI.state.deviceCode||'');code.id='login-code';code.hidden=!GameAI.state.deviceCode;body.append(code);
+  const usingAPI=GameAI.state.provider==='api';
+  const card=el('div',undefined,'connection-card');
+  card.append(el('strong',usingAPI?'OpenAI API · 직접 연결':'ChatGPT 구독 연결'));
+  const badge=el('span',GameAI.state.ready?'연결됨':'연결 필요');badge.id='connection-badge';card.append(badge);body.append(card);
+  const status=el('p',GameAI.state.message);status.id='ai-load-message';body.append(status);
   const action=(label,fn)=>button(label,async()=>{try{await fn();}catch(error){toast(error.message);}finally{openPanel('settings');}});
-  const login=action(GameAI.state.ready?'다른 ChatGPT 계정으로 로그인':'ChatGPT로 로그인',()=>GameAI.login('browser'));login.id='login-button';login.disabled=GameAI.state.phase==='login';body.append(login,action('연결 확인',()=>GameAI.start()));
-  const open=action('공식 로그인 페이지 열기',()=>GameAI.openLogin());open.id='open-login';open.hidden=GameAI.state.phase!=='login';body.append(open);
-  const cancel=action('로그인 취소',()=>GameAI.stop());cancel.id='cancel-login';cancel.hidden=GameAI.state.phase!=='login';body.append(cancel,action('인증 코드로 로그인',()=>GameAI.login('device')),action('Codex 실행 파일 직접 선택',()=>GameAI.chooseCLI()),action('작성형 체험 모드',()=>GameAI.demo()),el('p','비밀번호는 앱에서 받지 않습니다. 공식 OpenAI 인증 화면에서 로그인하며, 앱은 ChatGPT로 로그인한 Codex를 호출합니다. API 키 입력이나 유료 API 자동 전환은 없습니다.','muted'),el('p','ChatGPT 구독의 Codex 사용 한도가 적용됩니다. 입력과 현재 장면의 대화는 OpenAI로 전송됩니다. 기존 Codex 로그인과 같은 계정을 사용할 수 있습니다.','muted'),el('p','로그인 창이 열리지 않으면 공식 로그인 페이지 열기 또는 인증 코드로 로그인을 사용하세요. 코드 인증은 계정 설정에서 허용해야 할 수 있습니다.','muted'),el('p','AI는 대사와 짧은 행동만 생성합니다. 스탯·시간·아이템·장면 완료는 게임 엔진이 처리합니다.','muted'),action('AI 대화 기억 초기화',async()=>{if(confirm('앱의 AI 대화 기억을 지울까요? 게임 저장 슬롯은 유지됩니다.'))await GameAI.reset();}));
+  body.append(action('연결 확인',()=>GameAI.start()));
+  if(!usingAPI){
+   const code=el('pre',GameAI.state.deviceCode||'');code.id='login-code';code.hidden=!GameAI.state.deviceCode;body.append(code);
+   const login=action(GameAI.state.ready?'다른 ChatGPT 계정으로 로그인':'ChatGPT로 로그인',()=>GameAI.login('browser'));login.id='login-button';login.disabled=GameAI.state.phase==='login';
+   const open=action('공식 로그인 페이지 열기',()=>GameAI.openLogin());open.id='open-login';open.hidden=GameAI.state.phase!=='login';
+   const cancel=action('로그인 취소',()=>GameAI.stop());cancel.id='cancel-login';cancel.hidden=GameAI.state.phase!=='login';
+   body.append(login,open,cancel,action('인증 코드로 로그인',()=>GameAI.login('device')));
+   const details=el('details');details.append(el('summary','구독 연결 문제 해결'),el('p','구독 연결은 내장 Codex를 통해 응답을 받습니다. 앱은 비밀번호를 받지 않습니다.','muted'),action('공식 Codex 실행 파일 선택',()=>GameAI.chooseCLI()));body.append(details);
+  }else{
+   body.append(action('기존 구독 연결로 돌아가기',()=>GameAI.chooseAPI(null)));
+  }
+  if(window.desktopAI?.chooseAPI){
+   const direct=el('details');direct.append(el('summary','OpenAI API로 직접 연결'));
+   direct.append(el('p','OpenAI API 키가 필요하며 API 사용료는 ChatGPT 구독과 별도입니다. 이 방식에서는 코덱스가 실행되지 않습니다.','muted'));
+   const label=el('label','OpenAI API 키 '),key=el('input');
+   key.type='password';key.autocomplete='off';key.spellcheck=false;key.maxLength=515;
+   label.append(key);
+   const submit=action('API 키 확인 및 사용',async()=>{const value=key.value.trim();key.value='';await GameAI.chooseAPI(value);});
+   direct.append(label,submit);body.append(direct);
+  }
+  body.append(action('작성형 체험 모드',()=>GameAI.demo()),action('AI 대화 기억 초기화',async()=>{if(confirm('앱의 AI 대화 기억을 지울까요? 게임 저장 슬롯은 유지됩니다.'))await GameAI.reset();}));
+
  }
 
  $('panel').hidden=false;$('scrim').hidden=false;$('close-panel').focus();}
@@ -146,7 +168,7 @@ $('chat-form').onsubmit=async e=>{e.preventDefault();if(busy){GameAI.stop();retu
  catch(error){toast(error.message);$('save-state').textContent='응답 실패 · 입력 유지됨';}
  finally{setBusy(false);input.focus();}
 };
-document.addEventListener('ai-status',()=>{const state=GameAI.state;$('ai-mode').textContent=state.enabled?'● ChatGPT 구독 · 연결됨':state.phase==='login'?'◌ 로그인 대기 중':state.phase==='demo'?'○ 작성형 체험 모드':'○ ChatGPT 연결';if($('ai-load-message'))$('ai-load-message').textContent=state.message;if($('connection-badge'))$('connection-badge').textContent=state.ready?'로그인됨':'로그인 필요';if($('login-code')){$('login-code').textContent=state.deviceCode||'';$('login-code').hidden=!state.deviceCode;}if($('open-login'))$('open-login').hidden=state.phase!=='login';if($('cancel-login'))$('cancel-login').hidden=state.phase!=='login';if($('login-button'))$('login-button').disabled=state.phase==='login';});
+document.addEventListener('ai-status',()=>{const state=GameAI.state;$('ai-mode').textContent=state.enabled?(state.provider==='api'?'● OpenAI API · 연결됨':'● ChatGPT 구독 · 연결됨'):state.phase==='login'?'◌ 로그인 대기 중':state.phase==='demo'?'○ 작성형 체험 모드':'○ ChatGPT 연결';if($('ai-load-message'))$('ai-load-message').textContent=state.message;if($('connection-badge'))$('connection-badge').textContent=state.ready?'연결됨':'연결 필요';if($('login-code')){$('login-code').textContent=state.deviceCode||'';$('login-code').hidden=!state.deviceCode;}if($('open-login'))$('open-login').hidden=state.phase!=='login';if($('cancel-login'))$('cancel-login').hidden=state.phase!=='login';if($('login-button'))$('login-button').disabled=state.phase==='login';});
 
 
 try{const raw=localStorage.getItem(KEY);if(raw)apply(JSON.parse(raw));else start(D.events[0].id);}catch{blocked=true;toast('자동 저장을 읽지 못해 원본을 보존했습니다. 저장 메뉴에서 다른 기록을 불러올 수 있습니다.');engine=new E(D);start(D.events[0].id);}render();
@@ -162,9 +184,15 @@ $('walk-launch').onclick=()=>{if(busy){toast('대화 응답을 기다리는 중�
 
 
 const quickToolsToggle=$('quick-tools-toggle'),quickTools=$('quick-tools');
-function setQuickTools(open){quickToolsToggle.setAttribute('aria-expanded',String(open));}
+function setQuickTools(open){
+ quickToolsToggle.setAttribute('aria-expanded',String(open));
+ quickTools.hidden=!open;
+}
 quickToolsToggle.onclick=()=>setQuickTools(quickToolsToggle.getAttribute('aria-expanded')!=='true');
 quickTools.addEventListener('click',event=>{if(event.target.closest('button'))setQuickTools(false);});
+document.addEventListener('pointerdown',event=>{
+ if(!quickTools.hidden&&!quickTools.contains(event.target)&&!quickToolsToggle.contains(event.target))setQuickTools(false);
+});
 document.addEventListener('keydown',event=>{
  if(event.key==='Escape'&&quickToolsToggle.getAttribute('aria-expanded')==='true'){
   setQuickTools(false);quickToolsToggle.focus();
