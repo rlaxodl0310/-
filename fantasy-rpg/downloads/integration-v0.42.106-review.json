@@ -32,5 +32,27 @@
     "New fixed stat allocation and test HP/damage are balance drafts",
     "No new scenic background CG or fixed story encounter"
   ],
-  "WindowsBuild": "pending"
+  "WindowsBuild": {
+    "status": "success",
+    "url": "https://github.com/rlaxodl0310/-/actions/runs/45622593506",
+    "source": "8035c5d0cd0330e1927018281798dda259e9271a",
+    "tests": 674,
+    "nativePatchTransactions": "passed"
+  },
+  "patch": {
+    "file": "FantasyStory-Patch.zip",
+    "bytes": 409945933,
+    "sha256": "461ceb6aca767553a69dbe060bdfd5e51f3556111e300ce5199460d925f900ea",
+    "manifest": {
+      "minimumVersion": "0.1.0",
+      "version": "0.42.106",
+      "sha256": "29b98a9f72242e43a32d095555787e05f4b64ba8e7e438540aa2e8f6a238f6bf",
+      "product": "FantasyStory"
+    },
+    "zipCRC": "passed",
+    "payloadSHA256": "passed",
+    "nativeExecutable": "PE MZ signature verified",
+    "runtimeAssets": "Cobalion normal/charge/guard/hit/SD/combat-SD/sprite assets and grade8 registration present"
+  },
+  "downloadPage": "https://github.com/rlaxodl0310/-/releases/tag/untagged-02ccf6c586aba1252080"
 }
