@@ -151,5 +151,23 @@
     "h": 1024,
     "imageWidth": 1536,
     "imageHeight": 1024
+  },
+  "fizz": {
+    "src": "assets/monsters/fizz-basic.webp",
+    "x": 0,
+    "y": 0,
+    "w": 793,
+    "h": 793,
+    "imageWidth": 793,
+    "imageHeight": 793
+  },
+  "grauk": {
+    "src": "assets/monsters/grauk-basic.webp",
+    "x": 0,
+    "y": 0,
+    "w": 1190,
+    "h": 793,
+    "imageWidth": 1190,
+    "imageHeight": 793
   }
 }

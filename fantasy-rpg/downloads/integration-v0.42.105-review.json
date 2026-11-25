@@ -1,0 +1,31 @@
+{
+  "version": "0.42.105",
+  "sourceBase": "7d70c576170244b8d6270bc3c38a14f1aec395b9",
+  "tests": {
+    "pass": 671,
+    "fail": 0
+  },
+  "ui": {
+    "species": [
+      "fizz",
+      "grauk"
+    ],
+    "frames": 48,
+    "exceptions": [],
+    "passed": true
+  },
+  "scope": [
+    "Fizz grade6 and Grauk grade5 independent species",
+    "Approved fixed effect and one additional active each",
+    "Transparent basic art and 24 SD frames per species",
+    "Shared combat/save/loot/world-context registration",
+    "Reference appearance lock rule saved to developer/style/world documents"
+  ],
+  "limits": [
+    "New essence stat allocation and battle HP/damage are balance drafts",
+    "Exact mana/range/duration unset: additional essence actives retain existing pending-cast policy",
+    "No new aquatic movement physics or automatic summons/encounters",
+    "No installation on user PC or live ChatGPT story-quality validation"
+  ],
+  "WindowsBuild": "pending"
+}
