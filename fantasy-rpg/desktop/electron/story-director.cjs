@@ -56,6 +56,7 @@ const arrivalSchema={type:'object',additionalProperties:false,required:['situati
 function storyCoordinator(bridge){
  return new TangTang({provider:createBridgeProvider(bridge),maxContextChars:1024*1024});
 }
+const MonsterCatalog=require('../ui/monsters/catalog.js');
 const {resolveCombat,createCombat}=require('../ui/story/combat.js');
 const ids=D.catalog.map(c=>c.id),monsterIds=Roster.monsters.map(m=>m.id),earth=['subway','platform','station'];
 const text={type:'string'},strArray={type:'array',maxItems:8,items:text};
@@ -92,7 +93,10 @@ function encounterContext(state){
  const party=(state.party||[]).filter(id=>state.present.includes(id)).length;
  const maxStars=Math.min(10,1+Math.floor((level-1)/5));
  const maxCount=Math.min(6,1+party+Math.floor((level-1)/5));
- return {maxStars,maxCount,available:Roster.monsters.filter(monster=>monster.stars<=maxStars).map(({id,name,stars})=>({id,name,stars}))};
+ return {maxStars,maxCount,available:Roster.monsters.filter(monster=>monster.stars<=maxStars).map(({id,name,stars})=>{
+  const {habitat,profile}=MonsterCatalog.detail(state,id,{creator:true});
+  return {id,name,stars,habitat,habits:profile?.habits};
+ })};
 }
 function validateMonsterScene(result,state){
  const appearances=result.monsterAppearances??[];
@@ -204,7 +208,7 @@ class StoryDirector{
   }finally{this.busy=false;}
  }
  async read(){try{const raw=await fs.readFile(this.file,'utf8');if(raw.length>32*1024*1024)throw Error();const s=JSON.parse(raw);if(s.version!==1||!Array.isArray(s.turns)||!Array.isArray(s.ledger)||!Number.isInteger(s.revision)||!['earth','fantasy'].includes(s.era)||!Array.isArray(s.present)||!Array.isArray(s.threads)||!Array.isArray(s.panels)||!Array.isArray(s.visited)||!s.player||!Number.isFinite(s.player.hp))throw Error();if(s.player.progression){const synced=Growth.sync(s);s.player=synced.player;s.skillBook=synced.skillBook;}s.player=Resources.normalise(s.player);if(s.player.experience)XP.record(s.player);s.skillBook=SkillSystem.read(s.skillBook);if(s.roleAssignments)PartyRoles.validate(s.roleAssignments);if(s.adventure){Object.assign(s,Adventure.ensure(s));}Companion.validate(s);Preparation.validate(s);Arrival.validate(s);Commerce.validate(s);Services.validate(s);Party.validate(s);Escort.validate(s);Personal.validate(s);Mining.validate(s);if(s.partyRewards)Party.expire(s);const integrity=Continuity.audit(s);if(!integrity.ok)throw Error('기억 원문 검증 실패');return s;}catch(e){if(e.code==='ENOENT')return initial();throw Error('이야기 저장을 읽지 못했습니다. 원본은 보존했습니다.');}}
- async save(s,{restore=false,review=null,discussion=false}={}){let previous=null;if(!restore){try{previous=JSON.parse(await fs.readFile(this.file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}}if(!discussion){if(s.passages){Object.assign(s,PassageHost.tick(s));PassageHost.validate(s);}if(!restore&&previous){Object.assign(s,Arrival.observe(previous,s));Object.assign(s,Companion.observe(previous,s));}Companion.validate(s);Preparation.validate(s);Arrival.validate(s);Object.assign(s,Dungeon.tick(s));Object.assign(s,NPCLife.advance(s));if(!restore&&previous)EncounterOutcomes.record(previous,s);Object.assign(s,SocialInformation.advance(s));}if(s.pendingObservationAction?.revision!==s.revision)delete s.pendingObservationAction;if(review){
+ async save(s,{restore=false,review=null,discussion=false}={}){let previous=null;if(!restore){try{previous=JSON.parse(await fs.readFile(this.file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}}if(!discussion){if(s.passages){Object.assign(s,PassageHost.tick(s));PassageHost.validate(s);}if(!restore&&previous){Object.assign(s,Arrival.observe(previous,s));Object.assign(s,Companion.observe(previous,s));}Companion.validate(s);Preparation.validate(s);Arrival.validate(s);Object.assign(s,Dungeon.tick(s));Object.assign(s,NPCLife.advance(s));if(!restore&&previous)EncounterOutcomes.record(previous,s);Object.assign(s,SocialInformation.advance(s));if(!restore)Object.assign(s,MonsterCatalog.observe(s));}if(s.pendingObservationAction?.revision!==s.revision)delete s.pendingObservationAction;if(review){
  const before=previous||(s.revision===1?initial():null);
  require("./turn-review.cjs").append(before,s,review);
  if(before&&!discussion&&s.revision>before.revision)require('./story-checkpoints.cjs').capture(before,s);

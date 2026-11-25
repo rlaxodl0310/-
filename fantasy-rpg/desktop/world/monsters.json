@@ -1,5 +1,565 @@
 [
   {
+    "id": "goblin",
+    "name": "고블린",
+    "stars": 1,
+    "lineage": "인간형 씨앗종",
+    "size": "0.95m × 0.36m · 23kg",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 0.95,
+        "lengthM": 0.36,
+        "massKg": 23
+      },
+      "temperament": "경계심이 강하고 주변에 동료가 있으면 대담해진다.",
+      "habits": "잔해나 관목을 엄폐로 삼고, 돌아갈 통로를 살핀다.",
+      "nutrition": "뿌리와 열매, 작은 동물과 남은 먹이를 모은다.",
+      "ecosystemRole": "남은 먹이를 옮기고 흩어진 씨앗을 퍼뜨린다."
+    },
+    "asset": "assets/monsters/seed-combat-atlas.png",
+    "artLayout": "frames",
+    "artFrames": {
+      "main": {
+        "src": "assets/monsters/seed-combat-atlas.png",
+        "x": 57,
+        "y": 10,
+        "w": 364,
+        "h": 392,
+        "imageWidth": 1292,
+        "imageHeight": 1218
+      },
+      "sd": {
+        "src": "battle/assets/battle-pixels.png",
+        "x": 0,
+        "y": 647,
+        "w": 323,
+        "h": 324,
+        "imageWidth": 971,
+        "imageHeight": 1619
+      }
+    },
+    "appearance": "탁한 녹색 피부와 긴 귀, 머리카락이 없는 작은 인간형. 해진 천옷과 나무 몽둥이를 쓴다.",
+    "habitat": "숲 가장자리와 폐허의 가려진 곳.",
+    "ecology": "잔해나 관목을 엄폐로 삼고, 돌아갈 통로를 살핀다. 뿌리와 열매, 작은 동물과 남은 먹이를 모은다.",
+    "combat": "몽둥이로 내리치고, 무리는 측면으로 접근한다.",
+    "weakness": "몽둥이를 크게 들어 올릴 때 측면이 열린다.",
+    "derivatives": "구체적인 파생형은 미정이다.",
+    "activeSkill": null,
+    "essences": [
+      {
+        "id": "grip",
+        "name": "미약한 손아귀",
+        "effect": "쥔 도구나 무기를 놓치지 않고 버티는 힘을 조금 보조한다. 무기 숙련이나 강한 압착력을 주지는 않는다."
+      }
+    ],
+    "essenceRule": "극히 드문 드롭. 미약한 손아귀 하나를 고정 습득하고 힘 +2, 민첩 +1. 정수 슬롯 하나 사용, 생성 후 30분 미섭취 시 소멸. 성급만으로 우열이 정해지지 않으며 조합·소모·신체 부담과 활용이 중요하다."
+  },
+  {
+    "id": "slime",
+    "name": "슬라임",
+    "stars": 1,
+    "lineage": "점액형 씨앗종",
+    "size": "0.27m × 0.48m · 15kg",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 0.27,
+        "lengthM": 0.48,
+        "massKg": 15
+      },
+      "temperament": "움직임이 느리고 가까운 진동에 몸을 움츠린다.",
+      "habits": "젖은 바닥을 천천히 미끄러지며 틈에 몸을 낮춘다.",
+      "nutrition": "낙엽과 사체에서 나온 부드러운 유기물을 흡수한다.",
+      "ecosystemRole": "젖은 장소에 쌓이는 유기물을 분해한다."
+    },
+    "asset": "assets/monsters/seed-combat-atlas.png",
+    "artLayout": "frames",
+    "artFrames": {
+      "main": {
+        "src": "assets/monsters/seed-combat-atlas.png",
+        "x": 444,
+        "y": 147,
+        "w": 395,
+        "h": 238,
+        "imageWidth": 1292,
+        "imageHeight": 1218
+      },
+      "sd": {
+        "src": "battle/assets/battle-pixels.png",
+        "x": 0,
+        "y": 971,
+        "w": 323,
+        "h": 324,
+        "imageWidth": 971,
+        "imageHeight": 1619
+      }
+    },
+    "appearance": "청록색 점액에 핵이 비친다. 눈과 입처럼 보이는 부분은 점액 속 빈 공간이다.",
+    "habitat": "습한 그늘, 얕은 물가와 폐허 바닥.",
+    "ecology": "젖은 바닥을 천천히 미끄러지며 틈에 몸을 낮춘다. 낙엽과 사체에서 나온 부드러운 유기물을 흡수한다.",
+    "combat": "낮게 퍼졌다가 몸을 튕겨 부딪친다.",
+    "weakness": "마른 바닥에서는 이동이 느려지고, 핵이 드러날 때 취약하다.",
+    "derivatives": "구체적인 파생형은 미정이다.",
+    "activeSkill": null,
+    "essences": [
+      {
+        "id": "cushion",
+        "name": "미약한 완충",
+        "effect": "가벼운 부딪힘으로 인한 충격을 조금 줄인다. 칼날·관통·강한 타격을 막거나 몸을 점액으로 바꾸지 않는다."
+      }
+    ],
+    "essenceRule": "극히 드문 드롭. 미약한 완충 하나를 고정 습득하고 체력 +2, 방어력 +1. 정수 슬롯 하나 사용, 생성 후 30분 미섭취 시 소멸. 성급만으로 우열이 정해지지 않으며 조합·소모·신체 부담과 활용이 중요하다."
+  },
+  {
+    "id": "moa",
+    "name": "모아",
+    "stars": 1,
+    "lineage": "식물형 씨앗종",
+    "size": "0.25m × 0.19m · 2.1kg",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 0.25,
+        "lengthM": 0.19,
+        "massKg": 2.1
+      },
+      "temperament": "움직임에 민감하며 가까운 위협에는 잎을 움츠린다.",
+      "habits": "낮에는 빛을 따라 움직이고, 마른 날에는 그늘에 뿌리를 댄다.",
+      "nutrition": "광합성하고 젖은 흙에서 물과 양분을 흡수한다.",
+      "ecosystemRole": "작은 뿌리로 표토를 붙들고 떨어진 잎을 흙에 돌려준다."
+    },
+    "asset": "assets/monsters/seed-combat-atlas.png",
+    "artLayout": "frames",
+    "artFrames": {
+      "main": {
+        "src": "assets/monsters/seed-combat-atlas.png",
+        "x": 844,
+        "y": 21,
+        "w": 415,
+        "h": 376,
+        "imageWidth": 1292,
+        "imageHeight": 1218
+      },
+      "sd": {
+        "src": "battle/assets/monster-seeds-pixels.png",
+        "x": 75,
+        "y": 12,
+        "w": 270,
+        "h": 292,
+        "imageWidth": 1292,
+        "imageHeight": 1218
+      }
+    },
+    "appearance": "견과 같은 갈색 껍질과 뿌리 팔·다리, 두 장의 떡잎.",
+    "habitat": "빛이 드는 숲 바닥과 축축한 풀밭.",
+    "ecology": "낮에는 빛을 따라 움직이고, 마른 날에는 그늘에 뿌리를 댄다. 광합성하고 젖은 흙에서 물과 양분을 흡수한다.",
+    "combat": "뿌리를 고정한 뒤 껍질과 뿌리 팔로 짧게 들이받는다.",
+    "weakness": "뿌리를 박고 자세를 잡는 동안 방향을 바꾸기 어렵다.",
+    "derivatives": "구체적인 파생형은 미정이다.",
+    "activeSkill": null,
+    "essences": [
+      {
+        "id": "rest",
+        "name": "미약한 생기",
+        "effect": "휴식 중 작은 찰과상과 일상 피로의 자연 회복을 조금 보조한다. 활동 중 재생·지혈·중상 치료 능력은 아니다."
+      }
+    ],
+    "essenceRule": "극히 드문 드롭. 미약한 생기 하나를 고정 습득하고 체력 +2, 마나 +1. 정수 슬롯 하나 사용, 생성 후 30분 미섭취 시 소멸. 성급만으로 우열이 정해지지 않으며 조합·소모·신체 부담과 활용이 중요하다."
+  },
+  {
+    "id": "ruke",
+    "name": "루크",
+    "stars": 1,
+    "lineage": "짐승형 씨앗종",
+    "size": "0.43m × 0.91m · 11kg",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 0.43,
+        "lengthM": 0.91,
+        "massKg": 11
+      },
+      "temperament": "호기심이 있지만 낯선 냄새에는 한 걸음 물러선다.",
+      "habits": "바람을 등지고 쉬고, 낮은 관목 사이를 돌아다닌다.",
+      "nutrition": "소형 동물과 곤충, 익은 열매를 먹는다.",
+      "ecosystemRole": "덤불의 작은 동물을 사냥하고 열매 씨앗을 옮긴다."
+    },
+    "asset": "assets/monsters/seed-combat-atlas.png",
+    "artLayout": "frames",
+    "artFrames": {
+      "main": {
+        "src": "assets/monsters/seed-combat-atlas.png",
+        "x": 12,
+        "y": 462,
+        "w": 416,
+        "h": 315,
+        "imageWidth": 1292,
+        "imageHeight": 1218
+      },
+      "sd": {
+        "src": "battle/assets/monster-seeds-pixels.png",
+        "x": 36,
+        "y": 304,
+        "w": 321,
+        "h": 294,
+        "imageWidth": 1292,
+        "imageHeight": 1218
+      }
+    },
+    "appearance": "큰 머리·귀·발, 황금빛 눈과 이마 무늬, 잎 모양 꼬리 끝이 있는 네발짐승.",
+    "habitat": "관목이 우거진 구릉과 숲 가장자리.",
+    "ecology": "바람을 등지고 쉬고, 낮은 관목 사이를 돌아다닌다. 소형 동물과 곤충, 익은 열매를 먹는다.",
+    "combat": "앞발을 낮춘 뒤 짧게 뛰어들어 문다.",
+    "weakness": "뛰어든 직후 자세를 바꾸는 데 시간이 걸린다.",
+    "derivatives": "구체적인 파생형은 미정이다.",
+    "activeSkill": null,
+    "essences": [
+      {
+        "id": "balance",
+        "name": "미약한 균형",
+        "effect": "발을 헛디딘 직후 자세를 회복하는 감각을 조금 보조한다. 자동 회피나 공중 자세 제어는 아니다."
+      }
+    ],
+    "essenceRule": "극히 드문 드롭. 미약한 균형 하나를 고정 습득하고 민첩 +2, 체력 +1. 정수 슬롯 하나 사용, 생성 후 30분 미섭취 시 소멸. 성급만으로 우열이 정해지지 않으며 조합·소모·신체 부담과 활용이 중요하다."
+  },
+  {
+    "id": "por",
+    "name": "포르",
+    "stars": 1,
+    "lineage": "어류형 씨앗종",
+    "size": "0.14m × 0.25m · 0.8kg",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 0.14,
+        "lengthM": 0.25,
+        "massKg": 0.8
+      },
+      "temperament": "물속 진동에 민감하며 이상하면 수초나 돌 뒤로 숨는다.",
+      "habits": "수초 사이에서 작은 무리가 모였다 흩어진다.",
+      "nutrition": "작은 벌레와 수초, 물속 유기물을 먹는다.",
+      "ecosystemRole": "수초 주변의 작은 벌레를 먹고 큰 수생종의 먹이가 된다."
+    },
+    "asset": "assets/monsters/seed-combat-atlas.png",
+    "artLayout": "frames",
+    "artFrames": {
+      "main": {
+        "src": "assets/monsters/seed-combat-atlas.png",
+        "x": 407,
+        "y": 439,
+        "w": 447,
+        "h": 336,
+        "imageWidth": 1292,
+        "imageHeight": 1218
+      },
+      "sd": {
+        "src": "battle/assets/monster-seeds-pixels.png",
+        "x": 33,
+        "y": 632,
+        "w": 371,
+        "h": 247,
+        "imageWidth": 1292,
+        "imageHeight": 1218
+      }
+    },
+    "appearance": "둥근 물방울 몸과 큰 지느러미, 부채꼬리, 포식자 눈과 이빨 달린 턱.",
+    "habitat": "얕은 강과 호수의 수초 주변.",
+    "ecology": "수초 사이에서 작은 무리가 모였다 흩어진다. 작은 벌레와 수초, 물속 유기물을 먹는다.",
+    "combat": "물을 짧게 내뿜어 가속하고 방향을 바꾸며 접근한다.",
+    "weakness": "물 밖에서는 이동과 호흡에 한계가 있다.",
+    "derivatives": "구체적인 파생형은 미정이다.",
+    "activeSkill": null,
+    "essences": [
+      {
+        "id": "current",
+        "name": "희미한 수류 감각",
+        "effect": "몸이 물에 잠겨 있을 때 바로 가까운 큰 물의 흐름 변화를 희미하게 느낀다. 대상 식별·수중 호흡·정밀 탐지는 못한다."
+      }
+    ],
+    "essenceRule": "극히 드문 드롭. 희미한 수류 감각 하나를 고정 습득하고 민첩 +2, 마나 +1. 정수 슬롯 하나 사용, 생성 후 30분 미섭취 시 소멸. 성급만으로 우열이 정해지지 않으며 조합·소모·신체 부담과 활용이 중요하다."
+  },
+  {
+    "id": "tork",
+    "name": "토르크",
+    "stars": 1,
+    "lineage": "파충류형 씨앗종",
+    "size": "0.17m × 0.40m · 2.7kg",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 0.17,
+        "lengthM": 0.4,
+        "massKg": 2.7
+      },
+      "temperament": "혼자 쉬며 위협을 관찰하고 접근하면 몸을 낮춘다.",
+      "habits": "햇볕과 그늘을 오가며 바위 틈에 쉰다.",
+      "nutrition": "곤충과 알, 열매를 먹는다.",
+      "ecosystemRole": "바위 주변의 곤충을 먹고 열매 씨앗을 옮긴다."
+    },
+    "asset": "assets/monsters/seed-combat-atlas.png",
+    "artLayout": "frames",
+    "artFrames": {
+      "main": {
+        "src": "assets/monsters/seed-combat-atlas.png",
+        "x": 833,
+        "y": 492,
+        "w": 449,
+        "h": 279,
+        "imageWidth": 1292,
+        "imageHeight": 1218
+      },
+      "sd": {
+        "src": "battle/assets/monster-seeds-pixels.png",
+        "x": 25,
+        "y": 936,
+        "w": 405,
+        "h": 231,
+        "imageWidth": 1292,
+        "imageHeight": 1218
+      }
+    },
+    "appearance": "큰 턱과 거친 회녹색 비늘, 짧은 네 다리, 쐐기 모양 꼬리.",
+    "habitat": "햇볕 드는 바위와 가까운 그늘.",
+    "ecology": "햇볕과 그늘을 오가며 바위 틈에 쉰다. 곤충과 알, 열매를 먹는다.",
+    "combat": "짧은 돌진과 물기·꼬리치기를 쓰며 경린으로 비늘을 굳힌다.",
+    "weakness": "경린 중 움직임이 둔해진다. 관절 사이와 배는 상대적으로 약하다.",
+    "derivatives": "구체적인 파생형은 미정이다.",
+    "activeSkill": null,
+    "essences": [
+      {
+        "id": "scale",
+        "name": "미약한 경린",
+        "effect": "마나를 써 작은 피부 부위를 잠깐 단단하게 하여 가벼운 긁힘을 덜 입는다. 칼날 방어나 전신 비늘 갑옷은 아니다."
+      }
+    ],
+    "essenceRule": "극히 드문 드롭. 미약한 경린 하나를 고정 습득하고 방어력 +2, 체력 +1. 정수 슬롯 하나 사용, 생성 후 30분 미섭취 시 소멸. 성급만으로 우열이 정해지지 않으며 조합·소모·신체 부담과 활용이 중요하다."
+  },
+  {
+    "id": "kar",
+    "name": "카르",
+    "stars": 1,
+    "lineage": "조류형 씨앗종",
+    "size": "0.39m × 0.54m · 2.4kg",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 0.39,
+        "lengthM": 0.54,
+        "massKg": 2.4
+      },
+      "temperament": "높은 곳에서 먹이의 움직임을 오래 살핀다.",
+      "habits": "절벽의 턱이나 큰 가지에 앉아 아래를 내려다본다.",
+      "nutrition": "작은 동물과 사체를 먹는다.",
+      "ecosystemRole": "소형 동물의 개체수를 조절하고 노출된 사체 일부를 치운다."
+    },
+    "asset": "assets/monsters/seed-combat-atlas.png",
+    "artLayout": "frames",
+    "artFrames": {
+      "main": {
+        "src": "assets/monsters/seed-combat-atlas.png",
+        "x": 9,
+        "y": 805,
+        "w": 409,
+        "h": 359,
+        "imageWidth": 1292,
+        "imageHeight": 1218
+      },
+      "sd": {
+        "src": "battle/assets/monster-armored-pixels.png",
+        "x": 20,
+        "y": 17,
+        "w": 373,
+        "h": 278,
+        "imageWidth": 1330,
+        "imageHeight": 1182
+      }
+    },
+    "appearance": "청회색 깃과 굽은 부리, 갈고리 발톱이 있는 조류형.",
+    "habitat": "숲 가장자리와 절벽.",
+    "ecology": "절벽의 턱이나 큰 가지에 앉아 아래를 내려다본다. 작은 동물과 사체를 먹는다.",
+    "combat": "급강하해 부리와 발톱으로 덮친다.",
+    "weakness": "급강하 직전에 날개를 접는다. 높이를 잃으면 다시 올라가야 한다.",
+    "derivatives": "구체적인 파생형은 미정이다.",
+    "activeSkill": null,
+    "essences": [
+      {
+        "id": "focus",
+        "name": "미약한 초점 보조",
+        "effect": "멀리 있는 큰 윤곽에 초점을 맞추는 것을 조금 돕는다. 어둠·장애물을 꿰뚫거나 미세한 약점을 찾아주지 않는다."
+      }
+    ],
+    "essenceRule": "극히 드문 드롭. 미약한 초점 보조 하나를 고정 습득하고 민첩 +2, 체력 +1. 정수 슬롯 하나 사용, 생성 후 30분 미섭취 시 소멸. 성급만으로 우열이 정해지지 않으며 조합·소모·신체 부담과 활용이 중요하다."
+  },
+  {
+    "id": "ves",
+    "name": "베스",
+    "stars": 1,
+    "lineage": "박쥐형 씨앗종",
+    "size": "0.26m × 0.36m · 1.6kg",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 0.26,
+        "lengthM": 0.36,
+        "massKg": 1.6
+      },
+      "temperament": "동굴 속 낯선 소리에 민감하고 무리의 움직임에 반응한다.",
+      "habits": "동굴에서 무리 지어 쉬며 반향으로 통로를 확인한다.",
+      "nutrition": "날벌레와 동굴의 작은 동물을 사냥한다.",
+      "ecosystemRole": "동굴 입구 주변에서 날벌레를 사냥한다."
+    },
+    "asset": "assets/monsters/seed-combat-atlas.png",
+    "artLayout": "frames",
+    "artFrames": {
+      "main": {
+        "src": "assets/monsters/seed-combat-atlas.png",
+        "x": 430,
+        "y": 818,
+        "w": 415,
+        "h": 315,
+        "imageWidth": 1292,
+        "imageHeight": 1218
+      },
+      "sd": {
+        "src": "battle/assets/battle-pixels.png",
+        "x": 0,
+        "y": 1295,
+        "w": 323,
+        "h": 324,
+        "imageWidth": 971,
+        "imageHeight": 1619
+      }
+    },
+    "appearance": "큰 쐐기 귀와 어깨 각질판, 각진 날개막이 있다. 앞다리가 날개다.",
+    "habitat": "어둡고 좁은 동굴.",
+    "ecology": "동굴에서 무리 지어 쉬며 반향으로 통로를 확인한다. 날벌레와 동굴의 작은 동물을 사냥한다.",
+    "combat": "어둠을 타고 사각에서 접근해 문다.",
+    "weakness": "시야가 열린 공간에서는 사각으로 접근하기 어려워진다.",
+    "derivatives": "구체적인 파생형은 미정이다.",
+    "activeSkill": null,
+    "essences": [
+      {
+        "id": "echo",
+        "name": "미약한 반향",
+        "effect": "조용한 곳에서 자신이 낸 소리의 반향으로 바로 앞 큰 장애물 유무를 희미하게 느낀다. 정밀 지도·적 식별·공격 음파는 불가하다."
+      }
+    ],
+    "essenceRule": "극히 드문 드롭. 미약한 반향 하나를 고정 습득하고 민첩 +2, 마나 +1. 정수 슬롯 하나 사용, 생성 후 30분 미섭취 시 소멸. 성급만으로 우열이 정해지지 않으며 조합·소모·신체 부담과 활용이 중요하다."
+  },
+  {
+    "id": "rat",
+    "name": "라트",
+    "stars": 1,
+    "lineage": "쥐형 씨앗종",
+    "size": "0.19m × 0.49m · 3.1kg",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 0.19,
+        "lengthM": 0.49,
+        "massKg": 3.1
+      },
+      "temperament": "좁은 틈을 벗어나기를 꺼리지만 몰리면 발밑으로 달려든다.",
+      "habits": "창고 벽이나 하수로 가장자리에서 냄새를 따라 이동한다.",
+      "nutrition": "씨앗, 벌레와 버려진 먹이를 먹는 잡식성이다.",
+      "ecosystemRole": "버려진 먹이를 옮기며 저장 곡식을 훼손하기도 한다."
+    },
+    "asset": "assets/monsters/seed-combat-atlas.png",
+    "artLayout": "frames",
+    "artFrames": {
+      "main": {
+        "src": "assets/monsters/seed-combat-atlas.png",
+        "x": 856,
+        "y": 864,
+        "w": 427,
+        "h": 322,
+        "imageWidth": 1292,
+        "imageHeight": 1218
+      },
+      "sd": {
+        "src": "battle/assets/monster-armored-pixels.png",
+        "x": 20,
+        "y": 295,
+        "w": 423,
+        "h": 260,
+        "imageWidth": 1330,
+        "imageHeight": 1182
+      }
+    },
+    "appearance": "낮은 몸과 강한 앞니, 각질 고리 꼬리가 있다.",
+    "habitat": "창고, 하수로와 땅굴.",
+    "ecology": "창고 벽이나 하수로 가장자리에서 냄새를 따라 이동한다. 씨앗, 벌레와 버려진 먹이를 먹는 잡식성이다.",
+    "combat": "낮게 웅크린 뒤 발목 가까이 달려들어 문다.",
+    "weakness": "숨을 틈이 없는 열린 바닥에서는 접근 방향을 읽기 쉽다.",
+    "derivatives": "구체적인 파생형은 미정이다.",
+    "activeSkill": null,
+    "essences": [
+      {
+        "id": "smell",
+        "name": "미약한 냄새 구분",
+        "effect": "가까운 곳의 강한 냄새 차이를 조금 구별한다. 장거리 추적이나 독의 정확한 감정은 불가하다."
+      }
+    ],
+    "essenceRule": "극히 드문 드롭. 미약한 냄새 구분 하나를 고정 습득하고 민첩 +2, 체력 +1. 정수 슬롯 하나 사용, 생성 후 30분 미섭취 시 소멸. 성급만으로 우열이 정해지지 않으며 조합·소모·신체 부담과 활용이 중요하다."
+  },
+  {
+    "id": "chitin",
+    "name": "키틴",
+    "stars": 1,
+    "lineage": "곤충형 씨앗종",
+    "size": "0.21m × 0.50m · 5.2kg",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 0.21,
+        "lengthM": 0.5,
+        "massKg": 5.2
+      },
+      "temperament": "가까운 진동과 냄새에 반응하며 위협을 받으면 땅을 짚고 버틴다.",
+      "habits": "썩은 나무 아래와 습한 굴을 오가며 가까운 흔적을 살핀다.",
+      "nutrition": "뿌리와 곤충, 사체를 먹는다.",
+      "ecosystemRole": "썩은 나무 주변의 사체를 분해하고 흙에 작은 굴을 만든다."
+    },
+    "asset": "assets/combat/monsters-atlas.png",
+    "artLayout": "frames",
+    "artFrames": {
+      "main": {
+        "src": "assets/combat/monsters-atlas.png",
+        "x": 898,
+        "y": 517,
+        "w": 424,
+        "h": 303,
+        "imageWidth": 1774,
+        "imageHeight": 887
+      },
+      "sd": {
+        "src": "battle/assets/monster-armored-pixels.png",
+        "x": 19,
+        "y": 597,
+        "w": 424,
+        "h": 250,
+        "imageWidth": 1330,
+        "imageHeight": 1182
+      }
+    },
+    "appearance": "흑갈색 갑각과 뼈색 이음선, 다리 여섯 개와 양옆으로 열리는 톱니 앞턱.",
+    "habitat": "썩은 나무와 습한 흙의 굴.",
+    "ecology": "썩은 나무 아래와 습한 굴을 오가며 가까운 흔적을 살핀다. 뿌리와 곤충, 사체를 먹는다.",
+    "combat": "짧게 돌진해 톱니 앞턱으로 물고 지면을 짚는다.",
+    "weakness": "방향 전환이 느리고 배와 관절이 상대적으로 약하다.",
+    "derivatives": "구체적인 파생형은 미정이다.",
+    "activeSkill": null,
+    "essences": [
+      {
+        "id": "cuticle",
+        "name": "얇은 각질",
+        "effect": "피부의 가벼운 마찰과 긁힘 저항을 미세하게 보조한다. 갑각 생성·칼날 방어·관통 저항 능력은 아니다."
+      }
+    ],
+    "essenceRule": "극히 드문 드롭. 얇은 각질 하나를 고정 습득하고 방어력 +2, 힘 +1. 정수 슬롯 하나 사용, 생성 후 30분 미섭취 시 소멸. 성급만으로 우열이 정해지지 않으며 조합·소모·신체 부담과 활용이 중요하다."
+  },
+  {
     "id": "ant",
     "profile": {
       "status": "draft",
