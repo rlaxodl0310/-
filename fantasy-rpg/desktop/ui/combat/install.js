@@ -1,8 +1,8 @@
 (function (r, f) {
   if (typeof module === "object" && module.exports)
-    module.exports = f(require("./rules.js"));
-  else r.InstallCombatRules = f(r.CombatRules);
-})(globalThis, (R) => {
+    module.exports = f(require("./rules.js"),require("../skills/embodied.js"));
+  else r.InstallCombatRules = f(r.CombatRules,r.EmbodiedSkills);
+})(globalThis, (R,E) => {
   "use strict";
   return function install(B, S) {
     const oldAdd = B.prototype.addStatus,
@@ -34,6 +34,7 @@
       const def = registered?.common || null,
         m = def?.mechanic || {},
         now = this.time,
+        localReduction=E.reduction(this,target,registered?.hitPart||source.activeHitPart||source.aimPart||"torso",kind,source,registered),
         counter = this.statuses(target).find((s) => s.key === "counter"),
         result = R.resolveHit(
           {
@@ -65,7 +66,7 @@
               })),
             extraReduction:
               ((target.braceUntil || 0) > now && kind !== "magic" ? 0.4 : 0) +
-              (counter && !registered?.reaction ? 0.5 : 0),
+              (counter && !registered?.reaction ? 0.5 : 0)+localReduction,
             now,
           },
           () => this.formulaRandom(),
@@ -328,6 +329,7 @@
         skillId: p.skill.id,
         castId: p.castId,
         commonId: p.common.id,
+        definitionRevision:p.common.revision||0,
         ...extraFields,
         ...extra,
       };

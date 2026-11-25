@@ -19,6 +19,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Patch tests compilation failed.' }
 & $testExe
 if ($LASTEXITCODE -ne 0) { throw 'Patch transaction tests failed.' }
 $asar = Join-Path $root 'release/FantasyStory-win32-x64/resources/app.asar'
+node (Join-Path $PSScriptRoot 'verify-package.cjs') $asar
+if ($LASTEXITCODE -ne 0) { throw 'Packaged source and runtime assets verification failed.' }
 Copy-Item $asar (Join-Path $folder 'app.asar') -Force
 $version = (Get-Content (Join-Path $root 'package.json') -Raw | ConvertFrom-Json).version
 @{product='FantasyStory';version=$version;minimumVersion='0.1.0';sha256=(Get-FileHash $asar -Algorithm SHA256).Hash.ToLowerInvariant()} | ConvertTo-Json | Set-Content (Join-Path $folder 'manifest.json') -Encoding utf8

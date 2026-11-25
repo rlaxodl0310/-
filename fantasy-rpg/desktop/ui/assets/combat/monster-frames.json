@@ -187,5 +187,14 @@
     "h": 1254,
     "imageWidth": 1254,
     "imageHeight": 1254
+  },
+  "viridion": {
+    "src": "assets/monsters/viridion-basic.webp",
+    "x": 0,
+    "y": 0,
+    "w": 1254,
+    "h": 1254,
+    "imageWidth": 1254,
+    "imageHeight": 1254
   }
 }

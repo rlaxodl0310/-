@@ -417,78 +417,81 @@
     "effect": {
       "id": "rock-body",
       "name": "암체",
-      "effect": "MP420을 소모해12초간 방어력을80% 높이고 이동속도가25% 감소한다. 같은 방어 강화는 강한 것만 적용하며 충격이나 관절 손상을 완전히 막지는 않는다.",
+      "effect": "마나로 선택한 팔·어깨·다리·몸통 일부를 바위처럼 굳혀 버팀점으로 삼는다. 굳힌 부위의 물리 충격을 줄이되 움직임이 제한된다. 방어력 전체를 올리지 않고 다른 부위나 마법을 보호하지 않는다. 시작MP90,유지초당20. 같은 기술로 해제하며 유지 한계20초.",
       "runtime": {
         "id": "essence-terrakion-rock-body",
+        "revision": 2,
         "grade": 8,
-        "mana": 420,
+        "mana": 90,
         "mechanic": {
-          "kind": "defense",
+          "kind": "body_harden",
           "element": "physical",
+          "windup": 0.35,
           "range": 0,
           "radius": 0,
           "hits": 1,
           "amount": 0,
-          "potency": 0.8,
-          "windup": 0.6,
-          "duration": 12,
-          "selfStatuses": [
-            {
-              "key": "slow",
-              "potency": 0.25,
-              "duration": 12
-            }
+          "potency": 0,
+          "duration": 0,
+          "maxDuration": 20,
+          "maintenance": 20,
+          "parts": [
+            "arm",
+            "shoulder",
+            "leg",
+            "torso",
+            "chest",
+            "abdomen"
           ]
         },
         "visual": {
-          "motif": "ring",
+          "motif": "crystal",
           "element": "physical",
-          "duration": 0.85,
-          "scale": 2,
+          "duration": 0.75,
+          "scale": 1.4,
           "hits": 1,
-          "seed": 83421
+          "seed": 88091
         }
       }
     },
     "activeSkill": {
-      "id": "tectonic-crush",
-      "name": "지각분쇄",
-      "effect": "MP600을 소모해1.1초 준비 뒤 자신 주변 반경3m의 적 최대6명에게 물리 기본위력360·힘 계수1.6·비율 방어관통25%의 타격을 각각 한 번 가한다. 유효 타격 뒤 이동속도35% 감소를4초간 시도하며 기존 저항 판정을 따른다.",
-      "cost": "MP600 · 준비1.1초 · 반경3m · 최대6대상 · 별도 쿨타임 없음.",
-      "limits": "영구 지형 파괴나 지진·용암 생성이 아니다. 범위 밖 대상에게 피해를 주지 않고 무적이나 방어 무시를 부여하지 않는다.",
+      "id": "contact-fracture",
+      "name": "쇄암",
+      "effect": "손발이나 무기가 닿을 거리의 실제 암석에 마나를 밀어 넣어 균열을 누적한다. 한 번MP420,준비0.4초 뒤0.4초 간격으로최대3회 접촉 작업. 가벼운 암석은1회,중간 암석은3회,무거운 암석은8회 누적 작업이 필요하다. 크기와재질이 확인되지 않으면 성공을 발명하지 않는다.",
+      "cost": "MP420 · 준비0.4초 · 접촉거리1.25m · 접촉을 유지해야 작업 진행.",
+      "limits": "살아 있는 적에게 범위 피해를 주는 기술이 아니다. 나무·금속·멀리 있는 암석에는 사용할 수 없다. 접촉이 끊기면 중단한다. 고정 구조물은 국소 균열까지만 기록하며 전체 붕괴·낙석 피해·통로 개방은 별도 구조 판정이 필요하다.",
       "runtime": {
-        "id": "essence-terrakion-tectonic-crush",
+        "id": "essence-terrakion-fracture",
+        "revision": 2,
         "grade": 8,
-        "mana": 600,
+        "mana": 420,
         "mechanic": {
-          "kind": "damage",
+          "kind": "contact_fracture",
           "element": "physical",
-          "range": 3,
-          "radius": 3,
+          "windup": 0.4,
+          "range": 1.25,
+          "radius": 0,
           "hits": 1,
-          "amount": 360,
+          "amount": 0,
           "potency": 0,
-          "windup": 1.1,
           "duration": 0,
-          "delivery": "area",
-          "maxTargets": 6,
-          "attackCoefficient": 1.6,
-          "penetrationPercent": 0.25,
-          "onHitStatuses": [
-            {
-              "key": "slow",
-              "potency": 0.35,
-              "duration": 4
-            }
-          ]
+          "material": "rock",
+          "workByWeight": {
+            "light": 30,
+            "medium": 90,
+            "heavy": 240
+          },
+          "pulses": 3,
+          "pulseInterval": 0.4,
+          "workPerPulse": 30
         },
         "visual": {
-          "motif": "trail",
+          "motif": "crystal",
           "element": "physical",
-          "duration": 0.85,
-          "scale": 2,
+          "duration": 0.75,
+          "scale": 1.4,
           "hits": 1,
-          "seed": 83601
+          "seed": 88421
         }
       }
     },
@@ -499,5 +502,89 @@
       "민첩": 150
     },
     "statsRule": "8성 총량4500 고정 배분 · 사용자 위임으로 수치 확정"
+  },
+  {
+    "id": "viridion",
+    "name": "비리디온",
+    "stars": 8,
+    "effect": {
+      "id": "flex-fiber",
+      "name": "유연섬유",
+      "effect": "마나로 근육과 힘줄을 식물 섬유처럼 유연하게 만들어 몸을 접고 비트는 동작을 돕는다. 시작MP60,유지초당8,같은 기술로 해제,유지 한계20초. 접힌 자세에서는 신체 충돌 폭이25% 줄고 맨몸의 둔한 충돌을 일부 흘린다. 뼈의 가동 한계가 남고 칼날·마법·관통 공격을 통과하거나 자동 회피하지 않는다.",
+      "runtime": {
+        "id": "essence-viridion-flex-fiber",
+        "revision": 2,
+        "grade": 8,
+        "mana": 60,
+        "mechanic": {
+          "kind": "body_flex",
+          "element": "physical",
+          "windup": 0.35,
+          "range": 0,
+          "radius": 0,
+          "hits": 1,
+          "amount": 0,
+          "potency": 0,
+          "duration": 0,
+          "maxDuration": 20,
+          "maintenance": 8
+        },
+        "visual": {
+          "motif": "arc",
+          "element": "wind",
+          "duration": 0.75,
+          "scale": 1.4,
+          "hits": 1,
+          "seed": 88061
+        }
+      }
+    },
+    "activeSkill": {
+      "id": "leaf-edge",
+      "name": "절엽",
+      "effect": "손발이나 실제 쥔 무기의 가장자리에 얇은 잎날 형태의 마나를 펼쳐 휘두르는 동작으로 벤다. 형성MP80·유지초당12·유지 한계20초. 실제 근접 타격에 잎날 위력45를 더하며,추가MP140으로 잎날 한 장을 떼어최대5m로 날릴 수 있다. 날린 잎날은물리 기본위력180·힘 계수1.2로 한 번 타격한다.",
+      "cost": "형성MP80·유지초당12·떼어 날리기MP140·형성0.35초·발사0.2초. 별도 쿨타임 없음.",
+      "limits": "잎날 형성 뒤에만 날릴 수 있고 발사하면 유지하던 날이 사라진다. 유도·벽 관통·복수 잎날 자동 연사 없음. 실제 공격하지 않아도 적이 베이거나 방어구가 자동 관통되지는 않는다. 해제로 유지 중단 가능.",
+      "runtime": {
+        "id": "essence-viridion-leaf-edge",
+        "revision": 2,
+        "grade": 8,
+        "mana": 80,
+        "mechanic": {
+          "kind": "edge_blade",
+          "element": "physical",
+          "windup": 0.35,
+          "range": 0,
+          "radius": 0,
+          "hits": 1,
+          "amount": 0,
+          "potency": 0,
+          "duration": 0,
+          "maxDuration": 20,
+          "maintenance": 12,
+          "edgeAmount": 45,
+          "detachMana": 140,
+          "detachRange": 5,
+          "detachAmount": 180,
+          "detachCoefficient": 1.2,
+          "projectileSpeed": 9
+        },
+        "visual": {
+          "motif": "arc",
+          "element": "wind",
+          "duration": 0.75,
+          "scale": 1.4,
+          "hits": 1,
+          "seed": 88081
+        }
+      }
+    },
+    "stats": {
+      "민첩": 1500,
+      "힘": 1200,
+      "체력": 900,
+      "마나": 900
+    },
+    "statsRule": "8성 총량4500 고정 배분 · 수정된 근접/물리 잎날 능력에 맞춘 배분"
   }
 ]

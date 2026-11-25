@@ -93,7 +93,7 @@
         nextTick: this.time + (e.nextTick - now),
       }));
       this.bloodTrails = clone(state.bloodTrails || []);
-      this.props = clone(state.props || this.props || []);
+      this.props = this.props?.length?this.props.map(o=>clone((state.props||[]).find(saved=>saved.id===o.id)||o)):clone(state.props||[]);
       for (const ghost of state.illusions || [])
         if (ghost.until > now) this.units.push(convert(ghost));
     };
@@ -160,6 +160,7 @@
           (trace) => trace.subject === target?.id,
         ).length,
         weaponState: u.weaponState,
+        activeCommon:this.statuses(u),abilityMode:u.abilityMode||"auto",abilityPart:u.abilityPart||u.aimPart||"arm",
         abilitySourceIds:u.abilitySourceIds||[],essenceSpecies:u.essenceSpecies||[],
         stamina: u.stamina,
         weapon: u.weapon,
@@ -222,6 +223,7 @@
         m = d.mechanic,
         skill = p.skill;
       p.castId = a.castId;
+      if(C.Embodied.release(this,u,a,C))return;
       p.hitPart = a.hitPart || u.aimPart || "torso";
       const target =
         this.units.find((v) => v.id === a.targetId && v.hp > 0) ||
@@ -622,6 +624,7 @@
       registered = null,
     ) {
       if (!source || !t || t.hp <= 0) return;
+      const adapted=C.Embodied.melee(this,source,t,amount,kind,registered,C);amount=adapted.amount;registered=adapted.registered;
       const def = registered?.common || C.get(registered?.skill?.commonId),
         m = def?.mechanic;
       if (
@@ -744,6 +747,7 @@
       }
     };
     B.prototype.step = function (dt, input = {}) {
+      if(!this.paused)C.Embodied.step(this,dt,C);
       if (this.paused || this.status !== "playing") return;
       dt = Math.max(0, Math.min(0.05, Number(dt) || 0));
       for (const u of this.units) {
@@ -776,7 +780,7 @@
         u._commonSpeed = u.speed;
         u.speed *= Math.max(
           0.1,
-          1 + this.statusPower(u, "speed") - this.statusPower(u, "slow"),
+          (1 + this.statusPower(u, "speed") - this.statusPower(u, "slow"))*(1-(u.bodyMobility||0)),
         );
         if (this.hasStatus(u, "root") || this.hasStatus(u, "airborne"))
           u.speed = 0;

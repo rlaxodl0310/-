@@ -1,8 +1,8 @@
 (function (r, f) {
   if (typeof module === "object" && module.exports)
-    module.exports = f(require("./common-data.js"), require("../monsters/essence-rules.js"));
-  else r.CommonSkills = f(r.CommonSkillData, r.EssenceRules);
-})(globalThis, (records, Essences) => {
+    module.exports = f(require("./common-data.js"), require("../monsters/essence-rules.js"), require("./embodied.js"));
+  else r.CommonSkills = f(r.CommonSkillData, r.EssenceRules, r.EmbodiedSkills);
+})(globalThis, (records, Essences, Embodied) => {
   "use strict";
   const clone = (v) => JSON.parse(JSON.stringify(v));
   for (const d of records) {
@@ -56,6 +56,7 @@
   function prepare(skill, ctx) {
     const d = get(skill.commonId);
     if (!d) throw Error("등록된 공용 기술이 아닙니다.");
+    const custom=Embodied.prepare(d,ctx);if(custom)return custom;
     const m = d.mechanic,
       type =
         ctx.weaponType ||
@@ -229,5 +230,5 @@
       visual: clone(d.visual),
     };
   }
-  return { records, get, prepare, definition, describe, bands };
+  return { records, get, prepare, definition, describe, bands, Embodied, actionCost:(s,u)=>Embodied.actionCost(get(s.commonId),u)??s.cost.mana, actionLabel:(s,u)=>{const d=get(s.commonId);return d&&Embodied.supports(d.mechanic.kind)?Embodied.actionLabel(d,u):s.name;} };
 });

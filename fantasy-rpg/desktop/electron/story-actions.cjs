@@ -5,7 +5,7 @@ const Observations=require('./story-observations.cjs');
 const Passage=require('../ui/passage/host.js');
 const sceneKey=s=>Passage.onboard(s)?'vehicle:'+Passage.onboard(s).id:s.era+':'+s.location;
 const verbs=['observe','attack','defend','approach','retreat','flee','tip','push','open','close','hide','inspect','request'];
-const states=['intact','toppled','open','closed','locked','broken'];
+const states=['intact','toppled','open','closed','locked','broken','cracked'];
 const OBJECT_SCHEMA={type:'array',maxItems:6,items:{type:'object',additionalProperties:false,required:['id','name','weight','fixed','distance','condition','affordances','quote'],properties:{id:{type:'string'},name:{type:'string'},weight:{type:'string',enum:['light','medium','heavy','unknown']},fixed:{type:'boolean'},distance:{type:'integer',minimum:0,maximum:4},condition:{type:'string',enum:states},affordances:{type:'array',maxItems:8,items:{type:'string',enum:['tip','push','open','close','hide','inspect']}},quote:{type:'string'}}}};
 const PLAN_SCHEMA={type:'array',maxItems:3,items:{type:'object',additionalProperties:false,required:['verb','target','request','confidence','quote'],properties:{verb:{type:'string',enum:verbs},target:{type:'string'},request:{type:'string',enum:['none','withdraw','help','protect','hold']},confidence:{type:'number',minimum:0,maximum:1},quote:{type:'string'}}}};
 const cue={attack:/공격|때린|친다|주먹|쏘|베어|찌른/,defend:/막|방어|대비|가드|버틴/,approach:/접근|다가|가까이|향해|이동/,retreat:/후퇴|뒤로|물러|거리/,flee:/도망|도주|달아|이탈|빠져나/,tip:/엎|넘어뜨|기울/,push:/밀|옮|움직/,open:/열|연다/,close:/닫/,hide:/숨|가려|엄폐|뒤에/,request:/부탁|줘|해|여경|도겸|뒤로|기다|도와/};
@@ -33,7 +33,7 @@ function resolve(state,plan,frame){if(plan.some(p=>!['observe','inspect','reques
  Observations.capture(state,next,key,resolution);
  return{...next,resolution};}
 function register(state,candidate){const world=clone(state.actionWorld||{locations:{},actors:{}}),key=sceneKey(state);world.locations??={};world.actors??={};world.locations[key]??={objects:[]};for(const o of candidate.sceneObjects||[])if(!world.locations[key].objects.some(old=>old.id===o.id))world.locations[key].objects.push({...o,observedTurn:state.revision});return world;}
-function events(state,resolution){const effects=(resolution?.effects||[]).map((effect,i)=>{const o=objects(state).find(o=>o.id===effect.objectId),label={toppled:'넘어진 상태',open:'열린 상태',closed:'닫힌 상태'}[effect.condition]||'위치가 바뀐 상태';return{id:'action-'+state.revision+'-'+i,turn:state.revision,text:(o?.name||effect.objectId)+'는 '+label+'가 되었다.',evidence:'행동 판정 결과',source:'engine-action',subject:effect.objectId,predicate:effect.condition?'condition':'observation',value:effect.condition||'moved',witnesses:['taei',...state.present]};});
+function events(state,resolution){const effects=(resolution?.effects||[]).map((effect,i)=>{const o=objects(state).find(o=>o.id===effect.objectId),label={toppled:'넘어진 상태',open:'열린 상태',closed:'닫힌 상태',broken:'파쇄된 상태',cracked:'균열이 생긴 상태'}[effect.condition]||'위치가 바뀐 상태';return{id:'action-'+state.revision+'-'+i,turn:state.revision,text:(o?.name||effect.objectId)+'는 '+label+'가 되었다.',evidence:'행동 판정 결과',source:'engine-action',subject:effect.objectId,predicate:effect.condition?'condition':'observation',value:effect.condition||'moved',witnesses:['taei',...state.present]};});
  const observations=(resolution?.observations||[]).map(row=>({
   id:row.id,turn:state.revision,at:state.minutes,location:row.location,
   text:row.confirmed+' '+row.uncertain,source:'engine-observation',

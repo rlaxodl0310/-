@@ -25,7 +25,7 @@ function select(state, input) {
     (s) =>
       s.ownerId === "taei" &&
       input.includes(s.name) &&
-      /사용|시전|발동|써|쓴다|쓸게/.test(input),
+      /사용|시전|발동|써|쓴다|쓸게|해제|날려|날린|발사|거둬|풀어/.test(input),
   );
   if (matches.length > 1) throw Error("한 번에 스킬 하나를 선택해 주세요.");
   return matches[0] || null;
@@ -34,14 +34,15 @@ function cast(state, skill, input, id, target = 0) {
  if(require('../ui/combat/stats.js').fatigue(state.player).exhausted)throw Error('탈진 상태에서는 스킬을 사용할 수 없습니다.');
   if (skill.origin === "common") {
     const def = Common.get(skill.commonId);
-    if (["pull_object", "vibrate_object"].includes(def.mechanic.kind)) {
-      const objects =
-          state.actionWorld?.locations?.[state.era + ":" + state.location]
-            ?.objects || [],
+    state={...state,skillAbilityMode:/해제|거둬|풀어/.test(input)?'cancel':/날려|날린|발사|떼어/.test(input)?'release':'auto'};
+    const partMap=[[/머리/,'head'],[/목에|목을/,'neck'],[/어깨/,'shoulder'],[/팔/,'arm'],[/다리/,'leg'],[/가슴/,'chest'],[/복부|배에/,'abdomen'],[/몸통/,'torso'],[/전신/,'all']];
+    for(const [pattern,part]of partMap)if(pattern.test(input)){state.skillAbilityPart=part;break;}
+    if (["pull_object", "vibrate_object", "contact_fracture"].includes(def.mechanic.kind)) {
+      const objects = require('./story-actions.cjs').objects(state),
         named = objects.filter((o) => input.includes(o.name)),
         eligible = named.length
           ? named
-          : objects.filter((o) => !o.fixed && o.weight === "light");
+          : def.mechanic.kind==="contact_fracture"?objects.filter(o=>Common.Embodied.material(o)===def.mechanic.material):objects.filter((o) => !o.fixed && o.weight === "light");
       if (eligible.length !== 1)
         throw Error("사용할 물건을 이름으로 명확히 지정해 주세요.");
       state = { ...state, skillObjectTarget: eligible[0].id };

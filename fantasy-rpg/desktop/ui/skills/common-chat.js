@@ -11,6 +11,7 @@
   "use strict";
   const clone = (v) => JSON.parse(JSON.stringify(v)),
     distPoint = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  function sceneKey(state){const host=typeof module==='object'&&module.exports?require('../passage/host.js'):globalThis.PassageHost;const vehicle=host?.onboard(state);return vehicle?'vehicle:'+vehicle.id:state.era+':'+state.location;}
   function setup(state, book) {
     const c = state.combat,
       p = state.player,
@@ -34,7 +35,7 @@
           }[p.weaponType] || "gauntlet",
         weaponType: p.weaponType || "unarmed",
       });
-    const key = state.era + ":" + state.location,
+    const key = sceneKey(state),
       objects = state.actionWorld?.locations?.[key]?.objects || [];
     b.props = objects.map((o) => ({ ...clone(o), x: 5 + o.distance, y: 8 }));
     b.units[0].objectTarget =
@@ -44,6 +45,7 @@
     b.serial = c.commonState?.serial || 0;
     Object.assign(b.units[0], {
       level: p.level || 1,
+      abilityMode:state.skillAbilityMode||"auto",abilityPart:state.skillAbilityPart||p.aimPart||"arm",
       aimPart: p.aimPart || "torso",
       stats:Rules.baseStats(p),effectBonuses:Rules.normalizeActor(p).effectBonuses,agility:Rules.baseStats(p).agility??b.units[0].agility,combatStats: Rules.actorStats(p),
       armor: clone(p.armor || {}),
@@ -86,7 +88,7 @@
           ? Math.max(0, b.skillBook.clock - c.commonState.captureClock)
           : 0);
       b.bloodTrails = clone(c.commonState.bloodTrails || []);
-      b.props = clone(c.commonState.props || b.props);
+      b.props = b.props.map(o=>clone((c.commonState.props||[]).find(saved=>saved.id===o.id)||o));
       b.commonFields = clone(c.commonState.fields || []);
       b.healingOverTime = clone(c.commonState.healingOverTime || []);
       for (const ghost of c.commonState.illusions || [])
@@ -120,7 +122,7 @@
           commonState: state.skillUtilityState || state.combat?.commonState,
         },
       };
-    const key = state.era + ":" + state.location,
+    const key = sceneKey(state),
       b = setup(state, book),
       p = b.units[0],
       c = clone(state.combat),
@@ -229,8 +231,9 @@
       engine: "common",
       formulaEvents: [...(b.formulaLog || []), ...(b.healingLog || []),...(b.partyUtilityLog||[])],
       discoveredTrail: clone(b.revealedTrail || []),
+      effects:(b.props||[]).filter(o=>o.fractured).map(o=>({objectId:o.id,condition:o.condition})),
       objectChanges: clone(b.props || []).filter(
-        (p) => p.moved || p.vibratingUntil,
+        (p) => p.moved || p.vibratingUntil || p.fractured,
       ),
       activeStatuses: b.units
         .filter((u) => u.hp > 0)
@@ -266,12 +269,13 @@
           o.distance = Math.min(4, Math.round(distPoint(prop, p)));
           o.moved = prop.moved || o.moved;
           if (prop.vibratingUntil) o.vibratingUntil = prop.vibratingUntil;
+          if(prop.fractured){o.condition=prop.condition;o.fractureWork=prop.fractureWork;o.fractured=true;}
         }
       }
     return {
       player,
       combat: utility ? previousCombat : c,
-      utilityState: utility ? c.commonState : undefined,
+      utilityState: utility || c.status!=="playing" ? c.commonState : undefined,
       skillBook: b.skillBook,
       resolution,
       actionWorld,

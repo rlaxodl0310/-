@@ -24,10 +24,9 @@ function sync(state) {
     const def = Common.definition(commonId, "taei", {sourceGranted:true});
     const present = book.skills.find((s) => s.id === def.id);
     if (present) {
-      if (present.progressionGranted)
-        present.progressionSources = player.grantedAbilities
+      if(present.progressionGranted||def.requiredEssenceSpecies){Object.assign(present,def);present.progressionGranted=true;present.progressionSources = player.grantedAbilities
           .filter((a) => a.commonId === commonId)
-          .map((a) => a.sourceId);
+          .map((a) => a.sourceId);}
       continue;
     }
     const old = book.dormantProgressionSkills?.[def.id];
@@ -45,7 +44,16 @@ function sync(state) {
   for (const cap of book.capabilities)
     if (cap.origin === "ego" && cap.equipmentId)
       cap.active = player.equipmentIds.includes(cap.equipmentId);
-  return { ...state, player, skillBook: book };
+  const clean=common=>{if(!common)return common;return {...common,units:(common.units||[]).map(u=>({...u,statuses:(u.statuses||[]).filter(status=>{if(!status.commonId?.startsWith('essence-'))return true;const d=Common.get(status.commonId);return !!d&&(!d.revision||status.definitionRevision===d.revision);})}))};};
+  let combat=state.combat?{...state.combat,commonState:clean(state.combat.commonState)}:undefined,utility=clean(state.skillUtilityState);
+  if(combat?.status==='playing'&&!combat.commonState&&utility?.units?.some(u=>u.id==='taei'&&u.statuses.some(s=>Common.Embodied.supports(s.key)))){combat.commonState={...utility,units:utility.units.filter(u=>u.id==='taei'),props:[],fields:[],illusions:[]};utility=undefined;}
+  const current=combat?.status==='playing'?combat.commonState:utility;
+  if(current){const delta=Math.max(0,book.clock-(current.captureClock??book.clock)),start=current.time||0,end=start+delta;
+    for(const actor of current.units||[])if(actor.id==='taei')actor.statuses=actor.statuses.filter(status=>{if(!Common.Embodied.supports(status.key))return true;const cost=Math.min(delta,Math.max(0,status.until-start))*(status.maintenance||0);if(player.mana+1e-8<cost){player.mana=0;return false;}player.mana=Math.max(0,Math.round((player.mana-cost)*1e6)/1e6);return status.until>end;});
+    current.time=end;current.captureClock=book.clock;
+  }
+  return { ...state, player, skillBook: book,...(combat?{combat}:{}),...(state.skillUtilityState||utility?{skillUtilityState:utility}:{}) };
+
 }
 function context(state) {
   const XP=require("../ui/progression/experience.js");

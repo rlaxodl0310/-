@@ -1,0 +1,35 @@
+{
+  "version": "0.42.108",
+  "sourceBase": "8a59389523e1bdde6e27192e6ed9fcad1560e89c",
+  "tests": {
+    "passed": 694,
+    "failed": 0
+  },
+  "browser": {
+    "species": [
+      "viridion"
+    ],
+    "frames": 24,
+    "transparentFrameCorners": 24,
+    "materialSkillUIPaths": [
+      "part selection and harden/release",
+      "actual object selection/contact fracture",
+      "flexible collider",
+      "held leaf and single nonhoming leaf projectile"
+    ],
+    "exceptions": [],
+    "passed": true
+  },
+  "scope": [
+    "Viridion approved plant dinosaur artwork, SD and 24-frame combat sprite",
+    "Terrakion selected-part hardening and actual rock contact fracture",
+    "Viridion flexible fibers and held/single released leaf edge",
+    "source-gated migration and replay-safe saved object work"
+  ],
+  "limits": [
+    "No direct installation on user PC",
+    "No live ChatGPT inference validation",
+    "Fixed structure cracks do not automatically cause structural collapse"
+  ],
+  "windowsBuild": "pending"
+}
