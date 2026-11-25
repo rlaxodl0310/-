@@ -72,7 +72,13 @@ const previews=Object.freeze([
       }
     ],
     "essenceRule": "정수 설계안 · 마나·민첩 중심. 스탯 수치와 실제 발동은 검증 전.",
-    "artNote": "원본 파일 확보와 검수 후 일러스트 연결.",
+    "artFrames": {
+      "main": { "src": "assets/monsters/empereut-basic.png", "x": 0, "y": 0, "w": 1254, "h": 1254, "imageWidth": 1254, "imageHeight": 1254 },
+      "poses": { "src": "assets/monsters/empereut-poses.png", "x": 0, "y": 0, "w": 1254, "h": 1254, "imageWidth": 1254, "imageHeight": 1254 },
+      "sd": { "src": "assets/monsters/empereut-sprites.png", "x": 0, "y": 0, "w": 256, "h": 256, "imageWidth": 1024, "imageHeight": 1536 },
+      "spriteSheet": { "src": "assets/monsters/empereut-sprites.png", "x": 0, "y": 0, "w": 1024, "h": 1536, "imageWidth": 1024, "imageHeight": 1536 }
+    },
+    "artLabels": { "poses": "추가 자세 4종", "spriteSheet": "전투 도트 24프레임" },
     "derivatives": "제작자 도감 설정 자료. 조우·전투·정수 발동 미등록."
   },
   {
