@@ -31,5 +31,23 @@
     "No live ChatGPT inference validation",
     "Fixed structure cracks do not automatically cause structural collapse"
   ],
-  "windowsBuild": "pending"
+  "windowsBuild": {
+    "status": "passed",
+    "sourceCommit": "d384b891fc4e6c31e6c84e8dbdc30f70822d3385",
+    "run": "https://github.com/rlaxodl0310/-/actions/runs/45684663448",
+    "testsPassed": 694,
+    "nativePatchTransactions": "passed",
+    "packagedSourceAndAssetBytes": "passed",
+    "packagedFilesVerified": 52,
+    "manifestComparison": "runtime fields after Electron packager normalization",
+    "initialBuildCorrection": "Exact manifest bytes comparison corrected to runtime fields; all source/asset bytes still compared by SHA256"
+  },
+  "patch": {
+    "file": "FantasyStory-Patch.zip",
+    "bytes": 417811838,
+    "sha256": "14c4da39b6bf7c90c02e8e606aebec593d64a1215c188511a2dbbbf4e6662473",
+    "streamedReleaseSHA256": "passed",
+    "releaseURL": "https://github.com/rlaxodl0310/-/releases/tag/untagged-db620437b4123bc1fa45",
+    "draft": true
+  }
 }
