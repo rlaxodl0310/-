@@ -1,0 +1,36 @@
+{
+  "version": "0.42.106",
+  "sourceBase": "097516761f31e7bc057b5bce6578a7455d3e4623",
+  "tests": {
+    "pass": 674,
+    "fail": 0
+  },
+  "ui": {
+    "species": [
+      "cobalion"
+    ],
+    "frames": 24,
+    "transparentFrameCorners": 24,
+    "exceptions": [],
+    "passed": true
+  },
+  "scope": [
+    "Grade8 steel dinosaur with no arms/hands and two hindlegs",
+    "Approved corrected alert/charge/guard/hit art and illustrated SD",
+    "24 combat pixel frames in six clips",
+    "Shared monster/battle/save/loot/AI-world registration",
+    "Generic monster gallery supports additional authored poses and separate illustrated/combat SD"
+  ],
+  "transparency": {
+    "method": "actual browser composition over white/dark backgrounds; inspect source PNG alpha",
+    "allFrameCornerAlphaMax": 1,
+    "note": "Preview displayed hidden RGB background despite transparent alpha; actual browser composites cleanly"
+  },
+  "limits": [
+    "No user PC installation or live ChatGPT evaluation",
+    "Essence exact mana/range/power unset, active remains pending-cast",
+    "New fixed stat allocation and test HP/damage are balance drafts",
+    "No new scenic background CG or fixed story encounter"
+  ],
+  "WindowsBuild": "pending"
+}

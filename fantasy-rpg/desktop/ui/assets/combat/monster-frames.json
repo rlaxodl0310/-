@@ -169,5 +169,14 @@
     "h": 793,
     "imageWidth": 1190,
     "imageHeight": 793
+  },
+  "cobalion": {
+    "src": "assets/monsters/cobalion-basic.webp",
+    "x": 0,
+    "y": 0,
+    "w": 656,
+    "h": 599,
+    "imageWidth": 656,
+    "imageHeight": 599
   }
 }
