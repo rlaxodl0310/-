@@ -43,10 +43,32 @@
     "temporaryBattleHP": 60,
     "temporaryBattleDamage": 16
   },
-  "WindowsBuild": "pending",
+  "WindowsBuild": {
+    "status": "success",
+    "url": "https://github.com/rlaxodl0310/-/actions/runs/45606229446",
+    "source": "e2f532ae2c391d56a3dff688517a87f0f5b887d7",
+    "tests": 668,
+    "nativePatchTransactions": "passed"
+  },
   "limits": [
     "No installation on the user PC",
     "No live ChatGPT story-quality evaluation",
     "New locations shown in CGs do not automatically move the story or create encounters"
-  ]
+  ],
+  "patch": {
+    "file": "FantasyStory-Patch.zip",
+    "bytes": 404085923,
+    "sha256": "407cca6f9acf34986e52bc534791f187be268918200957e063a999c0fe52d90e",
+    "manifest": {
+      "sha256": "2da4458845e2954aab8cb4d867b3b702b94878215da4fdd79f251aee3f67ce15",
+      "product": "FantasyStory",
+      "version": "0.42.104",
+      "minimumVersion": "0.1.0"
+    },
+    "zipCRC": "passed",
+    "payloadSHA256": "passed",
+    "nativeExecutable": "PE MZ signature verified",
+    "runtimeAssets": "both cinematic CGs, both character combat sheets, Nerpang basic/scene/SD and sprite sheet present"
+  },
+  "downloadPage": "https://github.com/rlaxodl0310/-/releases/tag/untagged-07da39709b5b33233c32"
 }
