@@ -1,6 +1,18 @@
 [
   {
     "id": "ant",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 0.28,
+        "lengthM": 0.55,
+        "massKg": 4.5
+      },
+      "temperament": "둥지와 먹이에 집요하고, 단독으로 멀리 나가기를 꺼린다.",
+      "habits": "흙 둥지의 저장실을 돌며 먹이 냄새가 이어진 길을 따라 여럿이 움직인다.",
+      "nutrition": "작은 동물과 사체, 몬스터 잔해를 잘라 저장한다.",
+      "ecosystemRole": "사체를 잘게 해 분해를 돕고, 굴을 파 흙을 뒤섞는다."
+    },
     "name": "앤트",
     "stars": 1,
     "lineage": "개미형 씨앗종",
@@ -24,6 +36,18 @@
   },
   {
     "id": "clad",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 0.64,
+        "lengthM": 1.15,
+        "massKg": 180.0
+      },
+      "temperament": "먹이와 통로를 지키며, 위협이 가까워지면 몸의 정면을 돌린다.",
+      "habits": "폐광 낙석 더미를 돌아다니고, 좁은 굴에서는 후진으로 물러난다.",
+      "nutrition": "광석 조각과 몬스터 잔해를 압착해 몸 안으로 밀어 넣는다.",
+      "ecosystemRole": "흩어진 잔해를 작은 덩어리로 압착해 폐갱의 퇴적층에 남긴다."
+    },
     "name": "클래드",
     "stars": 2,
     "lineage": "광물·기계형 몬스터 · 기원 미상",
@@ -49,6 +73,19 @@
   },
   {
     "id": "velum",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 0.48,
+        "lengthM": 0.85,
+        "massKg": 12.0,
+        "spanM": 1.5
+      },
+      "temperament": "밝게 드러난 곳을 피하고, 무리에서 떨어진 먹잇감을 노린다.",
+      "habits": "낮에는 절벽이나 큰 나무에 거꾸로 매달려 쉬고, 해 질 무렵 낮게 활공한다.",
+      "nutrition": "작은 동물과 부상당한 몬스터를 사냥하며 사람도 공격할 수 있다.",
+      "ecosystemRole": "절벽 아래와 숲 가장자리에서 소형 포식자의 빈자리를 채운다."
+    },
     "name": "벨룸",
     "stars": 2,
     "lineage": "공중형 몬스터",
@@ -75,6 +112,18 @@
   },
   {
     "id": "draven",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 0.75,
+        "lengthM": 2.0,
+        "massKg": 72.0
+      },
+      "temperament": "홀로 지내며, 은신처 부근에 들어온 대상을 오래 관찰한다.",
+      "habits": "바위 구릉과 동굴 입구에 매복하고 남은 먹이를 돌 틈에 숨긴다.",
+      "nutrition": "들짐승과 중소형 몬스터를 사냥한다.",
+      "ecosystemRole": "길목의 중소형 개체수를 조절하고, 남긴 먹이는 청소성 생물이 먹는다."
+    },
     "name": "드라벤",
     "stars": 2,
     "lineage": "성체 용족 · 날개 없는 사족",
@@ -101,6 +150,18 @@
   },
   {
     "id": "noxvern",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 1.05,
+        "lengthM": 4.0,
+        "massKg": 205.0
+      },
+      "temperament": "빛에 오래 노출되면 어두운 틈으로 물러나는 매복형이다.",
+      "habits": "깊은 동굴의 천장과 벽을 오르며 진동을 따라 먹이의 이동을 기다린다.",
+      "nutrition": "동굴 짐승이나 지하 몬스터를 덮쳐 높은 틈으로 끌어올린다.",
+      "ecosystemRole": "굴 위쪽의 포식자로 동굴 바닥과 높은 바위 틈 사이에 먹이 잔해를 옮긴다."
+    },
     "name": "녹스베른",
     "stars": 4,
     "lineage": "성체 용족 · 그림자 은폐형",
@@ -133,6 +194,18 @@
   },
   {
     "id": "lairon",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 0.95,
+        "lengthM": 1.7,
+        "massKg": 390.0
+      },
+      "temperament": "영역성이 강하며 광맥 주변에서 반복되는 진동에 민감하다.",
+      "habits": "광산이나 철광석 노두를 따라 움직이며, 갱도 지지대에 붙은 광물도 긁는다.",
+      "nutrition": "철이 섞인 광석을 갉아 갑각을 유지한다.",
+      "ecosystemRole": "철광석을 부스러뜨려 광물성 퇴적물을 만들고, 갱도 지지력이 약해질 수 있다."
+    },
     "name": "갱도라",
     "stars": 3,
     "lineage": "강철·광물형 사족 몬스터 · 포켓몬 갱도라 디자인",
@@ -164,6 +237,18 @@
   },
   {
     "id": "nerpang",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 0.8,
+        "lengthM": 2.5,
+        "massKg": 265.0
+      },
+      "temperament": "물가에서 느긋하게 보이지만 먹이가 가까워지면 무리의 위치를 확인한다.",
+      "habits": "해안 동굴이나 하구에서 작은 무리로 쉬며 낮은 울음으로 연락한다.",
+      "nutrition": "어류와 갑각류를 주로 먹으며, 물가 가까이 온 작은 짐승도 노린다.",
+      "ecosystemRole": "연안과 하구의 어류·갑각류를 사냥하고 먹이 잔해를 조수 웅덩이에 남긴다."
+    },
     "name": "네르팽",
     "stars": 2,
     "lineage": "물범형 수륙 양용 몬스터",
@@ -455,6 +540,18 @@
   },
   {
     "id": "fizz",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 0.95,
+        "lengthM": 1.25,
+        "massKg": 29.0
+      },
+      "temperament": "호기심이 많고 경계가 빠르며, 뒤로 빠질 물길을 먼저 살핀다.",
+      "habits": "침수 유적과 하구에서 단독으로도 활동하며, 사냥할 때 그라우크와 신호를 주고받기도 한다.",
+      "nutrition": "작은 물고기와 연체동물을 사냥하며 공동 사냥에선 잔해를 나눠 먹는다.",
+      "ecosystemRole": "얕은 물에서 깊은 물로 먹이 무리를 몰아 하구의 두 수역을 연결한다."
+    },
     "name": "피즈",
     "stars": 6,
     "lineage": "수생 양서형 몬스터",
@@ -752,6 +849,18 @@
   },
   {
     "id": "grauk",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 1.3,
+        "lengthM": 5.2,
+        "massKg": 1350.0
+      },
+      "temperament": "물속에서 기다리는 데 익숙하며, 수심이 낮은 곳으로 무리하게 따라가지 않는다.",
+      "habits": "깊은 물길에 잠복한다. 피즈와 신호를 맞춰 사냥하기도 하며 홀로도 활동한다.",
+      "nutrition": "큰 물고기와 수생 몬스터를 먹는다.",
+      "ecosystemRole": "하구의 큰 포식자로 깊은 물의 먹이 개체수를 조절한다."
+    },
     "name": "그라우크",
     "stars": 5,
     "lineage": "대형 수중 포식 몬스터",
@@ -1049,6 +1158,18 @@
   },
   {
     "id": "cobalion",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 2.8,
+        "lengthM": 5.1,
+        "massKg": 2400.0
+      },
+      "temperament": "침착하고 경계심이 강하다. 영역 훼손과 퇴로 봉쇄에 강하게 반응한다.",
+      "habits": "고산 철광 노두 사이의 단단한 바닥을 고르고, 흔들리는 갱도 입구는 피한다.",
+      "nutrition": "철분이 섞인 광석을 부수어 섭취하고 강철 조직이 닳은 부분의 유지에 쓴다.",
+      "ecosystemRole": "철광 부스러기를 이동로에 흩뜨려 광물성 토양이 생기는 곳을 만든다."
+    },
     "name": "코바르온",
     "stars": 8,
     "lineage": "강철체 공룡형 몬스터 · 팔 없는 두 다리 구조",
@@ -1447,6 +1568,18 @@
   },
   {
     "id": "terrakion",
+    "profile": {
+      "status": "draft",
+      "adultAverage": {
+        "heightM": 2.25,
+        "lengthM": 4.7,
+        "massKg": 1750.0
+      },
+      "temperament": "평소 움직임이 적고, 물러날 길이 막히면 몸을 낮추고 버틴다.",
+      "habits": "건조한 암벽 지대와 너덜지대에서 쉬며 흔들리는 바닥을 피한다.",
+      "nutrition": "풍화된 암석과 광물질을 섭취해 닳은 바위 조직을 천천히 보충한다.",
+      "ecosystemRole": "이동 중 느슨한 돌을 밀어내 작은 동물이 드나들 바위 틈과 자갈 퇴적지를 만든다."
+    },
     "name": "테라키온",
     "stars": 8,
     "lineage": "단단한 바위 몸체의 공룡형 사족 몬스터",
@@ -1858,6 +1991,18 @@
   },
   {
     "id": "viridion",
+    "profile": {
+      "status": "baseline",
+      "adultAverage": {
+        "heightM": 2.4,
+        "lengthM": 5.5,
+        "massKg": 380.0
+      },
+      "temperament": "신중하고 예민하며 낯선 자극에 호기심을 보인다.",
+      "habits": "아침에는 햇빛이 드는 공터, 한낮에는 그늘과 물가를 이용하고 밤에는 잎 조직을 접는다.",
+      "nutrition": "빛을 받아 광합성하고 물과 광물질을 흡수한 뒤 휴식하며 조직을 유지한다.",
+      "ecosystemRole": "씨앗과 꽃가루를 옮기고 떨어진 잎으로 주변 토양에 유기물을 돌려준다."
+    },
     "name": "비리디온",
     "stars": 8,
     "lineage": "살아 있는 식물 조직의 공룡형 몬스터",
