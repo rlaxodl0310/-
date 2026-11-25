@@ -86,14 +86,16 @@ function reviewDanger(result,state){
 }
 SCHEMA.required.push('monsterAppearances');
 SCHEMA.properties.monsterAppearances={type:'array',maxItems:3,items:{type:'object',additionalProperties:false,required:['id','panel','evidence'],properties:{
- id:{type:'string',enum:monsterIds},panel:{type:'integer',minimum:0,maximum:5},evidence:{type:'string',maxLength:160},
+ id:{type:'string',enum:[...monsterIds,...MonsterCatalog.sightings.map(monster=>monster.id)]},panel:{type:'integer',minimum:0,maximum:5},evidence:{type:'string',maxLength:160},
 }}};
-function encounterContext(state){
+function encounterContext(state,location=state.location){
  const level=Math.max(1,state.player?.level||1);
  const party=(state.party||[]).filter(id=>state.present.includes(id)).length;
  const maxStars=Math.min(10,1+Math.floor((level-1)/5));
  const maxCount=Math.min(6,1+party+Math.floor((level-1)/5));
- return {maxStars,maxCount,available:Roster.monsters.filter(monster=>monster.stars<=maxStars).map(({id,name,stars})=>{
+ const visibleOnly=MonsterCatalog.sightings.filter(monster=>monster.stars<=maxStars&&monster.sightingLocations.includes(location))
+  .map(({id,name,stars,habitat})=>({id,name,stars,habitat}));
+ return {maxStars,maxCount,visibleOnly,available:Roster.monsters.filter(monster=>monster.stars<=maxStars).map(({id,name,stars})=>{
   const {habitat,profile}=MonsterCatalog.detail(state,id,{creator:true});
   return {id,name,stars,habitat,habits:profile?.habits};
  })};
@@ -102,14 +104,15 @@ function validateMonsterScene(result,state){
  const appearances=result.monsterAppearances??[];
  if(!Array.isArray(appearances)||appearances.length>3)throw Error('몬스터 등장 정보가 잘못되었습니다.');
  const newEnemies=result.combat.importance==='none'?[]:result.combat.monsters;
- const encounter=encounterContext(state);
+ const encounter=encounterContext(state,result.location);
  const existing=state.combat?.status==='playing'?state.combat.monsters:[];
  const allowed=new Set([...encounter.available.map(monster=>monster.id),...existing]);
  if(newEnemies.some(id=>!allowed.has(id))||(!existing.length&&newEnemies.length>encounter.maxCount))throw Error('현재 파티가 접근 가능한 몬스터 등급과 수를 초과했습니다.');
+ const visibleOnly=new Map(encounter.visibleOnly.map(monster=>[monster.id,monster.name]));
  const seen=new Set();
  for(const {id,panel,evidence} of appearances){
   const narrator=result.panels[panel],quote=typeof evidence==='string'?evidence.trim():'';
-  if(result.era!=='fantasy'||!Number.isInteger(panel)||narrator?.speaker!=='narrator'||quote.length<5||quote.length>160||!narrator.text.includes(quote)||!allowed.has(id)||!quote.includes(Roster.get(id).name)||seen.has(id))
+  if(result.era!=='fantasy'||!Number.isInteger(panel)||narrator?.speaker!=='narrator'||quote.length<5||quote.length>160||!narrator.text.includes(quote)||!(allowed.has(id)||visibleOnly.has(id))||!quote.includes(Roster.get(id)?.name||visibleOnly.get(id))||seen.has(id))
    throw Error('몬스터 원화는 현재 장면에서 직접 보이는 등록 몬스터에만 지정할 수 있습니다.');
   seen.add(id);
  }
@@ -128,7 +131,7 @@ SCHEMA.required.push('sceneObjects','actionPlan');SCHEMA.properties.sceneObjects
 SCHEMA.properties.companionReply={type:['object','null'],additionalProperties:false,required:['actorId','stance','quote','evidenceIds'],properties:{actorId:{type:'string'},stance:{type:'string',enum:['discuss','accept','refuse','consider']},quote:{type:'string'},evidenceIds:{type:'array',maxItems:6,items:{type:'string'}}}};
 const PERSONAS={...Object.fromEntries(D.content.records.map(r=>[r.id,r.persona])),taei:'18세 고2. 플레이어. 격투가 컨셉이나 행동은 사용자가 정한다.',dogyeom:'18세 고2. 겉보기엔 거친 문제아이지만 본성이 나쁜 것은 아니다. 원래 복싱 유망주. 비 오는 새벽 운동 뒤 달리던 중 음주운전 트럭 사고로 큰 수술을 받고 운동을 그만뒀으며 팔다리 이레즈미는 흉터를 가리려 새겼다. 이 과거는 비밀이며 태이는 존재만 알던 사이. 잠재력·전투 센스·정신력·담력이 뛰어나다. 특성 반동은 현실에서 발현하지 않는다.',yeogyeong:'18세 고2. 태이와 조금 친한 같은 반. 올바르고 차분하고 겁 많고 귀여운 성격. 사람을 돕기 좋아하며 간호학과를 준비한다. 이세계 치유 재능과 부상 정지 방향 특성이 있지만 장면에서 습득하기 전에는 쓰지 않는다.',seoha:'18세 고2. 무표정에 차가워 보이지만 엉뚱하고 딴생각을 많이 한다. 외모와 냉혹한 성격을 동일시하지 않는다.',yui:'20세 158cm. 고교 졸업 후 인근 대학. 태이 입학 당시3학년, 잘생겨 눈에 띄어 얼굴과 이름만 알고 대화는 처음. 선배이지 연인/친구가 아니다. 특성 잔향은 이후 벌어진 일의 흔적 탐지로 발전하는 잠재력이며 습득 전 사용 금지.',woojin:'특수부대 출신 군인. 나이·계급·현재 복무·태이와 관계는 미정. 침착한 외관과 실전 경험을 과장된 초인 능력으로 바꾸지 않는다. 정우진은 기존 제작 데이터의 이름이다.','dogyeom-childhood-friend':'임소윤.154cm. 백도겸의 소꿉친구. 바르고 귀여운 모범생. 도겸이 성질 부리면 하지 마, 떽 하는 느낌으로 제지한다. 특성 보관은 나중에 개인 아공간처럼 성장한다. 능력과 실제 보유품은 별개.',nea:'이세계 현지 북극여우 수인.18세. 교육을 제대로 받지 못하고 무척 겁이 많다. 검정/흰색 단발과 오드아이. 현실에 등장 금지. 만남·소유·동행·호감을 자동 확정하지 않는다. 전이자 고유 특성 없음.',zero:'태이 특성과 관련된 작은 동반자. 보라색 작은 용. 현실/특성 발현 전 등장 금지. 제로의 공격 능력과 성장 수치는 아직 미정.'};
 const RULES=`이야기에 가끔 긴장감을 줄 수 있다. 직전 플레이어 행동, 누적 단서, 장소 조건에 어울리는 위험 신호가 있을 때만 dangerPacing.allowNewDanger를 확인하고 dangerBeats에 넣는다. 허용된 턴이라도 위험 생성 의무는 없다. 턴마다 바위 붕괴, 갑작스러운 습격, 위기 반전을 반복하지 않는다. 새 위험은 곧장 피해나 전투를 확정하지 말고 감지할 수 있는 전조를 실제 서술에 두며, 관찰·회피·후퇴 중 가능한 대응을 선택지에 넣는다. dangerBeats의 cue는 서술의 정확한 인용, response는 해당 선택지의 정확한 문구다. 기존 전투의 자연스러운 진행과 플레이어가 직접 택한 위험 행동은 신규 연출로 기록하지 않는다. 새 위험 연출이 없으면 빈 배열을 반환한다.
-monsterAppearances는 현재 플레이어가 눈앞에서 직접 보는 몬스터만 {id,panel,evidence}로 표시한다. panel은 실제 등장하는 서술자의 패널 인덱스, evidence는 그 패널에서 등록된 몬스터 이름과 출현을 함께 확인할 수 있는 문장의 정확한 인용이다. 소문, 이름 언급, 흔적, 회상 또는 화면 밖의 몬스터는 빈 배열로 처리한다. 전투는 별도 근거가 있을 때만 시작한다. 새 몬스터는 encounterContext의 등록 ID·상한 등급·인원 제한을 지킨다.
+monsterAppearances는 현재 플레이어가 눈앞에서 직접 보는 몬스터만 {id,panel,evidence}로 표시한다. panel은 실제 등장하는 서술자의 패널 인덱스, evidence는 그 패널에서 등록된 몬스터 이름과 출현을 함께 확인할 수 있는 문장의 정확한 인용이다. 소문, 이름 언급, 흔적, 회상 또는 화면 밖의 몬스터는 빈 배열로 처리한다. 전투는 별도 근거가 있을 때만 시작한다. 새 몬스터는 encounterContext의 등록 ID·상한 등급·인원 제한을 지킨다. visibleOnly에 있는 몬스터는 현재 해안 장면의 직접 목격에만 쓰며 전투 목록에 넣지 않는다.
 공략점수와상대비공개스탯을NPC대사로노출하지않는다. combatRulesContext의공식을따르고실제판정전combatClaims는빈배열이다. 실제판정이있으면formulaEvents의수치/치명타/방호우회결과만인용한다. 피해감소우회는방어력무시가아니다. 연타판정은각각독립이다.
 skillContext의 실제 보유 근거/사용 경험만으로 개인 스킬을 skillProposals에 제안한다. 공용 기술은 도감과 실제 습득 기록을 구분한다. 도감에 있다는 이유로 습득을 확정하지 않는다. 근거가 없으면 빈 배열. 등록된 스킬을 사용자가 이름과 함께 사용한다고 입력하면 actionPlan은 비우고 combat.intent는 observe로 둔다. 스킬 판정이 제공되면 자원/피해/회복 결과를 그대로 따른다.
 등록된 지도 지역 사이 이동은 journeyContext와 여정 화면의 실제 도로·구간으로 진행한다. 대화만으로 location을 바꾸지 않는다. 이동 요청에는 여정 화면을 안내하며 actionPlan을 비운다. 전투 이탈은 먼저 현재 장소에서 판정한다. actionContext를 보고 사용자 입력의 실제 시도만 actionPlan으로 분류한다. 빈 배열도 가능하다. 한 장면에는 신체 행동1개+NPC 부탁1개까지만 담고 복합 행동은 순간별로 나눈다. NPC에게 부탁한 것과 NPC가 실제 수락한 행동을 구분한다. 사용자가 NPC에게 명령해도 그 NPC를 플레이어처럼 직접 조종하지 않는다. 새로 관찰된 물건만 sceneObjects에 인용과 함께 기록한다. 이미 기록한 물건의 성질/상태는 AI가 바꾸지 않는다. 물건이 없으면 만들어 성공시키지 말고 설명/관찰/다른 방법으로 이어간다. 판정 결과의 steps/effects/npcReactions/적 대응을 정확히 묘사한다. 판정이 blocked/clarify이면 성공 장면을 만들지 않는다. NPC의 자율 행동은 경고·살피기·한 걸음 물러서기 같은 현재 가능한 범위이며 새 무기·고유 능력·마법을 지급하지 않는다.

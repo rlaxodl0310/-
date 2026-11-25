@@ -129,3 +129,21 @@ t('two village locations retain independent street positions and facility record
   await a.rejects(d.returnFromStreet({revision:secondVisit.revision,position:{x:1,y:0},targetId:first+'-facility-inn'}),/가까이/);
  }finally{await fs.rm(dir,{recursive:true,force:true});}
 });
+
+t('Empereut artwork is revealed by a level-appropriate coastal sighting without starting combat',()=>{
+ const Catalog=require('../ui/monsters/catalog.js');
+ const state={...initial(),era:'fantasy',location:'east-village-06',present:[],focus:'taei',player:{...initial().player,level:31}};
+ const quote='앞쪽 암초 위로 엠페르트가 날개를 펼치며 모습을 드러낸다.';
+ const sighting={id:'empereut',panel:0,evidence:quote};
+ const proposal=s=>answer(s,{panels:[{speaker:'narrator',text:quote}],facts:[],monsterAppearances:[sighting]});
+ const land={...state,location:'arrival_meadow'};
+ const lowLevel={...state,player:{...state.player,level:30}};
+ a.throws(()=>validate(proposal(land),land,'주변을 살핀다'),/몬스터 원화/);
+ a.throws(()=>validate(proposal(lowLevel),lowLevel,'주변을 살핀다'),/몬스터 원화/);
+ const result=validate(proposal(state),state,'암초 쪽을 살핀다');
+ a.equal(result.combat.importance,'none');
+ a.deepEqual(result.monsterAppearances,[sighting]);
+ const discovered=Catalog.observe({...state,monsterAppearances:result.monsterAppearances});
+ a.equal(Catalog.detail(state,'empereut').name,'미발견');
+ a.equal(Catalog.detail(discovered,'empereut').artFrames.main.src,'assets/monsters/empereut-basic.png');
+});

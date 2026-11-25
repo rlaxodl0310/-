@@ -41,14 +41,14 @@ function observe(state){
  const seen=[
   ...(state.monsterAppearances||[]).map(({id})=>id),
   ...(state.combat?.enemies||[]).map(({kind})=>kind),
- ].filter(id=>byId.has(id));
+ ].filter(id=>byId.has(id)||sightings.some(entry=>entry.id===id));
  if(!seen.length)return state;
  const flags=new Set(state.flags||[]);
  for(const id of seen)flags.add('known_monster_'+id);
  return flags.size===(state.flags||[]).length?state:{...state,flags:[...flags]};
 }
 function known(state,id){return(state?.flags||[]).includes('known_monster_'+id);}
-function detail(state,id,{creator=false}={}){const m=byId.get(id);if(!m)return null;return known(state,id)||creator?{...m,known:known(state,id)}:{id:m.id,known:false,name:'미발견'};}
+function detail(state,id,{creator=false}={}){const m=byId.get(id)||sightings.find(entry=>entry.id===id);if(!m)return null;return known(state,id)||creator?{...m,known:known(state,id)}:{id:m.id,known:false,name:'미발견'};}
 const previews=Object.freeze([
   {
     "id": "empereut",
@@ -79,7 +79,8 @@ const previews=Object.freeze([
       "spriteSheet": { "src": "assets/monsters/empereut-sprites.png", "x": 0, "y": 0, "w": 1024, "h": 1536, "imageWidth": 1024, "imageHeight": 1536 }
     },
     "artLabels": { "poses": "추가 자세 4종", "spriteSheet": "전투 도트 24프레임" },
-    "derivatives": "제작자 도감 설정 자료. 조우·전투·정수 발동 미등록."
+    "sightingLocations": ["north-village-09", "east-village-06"],
+    "derivatives": "해안 장면 목격과 격자·실시간 연습 전투에 연결. 정수는 설계안."
   },
   {
     "id": "flygon",
@@ -107,5 +108,6 @@ const previews=Object.freeze([
     "derivatives": "제작자 도감 설정 자료. 조우·전투·정수 발동 미등록."
   }
 ].map(Object.freeze));
-return {records,previews,known,detail,observe};
+const sightings=Object.freeze(previews.filter(monster=>monster.sightingLocations));
+return {records,previews,sightings,known,detail,observe};
 });
