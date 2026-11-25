@@ -72,6 +72,7 @@
         const u = b.units.find((u) => u.id === saved.id);
         if (u) {
           u.commonStatuses = clone(saved.statuses);
+          if(c.commonState.positionsTracked&&Number.isFinite(saved.x)&&Number.isFinite(saved.y)){u.x=Math.max(.5,Math.min(b.width-.5,saved.x));u.y=Math.max(.5,Math.min(b.height-.5,saved.y));}
           u.controlHistory = clone(saved.controlHistory || {});
           if (u.id !== "taei") u.mana = saved.mana ?? u.mana;
           u.supportTarget = saved.supportTarget;
@@ -188,7 +189,10 @@
     }));
     if (!c.enemies.some((e) => e.hp > 0)) c.status = "won";
     if (p.hp <= 0) c.status = "lost";
+    const positionsTracked=!!(state.combat.commonState?.positionsTracked||skill&&C.get(skill.commonId)?.mechanic.travelDistance);
+    if(positionsTracked&&t)c.distance=Math.max(.01,Math.round(distPoint(p,t)*100)/100);
     c.commonState = {
+      ...(positionsTracked?{positionsTracked:true}:{}),
       bloodTrails: clone(b.bloodTrails || []),
       props: clone(b.props || []),
       serial: b.serial,
@@ -201,6 +205,7 @@
         .filter((u) => u.kind !== "illusion")
         .map((u) => ({
           id: u.id,
+          ...(positionsTracked?{x:u.x,y:u.y}:{}),
           statuses: clone(u.commonStatuses || []),
           controlHistory: clone(u.controlHistory || {}),
           mana: u.mana,
@@ -231,6 +236,7 @@
         .filter((u) => u.hp > 0)
         .map((u) => ({
           id: u.id,
+          ...(positionsTracked?{x:u.x,y:u.y}:{}),
           statuses: b
             .statuses(u)
             .map((s) => ({ key: s.key, remaining: s.until - b.time })),

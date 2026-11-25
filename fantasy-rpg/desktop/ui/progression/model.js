@@ -249,6 +249,8 @@
     p.equipmentIds = [...g.legacyWeapon.equipmentIds];
     p.weaponType = g.legacyWeapon.weaponType;
     p.weaponState = clone(g.legacyWeapon.weaponState);
+    p.abilitySourceIds = (p.progression?.absorbed||[]).map(a=>a.id);
+    p.essenceSpecies = (p.progression?.absorbed||[]).map(a=>a.species);
     p.grantedAbilities = [];
     for (const source of list) {
       if (source.kind === "essence") {
@@ -258,6 +260,7 @@
           name: source.effect.name,
           description: source.effect.effect,
           kind: "essence-effect",
+          ...(source.effect.runtime?{commonId:source.effect.runtime.id,execution:"ready"}:{}),
         });
         if (source.activeSkill)
           p.grantedAbilities.push({
@@ -268,7 +271,8 @@
             limits: source.activeSkill.limits,
             cost: source.activeSkill.cost,
             kind: "essence-active",
-            execution: "pending-cost-and-mechanic",
+            execution: source.activeSkill.runtime?"ready":"pending-cost-and-mechanic",
+            ...(source.activeSkill.runtime?{commonId:source.activeSkill.runtime.id}:{}),
           });
       }
       if (source.kind !== "equipment") continue;

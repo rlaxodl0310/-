@@ -1366,17 +1366,491 @@
     "activeSkill": {
       "id": "steel-march",
       "name": "철각 진군",
-      "effect": "마나로 하체와 몸통을 보강하고 전방으로 강하게 돌파한다. 충돌 시 상대의 자세와 방어를 무너뜨린다.",
-      "cost": "발동 시 마나 소모. 정확한 소모량·거리·위력은 미정이다.",
-      "limits": "급회전이 어렵고 더 강한 장애물에 부딪히면 사용자도 다친다. 순간이동·무적·관통 이동이 아니며 정수 흡수로 전신이 영구적인 강철이 되지 않는다."
+      "effect": "MP560을 소모하고0.8초 준비 뒤 최대6m를0.75초에 걸쳐 전방 돌파한다. 물리 기본위력320·힘 계수1.8·비율 방어관통15%의 단일 충돌 타격. 유효 타격 뒤 방어력20% 감소를4초간 시도하며 기존 저항 판정을 따른다.",
+      "cost": "MP560 · 준비0.8초 · 최대6m/0.75초 · 별도 쿨타임 없음. 동작 종료 전 중첩 실행 불가.",
+      "limits": "직선 돌진이며 급회전·무적·벽 통과·영구 강철화가 아니다. 유닛/막는 지형에 막히면 이동이 멈추며 빗나가면 피해와 방어 약화가 없다. 강철맥의 방어 강화와 감속은 별도 사용 효과다.",
+      "runtime": {
+        "id": "essence-cobalion-steel-march",
+        "grade": 8,
+        "mana": 560,
+        "mechanic": {
+          "kind": "charge",
+          "element": "physical",
+          "range": 6,
+          "radius": 6,
+          "hits": 1,
+          "amount": 320,
+          "potency": 0,
+          "windup": 0.8,
+          "duration": 0,
+          "travelDistance": 6,
+          "travelDuration": 0.75,
+          "attackCoefficient": 1.8,
+          "penetrationPercent": 0.15,
+          "onHitStatuses": [
+            {
+              "key": "defenseWeak",
+              "potency": 0.2,
+              "duration": 4
+            }
+          ]
+        },
+        "visual": {
+          "motif": "trail",
+          "element": "physical",
+          "duration": 0.85,
+          "scale": 2,
+          "hits": 1,
+          "seed": 83561
+        }
+      }
     },
     "essences": [
       {
         "id": "steel-vein",
         "name": "강철맥",
-        "effect": "마나를 소모해 신체 일부의 경도와 하중을 버티는 능력을 높인다. 강화한 부분은 유연성이 떨어지고 움직임이 무거워진다. 내부 충격이나 관절 손상을 완전히 막지는 못한다."
+        "effect": "MP420을 소모해12초간 방어력을60% 높이고 이동속도가15% 감소한다. 중복 시 강한 방어 강화만 적용한다. 내부 충격·관절 손상이나 마법 피해를 완전히 막지 않는다.",
+        "runtime": {
+          "id": "essence-cobalion-steel-vein",
+          "grade": 8,
+          "mana": 420,
+          "mechanic": {
+            "kind": "defense",
+            "element": "physical",
+            "range": 0,
+            "radius": 0,
+            "hits": 1,
+            "amount": 0,
+            "potency": 0.6,
+            "windup": 0.45,
+            "duration": 12,
+            "selfStatuses": [
+              {
+                "key": "slow",
+                "potency": 0.15,
+                "duration": 12
+              }
+            ]
+          },
+          "visual": {
+            "motif": "ring",
+            "element": "physical",
+            "duration": 0.85,
+            "scale": 2,
+            "hits": 1,
+            "seed": 83421
+          }
+        }
       }
     ],
     "essenceRule": "극히 드문 드롭. 강철맥 하나를 고정 습득하고 방어력 +1800, 힘 +1350, 체력 +900, 민첩 +450 추가 고정 액티브 철각 진군 포함. 정수 슬롯 하나 사용, 생성 후 30분 미섭취 시 소멸. 성급만으로 우열이 정해지지 않으며 조합·소모·신체 부담과 활용이 중요하다."
+  },
+  {
+    "id": "terrakion",
+    "name": "테라키온",
+    "stars": 8,
+    "lineage": "단단한 바위 몸체의 공룡형 사족 몬스터",
+    "size": "정확한 크기 미정",
+    "asset": "assets/monsters/terrakion-basic.webp",
+    "spriteAsset": "battle/assets/terrakion-sprites.png",
+    "artLayout": "frames",
+    "appearance": "노란 눈과 연한 얼굴,매우 긴 갈색의 각진 머리 뿔/머리판과 주황 광물 무늬. 연회색 바위 몸통과 크림색 분절 배,검은 등 돌기·아랫다리,네 발의 주황 세 발톱과 뒤쪽 주황 돌기. 자연석의 거친 무광 표면이며 금속이나 용암이 아니다.",
+    "habitat": "상세 서식지 미정.",
+    "ecology": "구체적인 성격·지성과 생태는 미정이다.",
+    "combat": "네 발로 무게를 지탱하고 뿔과 몸통으로 돌파하거나 몸을 낮춰 충격에 버틴다. 팔이나 손을 추가하지 않는다. 정수의 암체와 지각분쇄를 사용할 수 있다.",
+    "weakness": "무적이 아니며 공격 준비와 큰 동작 뒤에 대응할 수 있다. 구체적인 속성 약점은 미정이다.",
+    "derivatives": "8등급은 현재 힘과 위험도이며 신수 분류가 아니다. 고정 조우·서식 위치·동행·지성은 자동 확정하지 않는다.",
+    "artFrames": {
+      "main": {
+        "src": "assets/monsters/terrakion-basic.webp",
+        "x": 0,
+        "y": 0,
+        "w": 1254,
+        "h": 1254,
+        "imageWidth": 1254,
+        "imageHeight": 1254
+      },
+      "alert": {
+        "src": "assets/monsters/terrakion-alert.webp",
+        "x": 0,
+        "y": 0,
+        "w": 656,
+        "h": 599,
+        "imageWidth": 656,
+        "imageHeight": 599
+      },
+      "action": {
+        "src": "assets/monsters/terrakion-charge.webp",
+        "x": 0,
+        "y": 0,
+        "w": 656,
+        "h": 599,
+        "imageWidth": 656,
+        "imageHeight": 599
+      },
+      "guard": {
+        "src": "assets/monsters/terrakion-guard.webp",
+        "x": 0,
+        "y": 0,
+        "w": 656,
+        "h": 599,
+        "imageWidth": 656,
+        "imageHeight": 599
+      },
+      "hit": {
+        "src": "assets/monsters/terrakion-hit.webp",
+        "x": 0,
+        "y": 0,
+        "w": 656,
+        "h": 599,
+        "imageWidth": 656,
+        "imageHeight": 599
+      },
+      "sd": {
+        "src": "assets/monsters/terrakion-sd.webp",
+        "x": 0,
+        "y": 0,
+        "w": 1536,
+        "h": 1024,
+        "imageWidth": 1536,
+        "imageHeight": 1024
+      },
+      "combatSD": {
+        "src": "assets/monsters/terrakion-combat-sd.webp",
+        "x": 0,
+        "y": 0,
+        "w": 256,
+        "h": 256,
+        "imageWidth": 256,
+        "imageHeight": 256
+      }
+    },
+    "artLabels": {
+      "alert": "경계 일러스트",
+      "action": "돌진 일러스트",
+      "guard": "방어 일러스트",
+      "hit": "피격 일러스트",
+      "sd": "일반 SD 일러스트",
+      "combatSD": "전투 SD 도트"
+    },
+    "artNote": "레퍼런스 외형과 네 다리를 유지한 기본/자세 원화와 일반 SD,전투 도트24프레임. 별도의 배경 컷신 CG는 제작하지 않았다.",
+    "battle": {
+      "hp": 550,
+      "damage": 62,
+      "tell": "네 발로 지면을 딛고 거대한 뿔과 머리를 낮춰 충격에 대비한다.",
+      "note": "HP와 피해는 전투 시험용 임시 수치이며 본편 확정 스탯이 아니다.",
+      "sprite": {
+        "src": "assets/terrakion-sprites.png",
+        "imageWidth": 1024,
+        "imageHeight": 1536,
+        "frames": [
+          {
+            "x": 0,
+            "y": 0,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 256,
+            "y": 0,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 512,
+            "y": 0,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 768,
+            "y": 0,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 0,
+            "y": 256,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 256,
+            "y": 256,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 512,
+            "y": 256,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 768,
+            "y": 256,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 0,
+            "y": 512,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 256,
+            "y": 512,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 512,
+            "y": 512,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 768,
+            "y": 512,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 0,
+            "y": 768,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 256,
+            "y": 768,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 512,
+            "y": 768,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 768,
+            "y": 768,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 0,
+            "y": 1024,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 256,
+            "y": 1024,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 512,
+            "y": 1024,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 768,
+            "y": 1024,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 0,
+            "y": 1280,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 256,
+            "y": 1280,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 512,
+            "y": 1280,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          },
+          {
+            "x": 768,
+            "y": 1280,
+            "w": 256,
+            "h": 256,
+            "flip": true
+          }
+        ],
+        "clips": {
+          "idle": {
+            "frames": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "fps": 5
+          },
+          "move": {
+            "frames": [
+              4,
+              5,
+              6,
+              7
+            ],
+            "fps": 9
+          },
+          "attack": {
+            "frames": [
+              8,
+              9,
+              10,
+              11
+            ],
+            "fps": 9
+          },
+          "guard": {
+            "frames": [
+              12,
+              13,
+              14,
+              15
+            ],
+            "fps": 9
+          },
+          "dodge": {
+            "frames": [
+              16,
+              17,
+              18,
+              19
+            ],
+            "fps": 9
+          },
+          "hit": {
+            "frames": [
+              20,
+              21,
+              22,
+              23
+            ],
+            "fps": 9
+          }
+        }
+      }
+    },
+    "activeSkill": {
+      "id": "tectonic-crush",
+      "name": "지각분쇄",
+      "effect": "MP600을 소모해1.1초 준비 뒤 자신 주변 반경3m의 적 최대6명에게 물리 기본위력360·힘 계수1.6·비율 방어관통25%의 타격을 각각 한 번 가한다. 유효 타격 뒤 이동속도35% 감소를4초간 시도하며 기존 저항 판정을 따른다.",
+      "cost": "MP600 · 준비1.1초 · 반경3m · 최대6대상 · 별도 쿨타임 없음.",
+      "limits": "영구 지형 파괴나 지진·용암 생성이 아니다. 범위 밖 대상에게 피해를 주지 않고 무적이나 방어 무시를 부여하지 않는다.",
+      "runtime": {
+        "id": "essence-terrakion-tectonic-crush",
+        "grade": 8,
+        "mana": 600,
+        "mechanic": {
+          "kind": "damage",
+          "element": "physical",
+          "range": 3,
+          "radius": 3,
+          "hits": 1,
+          "amount": 360,
+          "potency": 0,
+          "windup": 1.1,
+          "duration": 0,
+          "delivery": "area",
+          "maxTargets": 6,
+          "attackCoefficient": 1.6,
+          "penetrationPercent": 0.25,
+          "onHitStatuses": [
+            {
+              "key": "slow",
+              "potency": 0.35,
+              "duration": 4
+            }
+          ]
+        },
+        "visual": {
+          "motif": "trail",
+          "element": "physical",
+          "duration": 0.85,
+          "scale": 2,
+          "hits": 1,
+          "seed": 83601
+        }
+      }
+    },
+    "essences": [
+      {
+        "id": "rock-body",
+        "name": "암체",
+        "effect": "MP420을 소모해12초간 방어력을80% 높이고 이동속도가25% 감소한다. 같은 방어 강화는 강한 것만 적용하며 충격이나 관절 손상을 완전히 막지는 않는다.",
+        "runtime": {
+          "id": "essence-terrakion-rock-body",
+          "grade": 8,
+          "mana": 420,
+          "mechanic": {
+            "kind": "defense",
+            "element": "physical",
+            "range": 0,
+            "radius": 0,
+            "hits": 1,
+            "amount": 0,
+            "potency": 0.8,
+            "windup": 0.6,
+            "duration": 12,
+            "selfStatuses": [
+              {
+                "key": "slow",
+                "potency": 0.25,
+                "duration": 12
+              }
+            ]
+          },
+          "visual": {
+            "motif": "ring",
+            "element": "physical",
+            "duration": 0.85,
+            "scale": 2,
+            "hits": 1,
+            "seed": 83421
+          }
+        }
+      }
+    ],
+    "essenceRule": "극히 드문 드롭. 암체 하나를 고정 습득하고 방어력 +1800, 체력 +1350, 힘 +1200, 민첩 +150 추가 고정 액티브 지각분쇄 포함. 정수 슬롯 하나 사용, 생성 후 30분 미섭취 시 소멸. 성급만으로 우열이 정해지지 않으며 조합·소모·신체 부담과 활용이 중요하다."
   }
 ]

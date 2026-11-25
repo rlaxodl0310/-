@@ -160,6 +160,7 @@
           (trace) => trace.subject === target?.id,
         ).length,
         weaponState: u.weaponState,
+        abilitySourceIds:u.abilitySourceIds||[],essenceSpecies:u.essenceSpecies||[],
         stamina: u.stamina,
         weapon: u.weapon,
         weaponType:
@@ -192,7 +193,12 @@
     };
     B.prototype.move = function (u, dx, dy, dt, mult = 1) {
       if (this.hasStatus(u, "root") || this.hasStatus(u, "airborne")) return;
-      const oldPos = { x: u.x, y: u.y };
+      const oldPos = { x: u.x, y: u.y },travel=u.commonTravel;
+      if(travel?.configured){
+        if(travel.remaining<=0){if(u.intentMove)u.intentMove.remaining=0;return;}
+        dt=Math.min(dt,travel.remaining/travel.speed);
+        mult=travel.speed/Math.max(.001,u.speed*(1+u.agility/100));
+      }
       old.move.call(this, u, dx, dy, dt, mult);
       for (const field of this.commonFields || [])
         if (
@@ -204,6 +210,7 @@
           u.x = oldPos.x;
           u.y = oldPos.y;
         }
+      if(travel?.configured){travel.remaining=Math.max(0,travel.remaining-dist(oldPos,u));if(dist(oldPos,u)<.000001||travel.remaining<=.000001){if(u.intentMove)u.intentMove.remaining=0;travel.remaining=0;}}
     };
     B.prototype.releaseSkill = function (u, a) {
       if (!a.prepared.common) return old.releaseSkill.call(this, u, a);
@@ -298,6 +305,13 @@
           award(target, 1);
         }
         return;
+      }
+      if(m.selfStatuses){
+        for(const spec of m.selfStatuses){
+          u.commonStatuses??=[];
+          u.commonStatuses=u.commonStatuses.filter(s=>!(s.commonId===d.id&&s.key===spec.key));
+          u.commonStatuses.push({key:spec.key,effectKey:spec.key,source:u.id,skillId:skill.id,castId:a.castId,commonId:d.id,grade:d.grade,potency:spec.potency,until:this.time+spec.duration,linkedTo:m.kind});
+        }
       }
       if (buffs.includes(m.kind)) {
         for (const v of ally) {
@@ -503,10 +517,11 @@
             award(u, 1);
           }
         } else {
-          u.intentMove = { x: a.face.x, y: a.face.y, remaining: 0.55 };
+          u.intentMove = { x: a.face.x, y: a.face.y, remaining: m.travelDuration||0.55 };
           mark(u, "speed", { potency: m.kind === "leap" ? 0.6 : 1 });
-          if (m.kind === "charge" && target) schedule(target, 0.5);
-          if (enemies.some((v) => dist(u, v) < 3))
+          if(m.travelDistance){u.commonTravel={configured:true,remaining:m.travelDistance,speed:m.travelDistance/m.travelDuration,origin:{x:u.x,y:u.y},until:this.time+m.travelDuration+.05,prepared:clone(p)};}
+          if (m.kind === "charge" && target) schedule(target, m.travelDuration||0.5);
+          if (!m.travelDistance && enemies.some((v) => dist(u, v) < 3))
             u.commonTravel = {
               origin: { x: u.x, y: u.y },
               until: this.time + 0.6,
@@ -629,6 +644,7 @@
       if (!verdict.blockEffects)
         for (const status of this.statuses(t).filter((s) => s.consumeOnHit))
           status.until = this.time;
+      if(actual>0&&!verdict.blockEffects&&m?.onHitStatuses){for(const spec of m.onHitStatuses){const p={...registered,skill:registered.skill,castId:registered.castId,common:{...def,mechanic:{...m,potency:spec.potency,duration:spec.duration}}};this.addStatus(t,spec.key,p);}}
       if (actual > 0) {
         if (t.kind === "illusion" && t.prepared) {
           const owner = this.units.find((u) => u.id === t.owner);
@@ -739,6 +755,9 @@
           u.stamina + dt * 4 * (1 + this.statusPower(u, "stamina")),
         );
         u.commonStatuses = u.commonStatuses.filter((s) => s.until > this.time);
+        u.commonStatuses=u.commonStatuses.filter(s=>!s.linkedTo||u.commonStatuses.some(v=>v.commonId===s.commonId&&v.skillId===s.skillId&&v.key===s.linkedTo&&!v.dispelled&&v.until>this.time));
+        for(const active of [...u.commonStatuses]){const cfg=C.get(active.commonId)?.mechanic;if(active.key!==cfg?.kind||active.dispelled)continue;for(const spec of cfg.selfStatuses||[]){if(!u.commonStatuses.some(s=>s.commonId===active.commonId&&s.skillId===active.skillId&&s.key===spec.key))u.commonStatuses.push({...active,key:spec.key,effectKey:spec.key,potency:spec.potency,linkedTo:active.key});}}
+
         if (u.kind === "illusion" && u.until <= this.time) u.hp = 0;
         if (u.commonTravel && this.time >= u.commonTravel.until) {
           const p = u.commonTravel.prepared;

@@ -1,8 +1,8 @@
 (function (r, f) {
   if (typeof module === "object" && module.exports)
-    module.exports = f(require("./common-data.js"));
-  else r.CommonSkills = f(r.CommonSkillData);
-})(globalThis, (records) => {
+    module.exports = f(require("./common-data.js"), require("../monsters/essence-rules.js"));
+  else r.CommonSkills = f(r.CommonSkillData, r.EssenceRules);
+})(globalThis, (records, Essences) => {
   "use strict";
   const clone = (v) => JSON.parse(JSON.stringify(v));
   for (const d of records) {
@@ -12,6 +12,12 @@
   }
   Object.freeze(records);
   const byId = new Map(records.map((d) => [d.id, d]));
+  // Configured essence abilities use the same executor without entering the public skill catalog.
+  for(const e of Essences?.records||[])for(const ability of [e.effect,e.activeSkill]){
+    const config=ability?.runtime;if(!config)continue;
+    if(byId.has(config.id))throw Error('중복 정수 스킬 ID');
+    byId.set(config.id,Object.freeze({...clone(config),name:ability.name,description:ability.effect,category:'정수',type:'active',cooldown:0,support:'combat',essenceSpecies:e.id}));
+  }
   const bands = [
     [5, 15],
     [16, 30],
@@ -175,15 +181,17 @@
       common: clone(d),
     };
   }
-  function definition(id, ownerId) {
+  function definition(id, ownerId, options={}) {
     const d = get(id);
     if (!d) throw Error("없는 공용 기술입니다.");
+    if(d.essenceSpecies&&!options.sourceGranted)throw Error("정수를 실제 흡수한 출처가 필요합니다.");
     return {
       id: "learned:" + ownerId + ":" + d.id,
       ownerId,
       name: d.name,
       origin: "common",
       commonId: d.id,
+      ...(d.essenceSpecies?{requiredEssenceSpecies:d.essenceSpecies}:{}),
       grade: d.grade,
       fixedGrade: true,
       basisIds: [],

@@ -178,5 +178,14 @@
     "h": 599,
     "imageWidth": 656,
     "imageHeight": 599
+  },
+  "terrakion": {
+    "src": "assets/monsters/terrakion-basic.webp",
+    "x": 0,
+    "y": 0,
+    "w": 1254,
+    "h": 1254,
+    "imageWidth": 1254,
+    "imageHeight": 1254
   }
 }

@@ -441,7 +441,8 @@
     )
       throw Error("지금 행동할 수 있는 상태가 아닙니다.");
     if (s.origin === "common") {
-      if(s.progressionGranted&&!(s.progressionSources||[]).some(id=>(ctx.equipmentIds||[]).includes(id)))throw Error("스킬을 제공하는 장비를 사용할 수 없습니다.");
+      if(s.requiredEssenceSpecies&&!(ctx.essenceSpecies||[]).includes(s.requiredEssenceSpecies))throw Error("스킬을 제공하는 정수를 흡수하지 않았습니다.");
+      if(s.progressionGranted&&!(s.progressionSources||[]).some(id=>[...(ctx.equipmentIds||[]),...(ctx.abilitySourceIds||[])].includes(id)))throw Error("스킬을 제공하는 정수/장비 출처를 사용할 수 없습니다.");
       const p = Common.prepare(s, ctx);
       if (ctx.mana < p.mana) throw Error("마나가 부족합니다.");
       return { ...p, skill: clone(s) };

@@ -1,0 +1,35 @@
+{
+  "version": "0.42.107",
+  "sourceBase": "396d166017bf95dbae1dc4ca50cbc6dd613e4677",
+  "tests": {
+    "pass": 682,
+    "fail": 0
+  },
+  "ui": {
+    "species": [
+      "terrakion"
+    ],
+    "frames": 24,
+    "transparentFrameCorners": 24,
+    "executableEssenceSkills": 4,
+    "exceptions": [],
+    "passed": true
+  },
+  "scope": [
+    "Terrakion grade8 rock quadruped reference art, poses, illustrated SD and24 combat pixel frames",
+    "Cobalion/Terrakion essence stats and4 executable skills configured by user delegation",
+    "Shared source-gated skill grant/prepare/cast/status/formula/VFX/save paths",
+    "Legacy absorbed saves gain executable skills on synchronization",
+    "181 public common skills unchanged; other pending essence abilities unchanged"
+  ],
+  "limits": [
+    "Actual user PC installation and live ChatGPT narrative evaluation not performed",
+    "No authored scenic background CG or fixed monster encounters",
+    "Monster HP/damage remain prototype tuning separate from essence stats"
+  ],
+  "WindowsBuild": "pending",
+  "transparency": {
+    "rawFrameCornerAlphaMax": 2,
+    "browserComposition": "passed"
+  }
+}

@@ -21,7 +21,7 @@ function sync(state) {
   for (const commonId of active) {
     if (!Common.get(commonId))
       throw Error("장비가 참조한 스킬이 도감에 없습니다.");
-    const def = Common.definition(commonId, "taei");
+    const def = Common.definition(commonId, "taei", {sourceGranted:true});
     const present = book.skills.find((s) => s.id === def.id);
     if (present) {
       if (present.progressionGranted)
