@@ -27,5 +27,27 @@
     "No new aquatic movement physics or automatic summons/encounters",
     "No installation on user PC or live ChatGPT story-quality validation"
   ],
-  "WindowsBuild": "pending"
+  "WindowsBuild": {
+    "status": "success",
+    "url": "https://github.com/rlaxodl0310/-/actions/runs/45615114281",
+    "source": "2f68f027ad514ff7d3946f26db89466836fe23e9",
+    "tests": 671,
+    "nativePatchTransactions": "passed"
+  },
+  "patch": {
+    "file": "FantasyStory-Patch.zip",
+    "bytes": 406428310,
+    "sha256": "c1e58adae3bd030d7b1ed2ab5d7952ce090b5f3ccf6ba3c14629a6e5b6bf3d6c",
+    "manifest": {
+      "version": "0.42.105",
+      "sha256": "0c199914c174226c03f2751d130460bc429096ec79aa3f95ccec0ff402337459",
+      "product": "FantasyStory",
+      "minimumVersion": "0.1.0"
+    },
+    "zipCRC": "passed",
+    "payloadSHA256": "passed",
+    "nativeExecutable": "PE MZ signature verified",
+    "runtimeAssets": "Fizz and Grauk basic/SD/sprite assets and both species registrations present"
+  },
+  "downloadPage": "https://github.com/rlaxodl0310/-/releases/tag/untagged-1d7cd59fb95781904a05"
 }
