@@ -1,0 +1,73 @@
+{
+  "version": "0.42.103",
+  "registeredCharacters": 41,
+  "scope": "main, speech and narrative art per native; Earth/fantasy references for transfers; Nea reference atlas; Zero has no human hair",
+  "reviewed": [
+    "cheona",
+    "fafnir",
+    "fenri",
+    "janghwa",
+    "selsi",
+    "rachel",
+    "spike",
+    "jave",
+    "aquila",
+    "kiriel",
+    "palanus",
+    "rosie",
+    "ace",
+    "evan",
+    "karin",
+    "taeo",
+    "trude",
+    "espada",
+    "restia",
+    "lir",
+    "nadan",
+    "hebnia",
+    "hellenia",
+    "biscuit",
+    "yunseol",
+    "spina",
+    "halo",
+    "ariel",
+    "milia",
+    "reginleif",
+    "horin",
+    "vanessa",
+    "taei",
+    "dogyeom",
+    "yeogyeong",
+    "seoha",
+    "yui",
+    "woojin",
+    "dogyeom-childhood-friend",
+    "nea",
+    "zero"
+  ],
+  "hairCorrections": [
+    {
+      "id": "selsi",
+      "asset": "desktop/ui/assets/selsi-standing.webp",
+      "before": "0394ad832ca86288c75eaa4b2bd5e710e74350bb5da2f76364a8913e6c954900",
+      "after": "94ab7e875a00f8944de97a67133c110a083d3de4ffa6bff6bd4db631b146ab46",
+      "scope": "standing source hair material; original silhouette bounds preserved"
+    },
+    {
+      "id": "restia",
+      "asset": "desktop/ui/assets/restia-standing.webp",
+      "before": "b31ad19d32751339a66e033712f1661296e6ab7eb4c8fdaf3d3725603369599a",
+      "after": "3e01597575d8674441fdcb6881ae129e76fc1c9b8590370e3c1a12c99a05688f",
+      "scope": "standing source hair material; original silhouette bounds preserved"
+    },
+    {
+      "id": "hebnia",
+      "asset": "desktop/ui/assets/hebnia-standing.webp",
+      "before": "869f5072bf22100f162a9abb1cd75f912739a34d40f6be4f9749fa2db63a3015",
+      "after": "51e041d084dfca41c4d5742f66dbc99478a91a7c8acbf7e5803d20cecabd5a25",
+      "scope": "standing source hair material; original silhouette bounds preserved"
+    }
+  ],
+  "faceReference": "assets/kiriel/face-hair-reference.png",
+  "limits": "Image revisions visually compared; no claim of identical regenerated pixels. Other poses retained where no material fault was identified."
+}

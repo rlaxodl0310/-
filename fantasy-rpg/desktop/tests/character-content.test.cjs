@@ -154,3 +154,18 @@ test('narrative CGs have their own art and Fafnir uses different sprites for spe
     a(frame.w*standardHeight/(soles-head)<=720,frame.src);
   }
 });
+
+test('Vanessa shares native identity, mage battle routing and independent transparent scene layers',()=>{
+ const c=C.get('vanessa');a.equal(c.heightCm,168);a.equal(c.weightKg,51);a.equal(c.age,null);a.equal(c.origin,'fantasy');a.equal(c.trait,null);a.deepEqual(c.roles,['mage']);
+ a.equal(O.allowed('vanessa',{era:'earth'}),false);a.equal(C.displayName({},c.id),c.unknownName);a.equal(C.displayName({knownIdentities:{vanessa:true}},c.id),'바네사');
+ const B=require('../ui/battle/engine.js'),b=new B({allies:['vanessa','kiriel'],count:1});a.equal(b.units.find(x=>x.id==='vanessa').weapon,'magic');a.equal(B.restore(b.save()).units.find(x=>x.id==='vanessa').weapon,'magic');
+ for(const id of ['vanessa','kiriel']){
+  const r=C.get(id),clips=r.combatSprite.clips;a.equal(r.combatSprite.frames.length,24);
+  a.deepEqual(Object.keys(clips),['idle','move','attack','guard','dodge','hit']);
+  for(const clip of Object.values(clips))a.equal(new Set(clip.frames).size,4);
+  const scenes=Object.entries(r.looks).filter(([k])=>k.startsWith('컷신 · '));a(scenes.length>=4);
+  for(const [key,f]of scenes){a(f.w>=f.h);a(fs.existsSync(path.resolve(__dirname,'../ui',f.src)));a.notEqual(f.src,r.looks.default.src);}
+  a(r.portraits.default.src.endsWith('/'+id+'.webp'));
+ }
+ a(C.get('kiriel').persona.includes('치마를 추가하지 않는다'));
+});

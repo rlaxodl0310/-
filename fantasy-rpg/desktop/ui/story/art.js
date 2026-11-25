@@ -4,7 +4,7 @@
   }else root.StoryBattleArt=factory(root.StoryArtFrames,root.CharacterContent);
 })(globalThis,(frames,Content)=>{
   const atlasPoses={ready:0,attack:5,hit:10,run:3,guard:7,dodge:8};
-  const looks={ready:['ready','default'],attack:['attack','cast'],hit:['hit','fallen'],run:[],guard:['guard'],dodge:[]};
+  const looks={ready:['ready','default'],attack:['attack','cast'],hit:['hit','fallen'],run:[],guard:['guard'],dodge:['dodge']};
   const records=Content?.records||[];
   for(const record of records){
     for(const [pose,index] of Object.entries(atlasPoses)){

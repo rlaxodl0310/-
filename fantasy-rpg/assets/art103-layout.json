@@ -1,0 +1,342 @@
+{
+  "vanessa-standing.webp": {
+    "size": [
+      720,
+      1080
+    ],
+    "body": [
+      16,
+      1064
+    ]
+  },
+  "vanessa-rear.webp": {
+    "size": [
+      720,
+      1080
+    ],
+    "body": [
+      16,
+      1064
+    ]
+  },
+  "vanessa-talk.webp": {
+    "size": [
+      720,
+      1080
+    ],
+    "body": [
+      16,
+      1064
+    ]
+  },
+  "vanessa-smile.webp": {
+    "size": [
+      720,
+      1080
+    ],
+    "body": [
+      16,
+      1064
+    ]
+  },
+  "vanessa-alert.webp": {
+    "size": [
+      720,
+      1080
+    ],
+    "body": [
+      16,
+      1064
+    ]
+  },
+  "vanessa-casual.webp": {
+    "size": [
+      720,
+      1080
+    ],
+    "body": [
+      280,
+      1064
+    ]
+  },
+  "vanessa-reaction.webp": {
+    "size": [
+      720,
+      1080
+    ],
+    "body": [
+      16,
+      1064
+    ]
+  },
+  "vanessa-attack.webp": {
+    "size": [
+      720,
+      1080
+    ],
+    "body": [
+      113,
+      1064
+    ]
+  },
+  "vanessa-dodge.webp": {
+    "size": [
+      720,
+      1080
+    ],
+    "body": [
+      46,
+      1064
+    ]
+  },
+  "cutscenes/vanessa-story.webp": {
+    "size": [
+      1080,
+      720
+    ],
+    "body": [
+      16,
+      704
+    ]
+  },
+  "vanessa-cutscene.webp": {
+    "size": [
+      1080,
+      720
+    ],
+    "body": [
+      16,
+      704
+    ]
+  },
+  "cutscenes/vanessa-reaction.webp": {
+    "size": [
+      1080,
+      720
+    ],
+    "body": [
+      16,
+      704
+    ]
+  },
+  "dialogue/vanessa.webp": {
+    "size": [
+      720,
+      540
+    ],
+    "body": [
+      16,
+      524
+    ]
+  },
+  "vanessa-sd.webp": {
+    "size": [
+      512,
+      512
+    ],
+    "body": [
+      16,
+      496
+    ]
+  },
+  "kiriel-standing.webp": {
+    "size": [
+      720,
+      1080
+    ],
+    "body": [
+      16,
+      1064
+    ]
+  },
+  "kiriel-rear.webp": {
+    "size": [
+      720,
+      1080
+    ],
+    "body": [
+      16,
+      1064
+    ]
+  },
+  "kiriel-talk.webp": {
+    "size": [
+      720,
+      1080
+    ],
+    "body": [
+      58,
+      1064
+    ]
+  },
+  "kiriel-casual.webp": {
+    "size": [
+      720,
+      1080
+    ],
+    "body": [
+      16,
+      1064
+    ]
+  },
+  "kiriel-reaction.webp": {
+    "size": [
+      720,
+      1080
+    ],
+    "body": [
+      425,
+      1064
+    ]
+  },
+  "kiriel-attack.webp": {
+    "size": [
+      720,
+      1080
+    ],
+    "body": [
+      231,
+      1064
+    ]
+  },
+  "kiriel-dodge.webp": {
+    "size": [
+      720,
+      1080
+    ],
+    "body": [
+      402,
+      1064
+    ]
+  },
+  "cutscenes/kiriel-story.webp": {
+    "size": [
+      1080,
+      720
+    ],
+    "body": [
+      16,
+      704
+    ]
+  },
+  "kiriel-cutscene.webp": {
+    "size": [
+      1080,
+      720
+    ],
+    "body": [
+      16,
+      704
+    ]
+  },
+  "cutscenes/kiriel-reaction.webp": {
+    "size": [
+      1080,
+      720
+    ],
+    "body": [
+      16,
+      704
+    ]
+  },
+  "dialogue/kiriel.webp": {
+    "size": [
+      720,
+      540
+    ],
+    "body": [
+      16,
+      524
+    ]
+  },
+  "kiriel-sd.webp": {
+    "size": [
+      512,
+      512
+    ],
+    "body": [
+      16,
+      496
+    ]
+  },
+  "cutscenes/vanessa-conversation.webp": {
+    "size": [
+      900,
+      600
+    ],
+    "body": [
+      16,
+      584
+    ]
+  },
+  "cutscenes/vanessa-casting.webp": {
+    "size": [
+      900,
+      600
+    ],
+    "body": [
+      16,
+      584
+    ]
+  },
+  "cutscenes/vanessa-evasion.webp": {
+    "size": [
+      900,
+      600
+    ],
+    "body": [
+      16,
+      584
+    ]
+  },
+  "cutscenes/vanessa-rest.webp": {
+    "size": [
+      900,
+      600
+    ],
+    "body": [
+      16,
+      584
+    ]
+  },
+  "cutscenes/kiriel-conversation.webp": {
+    "size": [
+      900,
+      600
+    ],
+    "body": [
+      16,
+      584
+    ]
+  },
+  "cutscenes/kiriel-casting.webp": {
+    "size": [
+      900,
+      600
+    ],
+    "body": [
+      16,
+      584
+    ]
+  },
+  "cutscenes/kiriel-evasion.webp": {
+    "size": [
+      900,
+      600
+    ],
+    "body": [
+      16,
+      584
+    ]
+  },
+  "cutscenes/kiriel-rest.webp": {
+    "size": [
+      900,
+      600
+    ],
+    "body": [
+      16,
+      584
+    ]
+  }
+}

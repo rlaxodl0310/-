@@ -1,0 +1,117 @@
+{
+  "version": "0.42.103",
+  "baseCommit": "cd4d39b638a999600a691fde68ed87b6df40f50c",
+  "tests": {
+    "pass": 665,
+    "fail": 0
+  },
+  "ui": {
+    "passed": true,
+    "renderedViews": [
+      {
+        "id": "vanessa",
+        "kind": "default",
+        "src": "http://127.0.0.1:8767/assets/vanessa-standing.webp"
+      },
+      {
+        "id": "vanessa",
+        "kind": "cutscene",
+        "src": "http://127.0.0.1:8767/assets/cutscenes/vanessa-story.webp"
+      },
+      {
+        "id": "vanessa",
+        "kind": "scene-warning",
+        "src": "http://127.0.0.1:8767/assets/cutscenes/vanessa-conversation.webp"
+      },
+      {
+        "id": "vanessa",
+        "kind": "scene-cast",
+        "src": "http://127.0.0.1:8767/assets/cutscenes/vanessa-casting.webp"
+      },
+      {
+        "id": "vanessa",
+        "kind": "scene-evasion",
+        "src": "http://127.0.0.1:8767/assets/cutscenes/vanessa-evasion.webp"
+      },
+      {
+        "id": "vanessa",
+        "kind": "scene-rest",
+        "src": "http://127.0.0.1:8767/assets/cutscenes/vanessa-rest.webp"
+      },
+      {
+        "id": "vanessa",
+        "kind": "portrait",
+        "src": "http://127.0.0.1:8767/assets/dialogue/vanessa.webp"
+      },
+      {
+        "id": "vanessa",
+        "kind": "sprite",
+        "src": "http://127.0.0.1:8767/battle/assets/vanessa-combat.png"
+      },
+      {
+        "id": "kiriel",
+        "kind": "default",
+        "src": "http://127.0.0.1:8767/assets/kiriel-standing.webp"
+      },
+      {
+        "id": "kiriel",
+        "kind": "cutscene",
+        "src": "http://127.0.0.1:8767/assets/cutscenes/kiriel-story.webp"
+      },
+      {
+        "id": "kiriel",
+        "kind": "scene-warning",
+        "src": "http://127.0.0.1:8767/assets/cutscenes/kiriel-conversation.webp"
+      },
+      {
+        "id": "kiriel",
+        "kind": "scene-cast",
+        "src": "http://127.0.0.1:8767/assets/cutscenes/kiriel-casting.webp"
+      },
+      {
+        "id": "kiriel",
+        "kind": "scene-evasion",
+        "src": "http://127.0.0.1:8767/assets/cutscenes/kiriel-evasion.webp"
+      },
+      {
+        "id": "kiriel",
+        "kind": "scene-rest",
+        "src": "http://127.0.0.1:8767/assets/cutscenes/kiriel-rest.webp"
+      },
+      {
+        "id": "kiriel",
+        "kind": "portrait",
+        "src": "http://127.0.0.1:8767/assets/dialogue/kiriel.webp"
+      },
+      {
+        "id": "kiriel",
+        "kind": "sprite",
+        "src": "http://127.0.0.1:8767/battle/assets/kiriel-combat.png"
+      }
+    ],
+    "clips": "2 characters ×6 clips ×4 phases rendered with visible pixels",
+    "mobile390": "no panel overflow",
+    "exceptions": []
+  },
+  "liveScene": "open/select/close retain background, revision, time and dialogue; presence and era checks verified",
+  "patch": {
+    "version": "0.42.103",
+    "file": "FantasyStory-0.42.103-Windows-Full-Patch.zip",
+    "bytes": 394453064,
+    "sha256": "d81e6ebe86854a5195dab29bfab759829d2a38bd297d0a5aaa727c1f471f3da2",
+    "payload": {
+      "product": "FantasyStory",
+      "version": "0.42.103",
+      "minimumVersion": "0.42.58",
+      "sha256": "4d2ed0a62e47b8f2b2a36e41ad54937cc685497bc2b150af72cd259a4f9a50e3"
+    },
+    "zipCRC": "passed",
+    "payloadSHA256": "passed",
+    "WindowsNative": "not run"
+  },
+  "limitations": [
+    "Windows-native patch execution not run",
+    "No live ChatGPT-generated story evaluation in this artwork revision",
+    "Hair material review covers registered main/speech/narrative references, not a pixel-identical facial identity guarantee"
+  ]
+}

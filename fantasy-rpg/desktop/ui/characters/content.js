@@ -748,5 +748,32 @@ function dialogueFrame(id,era,emotion){
   const earth=era==='지구'?transfer?.earthPortrait||transfer?.dialoguePortrait:null;
   return get(id)?.portraits?.default||earth||transferExpression(id,era,emotion)||transfer?.dialoguePortrait;
 }
+
+// Approved v0.42.103 character layers share the existing gallery, dialogue and combat engines.
+records.push({id:'vanessa',name:'바네사',age:null,species:'인간족',origin:'fantasy',heightCm:168,weightKg:51,
+ unknownName:'하늘색 머리의 인간족 마법사',requiresStoryIntroduction:true,trait:null,
+ roles:['mage'],combatStyle:'magic',preferredWeapons:['magic'],
+ persona:'인간족 메이지 바네사. 168cm, 51kg. 느긋하고 다정하지만 자기 판단이 확고하며 위급할수록 침착하게 상황을 살피고 동료를 챙긴다. 평소 가벼운 농담을 한다. 하늘색 머리와 옆으로 땋은 머리, 흰 꽃, 금빛 눈, 차분하게 다문 작은 입. 청백색 밀착 의상과 모래시계형 마도구를 유지하며 뒤로 늘어진 망토 천은 없다. 나이·과거·정수·전용 스킬·첫 만남은 미정. 이세계 현지인으로 지구에 등장하거나 자동 합류하지 않는다.',
+ looks:{},sd:{},motion:{name:'몸을 비껴 모래시계 마도구를 유도하기',lean:-4,step:6,turn:12,side:10,tempo:.98},
+});
+const approved103Bounds={"vanessa-standing.webp": {"size": [720, 1080], "body": [16, 1064]}, "vanessa-rear.webp": {"size": [720, 1080], "body": [16, 1064]}, "vanessa-talk.webp": {"size": [720, 1080], "body": [16, 1064]}, "vanessa-smile.webp": {"size": [720, 1080], "body": [16, 1064]}, "vanessa-alert.webp": {"size": [720, 1080], "body": [16, 1064]}, "vanessa-casual.webp": {"size": [720, 1080], "body": [280, 1064]}, "vanessa-reaction.webp": {"size": [720, 1080], "body": [16, 1064]}, "vanessa-attack.webp": {"size": [720, 1080], "body": [113, 1064]}, "vanessa-dodge.webp": {"size": [720, 1080], "body": [46, 1064]}, "cutscenes/vanessa-story.webp": {"size": [1080, 720], "body": [16, 704]}, "vanessa-cutscene.webp": {"size": [1080, 720], "body": [16, 704]}, "cutscenes/vanessa-reaction.webp": {"size": [1080, 720], "body": [16, 704]}, "dialogue/vanessa.webp": {"size": [720, 540], "body": [16, 524]}, "vanessa-sd.webp": {"size": [512, 512], "body": [16, 496]}, "kiriel-standing.webp": {"size": [720, 1080], "body": [16, 1064]}, "kiriel-rear.webp": {"size": [720, 1080], "body": [16, 1064]}, "kiriel-talk.webp": {"size": [720, 1080], "body": [58, 1064]}, "kiriel-casual.webp": {"size": [720, 1080], "body": [16, 1064]}, "kiriel-reaction.webp": {"size": [720, 1080], "body": [425, 1064]}, "kiriel-attack.webp": {"size": [720, 1080], "body": [231, 1064]}, "kiriel-dodge.webp": {"size": [720, 1080], "body": [402, 1064]}, "cutscenes/kiriel-story.webp": {"size": [1080, 720], "body": [16, 704]}, "kiriel-cutscene.webp": {"size": [1080, 720], "body": [16, 704]}, "cutscenes/kiriel-reaction.webp": {"size": [1080, 720], "body": [16, 704]}, "dialogue/kiriel.webp": {"size": [720, 540], "body": [16, 524]}, "kiriel-sd.webp": {"size": [512, 512], "body": [16, 496]}, "cutscenes/vanessa-conversation.webp": {"size": [900, 600], "body": [16, 584]}, "cutscenes/vanessa-casting.webp": {"size": [900, 600], "body": [16, 584]}, "cutscenes/vanessa-evasion.webp": {"size": [900, 600], "body": [16, 584]}, "cutscenes/vanessa-rest.webp": {"size": [900, 600], "body": [16, 584]}, "cutscenes/kiriel-conversation.webp": {"size": [900, 600], "body": [16, 584]}, "cutscenes/kiriel-casting.webp": {"size": [900, 600], "body": [16, 584]}, "cutscenes/kiriel-evasion.webp": {"size": [900, 600], "body": [16, 584]}, "cutscenes/kiriel-rest.webp": {"size": [900, 600], "body": [16, 584]}};
+for(const [id,poses]of [['vanessa',['default','rear','casual','help','smile','alert','reaction','attack','dodge']],['kiriel',['default','rear','casual','help','reaction','attack','dodge']]]){
+ const c=get(id);c.looks={};
+ for(const pose of poses){const file=id+'-'+({default:'standing',help:'talk'}[pose]||pose)+'.webp';c.looks[pose]={...fullImage(file,720,1080),body:approved103Bounds[file].body};}
+ c.looks.hit=c.looks.reaction;
+ c.looks.cutscene=fullImage('cutscenes/'+id+'-story.webp',1080,720);
+ c.looks['컷신 · 회피']=fullImage('cutscenes/'+id+'-reaction.webp',1080,720);
+ for(const [key,label]of [['conversation','대화'],['casting','집중'],['evasion','위기'],['rest','휴식']])c.looks['컷신 · '+label]=fullImage('cutscenes/'+id+'-'+key+'.webp',900,600);
+ c.portraits={default:{...fullImage('dialogue/'+id+'.webp',720,540),anchor:id==='vanessa'?[.50,.36,.17]:[.43,.31,.17]}};
+ c.sd={default:fullImage(id+'-sd.webp',512,512)};
+ const cell=256;c.combatSprite={src:'assets/'+id+'-combat.png',frames:Array.from({length:24},(_,i)=>[i%4*cell,Math.floor(i/4)*cell,cell,cell]),imageWidth:1024,imageHeight:1536,anchor:[128,244],scale:.35,tempo:id==='vanessa'?.98:1.02,pixelated:true,clips:Object.fromEntries(['idle','move','attack','guard','dodge','hit'].map((clip,row)=>[clip,{frames:[0,1,2,3].map(i=>row*4+i),fps:clip==='idle'?5:clip==='move'?10:0}]))};
+ c.pixel={src:'battle/assets/'+id+'-combat.png',battleSrc:'assets/'+id+'-combat.png',frames:[[0,0,256,256]],imageWidth:1024,imageHeight:1536};
+ c.lookLabels={...c.lookLabels,casual:id==='kiriel'?'판타지 평상복':'같은 복장 · 휴식',help:'대화 손짓',reaction:'주변을 살피기',cutscene:'전투 · 컷신',attack:id==='vanessa'?'마도구 시전':'활 조준과 사격'};
+}
+get('kiriel').unknownName='큰 활을 든 어두운 적갈색 머리 엘프';
+get('kiriel').persona+=' 현재 외형은 붉은 기가 아주 살짝 도는 어두운 갈색 머리와 초록 눈이다. 흰색 밀착 비대칭 의상이며 치마를 추가하지 않는다. 본인 기준 왼쪽 다리는 맨살과 맨발이며 반대쪽은 발끝까지 흰 타이즈가 감싼다. 구두는 없다. 등 뒤 큰 리본·사슬·사슬 연결 금속 갑주는 없고 큰 활은 유지한다.';
+
+// This registry contains native characters; Earth transfer outfits live in transfers.
+for(const record of records)record.origin??='fantasy';
 return{records,legacyCasual,transfers,transferExpression,dialogueFrame,sheetCell,get,appearance,displayName,combatFrame};
 });
