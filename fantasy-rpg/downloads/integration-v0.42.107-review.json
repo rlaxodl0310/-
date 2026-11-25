@@ -27,9 +27,31 @@
     "No authored scenic background CG or fixed monster encounters",
     "Monster HP/damage remain prototype tuning separate from essence stats"
   ],
-  "WindowsBuild": "pending",
+  "WindowsBuild": {
+    "status": "success",
+    "url": "https://github.com/rlaxodl0310/-/actions/runs/45627181677",
+    "source": "b3e4c6b323fd291dd1d943311908bb1968cc0ab1",
+    "tests": 682,
+    "nativePatchTransactions": "passed"
+  },
   "transparency": {
     "rawFrameCornerAlphaMax": 2,
     "browserComposition": "passed"
-  }
+  },
+  "patch": {
+    "file": "FantasyStory-Patch.zip",
+    "bytes": 413807825,
+    "sha256": "cb5a9ff878c9aa16060d1fe1c7b6d09520206c1248ca23f8d49b1450333a7dc8",
+    "manifest": {
+      "version": "0.42.107",
+      "sha256": "6f87a1c137c15ad9b962705adf2ccccc4f3bcce3e7bee7930858cf93530fbc99",
+      "minimumVersion": "0.1.0",
+      "product": "FantasyStory"
+    },
+    "zipCRC": "passed",
+    "payloadSHA256": "passed",
+    "nativeExecutable": "PE MZ signature verified",
+    "runtimeAssets": "Cobalion/Terrakion illustration and combat assets plus executable essence definitions present"
+  },
+  "downloadPage": "https://github.com/rlaxodl0310/-/releases/tag/untagged-285cc250bf70b152a9ee"
 }
