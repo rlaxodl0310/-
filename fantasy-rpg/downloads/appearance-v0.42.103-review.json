@@ -95,25 +95,30 @@
   },
   "liveScene": "open/select/close retain background, revision, time and dialogue; presence and era checks verified",
   "patch": {
-    "version": "0.42.103",
-    "file": "FantasyStory-0.42.103-Windows-Full-Patch.zip",
-    "bytes": 394453064,
-    "sha256": "d81e6ebe86854a5195dab29bfab759829d2a38bd297d0a5aaa727c1f471f3da2",
-    "payload": {
-      "product": "FantasyStory",
+    "file": "FantasyStory-Patch.zip",
+    "bytes": 399603368,
+    "sha256": "1cacbf31b04123041691d6d4a9dcdeee6f3b39246c5c5178993a977070d1cc17",
+    "manifest": {
+      "minimumVersion": "0.1.0",
+      "sha256": "28bca99e7a4caf519e2a7025936b7f2497169288258095db95cb1883151ae689",
       "version": "0.42.103",
-      "minimumVersion": "0.42.58",
-      "sha256": "4d2ed0a62e47b8f2b2a36e41ad54937cc685497bc2b150af72cd259a4f9a50e3"
+      "product": "FantasyStory"
     },
     "zipCRC": "passed",
     "payloadSHA256": "passed",
-    "WindowsNative": "not run",
-    "supersededBy": "GitHub Windows workflow native patch after corrected folder scope; local payload is a preflight archive, not delivered"
+    "nativeExecutable": "PE MZ signature verified",
+    "source": "GitHub Windows build 45565946965 at 5923e86686c6e00189bd9a24021488b891237b17"
   },
   "limitations": [
-    "Windows-native patch execution not run",
-    "No live ChatGPT-generated story evaluation in this artwork revision",
-    "Hair material review covers registered main/speech/narrative references, not a pixel-identical facial identity guarantee"
+    "Actual user PC GUI installation not performed",
+    "No live ChatGPT story-quality evaluation in this art revision",
+    "Hair review covers main/speech/narrative references; no claim of regenerated pixel-identical faces"
   ],
-  "windowsBuild": "source CI checks rerun after folder-scope fix"
+  "windowsBuild": {
+    "status": "success",
+    "url": "https://github.com/rlaxodl0310/-/actions/runs/45565946965",
+    "tests": 665,
+    "patchTransactions": "identity, ASAR, file selection, ambiguity, update, backup, save preservation, checksums, rollback, downgrade passed"
+  },
+  "downloadPage": "https://github.com/rlaxodl0310/-/releases/tag/untagged-b51e8af93a723b95a06e"
 }
