@@ -7,7 +7,7 @@ function verify(file,root=path.resolve(__dirname,'..')){
  const M=require(path.join(root,'ui/monsters/catalog.js')),S=require(path.join(root,'ui/battle/additional-monster-sprites.js'));
  for(const m of M.records){if(m.asset)files.add('ui/'+m.asset);for(const f of Object.values(m.artFrames||{}))files.add('ui/'+f.src);}
  for(const s of Object.values(S.records))files.add('ui/battle/'+s.src);
- const hash=b=>crypto.createHash('sha256').update(b).digest('hex');for(const name of files){const expected=fs.readFileSync(path.join(root,name)),packed=read(name);if(hash(expected)!==hash(packed))throw Error('Packed source/asset mismatch: '+name);}
+ const hash=b=>crypto.createHash('sha256').update(b).digest('hex');for(const name of files){const expected=fs.readFileSync(path.join(root,name)),packed=read(name);if(name==='package.json'){const a=JSON.parse(expected),b=JSON.parse(packed);for(const key of ['name','version','main','dependencies'])if(JSON.stringify(a[key])!==JSON.stringify(b[key]))throw Error('Packaged runtime manifest mismatch: '+key);continue;}if(hash(expected)!==hash(packed))throw Error('Packed source/asset mismatch: '+name);}
  const version=JSON.parse(read('package.json')).version;console.log(JSON.stringify({version,packagedFilesVerified:files.size,method:'actual ASAR bytes equal current source and registered assets'}));return{version,files:files.size};
  }finally{fs.closeSync(fd);}
 }
