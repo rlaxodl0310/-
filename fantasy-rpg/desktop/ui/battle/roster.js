@@ -1,13 +1,15 @@
-(function(root,f){if(typeof module==='object'&&module.exports)module.exports=f(require('../monsters/essence-rules.js'),require('../data.js'));else root.CombatRoster=f(root.EssenceRules,root.StoryKitData);})(globalThis,(E,D)=>{
+(function(root,f){if(typeof module==='object'&&module.exports)module.exports=f(require('../monsters/essence-rules.js'),require('../data.js'),require('../monsters/catalog.js'));else root.CombatRoster=f(root.EssenceRules,root.StoryKitData,root.MonsterCatalog);})(globalThis,(E,D,M)=>{
 const dedicated=new Set(['taei','dogyeom','yeogyeong','yui','seoha','woojin','dogyeom-childhood-friend','nea','zero','moa','ruke','por','tork','kar','rat','chitin','goblin','slime','ves','ant','clad','velum','draven','noxvern','lairon']);
 for(const c of D.content.records)if(c.combatSprite||c.pixel?.format!=='illustrated-sd')dedicated.add(c.id);
+for(const m of M.records)if(m.battle?.sprite)dedicated.add(m.id);
+const species=new Map(M.records.map(m=>[m.id,m]));
 const seeds=['goblin','slime','moa','ruke','por','tork','kar','ves','rat'];
 const monsterArt=id=>seeds.includes(id)?{src:'../assets/monsters/seed-combat-atlas.png',columns:3,rows:3,column:seeds.indexOf(id)%3,row:Math.floor(seeds.indexOf(id)/3),transparent:true}:id==='chitin'?{src:'../assets/monsters/chitin-basic.png'}:null;
 const art={taei:{src:'../assets/taei-fighter-standing.webp',transparent:true},dogyeom:{src:'../assets/dogyeom-expressions.png',columns:3,rows:2},yeogyeong:{src:'../assets/yeogyeong-fantasy-standing.webp',transparent:true},seoha:{src:'../assets/seoha-standing.png',transparent:true},yui:{src:'../assets/yui-standing.png',transparent:true},woojin:{src:'../assets/woojin-fantasy-standing.webp',transparent:true},'dogyeom-childhood-friend':{src:'../assets/childhood-friend-standing.png',transparent:true},zero:{src:'../assets/zero-dragon.webp',transparent:true},nea:{src:'../assets/nea-atlas.png',crop:{x:0,y:0,w:550,h:925},transparent:true}};
 for(const c of D.content.records){const f=c.looks.default;art[c.id]={src:'../'+f.src,crop:{x:f.x,y:f.y,w:f.w,h:f.h},transparent:true};}
 const stats={goblin:[30,12],slime:[24,9],ves:[30,12],ant:[28,10],clad:[65,18],velum:[50,15],draven:[75,20],noxvern:[140,28],lairon:[110,24]};
 const tells={moa:'뿌리 다리를 고정하고 몸을 기울여 공격을 준비한다.',ruke:'앞발을 낮추고 물어뜯을 틈을 노린다.',por:'지느러미를 접고 몸을 튕길 준비를 한다.',tork:'몸을 낮추고 꼬리를 옆으로 당긴다.',kar:'날개를 접어 급강하할 자세를 잡는다.',rat:'앞니를 드러내며 낮게 웅크린다.',chitin:'톱니형 앞턱을 벌리고 짧은 돌진을 준비한다.'};
-const monsters=E.records.map(m=>Object.freeze({id:m.id,name:m.name,stars:m.stars,hp:(stats[m.id]||[30,9])[0],damage:(stats[m.id]||[30,9])[1],art:monsterArt(m.id),dedicated:dedicated.has(m.id),temporaryArt:!dedicated.has(m.id),tell:tells[m.id]||'자세를 고쳐 공격할 틈을 노린다.'}));
+const monsters=E.records.map(m=>Object.freeze({id:m.id,name:m.name,stars:m.stars,hp:species.get(m.id)?.battle?.hp??(stats[m.id]||[30,9])[0],damage:species.get(m.id)?.battle?.damage??(stats[m.id]||[30,9])[1],art:monsterArt(m.id),cutscene:species.get(m.id)?.artFrames?.action||null,dedicated:dedicated.has(m.id),temporaryArt:!dedicated.has(m.id),tell:species.get(m.id)?.battle?.tell||tells[m.id]||'자세를 고쳐 공격할 틈을 노린다.'}));
 const profiles=new Map(D.content.records.map(record=>[record.id,record]));
 const characters=D.catalog.map(c=>{
   const profile=profiles.get(c.id);

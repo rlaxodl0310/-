@@ -1,7 +1,7 @@
 const test=require('node:test'),a=require('node:assert/strict'),I=require('../ui/story/illustrations.js'),Art=require('../electron/scene-art.cjs'),path=require('node:path');
 test('narrative layers require actual presence and obey Earth exclusion without advancing state',()=>{
  const s={era:'fantasy',location:'arrival_meadow',present:['vanessa','kiriel'],minutes:65,revision:5};const before=JSON.stringify(s);
- for(const id of s.present){const options=I.options(s,id);a(options.length>=4);a(options.some(o=>o.key==='컷신 · 휴식'));for(const o of options)a(Art.ALLOWED.includes(o.frame.src));}
+ for(const id of s.present){const options=I.options(s,id);a.equal(options.length,1);a.equal(options[0].key,'cutscene');a.equal(options[0].frame.presentation,'cinematic');for(const o of options)a(Art.ALLOWED.includes(o.frame.src));}
  a.deepEqual(I.options(s,'milia'),[]);a.deepEqual(I.options({...s,era:'earth',location:'subway'},'kiriel'),[]);a.deepEqual(I.options({...s,present:[]},'vanessa'),[]);a.equal(JSON.stringify(s),before);
 });
 test('desktop asset bridge loads actual registered new narrative frames',async()=>{

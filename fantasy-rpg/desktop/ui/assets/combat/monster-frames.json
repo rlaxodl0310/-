@@ -142,5 +142,14 @@
     "h": 303,
     "imageWidth": 1774,
     "imageHeight": 887
+  },
+  "nerpang": {
+    "src": "assets/monsters/nerpang-basic.webp",
+    "x": 0,
+    "y": 0,
+    "w": 1536,
+    "h": 1024,
+    "imageWidth": 1536,
+    "imageHeight": 1024
   }
 }

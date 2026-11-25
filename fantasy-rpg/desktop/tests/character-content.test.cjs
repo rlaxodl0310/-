@@ -163,7 +163,7 @@ test('Vanessa shares native identity, mage battle routing and independent transp
   const r=C.get(id),clips=r.combatSprite.clips;a.equal(r.combatSprite.frames.length,24);
   a.deepEqual(Object.keys(clips),['idle','move','attack','guard','dodge','hit']);
   for(const clip of Object.values(clips))a.equal(new Set(clip.frames).size,4);
-  const scenes=Object.entries(r.looks).filter(([k])=>k.startsWith('컷신 · '));a(scenes.length>=4);
+  const scenes=Object.entries(r.looks).filter(([k])=>k.startsWith('행동 · '));a(scenes.length>=4);a.equal(r.looks.cutscene.presentation,'cinematic');
   for(const [key,f]of scenes){a(f.w>=f.h);a(fs.existsSync(path.resolve(__dirname,'../ui',f.src)));a.notEqual(f.src,r.looks.default.src);}
   a(r.portraits.default.src.endsWith('/'+id+'.webp'));
  }

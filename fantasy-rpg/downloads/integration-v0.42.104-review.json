@@ -1,0 +1,52 @@
+{
+  "version": "0.42.104",
+  "sourceBase": "763ea587ea3058e42de4e250f0b8d93ec4b45260",
+  "tests": {
+    "pass": 668,
+    "fail": 0
+  },
+  "ui": {
+    "characters": [
+      {
+        "id": "vanessa",
+        "src": "http://127.0.0.1:8767/assets/cutscenes/vanessa-cinematic.webp"
+      },
+      {
+        "id": "kiriel",
+        "src": "http://127.0.0.1:8767/assets/cutscenes/kiriel-cinematic.webp"
+      }
+    ],
+    "monster": [
+      "roster selector/new battle/24 sprite frames",
+      "real-time renderer with both characters"
+    ],
+    "frames": 24,
+    "liveCG": "open/close preserve state and background",
+    "exceptions": [],
+    "passed": true
+  },
+  "scope": [
+    "Kiriel corrected two-leg full cinematic CG",
+    "Vanessa full cinematic CG",
+    "Nerpang approved cute basic, scene and 24 SD frames",
+    "Shared catalog, battle roster, renderer, rewards and fixed essence registration"
+  ],
+  "nerpang": {
+    "stars": 2,
+    "effect": "slipstream",
+    "stats": {
+      "민첩": 6,
+      "체력": 6,
+      "방어력": 3
+    },
+    "xp": 150,
+    "temporaryBattleHP": 60,
+    "temporaryBattleDamage": 16
+  },
+  "WindowsBuild": "pending",
+  "limits": [
+    "No installation on the user PC",
+    "No live ChatGPT story-quality evaluation",
+    "New locations shown in CGs do not automatically move the story or create encounters"
+  ]
+}

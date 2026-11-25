@@ -2,7 +2,7 @@
  function options(state,id){
   if(!state||!state.present?.includes(id)||!Origins.allowed(id,state))return [];
   const record=Content.get(id);if(!record)return [];
-  return Object.entries(record.looks).filter(([key])=>key==='cutscene'||key.startsWith('컷신 · ')).map(([key,frame])=>({key,label:key==='cutscene'?'기본 장면':key.replace(/^컷신 · /,''),frame}));
+  return Object.entries(record.looks).filter(([key])=>key==='cutscene'||key.startsWith('컷신 · ')).map(([key,frame])=>({key,label:record.lookLabels?.[key]||(key==='cutscene'?'기본 장면':key.replace(/^컷신 · /,'')),frame}));
  }
  let cleanup=null;
  function clear(){if(cleanup)cleanup();cleanup=null;}

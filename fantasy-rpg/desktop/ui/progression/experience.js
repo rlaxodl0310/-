@@ -53,7 +53,7 @@
   function monsterReward(species) {
     const e = E.records.find((x) => x.id === species);
     if (!e) throw Error("등록되지 않은 몬스터입니다.");
-    return monsterBase[species] ?? gradeBase[e.stars];
+    return e.experience ?? monsterBase[species] ?? gradeBase[e.stars];
   }
   function questReward(rank, type) {
     const index = ranks.indexOf(rank);

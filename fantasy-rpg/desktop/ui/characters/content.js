@@ -773,6 +773,9 @@ for(const [id,poses]of [['vanessa',['default','rear','casual','help','smile','al
 get('kiriel').unknownName='큰 활을 든 어두운 적갈색 머리 엘프';
 get('kiriel').persona+=' 현재 외형은 붉은 기가 아주 살짝 도는 어두운 갈색 머리와 초록 눈이다. 흰색 밀착 비대칭 의상이며 치마를 추가하지 않는다. 본인 기준 왼쪽 다리는 맨살과 맨발이며 반대쪽은 발끝까지 흰 타이즈가 감싼다. 구두는 없다. 등 뒤 큰 리본·사슬·사슬 연결 금속 갑주는 없고 큰 활은 유지한다.';
 
+
+const cinematic104={"kiriel": {"src": "assets/cutscenes/kiriel-cinematic.webp", "x": 0, "y": 0, "w": 1672, "h": 941, "imageWidth": 1672, "imageHeight": 941, "presentation": "cinematic", "label": "숲 망루 · 활 점검"}, "vanessa": {"src": "assets/cutscenes/vanessa-cinematic.webp", "x": 0, "y": 0, "w": 1672, "h": 941, "imageWidth": 1672, "imageHeight": 941, "presentation": "cinematic", "label": "해안 발코니 · 마도구 확인"}};
+for(const [id,frame]of Object.entries(cinematic104)){const c=get(id);for(const key of Object.keys(c.looks)){if(key==='cutscene'||key.startsWith('컷신 · ')){c.looks['행동 · '+(key==='cutscene'?'기본':key.slice(5))]=c.looks[key];delete c.looks[key];}}c.looks.cutscene=frame;c.lookLabels.cutscene=frame.label+' · 컷신';}
 // This registry contains native characters; Earth transfer outfits live in transfers.
 for(const record of records)record.origin??='fantasy';
 return{records,legacyCasual,transfers,transferExpression,dialogueFrame,sheetCell,get,appearance,displayName,combatFrame};
