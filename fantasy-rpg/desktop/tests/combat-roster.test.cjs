@@ -16,12 +16,12 @@ test('a bow companion fires from range instead of entering melee',()=>{
   a.equal(B.restore(battle.save()).units.find(u=>u.id===archer.id).weapon,'bow');
 });
 
-test('Empereut uses six four-frame clips in practice without entering the story combat roster',()=>{
+test('Empereut uses six four-frame clips in chat and practice battles',()=>{
  const kind='empereut';
  const sprites=require('../ui/battle/additional-monster-sprites.js');
  const entry=sprites.records[kind];
  a(!R.monsters.some(monster=>monster.id===kind));
- a(R.practiceMonsters.some(monster=>monster.id===kind));
+ a(R.encounterMonsters.some(monster=>monster.id===kind));
  a.equal(B.restore(new B({kind,count:1}).save()).units[1].kind,kind);
  a(fs.existsSync(path.resolve(__dirname,'../ui/battle',entry.src)));
  a.deepEqual(Object.keys(entry.clips),['idle','move','attack','guard','dodge','hit']);

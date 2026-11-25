@@ -3,9 +3,10 @@
     module.exports = f(
       require("./model.js"),
       require("../monsters/essence-rules.js"),
+      require("../battle/roster.js"),
     );
-  else r.ExperienceRules = f(r.Progression, r.EssenceRules);
-})(globalThis, (G, E) => {
+  else r.ExperienceRules = f(r.Progression, r.EssenceRules, r.CombatRoster);
+})(globalThis, (G, E, Roster) => {
   "use strict";
   const policy = Object.freeze({
     version: 1,
@@ -52,8 +53,9 @@
   }
   function monsterReward(species) {
     const e = E.records.find((x) => x.id === species);
-    if (!e) throw Error("등록되지 않은 몬스터입니다.");
-    return e.experience ?? monsterBase[species] ?? gradeBase[e.stars];
+    const stars = e?.stars ?? Roster?.encounterMonsters.find((monster) => monster.id === species)?.stars;
+    if (!stars) throw Error("등록되지 않은 몬스터입니다.");
+    return e?.experience ?? monsterBase[species] ?? gradeBase[stars];
   }
   function questReward(rank, type) {
     const index = ranks.indexOf(rank);

@@ -344,7 +344,10 @@
       fail("전리품을 생성할 수 없는 전투 결과입니다.");
     for (const enemy of battle.enemies) {
       const m = Essences.records.find((m) => m.id === enemy.kind);
-      if (!m) fail("등록되지 않은 전리품 출처입니다.");
+      if (!m) {
+        XP.monsterReward(enemy.kind);
+        continue;
+      }
       const random = Rules.rng(
           Rules.hash("drop:" + battle.id + ":" + enemy.id),
         ),

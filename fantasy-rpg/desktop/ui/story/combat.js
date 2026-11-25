@@ -12,7 +12,7 @@
   function createCombat(monsters, mode, reason) {
     if (
       !monsters.length ||
-      monsters.some((id) => !Roster.monsters.some((m) => m.id === id))
+      monsters.some((id) => !Roster.encounterMonsters.some((m) => m.id === id))
     )
       throw Error("등록된 적이 필요합니다.");
     const id = globalThis.crypto?.randomUUID?.() || "combat-" + Date.now();

@@ -63,7 +63,7 @@ t('fixed arrival hands off to TangTang and ChatGPT, repairs invalid choices, and
  }finally{await fs.rm(dir,{recursive:true,force:true});}
 });
 
-t('only a visible, level-appropriate registered monster gets an illustration in a dialogue panel',()=>{
+t('only a visible registered monster gets an illustration in a dialogue panel',()=>{
  const state={...initial(),era:'fantasy',location:'arrival_meadow',present:[],focus:'taei'};
  const quote='풀 사이로 슬라임 한 마리가 모습을 드러낸다.';
  const candidate=(id='slime',speaker='narrator')=>answer(state,{
@@ -75,8 +75,7 @@ t('only a visible, level-appropriate registered monster gets an illustration in 
  a.throws(()=>validate(candidate('goblin'),state,'풀밭을 살핀다'),/몬스터 원화/);
  a.throws(()=>validate(candidate('ten-star-monster'),state,'풀밭을 살핀다'),/몬스터/);
  a.throws(()=>validate(candidate('slime','yeogyeong'),{...state,present:['yeogyeong']},'슬라임 이야기를 듣는다'),/몬스터 원화/);
- const fight=answer(state,{scene:'combat',panels:[{speaker:'narrator',text:quote}],facts:[],combat:{...answer(state).combat,importance:'ordinary',monsters:['noxvern']}});
- a.throws(()=>validate(fight,state,'풀밭을 살핀다'),/등급과 수/);
+
 });
 
 t('optional danger requires a warning and an exit, and leaves three turns between new scares',()=>{
@@ -130,20 +129,51 @@ t('two village locations retain independent street positions and facility record
  }finally{await fs.rm(dir,{recursive:true,force:true});}
 });
 
-t('Empereut artwork is revealed by a level-appropriate coastal sighting without starting combat',()=>{
+t('Empereut can be selected from chat context without a fixed level or location',()=>{
  const Catalog=require('../ui/monsters/catalog.js');
  const state={...initial(),era:'fantasy',location:'east-village-06',present:[],focus:'taei',player:{...initial().player,level:31}};
  const quote='앞쪽 암초 위로 엠페르트가 날개를 펼치며 모습을 드러낸다.';
  const sighting={id:'empereut',panel:0,evidence:quote};
  const proposal=s=>answer(s,{panels:[{speaker:'narrator',text:quote}],facts:[],monsterAppearances:[sighting]});
- const land={...state,location:'arrival_meadow'};
- const lowLevel={...state,player:{...state.player,level:30}};
- a.throws(()=>validate(proposal(land),land,'주변을 살핀다'),/몬스터 원화/);
- a.throws(()=>validate(proposal(lowLevel),lowLevel,'주변을 살핀다'),/몬스터 원화/);
+ const other={...state,location:'north-city-03',player:{...state.player,level:1}};
+ a.deepEqual(validate(proposal(other),other,'암초 쪽을 살핀다').monsterAppearances,[sighting]);
+ const combat={...answer(state).combat,importance:'ordinary',reason:'날아드는 엠페르트에게 맞서기로 했다.',monsters:['empereut']};
+ a.deepEqual(validate({...proposal(other),scene:'combat',combat},other,'내게 날아드는 엠페르트에게 맞선다').combat.monsters,['empereut']);
+ a.equal(createCombat(['empereut'],'chat','대치').enemies[0].kind,'empereut');
  const result=validate(proposal(state),state,'암초 쪽을 살핀다');
  a.equal(result.combat.importance,'none');
  a.deepEqual(result.monsterAppearances,[sighting]);
  const discovered=Catalog.observe({...state,monsterAppearances:result.monsterAppearances});
  a.equal(Catalog.detail(state,'empereut').name,'미발견');
  a.equal(Catalog.detail(discovered,'empereut').artFrames.main.src,'assets/monsters/empereut-basic.png');
+});
+
+t('TangTang reviews chat-driven registered character and monster choices on an older save',async()=>{
+ const place='north-city-03';
+ const seed={...initial(),era:'fantasy',location:place,scene:'exploration',present:[],focus:'taei'};
+ const quote='방파제 너머로 엠페르트가 물을 차고 떠오른다.';
+ const character=require('../ui/data.js').content.get('janghwa');
+ const portraitCue=character.unknownName+'이 부둣가에 서 있다.';
+ let namedCharacter=false;
+ const {dir,d}=await setup(async messages=>{
+  a(messages[0].content.includes('프로젝트 문맥:'));
+  a(messages[0].content.includes('"id":"empereut"'));
+  a(messages[0].content.includes('"id":"janghwa"'));
+  if(!namedCharacter){
+   namedCharacter=true;
+   return answer(seed,{present:['janghwa'],focus:'janghwa',panels:[{speaker:'narrator',text:portraitCue}],facts:[]});
+  }
+  return answer(seed,{present:['janghwa'],focus:'janghwa',panels:[{speaker:'narrator',text:quote}],facts:[],
+   monsterAppearances:[{id:'empereut',panel:0,evidence:quote}]});
+ });
+ try{
+  const saved=await d.save(seed);
+  const first=await d.send({text:'부둣가에 누가 있는지 살핀다',requestId:'registered-cast-001',revision:saved.revision});
+  a.deepEqual(first.present,['janghwa']);
+  a.deepEqual(first.party,[]);
+  const second=await d.send({text:'방파제 바깥 바다를 바라본다',requestId:'registered-monster-001',revision:first.revision});
+  a.equal(second.monsterAppearances[0].id,'empereut');
+  a(second.flags.includes('known_monster_empereut'));
+  a.equal(second.combat,null);
+ }finally{await fs.rm(dir,{recursive:true,force:true});}
 });

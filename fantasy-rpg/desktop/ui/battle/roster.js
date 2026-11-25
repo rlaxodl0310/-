@@ -12,7 +12,7 @@ const tells={moa:'뿌리 다리를 고정하고 몸을 기울여 공격을 준�
 const monsters=E.records.map(m=>Object.freeze({id:m.id,name:m.name,stars:m.stars,hp:species.get(m.id)?.battle?.hp??(stats[m.id]||[30,9])[0],damage:species.get(m.id)?.battle?.damage??(stats[m.id]||[30,9])[1],art:monsterArt(m.id),cutscene:species.get(m.id)?.artFrames?.action||null,dedicated:dedicated.has(m.id),temporaryArt:!dedicated.has(m.id),tell:species.get(m.id)?.battle?.tell||tells[m.id]||'자세를 고쳐 공격할 틈을 노린다.'}));
 const empereut=M.sightings.find(monster=>monster.id==='empereut');
 dedicated.add(empereut.id);
-const practiceMonsters=Object.freeze([...monsters,Object.freeze({
+const encounterMonsters=Object.freeze([...monsters,Object.freeze({
   id:empereut.id,name:empereut.name,stars:empereut.stars,hp:100,damage:12,
   dedicated:true,temporaryArt:false,cutscene:empereut.artFrames.main,
   tell:'날개지느러미를 펼치고 몸을 낮춰 찌를 자세를 잡는다.',
@@ -25,6 +25,6 @@ const characters=D.catalog.map(c=>{
     damage:c.id==='zero'?0:10,passive:c.id==='zero',art:art[c.id]||null,
     dedicated:dedicated.has(c.id),temporaryArt:!dedicated.has(c.id)});
 });
-function get(id){return practiceMonsters.find(m=>m.id===id)||characters.find(c=>c.id===id)||null;}
-return Object.freeze({monsters:Object.freeze(monsters),practiceMonsters,characters:Object.freeze(characters),get,isGeneric:id=>!!get(id)&&!dedicated.has(id)});
+function get(id){return encounterMonsters.find(m=>m.id===id)||characters.find(c=>c.id===id)||null;}
+return Object.freeze({monsters:Object.freeze(monsters),encounterMonsters,characters:Object.freeze(characters),get,isGeneric:id=>!!get(id)&&!dedicated.has(id)});
 });
