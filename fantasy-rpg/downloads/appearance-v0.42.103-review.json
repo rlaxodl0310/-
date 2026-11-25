@@ -107,11 +107,13 @@
     },
     "zipCRC": "passed",
     "payloadSHA256": "passed",
-    "WindowsNative": "not run"
+    "WindowsNative": "not run",
+    "supersededBy": "GitHub Windows workflow native patch after corrected folder scope; local payload is a preflight archive, not delivered"
   },
   "limitations": [
     "Windows-native patch execution not run",
     "No live ChatGPT-generated story evaluation in this artwork revision",
     "Hair material review covers registered main/speech/narrative references, not a pixel-identical facial identity guarantee"
-  ]
+  ],
+  "windowsBuild": "source CI checks rerun after folder-scope fix"
 }

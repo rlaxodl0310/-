@@ -25,7 +25,7 @@ $version = (Get-Content (Join-Path $root 'package.json') -Raw | ConvertFrom-Json
 @"
 게임을 저장하고 완전히 종료한 뒤 이 패치 ZIP을 폴더 전체로 압축 해제하세요.
 FantasyStoryPatch.exe를 실행하면 게임을 자동 검색해 업데이트합니다. 여러 설치본이 있으면 대상을 고릅니다.
-찾지 못할 때만 FantasyStory.exe를 한 번 선택하면 이후 경로를 기억합니다. 게임이 실행 중이면 저장 후 종료하고 다시 시도하세요.
+찾지 못할 때만 FantasyStory.exe 또는 resources/app.asar를 한 번 선택하면 이후 경로를 기억합니다. 게임이 실행 중이면 저장 후 종료하고 다시 시도하세요.
 패치는 게임 파일만 교체합니다. 로그인, 기존 저장 파일, Electron, Codex는 교체하지 않습니다.
 파일 검사와 기존 버전 백업을 수행하며, 파일 교체 중 오류가 발생하면 기존 버전 복원을 시도합니다.
 현재 패치의 신규 현실 스토리는 별도 저장 슬롯을 사용하고 이전 체험판 기록은 보존합니다.
