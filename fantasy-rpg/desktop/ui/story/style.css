@@ -61,25 +61,18 @@ body[data-story-mode=director] .dialogue-wrap{background:linear-gradient(90deg,#
 .scene[data-chat-combat] .scene-top{padding-block:10px}
 .scene[data-chat-combat] #story-battle-layers{
  position:relative;inset:auto;grid-row:1;grid-column:1;
- min-height:0;margin-top:90px;
+ min-height:0;margin-top:70px;
 }
-.scene[data-chat-combat] .story-fighter,.scene[data-chat-combat] .story-monster{bottom:3%}
 .scene[data-chat-combat] .story-fighter:nth-child(2n){bottom:7%}
 .chat-combat-hud{
- position:absolute;z-index:2;inset:106px clamp(10px,3vw,42px) auto;
+ position:relative;z-index:2;
  display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
- align-items:start;gap:clamp(5px,2vw,24px);
+ align-items:center;gap:12px;
  pointer-events:none;color:#f5ecd9;
  font-variant-numeric:tabular-nums;
 }
-.chat-combat-side,.chat-combat-center{
- padding:8px 11px;border:1px solid #ad947268;border-radius:6px;
- background:linear-gradient(135deg,#0a141feb,#182632df);
- box-shadow:0 5px 20px #0007;
-}
-.chat-combat-side{width:min(100%,265px);min-width:0}
-.chat-combat-enemies{justify-self:end;border-color:#bc766b8c;max-height:145px;overflow:auto;pointer-events:auto}
-.chat-combat-enemies>div+div{margin-top:6px;border-top:1px solid #b289723d;padding-top:5px}
+.chat-combat-side{min-width:0}
+.chat-combat-enemies{justify-self:end;overflow:auto;pointer-events:auto}
 .chat-combat-hud h2{font-size:14px;line-height:1.25;margin:0 0 4px;color:#f4da9d}
 .chat-combat-enemies h2{color:#ffd3c3}
 .chat-combat-center{display:grid;gap:3px;text-align:center;color:#ebd09a;font-size:12px}
@@ -99,8 +92,6 @@ body[data-story-mode=director] .dialogue-wrap{background:linear-gradient(90deg,#
 .scene[data-chat-combat] #choices button[data-combat-command]:hover:not(:disabled){background:#485260}
 .scene[data-chat-combat] #choices button[data-combat-command="공격"]{border-color:#d39d84;background:#5b3438}
 @media(max-width:560px){
- .chat-combat-hud{inset:91px 8px auto;gap:5px}
- .chat-combat-side,.chat-combat-center{padding:5px}
  .chat-combat-hud h2{font-size:12px}
  .chat-combat-meter{gap:3px;font-size:10px}
  .chat-combat-center{font-size:10px}
@@ -113,12 +104,66 @@ body[data-story-mode=director] .dialogue-wrap{background:linear-gradient(90deg,#
 .scene[data-chat-combat] #passage-hud,
 .scene[data-chat-combat] #preparation-hud,
 .scene[data-chat-combat] #arrival-hud{display:none}
-.scene[data-chat-combat] .story-monster{right:calc(6% + var(--offset)*12%);width:clamp(85px,17vw,265px)}
-.scene[data-chat-combat] .story-fighter{max-width:calc(var(--art-ratio,1)*min(33vh,320px))}
-@media(max-width:560px){
- .scene[data-chat-combat] .story-monster{right:calc(4% + var(--offset)*15%);width:clamp(66px,23vw,125px)}
-}
 .scene[data-chat-combat] .history-toggle{right:104px;top:12px}
 @media(max-width:560px){
  .scene[data-chat-combat] .history-toggle{right:10px;top:12px}
+}
+
+.scene[data-chat-combat] .vignette{
+ background:linear-gradient(180deg,#0b101542,transparent 22%,transparent 55%,#090d16c9 100%);
+}
+.scene[data-chat-combat] .story-fighter{
+ left:calc(8% + var(--offset)*9%);bottom:3%;
+ max-width:calc(var(--art-ratio,1)*min(39vh,360px));
+}
+.scene[data-chat-combat] .story-monster{
+ right:calc(8% + var(--offset)*14%);bottom:3%;width:clamp(90px,16vw,245px);
+}
+.app>main .scene[data-chat-combat] .dialogue-wrap{
+ width:min(96%,1120px);padding:0;overflow:hidden;
+ border:1px solid #77818c;border-top:2px solid #d6b783;
+ box-shadow:0 12px 38px #000c;
+ background:linear-gradient(115deg,#101724fa,#1a2433fc);
+}
+.scene[data-chat-combat] .chat-combat-hud{
+ padding:10px 17px;border-bottom:1px solid #b5bec343;
+ background:linear-gradient(105deg,#1d3941 0%,#182633 40%,#241f2a 68%,#442e34 100%);
+}
+.scene[data-chat-combat] .chat-combat-side{width:100%;max-width:350px}
+.scene[data-chat-combat] .chat-combat-enemies{
+ display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,104px),1fr));
+ gap:7px 12px;max-height:76px;
+}
+.scene[data-chat-combat] .chat-combat-center{
+ min-width:72px;border-inline:1px solid #b5bec350;padding:0 9px;
+}
+.chat-combat-warning{color:#ffcab1}
+.scene[data-chat-combat] #dialogue-content{padding:9px 17px 4px}
+.scene[data-chat-combat] #line{margin:4px 0 10px}
+.scene[data-chat-combat] #choices{gap:4px;margin-bottom:4px}
+.scene[data-chat-combat] #choices>button{
+ background:#243142;border-color:#607082;border-radius:3px;
+}
+.scene[data-chat-combat] #choices>button[data-combat-command="공격"]{
+ background:linear-gradient(120deg,#68393c,#492631);border-color:#a96b64;
+}
+.scene[data-chat-combat] #chat-form{
+ margin:0 17px 9px;background:#0b1421;border-color:#5e6c7d;
+}
+.scene[data-chat-combat] #story-chat-mode[hidden],#battle-input-mode[hidden]{display:none}
+#battle-input-mode{
+ min-width:0;padding:4px 5px;border:0;border-right:1px solid #536074;
+ color:#edce99;background:#0b1421;font:inherit;font-size:12px;
+}
+.scene[data-chat-combat] .dialogue-footer{padding:0 17px 6px}
+@media(max-width:560px){
+ .scene[data-chat-combat] .chat-combat-hud{padding:7px 9px;gap:7px}
+ .scene[data-chat-combat] .chat-combat-center{min-width:48px;padding:0 4px}
+ .scene[data-chat-combat] .chat-combat-enemies{grid-template-columns:1fr}
+ .scene[data-chat-combat] #dialogue-content{padding:6px 9px 3px}
+ .scene[data-chat-combat] #chat-form{margin:0 9px 7px;flex-wrap:nowrap}
+ .scene[data-chat-combat] #chat-input{min-width:0}
+ .scene[data-chat-combat] .dialogue-footer{padding:0 9px 5px}
+ .scene[data-chat-combat] .story-fighter{left:calc(4% + var(--offset)*9%)}
+ .scene[data-chat-combat] .story-monster{right:calc(5% + var(--offset)*13%);width:clamp(66px,23vw,125px)}
 }
