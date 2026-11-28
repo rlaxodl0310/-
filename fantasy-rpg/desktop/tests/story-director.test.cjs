@@ -250,3 +250,31 @@ t('field research records verified sightings once and submits at an association'
   await a.rejects(send('협회에 현장 조사 기록을 제출한다'),/완성 조사 기록/);
  }finally{await fs.rm(dir,{recursive:true,force:true});}
 });
+
+t('registered monsters have field research and a new species can be observed and submitted',async()=>{
+ const Catalog=require('../ui/monsters/catalog.js');
+ const Research=require('../electron/field-research.cjs');
+ a.equal(Catalog.researchMonsters.length,Catalog.records.length+1);
+ a(Catalog.records.every(({id})=>Research.profile(id)?.behavior?.pattern));
+ const seed={...initial(),era:'fantasy',location:'north-city-03',scene:'exploration',present:[],focus:'taei'};
+ const {name}=Catalog.records.find(({id})=>id==='slime');
+ let candidate;
+ const {dir,d}=await setup(async()=>candidate);
+ try{
+  let s=await d.save(seed);
+  const send=async(text,quote)=>{
+   candidate=answer(s,{panels:[{speaker:'narrator',text:quote||'협회 직원이 기록을 확인한다.'}],facts:[],
+    monsterAppearances:quote?[{id:'slime',panel:0,evidence:quote}]:[]});
+   s=await d.send({text,requestId:'slime-research-'+s.revision,revision:s.revision});
+  };
+  await send('주변을 살핀다',name+' 한 마리가 돌 틈에 보인다.');
+  a(s.fieldResearch.slime.observations.sighting);
+  await send(Research.observeText,name+' 한 마리가 몸을 튕기려 한다.');
+  a.equal(s.fieldResearch.slime.observations.behavior,undefined);
+  await send(Research.observeText,name+' 한 마리가 몸을 튕겨 옆 돌로 옮겨간다.');
+  a(s.fieldResearch.slime.observations.behavior);
+  a.equal(s.minutes,20);
+  await send(Research.submitText);
+  a((await new StoryDirector(path.join(dir,'story.json'),{}).read()).fieldResearch.slime.submitted);
+ }finally{await fs.rm(dir,{recursive:true,force:true});}
+});

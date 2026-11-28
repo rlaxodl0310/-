@@ -6,8 +6,8 @@ const {policy}=require('../ui/adventure/tracking.js');
 const observeText='안전한 거리에서 더 관찰한다';
 const submitText='협회에 현장 조사 기록을 제출한다';
 const normalize=text=>text.trim().replace(/[.!。]$/,'');
-const profile=id=>Catalog.sightings.find(monster=>monster.id===id)?.research;
-const ambiguous=/소문|들었다|들었다고|가능성|모른다|지 않았|지 않는다|할 수|할 듯|할지도|것 같다|한다고|예상|상상|기억|아마|흔적만/;
+const profile=id=>Catalog.researchMonsters.find(monster=>monster.id===id)?.research;
+const ambiguous=/소문|들었다|들었다고|가능성|모른다|지 않았|지 않는다|할 수|할 준비|하려|기려 한다|하기 직전|할 태세|할 듯|할지도|것 같다|한다고|예상|상상|기억|아마|흔적만|하지 않|하지 못|않았|않는다|않고| 못했다|가정|전해진|했다고/;
 
 function observe(state,text){
  if(normalize(text)!==observeText)return null;
@@ -49,4 +49,4 @@ function submit(state,text,facilities){
  return fieldResearch;
 }
 
-module.exports={observe,submit,capture,observeText,submitText,minutes:policy.observeMinutes};
+module.exports={observe,submit,capture,profile,observeText,submitText,minutes:policy.observeMinutes};

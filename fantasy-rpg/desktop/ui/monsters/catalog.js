@@ -34,6 +34,96 @@ const profiles={
   terrakion:{"status":"draft","adultAverage":{"heightM":2.25,"lengthM":4.7,"massKg":1750.0},"temperament":"평소 움직임이 적고, 물러날 길이 막히면 몸을 낮추고 버틴다.","habits":"건조한 암벽 지대와 너덜지대에서 쉬며 흔들리는 바닥을 피한다.","nutrition":"풍화된 암석과 광물질을 섭취해 닳은 바위 조직을 천천히 보충한다.","ecosystemRole":"이동 중 느슨한 돌을 밀어내 작은 동물이 드나들 바위 틈과 자갈 퇴적지를 만든다."},
   viridion:{"status":"baseline","adultAverage":{"heightM":2.4,"lengthM":5.5,"massKg":380.0},"temperament":"신중하고 예민하며 낯선 자극에 호기심을 보인다.","habits":"아침에는 햇빛이 드는 공터, 한낮에는 그늘과 물가를 이용하고 밤에는 잎 조직을 접는다.","nutrition":"빛을 받아 광합성하고 물과 광물질을 흡수한 뒤 휴식하며 조직을 유지한다.","ecosystemRole":"씨앗과 꽃가루를 옮기고 떨어진 잎으로 주변 토양에 유기물을 돌려준다."},
 };
+const researchTasks={
+ "goblin": {
+  "label": "몽둥이 내리치기",
+  "pattern": "몽둥이로.{0,20}내리치|몽둥이를.{0,12}내리치"
+ },
+ "slime": {
+  "label": "몸 튕기기",
+  "pattern": "몸(?:을|이).{0,12}튕"
+ },
+ "moa": {
+  "label": "뿌리 고정",
+  "pattern": "뿌리를.{0,15}(?:고정|박|내리)"
+ },
+ "ruke": {
+  "label": "앞발 낮추기",
+  "pattern": "앞발을.{0,12}낮"
+ },
+ "por": {
+  "label": "분사 가속",
+  "pattern": "물을.{0,12}(?:뿜|내뿜).{0,18}(?:가속|빨라|달려)"
+ },
+ "tork": {
+  "label": "꼬리치기",
+  "pattern": "꼬리로.{0,15}(?:치|후려)|꼬리를.{0,12}휘둘"
+ },
+ "kar": {
+  "label": "급강하",
+  "pattern": "급강하"
+ },
+ "ves": {
+  "label": "사각 접근",
+  "pattern": "(?:사각|사각지대)에서.{0,16}접근"
+ },
+ "rat": {
+  "label": "몸 낮추기",
+  "pattern": "낮게.{0,8}웅크"
+ },
+ "chitin": {
+  "label": "톱니 앞턱 물기",
+  "pattern": "(?:앞턱|톱니 턱)으로.{0,15}(?:물|문)"
+ },
+ "ant": {
+  "label": "무리의 측면 접근",
+  "pattern": "(?:무리|여럿).{0,30}(?:옆구리|측면|옆쪽).{0,15}(?:접근|다가|파고)"
+ },
+ "clad": {
+  "label": "압착 턱 붙잡기",
+  "pattern": "턱으로.{0,15}(?:붙잡|움켜|물어 잡)"
+ },
+ "velum": {
+  "label": "낮은 활공",
+  "pattern": "낮게.{0,10}활공|낮은.{0,8}활공"
+ },
+ "draven": {
+  "label": "목주머니 팽창",
+  "pattern": "목주머니.{0,12}(?:부풀|팽창)"
+ },
+ "noxvern": {
+  "label": "벽면 이동",
+  "pattern": "벽(?:을|면을).{0,12}(?:타고|올라|기어)"
+ },
+ "lairon": {
+  "label": "낮은 자세 돌진",
+  "pattern": "몸을.{0,10}낮.{0,18}돌진"
+ },
+ "nerpang": {
+  "label": "젖은 지면 활주",
+  "pattern": "(?:수막|젖은 지면).{0,24}(?:활주|미끄러)"
+ },
+ "fizz": {
+  "label": "삼지창을 든 도약",
+  "pattern": "삼지창을.{0,20}(?:도약|뛰어오르|뛰어올)"
+ },
+ "grauk": {
+  "label": "수중 접근",
+  "pattern": "(?:물속|수중)에서.{0,18}(?:다가|접근)"
+ },
+ "cobalion": {
+  "label": "발톱으로 지면 찍기",
+  "pattern": "발톱으로.{0,16}(?:지면|땅)을.{0,10}찍"
+ },
+ "terrakion": {
+  "label": "몸을 낮춰 충격에 버팀",
+  "pattern": "몸을.{0,10}낮.{0,20}(?:버티|버텨|견디)"
+ },
+ "viridion": {
+  "label": "잎날 베기",
+  "pattern": "잎날로.{0,15}(?:베어|베는|벤다|베었다|벨)"
+ }
+};
 const records=Object.freeze([...seedMonsters,ant,clad,...added,lairon,nerpang,...aquatic105,cobalion106,terrakion107,viridion108].map(m=>{const e=E.records.find(e=>e.id===m.id);const profile=m.profile||profiles[m.id];return Object.freeze({...m,profile:Object.freeze({...profile,adultAverage:Object.freeze(profile.adultAverage)}),activeSkill:e.activeSkill||null,essences:Object.freeze([e.effect]),essenceRule:'극히 드문 드롭. '+e.effect.name+' 하나를 고정 습득하고 '+(e.stats?Object.entries(e.stats).map(([k,v])=>k+' +'+v).join(', '):'관련 스탯이 소폭 상승한다(수치 미정)')+(e.activeSkill?' 추가 고정 액티브 '+e.activeSkill.name+' 포함':'')+'. 정수 슬롯 하나 사용, 생성 후 30분 미섭취 시 소멸. 성급만으로 우열이 정해지지 않으며 조합·소모·신체 부담과 활용이 중요하다.'});}));
 const byId=new Map(records.map(record=>[record.id,record]));
 function observe(state){
@@ -48,7 +138,7 @@ function observe(state){
  return flags.size===(state.flags||[]).length?state:{...state,flags:[...flags]};
 }
 function known(state,id){return(state?.flags||[]).includes('known_monster_'+id);}
-function detail(state,id,{creator=false}={}){const m=byId.get(id)||sightings.find(entry=>entry.id===id);if(!m)return null;return known(state,id)||creator?{...m,known:known(state,id)}:{id:m.id,known:false,name:'미발견'};}
+function detail(state,id,{creator=false}={}){const m=byId.get(id)||sightings.find(entry=>entry.id===id);if(!m)return null;return known(state,id)||creator?{...m,...(researchTasks[id]&&{research:registeredResearch(id)}),known:known(state,id)}:{id:m.id,known:false,name:'미발견'};}
 const previews=Object.freeze([
   {
     "id": "empereut",
@@ -113,5 +203,10 @@ const previews=Object.freeze([
   }
 ].map(Object.freeze));
 const sightings=Object.freeze(previews.filter(monster=>monster.artFrames?.main));
-return {records,previews,sightings,known,detail,observe};
+const registeredResearch=id=>({sighting:{label:'직접 목격'},behavior:researchTasks[id]});
+const researchMonsters=Object.freeze([
+ ...records.filter(({id})=>researchTasks[id]).map(({id})=>({id,research:registeredResearch(id)})),
+ ...sightings.filter(m=>m.research),
+]);
+return {records,previews,sightings,researchMonsters,known,detail,observe};
 });

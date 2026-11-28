@@ -331,6 +331,12 @@ if(rememberedEncounter?.location===s.location){
   ' 마지막 목격 기록이다. 현재 위치와 새 관찰을 임의로 확정하지 않는다.';
 }
 if(observation)messages[0].content+='\n플레이어는 안전 거리에서 현재 조우만 관찰한다. 이동, 전투, 행동 계획 없이 확인 가능한 모습만 서술한다. 직접 보이는 경우에만 대상 '+observation.species+'의 목격 증거를 기록한다. 관찰 실패도 가능하다.';
+if(observation){
+ const tasks=Research.profile(observation.species);
+ const known=s.fieldResearch?.[observation.species]?.observations||{};
+ const pending=Object.entries(tasks).filter(([id,task])=>task.pattern&&!known[id]).map(([,task])=>task.label);
+ if(pending.length)messages[0].content+='\n미확인 조사 항목: '+pending.join(', ')+' . 관찰 목표이며 해당 행동이 일어났다고 미리 확정하지 않는다.';
+}
 if(reference)messages[0].content+='\n관찰을 참조한 행동은 actionContext.reference.target에 묶는다. actionPlan에 그 대상과 실제 행동을 기록한다. 대상이나 행동을 바꾸거나 새 대상을 만들지 않는다.';
 if(discussion){
  const answer=await this.bridge.generateStructured([

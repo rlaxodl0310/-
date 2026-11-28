@@ -378,14 +378,14 @@ function renderRecommendations(){
  const encounter=state.freeEncounter;
  if(state.era==='fantasy'&&encounter&&state.minutes<encounter.expiresAt&&state.combat?.status!=='playing'){
   if(encounter.location===state.location&&state.player.hp>0){
-   if(globalThis.MonsterCatalog?.sightings.some(monster=>monster.id===encounter.species&&monster.research))
+   if(globalThis.MonsterCatalog?.researchMonsters.some(monster=>monster.id===encounter.species&&monster.research))
     addButton({label:'안전한 거리에서 더 관찰한다',input:'안전한 거리에서 더 관찰한다',minutes:10},list);
    const input=encounter.phase==='withdrawn'?'마지막 조우에 재접근한다':'조우에서 물러난다';
    addButton({label:input,input,minutes:5},list);
   }
   addButton({label:'조우 추적을 그만둔다',input:'조우 추적을 그만둔다'},list);
  }
- const completedResearch=globalThis.MonsterCatalog?.sightings.some(monster=>{
+ const completedResearch=globalThis.MonsterCatalog?.researchMonsters.some(monster=>{
   const record=state.fieldResearch?.[monster.id];
   return monster.research&&record&&!record.submitted&&Object.keys(monster.research).every(id=>record.observations?.[id]);
  });
