@@ -17,7 +17,16 @@ for(const [label,key]of [['외형','appearance'],['서식','habitat'],['생태',
   const entry=record?.observations?.[id];
   card.append(n('p',task.label+' · '+(entry?entry.evidence:'미확인')));
  }
- if(record?.submitted)card.append(n('p','협회 제출 완료'));
+ const clue=MonsterCatalog.fieldClues[d.id];
+ if(record?.submitted){
+  card.append(n('p','협회 제출 완료'));
+  if(clue){
+   card.append(n('h4','협회 조사 단서'),n('p',clue.site+' · '+clue.timing),n('p',clue.approach));
+   if(record.clueDiscovery)card.append(n('p',clue.subject+' · '+record.clueDiscovery.evidence));
+   if(record.clueAttempt&&!record.clueAttempt.evidence)
+    card.append(n('p','최근 탐사에서 이 행동을 확인하지 못했습니다. '+clue.timing));
+  }
+ }
  else if(Object.keys(d.research).every(id=>record?.observations?.[id]))card.append(n('p','조사 완료 · 협회에 제출할 수 있습니다.'));
 }
 if(d.artNote)card.append(n('p',d.artNote));card.append(n('p',d.derivatives));content.append(card);}};check.onchange=()=>{creator=check.checked;draw();};body.append(toggle,content);draw();}

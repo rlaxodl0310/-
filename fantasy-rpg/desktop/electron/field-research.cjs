@@ -9,6 +9,26 @@ const normalize=text=>text.trim().replace(/[.!。]$/,'');
 const profile=id=>Catalog.researchMonsters.find(monster=>monster.id===id)?.research;
 const ambiguous=/소문|들었다|들었다고|가능성|모른다|지 않았|지 않는다|할 수|할 준비|하려|기려 한다|하기 직전|할 태세|할 듯|할지도|것 같다|한다고|예상|상상|기억|아마|흔적만|하지 않|하지 못|않았|않는다|않고| 못했다|가정|전해진|했다고/;
 
+function followClue(state,text){
+ const species=Object.keys(Catalog.fieldClues).find(id=>
+  normalize(text)===Catalog.clueInput(Catalog.detail(state,id,{creator:true}).name));
+ if(!species)return null;
+ if(state.era!=='fantasy'||state.combat?.status==='playing'||state.player.hp<=0||
+    !state.fieldResearch?.[species]?.submitted)
+  throw Error('협회에 제출한 조사 기록이 있어야 현장의 단서를 확인할 수 있습니다.');
+ return {species,...Catalog.fieldClues[species]};
+}
+
+function recordClue(state,clue,appearances){
+ const record=state.fieldResearch[clue.species];
+ const evidence=appearances.find(item=>item.id===clue.species&&!ambiguous.test(item.evidence)&&
+  new RegExp(clue.pattern).test(item.evidence))?.evidence;
+ const attempt={location:state.location,minutes:state.minutes,evidence:evidence||null};
+ state.fieldResearch={...state.fieldResearch,[clue.species]:{
+  ...record,clueAttempt:attempt,clueDiscovery:record.clueDiscovery||(evidence?attempt:null),
+ }};
+}
+
 function observe(state,text){
  if(normalize(text)!==observeText)return null;
  const encounter=FreeEncounter.current(state);
@@ -49,4 +69,4 @@ function submit(state,text,facilities){
  return fieldResearch;
 }
 
-module.exports={observe,submit,capture,profile,observeText,submitText,minutes:policy.observeMinutes};
+module.exports={observe,submit,capture,profile,followClue,recordClue,observeText,submitText,minutes:policy.observeMinutes};

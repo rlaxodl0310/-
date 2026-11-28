@@ -393,6 +393,15 @@ function renderRecommendations(){
   const input='협회에 현장 조사 기록을 제출한다';
   addButton({label:input,input},list);
  }
+ const catalog=globalThis.MonsterCatalog;
+ if(catalog&&state.era==='fantasy'&&state.combat?.status!=='playing'&&state.player.hp>0){
+  for(const [id,clue] of Object.entries(catalog.fieldClues)){
+   const record=state.fieldResearch?.[id];
+   if(!record?.submitted||record.clueDiscovery)continue;
+   const input=catalog.clueInput(catalog.detail(state,id,{creator:true}).name);
+   addButton({label:input,input,minutes:10,condition:clue.site},list);
+  }
+ }
  if(recommendationChoices===null&&window.desktopAI?.directorRecommendations)return;
  for(const choice of choices.slice(0,3)){
   if(!choice.compare){addButton(choice,list);continue;}

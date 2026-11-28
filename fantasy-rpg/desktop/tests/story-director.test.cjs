@@ -278,3 +278,45 @@ t('registered monsters have field research and a new species can be observed and
   a((await new StoryDirector(path.join(dir,'story.json'),{}).read()).fieldResearch.slime.submitted);
  }finally{await fs.rm(dir,{recursive:true,force:true});}
 });
+
+t('association clues unlock after submission and persist follow-up evidence',async()=>{
+ const Catalog=require('../ui/monsters/catalog.js');
+ const Research=require('../electron/field-research.cjs');
+ const input=Catalog.clueInput('엠페르트');
+ const seed={...initial(),era:'fantasy',location:'north-city-03',scene:'exploration',present:[],focus:'taei'};
+ let candidate;
+ const {dir,d}=await setup(async messages=>{
+  a(messages[0].content.includes('밀물 때와 썰물 때를 비교한다'));
+  return candidate;
+ });
+ try{
+  let s=await d.save(seed);
+  const send=async(quote,patch={})=>{
+   candidate=answer(s,{panels:[{speaker:'narrator',text:quote||'수면이 비어 있다.'}],facts:[],
+    monsterAppearances:quote?[{id:'empereut',panel:0,evidence:quote}]:[],...patch});
+   s=await d.send({text:input,requestId:'follow-clue-'+s.revision,revision:s.revision});
+  };
+  await a.rejects(send(null),/제출한 조사 기록/);
+  const submitted={location:s.location,minutes:s.minutes};
+  s=await d.save({...s,fieldResearch:{empereut:{observations:{},submitted}}});
+  await a.rejects(send('슬라임이 돌 틈에 있다.',{monsterAppearances:[{id:'slime',panel:0,evidence:'슬라임이 돌 틈에 있다.'}]}),/이동이나 전투/);
+  await send(null);
+  a.equal(s.minutes,10);
+  a.equal(s.fieldResearch.empereut.clueAttempt.evidence,null);
+  const quote='엠페르트 무리가 물고기를 한쪽으로 몰아 사냥한다.';
+  await send(quote);
+  a.equal(s.minutes,20);
+  const restored=await new StoryDirector(path.join(dir,'story.json'),{}).read();
+  a.equal(restored.fieldResearch.empereut.clueDiscovery.evidence,quote);
+  a.equal(restored.fieldResearch.slime,undefined);
+  for(const [id,evidence] of [
+   ['slime','슬라임이 젖은 바닥을 미끄러져 돌 틈에 닿는다.'],
+   ['kar','카르가 높은 가지에 앉아 아래를 내려다본다.'],
+  ]){
+   const state={...s,fieldResearch:{[id]:{submitted}}};
+   const name=Catalog.detail(state,id,{creator:true}).name;
+   Research.recordClue(state,Research.followClue(state,Catalog.clueInput(name)),[{id,evidence}]);
+   a.equal(state.fieldResearch[id].clueDiscovery.evidence,evidence);
+  }
+ }finally{await fs.rm(dir,{recursive:true,force:true});}
+});

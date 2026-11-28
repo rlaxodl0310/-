@@ -204,9 +204,33 @@ const previews=Object.freeze([
 ].map(Object.freeze));
 const sightings=Object.freeze(previews.filter(monster=>monster.artFrames?.main));
 const registeredResearch=id=>({sighting:{label:'직접 목격'},behavior:researchTasks[id]});
+const fieldClues=Object.freeze({
+ empereut:{
+  site:'해안 절벽이나 암초',
+  timing:'밀물 때와 썰물 때를 비교한다.',
+  approach:'물 밖의 안전한 높은 곳에서 무리가 먹이를 모는 수면을 살핀다.',
+  subject:'무리 사냥',
+  pattern:'(?:무리|여럿).{0,45}(?:몰아|사냥)|(?:물고기|먹이).{0,20}(?:몰아|에워싸)',
+ },
+ slime:{
+  site:'그늘진 얕은 물가나 습한 폐허 바닥',
+  timing:'바닥이 아직 젖어 있을 때 살핀다.',
+  approach:'발밑의 물기를 확인하고 젖은 바닥에서 돌 틈까지 이어지는 경로를 멀리서 본다.',
+  subject:'젖은 지면을 따라 이동',
+  pattern:'(?:젖은|축축한).{0,15}(?:바닥|돌|지면).{0,30}(?:미끄러|이동|기어)',
+ },
+ kar:{
+  site:'숲 가장자리나 절벽',
+  timing:'높은 가지나 바위턱에 앉아 아래를 살피는 순간을 기다린다.',
+  approach:'나무나 바위 뒤에서 높은 자리와 탁 트인 지면 사이의 비행 경로를 본다.',
+  subject:'높은 자리에서 아래를 살피는 행동',
+  pattern:'(?:가지|바위턱|절벽의 턱).{0,30}(?:아래를|바닥을).{0,18}(?:내려다|살피|주시)',
+ },
+});
+const clueInput=name=>name+'의 협회 조사 단서를 확인한다';
 const researchMonsters=Object.freeze([
  ...records.filter(({id})=>researchTasks[id]).map(({id})=>({id,research:registeredResearch(id)})),
  ...sightings.filter(m=>m.research),
 ]);
-return {records,previews,sightings,researchMonsters,known,detail,observe};
+return {records,previews,sightings,researchMonsters,fieldClues,clueInput,known,detail,observe};
 });
