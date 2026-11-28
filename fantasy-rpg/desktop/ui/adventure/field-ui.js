@@ -27,6 +27,13 @@ function draw(feedback=''){
  if(v.tracking&&v.at){if(feedback!==v.tracking.lastEvent.text)n('p',v.tracking.lastEvent.text,report);n('small',(v.tracking.source==='ai'?'탱탱 ↔ ChatGPT':'탱탱 ·로컬 판단')+' · 관찰 '+v.tracking.observations+'/2 · 흔적 파악 '+v.tracking.confidence+'/100 · 상대 경계 '+v.tracking.attention+'/100',report);}
  n('p','토벌 '+Math.min(v.q.progress,v.q.target)+'/'+v.q.target+' · 목적지 '+(v.destination?.name||v.q.destination)+' · 접수소 '+(v.issuer?.name||v.q.issuerLocation),report);
  const notes=n('details','',report);n('summary','의뢰서와 현장 기록',notes);n('p',v.q.description||'',notes);if(v.q.fieldNote){n('p','현장 확인 · '+v.q.fieldNote.at+'분 · '+(v.q.fieldNote.terrain||'등록된 세부 지형 없음'),notes);n('small','출몰 보고를 대조한 기록입니다. 적의 정확한 위치·수·약점이 확인된 것은 아닙니다.',notes);}
+ if(v.researchHint&&!v.playing){
+  const hint=n('details','',report);
+  n('summary','토벌 준비 · 협회 조사 기록',hint);
+  n('p',v.researchHint.site+' · '+v.researchHint.timing,hint);
+  n('p',v.researchHint.approach,hint);
+  if(v.researchHint.evidence)n('p','이전 관찰 · '+v.researchHint.evidence,hint);
+ }
  const controls=n('div','',report);controls.className='hunt-controls';
  function button(label,action,off=false){const b=n('button',label,controls);b.disabled=busy||off;b.onclick=async()=>{if(busy)return;busy=true;const token=++revision;for(const el of dialog.querySelectorAll('button,input'))el.disabled=true;msg.textContent='행동 결과 확인 중…';try{const next=await onAction(action);if(!next)throw Error('갱신된 게임 상태를 받지 못했습니다.');if(token!==revision||!dialog.isConnected)return;state=next;busy=false;if(state.combat?.status==='playing'){dialog.close();onCombat();return;}draw(['track','trackStep','trackIntent'].includes(action.type)?state.adventure.quests.find(q=>q.id===questId).tracking.lastEvent.text:action.type==='pickup'?'전리품을 회수했습니다. 실제 소지품과 분배 기록에 반영되었습니다.':action.type==='submit'?'증빙을 제출하고 보수·경험치를 정산했습니다.':action.type==='scout'?'5분 동안 주변 지형을 살피고 의뢰서의 보고를 대조했습니다.':'의뢰를 수락했습니다.');if(action.type==='submit')dialog.querySelector('.hunt-settlement')?.scrollIntoView({block:'nearest'});}catch(error){if(token!==revision)return;busy=false;draw(error.message);}};return b;}
  const locked=state.era!=='fantasy'||state.player.hp<=0||v.playing;

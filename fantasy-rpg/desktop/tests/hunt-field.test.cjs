@@ -4,3 +4,21 @@ t('field observation costs real time, survives save, grants no rewards or enemy 
 t('field progression follows actual combat receipts, pickup ownership and original issuer; observation never grants victory',()=>{let {s,q}=setup();assert.equal(F.view(s,q.id).stage,'travel');s.location=q.destination;assert.equal(F.view(s,q.id).stage,'field');s=A.apply(s,{type:'hunt',questId:q.id},{createCombat:C.createCombat});assert.equal(s.combat.adventureQuestId,q.id);assert.equal(F.view(s,q.id).stage,'combat');const won={...s,combat:{...s.combat,status:'won',enemies:s.combat.enemies.map(e=>({...e,hp:0}))}};let n=A.observe(s,won);assert.equal(F.view(n,q.id).stage,'loot');const ids=F.view(n,q.id).loot.map(l=>l.id);assert.equal(ids.length,q.target);assert.throws(()=>A.apply(n,{type:'submit',questId:q.id}));for(const id of ids)n=A.apply(n,{type:'pickup',lootId:id});assert.equal(F.view(n,q.id).stage,'return');assert.ok(F.view(n,q.id).steps[3][1]);assert.throws(()=>A.apply(n,{type:'pickup',lootId:ids[0]}));n.location=q.issuerLocation;n=A.apply(n,{type:'submit',questId:q.id});assert.equal(F.view(n,q.id).stage,'settled');assert.equal(n.adventure.quests.find(x=>x.id===q.id).receipt.xp,q.experienceReward);assert.throws(()=>A.apply(n,{type:'submit',questId:q.id}));});
 t('field screen never shows another quest battle or remote loot and preserves expired contract',()=>{let {s,q}=setup();s.combat=C.createCombat([q.species],'chat','unrelated');assert.equal(F.view(s,q.id).battle,null);assert.equal(F.view(s,'unknown'),null);s.combat=null;s.minutes=q.deadline+1;s=A.ensure(s);assert.equal(F.view(s,q.id).stage,'closed');});
 t('actual director observation is idempotent and old revision cannot duplicate world time',async()=>{const fs=require('node:fs/promises'),os=require('node:os'),path=require('node:path'),dir=await fs.mkdtemp(path.join(os.tmpdir(),'hunt65-'));try{let {s,q}=setup();s.location=q.destination;const d=new StoryDirector(path.join(dir,'story.json'),{});await d.save(s);const req={requestId:'hunt-scout-test-0001',revision:s.revision,action:{type:'scout',questId:q.id}};const n=await d.adventureAction(req),again=await d.adventureAction(req);assert.equal(again.minutes,n.minutes);assert.equal(again.revision,n.revision);await assert.rejects(d.adventureAction({...req,requestId:'hunt-scout-test-0002'}));assert.equal((await d.read()).minutes,n.minutes);}finally{await fs.rm(dir,{recursive:true,force:true});}});
+
+t('hunt shows submitted research for its own target without changing legal hunt actions',()=>{
+ const {s,q}=setup();
+ s.location=q.destination;
+ const before=F.view(s,q.id);
+ assert.equal(before.researchHint,null);
+ const other=q.species==='slime'?'kar':'slime';
+ const submitted={location:q.issuerLocation,minutes:0};
+ s.fieldResearch={[other]:{submitted}};
+ assert.equal(F.view(s,q.id).researchHint,null);
+ const evidence='이전 탐사에서 확인한 행동';
+ s.fieldResearch[q.species]={submitted,clueDiscovery:{evidence}};
+ const after=F.view(s,q.id);
+ assert.equal(after.researchHint.evidence,evidence);
+ assert.deepEqual(after.actions,before.actions);
+ assert.equal(after.stage,before.stage);
+ assert.equal(q.progress,0);
+});
