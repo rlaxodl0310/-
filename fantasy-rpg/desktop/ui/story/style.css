@@ -262,3 +262,54 @@ body[data-story-mode=director] .dialogue-wrap{background:linear-gradient(90deg,#
  to{width:calc(var(--impact-to)*100%)}
 }
 @media(prefers-reduced-motion:reduce){.combat-meter-impact::-webkit-progress-value{animation:none}}
+
+/* The background and battlers share the stage grid row and a common ground line. */
+.scene[data-chat-combat] #scene-art{
+ position:relative;inset:auto;grid-row:1;grid-column:1;min-height:0;
+}
+.scene[data-chat-combat] #story-battle-layers{--ground-offset:2%;margin-top:50px}
+.scene[data-chat-combat] .story-fighter,.scene[data-chat-combat] .story-monster{
+ bottom:var(--ground-offset);
+ --shadow-width:35%;
+}
+.scene[data-chat-combat] .story-monster{--shadow-width:60%}
+.scene[data-chat-combat] .story-fighter[data-formation=lead]{
+ bottom:var(--ground-offset);
+}
+.scene[data-chat-combat] .story-fighter[data-formation=front]{
+ bottom:calc(var(--ground-offset) + 1%);
+}
+.scene[data-chat-combat] .story-fighter[data-formation=back]{
+ bottom:calc(var(--ground-offset) + 4%);
+}
+.scene[data-chat-combat] .story-fighter::before,.scene[data-chat-combat] .story-monster::before{
+ inset:auto auto 0 50%;translate:-50%;width:var(--shadow-width);height:8%;
+ background:radial-gradient(ellipse closest-side at center,var(--contact-shadow) 12%,transparent 100%);
+}
+.scene[data-chat-combat] .story-fighter>img,.scene[data-chat-combat] .story-monster>img{
+ z-index:1;
+}
+.scene[data-chat-combat] .battle-ally-name,.scene[data-chat-combat] .battle-confirmed-hit{
+ z-index:2;
+}
+@media(max-width:560px){
+ .scene[data-chat-combat] #story-battle-layers:not([data-party-size="1"]) .story-fighter[data-formation=lead]{
+  bottom:var(--ground-offset);
+ }
+ .scene[data-chat-combat] .story-fighter[data-formation=back]{
+  bottom:calc(var(--ground-offset) + 17%);
+ }
+}
+.scene[data-chat-combat] #scene-art[data-battle-atlas]{
+ container-type:size;overflow:hidden;
+}
+.scene[data-chat-combat] #scene-art[data-battle-atlas]::after{
+ --atlas-width:max(200cqw,400cqh);
+ content:"";position:absolute;width:var(--atlas-width);aspect-ratio:2;
+ left:calc((100% - var(--atlas-width)/2)/2 - var(--atlas-column)*var(--atlas-width)/2);
+ bottom:calc((var(--atlas-row) - 1)*var(--atlas-width)/4);
+ background-image:inherit;background-size:100% 100%;background-repeat:no-repeat;
+}
+@media(max-width:560px){
+ .scene[data-chat-combat] .chat-combat-enemies{max-height:100px}
+}
