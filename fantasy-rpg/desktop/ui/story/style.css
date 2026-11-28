@@ -167,3 +167,73 @@ body[data-story-mode=director] .dialogue-wrap{background:linear-gradient(90deg,#
  .scene[data-chat-combat] .story-fighter{left:calc(4% + var(--offset)*9%)}
  .scene[data-chat-combat] .story-monster{right:calc(5% + var(--offset)*13%);width:clamp(66px,23vw,125px)}
 }
+
+.scene[data-chat-combat] #story-battle-layers{
+ --actor-tone:saturate(.9) brightness(.92) sepia(.1);
+ --contact-shadow:#07110cbb;
+}
+.scene[data-chat-combat] #story-battle-layers[data-light=cave]{
+ --actor-tone:saturate(.73) brightness(.82) sepia(.12) hue-rotate(8deg);
+ --contact-shadow:#04050bd9;
+}
+.scene[data-chat-combat] #story-battle-layers[data-light=ruins]{
+ --actor-tone:saturate(.82) brightness(.91) sepia(.12);
+ --contact-shadow:#141015bd;
+}
+.scene[data-chat-combat] #story-battle-layers[data-light=interior]{
+ --actor-tone:saturate(.85) brightness(.96);
+ --contact-shadow:#131413a8;
+}
+.scene[data-chat-combat] .story-fighter>img,.scene[data-chat-combat] .story-monster>img{
+ filter:var(--actor-tone);
+}
+.scene[data-chat-combat] .story-fighter::before,.scene[data-chat-combat] .story-monster::before{
+ content:"";position:absolute;inset:auto 12% 0;height:11%;
+ background:radial-gradient(ellipse at center,var(--contact-shadow),transparent 72%);
+}
+.scene[data-chat-combat] .story-fighter[data-formation=lead]{
+ left:14%;z-index:4;
+}
+.scene[data-chat-combat] .story-fighter[data-formation=back]{
+ left:calc(3% + var(--offset)*6%);bottom:12%;
+ width:clamp(90px,17vw,250px);transform:none;z-index:1;
+}
+.scene[data-chat-combat] .story-fighter[data-formation=front]{
+ left:calc(11% + var(--offset)*8%);bottom:5%;
+ width:clamp(90px,17vw,250px);z-index:3;
+}
+.scene[data-chat-combat] .story-fighter[data-pose=attack],
+.scene[data-chat-combat] .story-fighter[data-pose=hit]{z-index:6}
+.battle-ally-name{
+ position:absolute;top:2%;left:50%;translate:-50%;
+ max-width:95%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+ color:#f9e8c3;background:#111a22de;border:1px solid #b1a18370;
+ padding:2px 5px;border-radius:3px;font-size:11px;
+}
+.chat-combat-roster{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:4px}
+.chat-combat-roster>span{font-size:11px;color:#c5e1db}
+.chat-combat-roster>span[data-pose=attack],
+.chat-combat-roster>span[data-pose=hit]{color:#ffe4a7;text-decoration:underline}
+@media(max-width:560px){
+ .scene[data-chat-combat] .story-fighter[data-formation=lead]{left:8%}
+ .scene[data-chat-combat] #story-battle-layers:not([data-party-size="1"]) .story-fighter[data-formation=lead]{width:36vw;left:11%}
+ .scene[data-chat-combat] .story-fighter[data-formation=back]{left:calc(0% + var(--offset)*6%);bottom:29%;width:25vw}
+ .scene[data-chat-combat] .story-fighter[data-formation=front]{left:30%;bottom:7%;width:24vw}
+ .battle-ally-name{font-size:9px}
+}
+.scene[data-chat-combat] #companion-hud:disabled{display:none}
+.scene[data-chat-combat] #story-battle-layers:not([data-party-size="1"]) .story-fighter[data-formation=lead]{
+ left:18%;width:clamp(110px,17vw,255px);
+}
+.scene[data-chat-combat] .story-fighter[data-formation=back]{
+ left:calc(-8% + var(--offset)*12%);bottom:13%;
+ width:clamp(85px,14vw,210px);
+}
+.scene[data-chat-combat] .story-fighter[data-formation=front]{
+ left:41%;bottom:4%;width:clamp(85px,14vw,210px);
+}
+@media(max-width:560px){
+ .scene[data-chat-combat] #story-battle-layers:not([data-party-size="1"]) .story-fighter[data-formation=lead]{left:5%;width:27vw;bottom:4%}
+ .scene[data-chat-combat] .story-fighter[data-formation=back]{left:calc(-7% + var(--offset)*11%);bottom:29%;width:23vw}
+ .scene[data-chat-combat] .story-fighter[data-formation=front]{left:29%;bottom:4%;width:22vw}
+}
