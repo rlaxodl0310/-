@@ -313,3 +313,11 @@ body[data-story-mode=director] .dialogue-wrap{background:linear-gradient(90deg,#
 @media(max-width:560px){
  .scene[data-chat-combat] .chat-combat-enemies{max-height:100px}
 }
+.scene[data-chat-combat] #story-battle-layers[data-light=clearing]{
+ --ground-offset:7%;
+ --actor-tone:saturate(.89) brightness(.97) sepia(.075);
+ --contact-shadow:#241d16d4;
+}
+.scene[data-chat-combat] #story-battle-layers[data-light=clearing] .story-fighter[data-grounded]{
+ --shadow-width:96%;
+}

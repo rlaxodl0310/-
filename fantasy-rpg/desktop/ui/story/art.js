@@ -21,13 +21,25 @@
   function character(id,pose='ready'){
     return frames[pose]?.[id]||frames.ready[id]||null;
   }
-  function layer(parent,id,side='ally',index=0,pose='ready'){
-    const frame=character(id,pose);
+  const stages=Object.freeze({
+    'north-wild-02':{
+      src:'assets/combat/blackpine-clearing.webp',size:'cover',position:'center 71%',light:'clearing',
+      ready:{
+        taei:{src:'assets/combat/blackpine-taei-ready.webp',x:251,y:30,w:500,h:1451,imageWidth:1024,imageHeight:1536},
+        yeogyeong:{src:'assets/combat/blackpine-yeogyeong-ready.webp',x:278,y:18,w:460,h:1504,imageWidth:1024,imageHeight:1536},
+      },
+    },
+  });
+  const battleStage=location=>Object.hasOwn(stages,location)?stages[location]:null;
+  function layer(parent,id,side='ally',index=0,pose='ready',stage=null){
+    const grounded=pose==='ready'?stage?.ready?.[id]:null;
+    const frame=grounded||character(id,pose);
     if(!frame)return;
     const outer=document.createElement('div'),image=document.createElement('img');
     outer.className='story-fighter '+side;
     outer.dataset.actor=id;
     outer.dataset.pose=pose;
+    if(grounded)outer.dataset.grounded='true';
     if(rangedActors.has(id))outer.dataset.ranged='true';
     if(frame.src.startsWith('battle/assets/'))outer.dataset.sd='true';
     outer.style.setProperty('--offset',index);
@@ -79,5 +91,5 @@
     if(!events.length&&participants.has('taei')&&resolution.incoming>0)output.push({taei:'hit'});
     return output;
   }
-  return{ids,character,layer,phases};
+  return{ids,character,stages,battleStage,layer,phases};
 });

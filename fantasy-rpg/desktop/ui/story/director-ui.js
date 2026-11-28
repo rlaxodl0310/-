@@ -161,7 +161,9 @@ function render(){if(!state||!enabled)return;StoryIllustrations.clear();let comp
  }
 }renderCompanionActions(button);renderObservationChoices(button);const enterStreet=streetEntry();if(enterStreet)button('마을 거리 들어가기',enterStreet);if(combat?.mode==='chat'&&combat.status==='playing')for(const sk of (state.skillBook?.skills||[]).filter(s=>s.ownerId==='taei'))button(sk.name+' 사용',()=>send(sk.name+' 사용'));if(combat?.mode==='realtime'&&combat.status==='playing')button('중요 전투 시작',launch);else button(combat?.mode==='chat'&&combat.status==='playing'?'대기':'주변의 반응을 기다린다',()=>send('잠시 기다리며 주변의 반응을 본다.'));if(combat?.mode==='chat'&&state.turns.at(-1)?.resolution&&JSON.stringify(state.panels)===JSON.stringify(state.turns.at(-1)?.panels))button('공방 다시 보기',playResolution);if(state.actionWorld?.suggestions?.length)button('행동 단서 보기',()=>{for(const old of $('choices').querySelectorAll('[data-action-hint]'))old.remove();for(const hint of state.actionWorld.suggestions){const b=button(hint.text,()=>{$('chat-input').value=hint.text;$('chat-input').focus();});b.dataset.actionHint='true';b.disabled=working;}});}
  const layer=$('story-battle-layers');layer.replaceChildren();layer.hidden=!combat;const portrait=$('scene-portrait'),player=$('scene-player'),background=$('scene-art');delete background.dataset.battleAtlas;if(!combat){SceneStage.render({background,portrait,player,location:state.location,era:state.era,state,dialogue:true,characterId:sceneActor(p)});}else{portrait.hidden=true;player.hidden=true;background.style.backgroundImage=state.era==='earth'?'url("assets/bg-subway.png")':'url("assets/combat/locations.png")';background.style.backgroundSize=state.era==='earth'?'cover':'200% 200%';const place=GameGeography.records.find(x=>x.id===state.location);const label=(place?.note||'')+(place?.location||'');const biome=/동굴|지하|광산/.test(label)?2:/유적|폐허/.test(label)?1:(place?.kind==='city'||place?.kind==='village'||/도시|마을|성문/.test(label))?3:0;background.style.backgroundPosition=(biome%2*100)+'% '+(Math.floor(biome/2)*100)+'%';layer.dataset.light=state.era==='earth'?'interior':['forest','ruins','cave','interior'][biome];
- const art=state.era==='fantasy'?ArrivalModel.art(state):null;
+ const stagedArt=state.era==='fantasy'&&combat.mode==='chat'?StoryBattleArt.battleStage(state.location):null;
+ const art=stagedArt||(state.era==='fantasy'?ArrivalModel.art(state):null);
+ if(stagedArt)layer.dataset.light=stagedArt.light;
  if(!art&&state.era==='fantasy'&&combat.mode==='chat'){
   background.dataset.battleAtlas='true';
   background.style.setProperty('--atlas-column',biome%2);
@@ -170,7 +172,7 @@ function render(){if(!state||!enabled)return;StoryIllustrations.clear();let comp
  if(art){background.style.backgroundImage='url("'+art.src+'")';background.style.backgroundSize=art.size;background.style.backgroundPosition=art.position;}const party=combatParty();
  layer.dataset.partySize=Math.min(party.length,4);
  for(const [i,id]of party.slice(0,4).entries()){
-  const fighter=StoryBattleArt.layer(layer,id,'ally',i,poseFor(id));
+  const fighter=StoryBattleArt.layer(layer,id,'ally',i,poseFor(id),stagedArt);
   if(!fighter)continue;
   fighter.dataset.formation=i===0?'lead':i%2?'back':'front';
   if(i>0&&combat.mode==='chat'){
