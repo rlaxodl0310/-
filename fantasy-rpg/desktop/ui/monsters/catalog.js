@@ -52,6 +52,11 @@ function detail(state,id,{creator=false}={}){const m=byId.get(id)||sightings.fin
 const previews=Object.freeze([
   {
     "id": "empereut",
+    "research": {
+      "sighting": {"label": "직접 목격"},
+      "wings": {"label": "날개 펼침", "pattern": "날개(?:지느러미)?를\\s*(?:크게\\s*)?(?:펼|펼쳤)"},
+      "dive": {"label": "잠수", "pattern": "잠수(?:한다|했다|하며|하는)|물속으로\\s*(?:잠겨|잠수|들어간|뛰어든)"}
+    },
     "name": "엠페르트",
     "stars": 7,
     "lineage": "익룡·수장룡 혼합 해룡형",

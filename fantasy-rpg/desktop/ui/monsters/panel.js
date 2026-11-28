@@ -10,6 +10,16 @@ else{
   card.append(n('h4',label),n('p',profile[key]));
  }
 }
-for(const [label,key]of [['외형','appearance'],['서식','habitat'],['생태','ecology'],['전투','combat'],['약점','weakness']])card.append(n('h4',label),n('p',d[key]));card.append(n('h4','정수'),n('p',d.essenceRule));for(const e of d.essences)card.append(n('p',e.name+' · '+e.effect));if(d.activeSkill){const a=d.activeSkill;card.append(n('h4','추가 액티브 · '+a.name),n('p',a.effect),n('p',a.cost),n('p',a.limits));}if(d.artNote)card.append(n('p',d.artNote));card.append(n('p',d.derivatives));content.append(card);}};check.onchange=()=>{creator=check.checked;draw();};body.append(toggle,content);draw();}
+for(const [label,key]of [['외형','appearance'],['서식','habitat'],['생태','ecology'],['전투','combat'],['약점','weakness']])card.append(n('h4',label),n('p',d[key]));card.append(n('h4','정수'),n('p',d.essenceRule));for(const e of d.essences)card.append(n('p',e.name+' · '+e.effect));if(d.activeSkill){const a=d.activeSkill;card.append(n('h4','추가 액티브 · '+a.name),n('p',a.effect),n('p',a.cost),n('p',a.limits));}if(d.research&&d.known){
+ const record=state.fieldResearch?.[d.id];
+ card.append(n('h4','현장 조사 노트'));
+ for(const [id,task] of Object.entries(d.research)){
+  const entry=record?.observations?.[id];
+  card.append(n('p',task.label+' · '+(entry?entry.evidence:'미확인')));
+ }
+ if(record?.submitted)card.append(n('p','협회 제출 완료'));
+ else if(Object.keys(d.research).every(id=>record?.observations?.[id]))card.append(n('p','조사 완료 · 협회에 제출할 수 있습니다.'));
+}
+if(d.artNote)card.append(n('p',d.artNote));card.append(n('p',d.derivatives));content.append(card);}};check.onchange=()=>{creator=check.checked;draw();};body.append(toggle,content);draw();}
 r.MonsterUI={render};
 })(globalThis);

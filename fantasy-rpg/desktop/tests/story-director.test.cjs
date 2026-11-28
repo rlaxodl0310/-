@@ -219,3 +219,34 @@ t('a free sighting persists across withdrawal, reload and combat re-entry',async
   a.equal(s.combat.status,'playing');
  }finally{await fs.rm(dir,{recursive:true,force:true});}
 });
+
+t('field research records verified sightings once and submits at an association',async()=>{
+ const seed={...initial(),era:'fantasy',location:'north-city-03',scene:'exploration',present:[],focus:'taei'};
+ let candidate;
+ const {dir,d}=await setup(async()=>candidate);
+ try{
+  let s=await d.save(seed);
+  const send=async(text,quote,patch={})=>{
+   candidate=answer(s,{panels:[{speaker:'narrator',text:quote||'파도 소리가 들린다.'}],facts:[],
+    monsterAppearances:quote?[{id:'empereut',panel:0,evidence:quote}]:[],...patch});
+   s=await d.send({text,requestId:'research-'+s.revision,revision:s.revision});
+  };
+  await send('바다를 살핀다','엠페르트가 날개를 펼친다.');
+  const first=s.fieldResearch.empereut.observations.wings;
+  a(first);
+  await a.rejects(send('협회에 현장 조사 기록을 제출한다'),/완성 조사 기록/);
+  await send('안전한 거리에서 더 관찰한다','엠페르트가 날개를 펼친다.');
+  a.equal(s.minutes,10);
+  a.deepEqual(s.fieldResearch.empereut.observations.wings,first);
+  const revision=s.revision;
+  await a.rejects(send('안전한 거리에서 더 관찰한다',null,{scene:'combat'}));
+  a.equal((await d.read()).revision,revision);
+  await send('안전한 거리에서 더 관찰한다','엠페르트가 물속으로 들어간다.');
+  a(s.fieldResearch.empereut.observations.dive);
+  const Research=require('../electron/field-research.cjs');
+  a.throws(()=>Research.submit(s,'협회에 현장 조사 기록을 제출한다',[]),/현재 장소의 협회/);
+  await send('협회에 현장 조사 기록을 제출한다');
+  a((await new StoryDirector(path.join(dir,'story.json'),{}).read()).fieldResearch.empereut.submitted);
+  await a.rejects(send('협회에 현장 조사 기록을 제출한다'),/완성 조사 기록/);
+ }finally{await fs.rm(dir,{recursive:true,force:true});}
+});
