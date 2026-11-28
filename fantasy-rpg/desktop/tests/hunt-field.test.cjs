@@ -22,3 +22,29 @@ t('hunt shows submitted research for its own target without changing legal hunt 
  assert.equal(after.stage,before.stage);
  assert.equal(q.progress,0);
 });
+
+t('verified outcomes are recorded once and a failed caravan can post a funded recovery contract',()=>{
+ const {s,q}=setup();
+ const before=structuredClone(s);
+ const caravan=before.adventure.quests.find(q=>q.type==='caravan');
+ caravan.status='accepted';
+ caravan.escort.startedAt=before.minutes;
+ const next=structuredClone(before);
+ const failed=next.adventure.quests.find(q=>q.id===caravan.id);
+ failed.status='failed';
+ failed.escort.phase='failed';
+ failed.escort.failureReason='운송 실패';
+ const Money=require('../ui/association/economy.js');
+ Money.release(next.adventure.economy,failed.id);
+ const complete=next.adventure.quests.find(item=>item.id===q.id);
+ complete.status='completed';
+ next.adventure.economy.settled[q.id]={questId:q.id};
+ const result=A.recordRegionalOutcome(before,next);
+ assert.equal(result.adventure.regionalOutcomes.length,2);
+ const refreshed=A.apply(result,{type:'refreshAI'});
+ const event=refreshed.adventure.regionalOutcomes.find(e=>e.kind==='supply-disruption');
+ const followup=refreshed.adventure.quests.find(q=>q.id===event.followup);
+ assert.match(followup.description,/보충 물자/);
+ assert(refreshed.adventure.economy.escrow[followup.id]);
+ assert.equal(A.recordRegionalOutcome(before,refreshed).adventure.regionalOutcomes.length,2);
+});

@@ -361,3 +361,26 @@ t('association clues cover every field research species and evidence remains spe
   a.equal(state.fieldResearch[id].clueDiscovery?.evidence,evidence,id);
  }
 });
+
+t('research compensation uses the association budget and defers once when underfunded',()=>{
+ const Research=require('../electron/field-research.cjs');
+ const Adventure=require('../ui/adventure/engine.js');
+ const Money=require('../ui/association/economy.js');
+ const state=Adventure.ensure({...initial(),era:'fantasy',location:'north-city-03'});
+ state.fieldResearch={slime:{observations:{sighting:{},behavior:{}}}};
+ const ledger=state.adventure.economy;
+ ledger.issuers.merchant+=ledger.issuers.association;
+ ledger.issuers.association=0;
+ const submit=s=>Research.submit(s,Research.submitText,[{type:'association'}]);
+ const due=Research.settleReports(state,submit(state));
+ a.equal(due.pending,1);
+ a.equal(due.paid,0);
+ const replenished=due.next.adventure.economy;
+ replenished.issuers.association=8;
+ replenished.issuers.merchant-=8;
+ const paid=Research.settleReports(due.next,submit(due.next));
+ a.equal(paid.paid,8);
+ a.equal(paid.next.adventure.economy.wallet,8);
+ a.equal(Money.total(paid.next.adventure.economy),ledger.initialTotal);
+ a.throws(()=>submit(paid.next),/완성 조사 기록/);
+});

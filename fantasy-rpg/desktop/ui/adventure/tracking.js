@@ -42,6 +42,26 @@ function options(s,id){
  return Object.entries(fieldActions).filter(([decision])=>!decisionReason(s,q,decision))
   .map(([decision,action])=>({decision,...action}));
 }
+function opening(state,quest){
+ const t=quest.tracking;
+ const side=!!t.flanked;
+ const remembered=t.survivor?.tracking?.memory;
+ const watched=remembered?.approach===(side?'side':'front');
+ const secured=state.adventure?.regionalOutcomes?.some(event=>event.kind==='secured'&&
+  event.location===state.location&&event.species===quest.species&&state.minutes-event.at<24*60);
+ const attention=Math.min(100,Math.max(0,t.attention+(watched?15:0)-(secured?10:0)));
+ const prepared=side&&!watched;
+ const distance=prepared?2:t.behaviour==='ambush'&&attention>=25?1:
+  t.confidence>=100?1:attention>=35?3:2;
+ const scouts=(state.companions?.agreements||[]).filter(a=>a.questId===quest.id&&a.cycle===t.cycle&&
+  a.status==='used'&&a.location===state.location).map(a=>a.actorId);
+ const allies=[...new Set(scouts)].filter(id=>{
+  const profile=state.npcExpeditionProfiles?.[id];
+  return state.party?.includes(id)&&state.present?.includes(id)&&profile?.hp>0&&profile.fatigue<100&&
+   !state.actionWorld?.actors?.[id]?.incapacitated;
+ });
+ return {side:side?'side':'front',distance,attention,detected:!prepared||attention>=35,allies};
+}
 function step(state,id,decision,{createCombat,clueId}={}){const s=clone(state),q=quest(s,id);eligible(s,q);const t=q.tracking;if(!t||!['trail','sighted'].includes(t.phase))fail('새 추적 상황부터 확인해 주세요.');if(t.location!==s.location||expired(s,t))fail('오래된 흔적입니다. 새 상황을 확인해 주세요.');const reason=decisionReason(s,q,decision);if(reason)fail(reason);
  if(clueId!==undefined&&decision!=='observe')fail('단서 지정은 관찰에서만 가능합니다.');
  if(decision==='withdraw'){advance(s,q,policy.withdrawMinutes);t.phase='withdrawn';record(q,s,'withdrawn','추적을 멈추고 거리를 벌렸다. 도시로 귀환한 것은 아니며 현재 장소에 남아 있다.');return s;}
@@ -49,10 +69,17 @@ function step(state,id,decision,{createCombat,clueId}={}){const s=clone(state),q
  if(decision==='observe'){const seen=t.observedClues||[],cues=clues(s,id),cue=clueId!==undefined?cues.find(c=>c.id===clueId):cues.find(c=>c.focus===t.focus&&!seen.includes(c.id))||cues.find(c=>!seen.includes(c.id));if(!cue||seen.includes(cue.id))fail('이미 살폈거나 현재 없는 단서입니다.');t.observedClues=[...seen,cue.id];t.focus=cue.focus;advance(s,q,policy.observeMinutes,1);t.observations++;t.confidence=Math.min(100,t.confidence+50);t.attention+=t.behaviour==='ambush'?25:t.behaviour==='pack'?20:10;t.phase='sighted';record(q,s,'observed',cue.label+'을 대조했다. 대상의 움직임과 접근 방향을 확인했다. 관찰하는 동안 시간과 피로가 늘었고 상대도 주변을 경계한다.');return s;}
  if(typeof createCombat!=='function')fail('실제 전투 실행기가 필요합니다.');advance(s,q,policy.approachMinutes,2);const fatigue=s.player.fatigue||0,agility=Rules.stat?Rules.stat(s.player,'agility'):s.player.stats?.agility||0;
  // Persisted cycle seed prevents reopening the UI to reroll the same trail.
- const roll=Rules.hash(q.id+':'+t.cycle+':approach')%100,threshold=Math.min(85,35+t.confidence*.45+Math.min(10,Number.isFinite(agility)?agility:0)-fatigue*.15);
+ const entry=opening(s,q);
+ const roll=Rules.hash(q.id+':'+t.cycle+':approach')%100,threshold=Math.min(85,35+t.confidence*.45+(!entry.detected?15:0)+(entry.allies.length?5:0)-(entry.attention-t.attention)+Math.min(10,Number.isFinite(agility)?agility:0)-fatigue*.15);
  if(t.phase==='trail'&&roll>=threshold){t.phase='sighted';t.attention+=35;record(q,s,'alerted',t.behaviour==='mobile'?'대상이 거리를 벌렸다. 재접근하기 전에 위치를 다시 확인해야 한다.':'접근 기척에 상대가 경계했다. 당장 타격할 거리는 아니며 다음 행동을 골라야 한다.');return s;}
- const combat=t.survivor?{...clone(t.survivor),status:'playing'}:createCombat(Array(t.behaviour==='pack'?Math.min(3,q.target-q.progress):1).fill(q.species),'chat',q.title);combat.adventureQuestId=q.id;combat.tracking={questId:q.id,cycle:t.cycle,behaviour:t.behaviour,attention:t.attention};if(!t.survivor)combat.distance=t.behaviour==='ambush'&&t.attention>=25?1:t.confidence>=100?1:t.attention>=35?3:2;
- t.phase='engaged';t.battleId=combat.id;t.survivor=null;s.combat=combat;s.scene='combat';record(q,s,'engaged','대상과 실제로 마주쳤다. 관찰과 경계 상태에 따른 거리에서 대화 전투가 시작된다.');return s;}
+ const combat=t.survivor?{...clone(t.survivor),status:'playing'}:createCombat(Array(t.behaviour==='pack'?Math.min(3,q.target-q.progress):1).fill(q.species),'chat',q.title);combat.adventureQuestId=q.id;
+ const memory=t.survivor?.tracking?.memory;
+ combat.tracking={questId:q.id,cycle:t.cycle,behaviour:t.behaviour,attention:entry.attention,
+  opening:entry,...(memory?{memory}:{})};
+ if(!t.survivor)combat.distance=entry.distance;
+ t.phase='engaged';t.battleId=combat.id;t.survivor=null;s.combat=combat;s.scene='combat';record(q,s,'engaged',(entry.detected?'상대가 접근을 알아챘다. ':'상대가 접근을 알아채기 전에 자리를 잡았다. ')+
+ (entry.side==='side'?'측면':'정면')+' 거리 '+combat.distance+'에서 대치한다.'+
+ (entry.allies.length?' 정찰을 마친 동료 '+entry.allies.length+'명이 함께 접근했다.':''));return s;}
 // A battle can only withdraw as a group, so surviving enemies stay in one saved encounter.
 function enemyWithdrawal(previous,battle,location){
  if(!battle?.tracking||battle.mode!=='chat'||battle.status!=='playing'||
@@ -67,13 +94,16 @@ function enemyWithdrawal(previous,battle,location){
   if(battle.distance<=2)return '거리를 좁혀 적의 이탈을 막았다.';
   battle.status='withdrawn';
   battle.tracking.enemyWithdrew=true;
+  battle.tracking.memory={approach:battle.tracking.opening?.side||'front'};
   return '살아남은 적이 전투에서 이탈했다. 다시 추적하면 같은 개체와 마주칠 수 있다.';
  }
  if(battle.distance<=2)return null;
  battle.tracking.enemyWithdrawalRound=battle.round;
  return '부상당한 적이 물러날 길을 살핀다. 거리를 좁히면 이탈을 막을 수 있다.';
 }
-function observe(previous,next){const battle=next.combat,old=previous.combat;if(!battle?.tracking||old?.id!==battle.id||old.status!=='playing'||battle.status==='playing')return next;const s=clone(next),q=s.adventure?.quests.find(q=>q.id===battle.tracking.questId),t=q?.tracking;if(!t||t.battleId!==battle.id||t.phase!=='engaged')return next;t.phase=battle.status==='won'?'aftermath':'withdrawn';t.survivor=battle.status==='won'?null:clone(battle);record(q,s,'battle-'+battle.status,battle.tracking.enemyWithdrew?'부상당한 적이 이탈했다. 생존 개체를 다시 추적할 수 있다.':battle.status==='won'?'공방이 끝났다. 부상·피로·남은 전리품을 확인하고 계속 사냥할지 귀환할지 결정할 수 있다.':'전투를 끝내지 못했다. 살아남은 대상의 HP와 전투 기록을 유지한다.');return s;}
+function observe(previous,next){const battle=next.combat,old=previous.combat;if(!battle?.tracking||old?.id!==battle.id||old.status!=='playing'||battle.status==='playing')return next;const s=clone(next),q=s.adventure?.quests.find(q=>q.id===battle.tracking.questId),t=q?.tracking;if(!t||t.battleId!==battle.id||t.phase!=='engaged')return next;t.phase=battle.status==='won'?'aftermath':'withdrawn';t.survivor=battle.status==='won'?null:clone(battle);
+ if(t.survivor)t.survivor.tracking.memory??={approach:battle.tracking.opening?.side||'front'};
+ record(q,s,'battle-'+battle.status,battle.tracking.enemyWithdrew?'부상당한 적이 이탈했다. 생존 개체를 다시 추적할 수 있다.':battle.status==='won'?'공방이 끝났다. 부상·피로·남은 전리품을 확인하고 계속 사냥할지 귀환할지 결정할 수 있다.':'전투를 끝내지 못했다. 살아남은 대상의 HP와 전투 기록을 유지한다.');return s;}
 function validate(t,q){if(!t)return;if(t.version!==1||!Number.isSafeInteger(t.cycle)||t.cycle<1||t.location!==q.destination||t.species!==q.species||!['trail','sighted','engaged','aftermath','withdrawn'].includes(t.phase)||!profile(q.species).behaviours.includes(t.behaviour)||!focusKeys.includes(t.focus)||!Number.isFinite(t.at)||t.at<0||!Number.isInteger(t.observations)||t.observations<0||t.observations>2||!Number.isFinite(t.confidence)||t.confidence<0||t.confidence>100||!Number.isFinite(t.attention)||t.attention<0||t.attention>100||!['ai','local'].includes(t.source)||!Array.isArray(t.history)||t.history.length>12)fail('추적 상태 기록이 잘못되었습니다.');if(t.observedClues!==undefined&&(!Array.isArray(t.observedClues)||t.observedClues.length>2||new Set(t.observedClues).size!==t.observedClues.length||t.observedClues.some(id=>!['ground','motion','range'].includes(id))))fail('관찰 단서 기록이 잘못되었습니다.');if(t.flanked!==undefined&&typeof t.flanked!=='boolean')fail('우회 관찰 기록이 잘못되었습니다.');if(t.survivor&&(t.survivor.id!==t.battleId||t.survivor.adventureQuestId!==q.id||!['escaped','lost','withdrawn'].includes(t.survivor.status)||t.survivor.enemies.some(e=>e.kind!==q.species||!Number.isFinite(e.hp)||e.hp<0||e.hp>e.max)))fail('생존 개체 전투 기록이 잘못되었습니다.');}
 function encounter(q){const t=q.tracking;if(!t)return null;const count=t.survivor?t.survivor.enemies.filter(e=>e.hp>0).length:t.behaviour==='pack'?Math.min(3,q.target-q.progress):1;return{count:t.phase==='engaged'?null:t.observations>0?count:null,distance:t.phase==='sighted'?t.confidence>=100?2:3:null,attention:t.attention,side:t.flanked?'side':'front',confirmed:t.observations>0};}
 function clues(s,id){const q=quest(s,id),t=q.tracking;if(!t||!['trail','sighted'].includes(t.phase)||s.location!==q.destination||expired(s,t))return[];const m=Catalog.records.find(m=>m.id===q.species),text=[m?.lineage,m?.appearance,m?.name].join(' '),kind=/점액|젤리|슬라임/.test(text)?'residue':/식물|뿌리|줄기/.test(text)?'disturbed':/어류|지느러미/.test(text)?'scrape':'track';return[{id:'ground',kind,label:({residue:'남은 흔적',disturbed:'흐트러진 지면',scrape:'쓸린 자국',track:'지면의 자국'})[kind],focus:'terrain',note:'출몰 보고와 대조할 단서입니다. 원인·수·정확한 위치는 아직 단정하지 않습니다.'},{id:'motion',kind:'motion',label:'움직임의 기척',focus:'movement',note:'기척이 이어지는 방향을 더 관찰할 수 있습니다.'},{id:'range',kind:'range',label:t.phase==='sighted'?'확인한 접근 방향':'시야가 트인 틈',focus:'distance',note:'시야와 접근 방향을 살핍니다. 새 개체를 생성하지 않습니다.'}];}

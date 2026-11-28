@@ -18,7 +18,7 @@ for(const [label,key]of [['외형','appearance'],['서식','habitat'],['생태',
   card.append(n('p',task.label+' · '+(entry?entry.evidence:'미확인')));
  }
  if(submitted){
-  card.append(n('p','협회 제출 완료'));
+  card.append(n('p','협회 제출 완료'+(record.submitted.rewardPaid?' · 조사 보수 동화 '+record.submitted.rewardPaid+'닢':record.submitted.rewardDue?' · 보수 지급 대기':'')));
   if(clue){
    card.append(n('h4','협회 조사 단서'),n('p',clue.site+' · '+clue.timing),n('p',clue.approach));
    if(record.clueDiscovery)card.append(n('p',clue.subject+' · '+record.clueDiscovery.evidence));

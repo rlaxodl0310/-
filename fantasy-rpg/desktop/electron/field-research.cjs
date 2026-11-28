@@ -1,6 +1,9 @@
 'use strict';
 
 const Catalog=require('../ui/monsters/catalog.js');
+const Adventure=require('../ui/adventure/engine.js');
+const Money=require('../ui/association/economy.js');
+const reportReward=8;
 const FreeEncounter=require('./free-encounter.cjs');
 const {policy}=require('../ui/adventure/tracking.js');
 const {observe:observeText,submit:submitText}=Catalog.fieldResearchActions;
@@ -62,10 +65,29 @@ function submit(state,text,facilities){
   const status=Catalog.researchStatus(state,id);
   return status?.complete&&!record.submitted;
  });
- if(!completed.length)throw Error('제출할 수 있는 완성 조사 기록이 없습니다.');
+ if(!completed.length&&!Object.values(state.fieldResearch||{}).some(r=>r.submitted?.rewardDue===reportReward&&!r.submitted.rewardPaid))throw Error('제출할 수 있는 완성 조사 기록이 없습니다.');
  const fieldResearch={...state.fieldResearch};
- for(const [id,record] of completed)fieldResearch[id]={...record,submitted:{location:state.location,minutes:state.minutes}};
+ for(const [id,record] of completed)fieldResearch[id]={...record,submitted:{location:state.location,minutes:state.minutes,rewardDue:reportReward}};
  return fieldResearch;
 }
 
-module.exports={observe,submit,capture,profile,followClue,recordClue,observeText,submitText,minutes:policy.observeMinutes};
+function settleReports(state,submitted){
+ const next=Adventure.ensure({...state,fieldResearch:submitted});
+ const ledger=next.adventure.economy;
+ let paid=0,pending=0;
+ for(const [species,record] of Object.entries(next.fieldResearch)){
+  if(!record.submitted||record.submitted.rewardPaid||record.submitted.rewardDue!==reportReward)continue;
+  const id='field-research:'+species;
+  if(!ledger.settled[id]&&!Money.reserve(ledger,id,'association',{reward:reportReward,materialsCap:0})){
+   pending++;
+   continue;
+  }
+  const receipt=Money.settle(ledger,{id,status:'accepted',partySize:1},
+   {authority:'engine',questId:id,objectiveVerified:true,costCopper:0});
+  record.submitted.rewardPaid=receipt.reward;
+  paid+=receipt.reward;
+ }
+ return {next,paid,pending};
+}
+
+module.exports={observe,submit,capture,profile,followClue,recordClue,settleReports,observeText,submitText,minutes:policy.observeMinutes};

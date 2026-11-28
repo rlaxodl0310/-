@@ -64,8 +64,9 @@
       });
       u.hp = e.hp;
       u.max = e.max;
-      u.x = 5 + c.distance + (i % 2) * 0.5;
-      u.y = 8 + Math.floor(i / 2) * 0.7;
+      const side=c.tracking?.opening?.side==='side';
+      u.x = 5 + (side?i*0.5:c.distance+(i%2)*0.5);
+      u.y = 8 + (side?-c.distance-i*0.5:Math.floor(i/2)*0.7);
       u.speed = 0;
       u.cooldown = 1e8;
     }
@@ -133,6 +134,10 @@
     const start = b.time,
       oldHP = p.hp,
       oldMana = p.mana;
+    function placeAtDistance(enemy){
+      if(c.tracking?.opening?.side==='side')enemy.y=p.y-c.distance;
+      else enemy.x=p.x+c.distance;
+    }
     let moved = 0,
       escaped = false,
       note = "";
@@ -144,7 +149,7 @@
       if (c.distance > 1) {
         c.distance--;
         moved = 1;
-        for (const u of b.living("enemy")) u.x = Math.max(p.x + 1, u.x - 1);
+        for (const u of b.living("enemy")) placeAtDistance(u);
         note = "타격 거리에 접근했다.";
       } else b.startAttack(p);
     } else if (basicIntent === "defend") {
@@ -155,7 +160,7 @@
         escaped = true;
         c.status = "escaped";
       } else c.distance = Math.min(4, c.distance + 2);
-      for (const u of b.living("enemy")) u.x = p.x + c.distance;
+      for (const u of b.living("enemy")) placeAtDistance(u);
     }
     for (let i = 0; i < 100; i++) {
       if (utility && p.hp > 0) b.status = "playing";

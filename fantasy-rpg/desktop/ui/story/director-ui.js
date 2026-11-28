@@ -392,7 +392,7 @@ function renderRecommendations(){
  if(catalog?.researchAvailable(state)){
   const completedResearch=catalog.researchMonsters.some(({id})=>{
    const status=catalog.researchStatus(state,id);
-   return status.complete&&!status.submitted;
+   return status.complete&&!status.submitted||status.record?.submitted?.rewardDue&&!status.record.submitted.rewardPaid;
   });
   if(completedResearch&&globalThis.RestServices?.facilities(state).some(f=>f.type==='association')){
    const input=catalog.fieldResearchActions.submit;

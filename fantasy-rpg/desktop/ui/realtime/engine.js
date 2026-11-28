@@ -17,6 +17,19 @@ class Battle{
  else if(d.intent==='intercept'||d.intent==='focus'||d.intent==='skill_q'||d.intent==='skill_e'){if(t){if(p.id==='taei')this.selected=t.id;else p.orderTarget=t.id;}if(d.intent==='focus'&&p.id!=='taei'){p.order='focus';p.action=null;this.emit('intent',{intent:d.intent,actor:p.id});return{ok:true};}if(!this.startAttack(p,d.intent==='skill_q'?'q':d.intent==='skill_e'?'e':null))return{ok:false,error:'거리·마나·준비 동작 또는 쿨타임을 확인해 주세요.'};if(d.intent==='intercept'){const shot=this.projectiles.filter(s=>s.team==='enemy').sort((a,b)=>distance(a,p)-distance(b,p))[0];if(shot)p.action.face=norm(shot.x-p.x,shot.y-p.y);}}
  this.emit('intent',{intent:d.intent,actor:p.id});return{ok:true};}
  emit(type,extra={}){this.events.push({id:++this.serial,time:this.time,type,...extra});if(this.events.length>140)this.events.shift();}
+ applyOpening(opening){
+  if(!opening)return;
+  const player=this.units[0],side=opening.side==='side';
+  for(const [index,enemy] of this.units.filter(unit=>unit.team==='enemy').entries()){
+   enemy.x=player.x+(side?index:opening.distance+index);
+   enemy.y=player.y+(side?-opening.distance:(index%2?1:-1)*Math.ceil(index/2));
+   if(!opening.detected)enemy.cooldown=Math.max(enemy.cooldown,0.5);
+  }
+  for(const [index,id] of opening.allies.entries()){
+   const ally=this.units.find(unit=>unit.id===id&&unit.team==='ally');
+   if(ally){ally.x=player.x+1;ally.y=player.y+1+index;}
+  }
+ }
  living(team){return this.units.filter(u=>u.hp>0&&u.team===team);}
  move(u,dx,dy,dt,multiplier=1){const v=norm(dx,dy);if(!dx&&!dy)return;const speed=u.speed*(1+u.agility/100)*multiplier*Rules.fatigue(u).multiplier,nx=clamp(u.x+v.x*speed*dt,.5,this.width-.5),ny=clamp(u.y+v.y*speed*dt,.5,this.height-.5),free=(x,y)=>u.dodgeTime>0||u.rush||!this.units.some(o=>o.id!==u.id&&o.hp>0&&Math.hypot(o.x-x,o.y-y)<o.radius+u.radius-.03);const old={x:u.x,y:u.y};if(free(nx,ny)){u.x=nx;u.y=ny;}else if(free(nx,u.y))u.x=nx;else if(free(u.x,ny))u.y=ny;else if(u.id!=='taei'){const side=Number(u.id.split('-').at(-1))%2?1:-1;for(const sign of [side,-side]){const sx=clamp(u.x-v.y*speed*dt*sign,.5,this.width-.5),sy=clamp(u.y+v.x*speed*dt*sign,.5,this.height-.5);if(free(sx,sy)){u.x=sx;u.y=sy;break;}}}u.face=v;if(distance(old,u)>.00001)u.animation='move';}
  target(u){const selected=this.units.find(e=>e.id===(u.id==='taei'?this.selected:u.orderTarget)&&e.team!==u.team&&e.hp>0);if(u.team==='ally'&&selected)return selected;const candidates=this.living(u.team==='ally'?'enemy':'ally').filter(t=>u.team==='ally'||distance(u,t)<12);const score=t=>distance(t,u)-(u.threat?.[t.id]||0)*.35-(1-t.hp/t.max)*1.2;return candidates.sort((a,b)=>score(a)-score(b))[0];}

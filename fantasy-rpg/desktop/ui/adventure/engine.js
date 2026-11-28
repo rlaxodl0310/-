@@ -208,13 +208,38 @@
     if (!sites[0]) fail("의뢰 목적지가 없습니다.");
     return sites[0];
   }
+  function recordRegionalOutcome(previous,next) {
+    if (next.era!=="fantasy"||!next.adventure) return next;
+    const updates=[];
+    for (const q of next.adventure.quests) {
+      const old=previous.adventure?.quests.find(item=>item.id===q.id);
+      if (!old||old.status===q.status) continue;
+      if (q.type==="hunt"&&q.status==="completed"&&next.adventure.economy.settled[q.id])
+        updates.push({questId:q.id,location:q.destination,species:q.species,kind:"secured",at:next.minutes});
+      if (q.type==="caravan"&&q.status==="failed"&&q.escort?.startedAt!=null)
+        updates.push({questId:q.id,location:q.issuerLocation,destination:q.destination,kind:"supply-disruption",at:next.minutes});
+    }
+    if (!updates.length) return next;
+    const s=clone(next);
+    const history=s.adventure.regionalOutcomes||[];
+    s.adventure.regionalOutcomes=[...history,...updates.filter(event=>!history.some(old=>old.questId===event.questId))].slice(-64);
+    return s;
+  }
+  function postRecovery(s){
+    const event=s.adventure.regionalOutcomes?.findLast(e=>e.kind==="supply-disruption"&&e.location===s.location&&!e.followup);
+    if(!event||!Escort||!Escort.post(s))return 0;
+    const quest=s.adventure.quests.findLast(q=>q.type==="caravan"&&q.issuerLocation===s.location&&q.status==="open");
+    quest.description+=" 이전 운송 실패로 보충 물자를 운송합니다.";
+    event.followup=quest.id;
+    return 1;
+  }
   function refresh(s) {
     if (!association(s))
       fail("의뢰 게시판이 있는 도시나 마을에서 확인해 주세요.");
     const a = s.adventure,
       previous = a.refreshes[s.location];
     if (previous !== undefined && s.minutes - previous < policy.refreshMinutes) {
-      let added=0;
+      let added=postRecovery(s);
       if(Escort&&!a.quests.some(q=>q.type==='caravan'&&q.issuerLocation===s.location))added+=Escort.post(s);
       if(Personal&&!a.quests.some(q=>q.type==='escort'&&q.issuerLocation===s.location))added+=Personal.post(s);
       if(Mining&&!a.quests.some(q=>q.type==='mining'))added+=Mining.post(s);
@@ -290,7 +315,7 @@
       a.quests.push(q);
       made++;
     }
-    if(Escort)made+=Escort.post(s);
+    if(Escort)made+=postRecovery(s)||Escort.post(s);
     if(Personal)made+=Personal.post(s);
     if(Mining)made+=Mining.post(s);
     if (!made) fail("추가 가능한 의뢰나 예치 예산이 없습니다.");
@@ -410,7 +435,7 @@
         (q) => q.status === "open" && q.issuerLocation === s.location,
       )
     ) {
-      if(Escort&&!a.quests.some(q=>q.type==='caravan'&&q.issuerLocation===s.location))Escort.post(s);
+      if(Escort&&!postRecovery(s)&&!a.quests.some(q=>q.type==='caravan'&&q.issuerLocation===s.location))Escort.post(s);
       if(Personal&&!a.quests.some(q=>q.type==='escort'&&q.issuerLocation===s.location))Personal.post(s);
       if(Mining&&!a.quests.some(q=>q.type==='mining'))Mining.post(s);
       return s;
@@ -601,6 +626,7 @@
     ensure,
     validate,
     observe,
+    recordRegionalOutcome,
     apply,
     context,
     ready,

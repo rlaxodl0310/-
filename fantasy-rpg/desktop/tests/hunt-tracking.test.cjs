@@ -55,3 +55,36 @@ test('shared enemy withdrawal uses health and terrain and keeps the same encount
  a.equal(s.combat.enemies[0].hp,1);
  a.equal(s.combat.rngState,retreated.rngState);
 });
+
+test('opening consumes approach direction, performed scouting and survivor memory',()=>{
+ const Battle=require('../ui/realtime/engine.js');
+ const {s,id}=started();
+ const q=s.adventure.quests.find(q=>q.id===id);
+ const observed=step(step(s,id,'observe'),id,'observe');
+ const front=step(observed,id,'approach');
+ const side=structuredClone(observed);
+ const t=side.adventure.quests.find(q=>q.id===id).tracking;
+ t.flanked=true;
+ side.party=['ally-a','ally-b'];
+ side.present=[...side.party];
+ side.npcExpeditionProfiles={'ally-a':{hp:10,fatigue:0},'ally-b':{hp:0,fatigue:0}};
+ side.companions={agreements:side.party.map(actorId=>({actorId,questId:id,cycle:t.cycle,status:'used',location:side.location}))};
+ const flank=step(side,id,'approach');
+ a.equal(front.combat.distance,1);
+ a.equal(flank.combat.distance,2);
+ a.equal(flank.combat.tracking.opening.side,'side');
+ a.deepEqual(flank.combat.tracking.opening.allies,['ally-a']);
+ const battle=new Battle({monsters:[q.species],allies:[{id:'ally-a',name:'동료'}]});
+ battle.applyOpening(flank.combat.tracking.opening);
+ a.equal(battle.units.find(u=>u.team==='enemy').y,battle.units[0].y-2);
+ a.equal(battle.units.find(u=>u.id==='ally-a').x,battle.units[0].x+1);
+ const withdrawn={...flank.combat,status:'withdrawn'};
+ const retreated=T.observe(flank,{...flank,combat:withdrawn});
+ const replay=T.begin(retreated,id,{behaviour:'watch',focus:'terrain'});
+ const again=step(replay,id,'observe');
+ const retracked=again.adventure.quests.find(q=>q.id===id).tracking;
+ retracked.flanked=true;
+ const resumed=step(again,id,'approach');
+ a.equal(resumed.combat.id,flank.combat.id);
+ a.equal(resumed.combat.tracking.opening.attention,retracked.attention+15);
+});
