@@ -177,3 +177,45 @@ t('TangTang reviews chat-driven registered character and monster choices on an o
   a.equal(second.combat,null);
  }finally{await fs.rm(dir,{recursive:true,force:true});}
 });
+
+t('a free sighting persists across withdrawal, reload and combat re-entry',async()=>{
+ const seed={...initial(),era:'fantasy',location:'north-city-03',scene:'exploration',present:[],focus:'taei'};
+ const quote='방파제 너머로 엠페르트가 물을 차고 떠오른다.';
+ const ordinary={...answer().combat,importance:'ordinary',reason:'엠페르트가 날아든다.',monsters:['empereut']};
+ let candidate,calls=0;
+ const {dir,d}=await setup(async()=>{calls++;return candidate;});
+ try{
+  let s=await d.save(seed);
+  const send=async(text,patch={})=>{
+   candidate=answer(s,{panels:[{speaker:'narrator',text:quote}],facts:[],...patch});
+   s=await d.send({text,requestId:'free-journey-'+s.revision,revision:s.revision});
+  };
+  await send('방파제 바깥 바다를 바라본다',{monsterAppearances:[{id:'empereut',panel:0,evidence:quote}]});
+  a.equal(s.freeEncounter.species,'empereut');
+  const before=calls;
+  await send('조우에서 물러난다');
+  s=await new StoryDirector(path.join(dir,'story.json'),{}).read();
+  a.equal(s.freeEncounter.phase,'withdrawn');
+  await send('마지막 조우에 재접근한다');
+  a.equal(calls,before);
+  a.equal(s.minutes,10);
+  a.equal(s.freeEncounter.expiresAt,30);
+  await send('날아드는 엠페르트에게 맞선다',{scene:'combat',combat:ordinary});
+  const battleId=s.combat.id;
+  for(let i=0;i<4&&s.combat.status==='playing';i++)
+   await send('엠페르트에게서 달아난다',{scene:'combat',combat:{...ordinary,intent:'flee'}});
+  a.equal(s.combat.status,'escaped');
+  a.equal(s.freeEncounter.battle.id,battleId);
+  const snapshot=s.freeEncounter.battle;
+  const Free=require('../electron/free-encounter.cjs');
+  a.throws(()=>Free.command({...s,location:'east-village-06'},'마지막 조우에 재접근한다'),/목격 장소/);
+  a.throws(()=>Free.command({...s,minutes:25},'마지막 조우에 재접근한다'),/시간이 지나/);
+  a.throws(()=>Free.command({...s,minutes:30},'마지막 조우에 재접근한다'),/기록이 없습니다/);
+  await send('마지막 조우에 재접근한다');
+  await send('날아드는 엠페르트에게 맞선다',{scene:'combat',combat:ordinary});
+  a.equal(s.combat.id,battleId);
+  a.deepEqual(s.combat.enemies,snapshot.enemies);
+  a.equal(s.combat.rngState,snapshot.rngState);
+  a.equal(s.combat.status,'playing');
+ }finally{await fs.rm(dir,{recursive:true,force:true});}
+});

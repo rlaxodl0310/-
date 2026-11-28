@@ -359,7 +359,6 @@ function renderRecommendations(){
    renderRecommendations();
   });
  }
- if(recommendationChoices===null&&window.desktopAI?.directorRecommendations)return;
  const fallback=['주변 단서를 살핀다.','곁에 있는 인물에게 말을 건다.','잠시 기다리며 주변 반응을 본다.'];
  const choices=recommendationChoices||[...new Set([...(state.choices||[]),...fallback])]
   .slice(0,3).map(input=>({label:input,input}));
@@ -376,6 +375,15 @@ function renderRecommendations(){
   button.onclick=()=>choice.action?runRecommendedAction(choice.action):send(choice.input);
   parent.append(button);
  }
+ const encounter=state.freeEncounter;
+ if(state.era==='fantasy'&&encounter&&state.minutes<encounter.expiresAt&&state.combat?.status!=='playing'){
+  if(encounter.location===state.location&&state.player.hp>0){
+   const input=encounter.phase==='withdrawn'?'마지막 조우에 재접근한다':'조우에서 물러난다';
+   addButton({label:input,input,minutes:5},list);
+  }
+  addButton({label:'조우 추적을 그만둔다',input:'조우 추적을 그만둔다'},list);
+ }
+ if(recommendationChoices===null&&window.desktopAI?.directorRecommendations)return;
  for(const choice of choices.slice(0,3)){
   if(!choice.compare){addButton(choice,list);continue;}
   const details=document.createElement('details'),summary=document.createElement('summary');
