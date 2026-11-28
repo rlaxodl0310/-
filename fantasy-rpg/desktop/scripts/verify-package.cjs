@@ -8,6 +8,9 @@ function verify(file,root=path.resolve(__dirname,'..')){
  for(const m of [...M.records,...M.sightings]){if(m.asset)files.add('ui/'+m.asset);for(const f of Object.values(m.artFrames||{}))files.add('ui/'+f.src);}
  const Art=require(path.join(root,'ui/story/art.js'));
  files.add('ui/story/art.js');
+ const Characters=require(path.join(root,'ui/characters/content.js'));
+ files.add('ui/characters/content.js');
+ for(const frame of Object.values(Characters.legacyCasual))files.add('ui/'+frame.src);
  for(const stage of Object.values(Art.stages)){
   files.add('ui/'+stage.src);
   for(const frame of Object.values(stage.ready||{}))files.add('ui/'+frame.src);

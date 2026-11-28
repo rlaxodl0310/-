@@ -628,7 +628,7 @@ function appearance(id,{look='default',pose='default'}={}){const r=get(id);retur
 function displayName(state,id){const r=get(id);if(!r)return null;const introduced=state?.knownIdentities?.[id]===true||(state?.turns||[]).some(t=>(t.panels||[]).some(p=>p.speaker===id&&String(p.text||'').includes(r.name)));return introduced?r.name:r.unknownName;}
 
 const legacyCasual={
-  yeogyeong:fullImage('yeogyeong-casual.webp',720,1080),
+  yeogyeong:fullImage('yeogyeong-city-casual.webp',1024,1536),
   dogyeom:fullImage('dogyeom-casual.webp',720,1080),
   seoha:fullImage('seoha-casual.webp',720,1080),
   'dogyeom-childhood-friend':fullImage('soyun-casual.webp',720,1080),
