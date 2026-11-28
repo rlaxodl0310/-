@@ -395,11 +395,21 @@ function renderRecommendations(){
  }
  const catalog=globalThis.MonsterCatalog;
  if(catalog&&state.era==='fantasy'&&state.combat?.status!=='playing'&&state.player.hp>0){
-  for(const [id,clue] of Object.entries(catalog.fieldClues)){
+  const availableClues=Object.entries(catalog.fieldClues).filter(([id])=>{
    const record=state.fieldResearch?.[id];
-   if(!record?.submitted||record.clueDiscovery)continue;
+   return record?.submitted&&!record.clueDiscovery;
+  });
+  let parent=list;
+  if(availableClues.length>3){
+   const details=document.createElement('details'),summary=document.createElement('summary');
+   summary.textContent='협회 조사 단서 '+availableClues.length+'종';
+   details.append(summary);
+   list.append(details);
+   parent=details;
+  }
+  for(const [id,clue] of availableClues){
    const input=catalog.clueInput(catalog.detail(state,id,{creator:true}).name);
-   addButton({label:input,input,minutes:10,condition:clue.site},list);
+   addButton({label:input,input,minutes:10,condition:clue.site},parent);
   }
  }
  if(recommendationChoices===null&&window.desktopAI?.directorRecommendations)return;

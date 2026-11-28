@@ -320,3 +320,46 @@ t('association clues unlock after submission and persist follow-up evidence',asy
   }
  }finally{await fs.rm(dir,{recursive:true,force:true});}
 });
+
+t('association clues cover every field research species and evidence remains species-specific',()=>{
+ const Catalog=require('../ui/monsters/catalog.js');
+ const Research=require('../electron/field-research.cjs');
+ a.deepEqual(Object.keys(Catalog.fieldClues).sort(),Catalog.researchMonsters.map(({id})=>id).sort());
+ for(const [id,clue] of Object.entries(Catalog.fieldClues)){
+  a(clue.site&&clue.timing&&clue.approach&&clue.subject&&clue.pattern);
+  a.doesNotThrow(()=>new RegExp(clue.pattern));
+  const name=Catalog.detail({},id,{creator:true}).name;
+  const state={...initial(),era:'fantasy',fieldResearch:{[id]:{submitted:{minutes:0}}}};
+  a.equal(Research.followClue(state,Catalog.clueInput(name)).species,id);
+ }
+ const examples={
+  goblin:'고블린이 잔해 뒤에 몸을 숨긴다.',
+  moa:'모아가 햇빛을 따라 풀밭 건너로 움직인다.',
+  ruke:'루크가 바람을 등지고 쉰다.',
+  por:'수초 사이에 포르 무리가 모여든다.',
+  tork:'토르크가 그늘로 기어간다.',
+  ves:'베스가 반향을 듣고 통로 방향을 확인한다.',
+  rat:'라트가 냄새를 따라 벽가로 이동한다.',
+  chitin:'키틴이 썩은 나무 아래에서 기어 나온다.',
+  ant:'앤트 여러 마리가 먹이 냄새를 따라 같은 길로 이동한다.',
+  clad:'클래드가 좁은 굴에서 뒤로 물러난다.',
+  velum:'벨룸이 거꾸로 매달려 쉰다.',
+  draven:'드라벤이 먹이를 돌 틈에 숨긴다.',
+  noxvern:'천장의 녹스베른이 진동을 느끼자 고개를 돌린다.',
+  lairon:'갱도라가 철광석을 앞발로 긁는다.',
+  nerpang:'네르팽의 낮은 울음에 다른 개체가 응답한다.',
+  fizz:'피즈가 그라우크와 사냥 신호를 주고받는다.',
+  grauk:'그라우크가 깊은 물길에 잠복한다.',
+  cobalion:'코바르온이 단단한 바닥을 골라 걷는다.',
+  terrakion:'테라키온이 흔들리는 바닥을 피해 걷는다.',
+  viridion:'한낮에 비리디온이 그늘로 옮겨간다.',
+ };
+ for(const [id,evidence] of Object.entries(examples)){
+  const state={location:'test-location',minutes:10,fieldResearch:{[id]:{submitted:{minutes:0}}}};
+  const clue={species:id,...Catalog.fieldClues[id]};
+  Research.recordClue(state,clue,[{id:'empereut',evidence},{id,evidence:evidence+'라고 들었다.'}]);
+  a.equal(state.fieldResearch[id].clueDiscovery,null,id);
+  Research.recordClue(state,clue,[{id,evidence}]);
+  a.equal(state.fieldResearch[id].clueDiscovery?.evidence,evidence,id);
+ }
+});
