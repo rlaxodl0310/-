@@ -11,3 +11,47 @@ test('actual model proposal is reviewed by TangTang; unsupported ecology repairs
 test('director tracking retry and slot rollback restore confidence/time/HP with no model reroll on reopening',async()=>{const dir=await fs.mkdtemp(path.join(os.tmpdir(),'tracking66-'));try{const {s,id}=setup();let calls=0;const bridge={check:async()=>({ready:true}),generateStructured:async()=>{calls++;return{behaviour:'watch',focus:'movement'};}};const d=new StoryDirector(path.join(dir,'story.json'),bridge);await d.save(s);await d.saveSlotAction({action:'save',slot:1,revision:s.revision});const req={requestId:'tracking-first-001',revision:s.revision,action:{type:'track',questId:id}};const n=await d.adventureAction(req);const again=await d.adventureAction(req);a.equal(again.minutes,n.minutes);a.equal(calls,1);const reopened=await d.adventureAction({requestId:'tracking-open-0002',revision:n.revision,action:{type:'track',questId:id}});a.equal(reopened.minutes,n.minutes);a.equal(calls,1);await a.rejects(d.adventureAction({...req,requestId:'tracking-stale-0003'}));const observed=await d.adventureAction({requestId:'tracking-observe-004',revision:reopened.revision,action:{type:'trackStep',questId:id,decision:'observe'}});a.equal(T.context(observed,id).confidence,50);a.equal(observed.player.fatigue,2.5);const restored=(await d.saveSlotAction({action:'load',slot:1,revision:observed.revision})).state;a.equal(T.context(restored,id),null);a.equal(restored.minutes,s.minutes);a.equal(restored.player.hp,s.player.hp);}finally{await fs.rm(dir,{recursive:true,force:true});}});
 
 test('projected approach exhaustion rejects before writing a combat or spending time',async()=>{const dir=await fs.mkdtemp(path.join(os.tmpdir(),'tracking66-limit-'));try{let {s,id}=started();s=step(s,id,'observe');s.player.fatigue=97.9;const d=new StoryDirector(path.join(dir,'story.json'),{});await d.save(s);const before=await d.read();await a.rejects(d.adventureAction({requestId:'tracking-exhaustion-1',revision:before.revision,action:{type:'trackStep',questId:id,decision:'approach'}}),/탈진/);const after=await d.read();a.equal(after.minutes,before.minutes);a.equal(after.player.fatigue,before.player.fatigue);a.equal(after.combat,null);}finally{await fs.rm(dir,{recursive:true,force:true});}});
+
+test('shared enemy withdrawal uses health and terrain and keeps the same encounter without awarding kills',()=>{
+ const Geo=require('../ui/map/geography.js');
+ const exit=Geo.records.find(p=>p.huntTerrain?.coveredRoute).id;
+ for(const kind of ['ant','slime']){
+  const combat=C.createCombat([kind],'chat','same shared rules');
+  combat.tracking={behaviour:'watch'};
+  const wounded=structuredClone(combat);
+  wounded.round=1;
+  wounded.distance=3;
+  wounded.enemies[0].hp=Math.ceil(wounded.enemies[0].max*0.2);
+  a.equal(T.enemyWithdrawal(combat,structuredClone(wounded),'no-covered-route'),null);
+  a.match(T.enemyWithdrawal(combat,wounded,exit),/물러날 길/);
+  const close={...structuredClone(wounded),round:2,distance:2};
+  a.match(T.enemyWithdrawal(wounded,close,exit),/이탈을 막았다/);
+  a.equal(close.status,'playing');
+  const far={...structuredClone(wounded),round:2};
+  a.match(T.enemyWithdrawal(wounded,far,exit),/이탈했다/);
+  a.equal(far.status,'withdrawn');
+  a.deepEqual(far.enemies,wounded.enemies);
+ }
+
+ let {s,id}=started();
+ s=step(step(s,id,'observe'),id,'approach');
+ const old=s;
+ const damaged=structuredClone(s.combat);
+ damaged.round+=1;
+ damaged.enemies[0].hp=1;
+ damaged.tracking.behaviour='mobile';
+ damaged.distance=3;
+ T.enemyWithdrawal(old.combat,damaged,s.location);
+ const retreated={...structuredClone(damaged),round:damaged.round+1};
+ T.enemyWithdrawal(damaged,retreated,s.location);
+ s=A.observe(old,{...s,combat:retreated,scene:'exploration'});
+ let q=s.adventure.quests.find(q=>q.id===id);
+ a.equal(q.progress,0);
+ a.equal(q.tracking.survivor.enemies[0].hp,1);
+ a(!s.adventure.battleReceipts.includes(retreated.id));
+ s=T.begin(s,id,{behaviour:'watch',focus:'terrain'});
+ s=step(step(s,id,'observe'),id,'approach');
+ a.equal(s.combat.id,retreated.id);
+ a.equal(s.combat.enemies[0].hp,1);
+ a.equal(s.combat.rngState,retreated.rngState);
+});
