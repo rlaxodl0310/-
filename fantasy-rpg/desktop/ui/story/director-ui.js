@@ -375,29 +375,32 @@ function renderRecommendations(){
   button.onclick=()=>choice.action?runRecommendedAction(choice.action):send(choice.input);
   parent.append(button);
  }
+ const catalog=globalThis.MonsterCatalog;
  const encounter=state.freeEncounter;
  if(state.era==='fantasy'&&encounter&&state.minutes<encounter.expiresAt&&state.combat?.status!=='playing'){
   if(encounter.location===state.location&&state.player.hp>0){
-   if(globalThis.MonsterCatalog?.researchMonsters.some(monster=>monster.id===encounter.species&&monster.research))
-    addButton({label:'안전한 거리에서 더 관찰한다',input:'안전한 거리에서 더 관찰한다',minutes:10},list);
+   const minutes=HuntTracking.policy.observeMinutes;
+   if(catalog?.researchFor(encounter.species)&&state.minutes+minutes<encounter.expiresAt){
+    const input=catalog.fieldResearchActions.observe;
+    addButton({label:input,input,minutes},list);
+   }
    const input=encounter.phase==='withdrawn'?'마지막 조우에 재접근한다':'조우에서 물러난다';
    addButton({label:input,input,minutes:5},list);
   }
   addButton({label:'조우 추적을 그만둔다',input:'조우 추적을 그만둔다'},list);
  }
- const completedResearch=globalThis.MonsterCatalog?.researchMonsters.some(monster=>{
-  const record=state.fieldResearch?.[monster.id];
-  return monster.research&&record&&!record.submitted&&Object.keys(monster.research).every(id=>record.observations?.[id]);
- });
- if(completedResearch&&state.combat?.status!=='playing'&&state.player.hp>0&&globalThis.RestServices?.facilities(state).some(f=>f.type==='association')){
-  const input='협회에 현장 조사 기록을 제출한다';
-  addButton({label:input,input},list);
- }
- const catalog=globalThis.MonsterCatalog;
- if(catalog&&state.era==='fantasy'&&state.combat?.status!=='playing'&&state.player.hp>0){
-  const availableClues=Object.entries(catalog.fieldClues).filter(([id])=>{
-   const record=state.fieldResearch?.[id];
-   return record?.submitted&&!record.clueDiscovery;
+ if(catalog?.researchAvailable(state)){
+  const completedResearch=catalog.researchMonsters.some(({id})=>{
+   const status=catalog.researchStatus(state,id);
+   return status.complete&&!status.submitted;
+  });
+  if(completedResearch&&globalThis.RestServices?.facilities(state).some(f=>f.type==='association')){
+   const input=catalog.fieldResearchActions.submit;
+   addButton({label:input,input},list);
+  }
+  const availableClues=catalog.researchMonsters.filter(({id})=>{
+   const status=catalog.researchStatus(state,id);
+   return status.clue&&!status.record.clueDiscovery;
   });
   let parent=list;
   if(availableClues.length>3){
@@ -407,10 +410,8 @@ function renderRecommendations(){
    list.append(details);
    parent=details;
   }
-  for(const [id,clue] of availableClues){
-   const input=catalog.clueInput(catalog.detail(state,id,{creator:true}).name);
-   addButton({label:input,input,minutes:10,condition:clue.site},parent);
-  }
+  for(const {input,clue} of availableClues)
+   addButton({label:input,input,minutes:HuntTracking.policy.observeMinutes,condition:clue.site},parent);
  }
  if(recommendationChoices===null&&window.desktopAI?.directorRecommendations)return;
  for(const choice of choices.slice(0,3)){

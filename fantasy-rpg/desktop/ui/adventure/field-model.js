@@ -5,9 +5,9 @@ const loot=(s.adventure.ground||[]).filter(l=>l.location===s.location&&!l.claime
 const stage=finished?'settled':failed?'closed':q.status==='open'?'contract':playing&&battle?'combat':q.tracking&&['trail','sighted'].includes(q.tracking.phase)&&at?'field':loot.length?'loot':done?'return':at?'field':'travel';
 const stale=Tracking.expired(s,q.tracking);const label={contract:'의뢰 수락',travel:'현장으로 이동',field:stale?'오래된 흔적':q.tracking?({trail:'흔적 추적',sighted:'대상 관찰',withdrawn:'추적 중단',aftermath:'사냥 후 판단',engaged:'대화 전투'})[q.tracking.phase]:q.fieldNote?'대치 준비':'현장 확인',combat:'대화 전투',loot:'전리품 확보',return:'귀환·증빙 제출',settled:'정산 완료',closed:'계약 종료'}[stage];
 const text=(place?.note||'')+(place?.name||'');const biome=/동굴|지하|광산/.test(text)?2:/유적|폐허/.test(text)?1:['city','village'].includes(place?.kind)?3:0;
-const research=s.fieldResearch?.[q.species];
-const briefing=research?.submitted&&!done&&!finished&&!failed?Catalog.fieldClues[q.species]:null;
+const research=Catalog.researchStatus(s,q.species);
+const briefing=!done&&!finished&&!failed?research?.clue:null;
 const researchHint=briefing?{site:briefing.site,timing:briefing.timing,approach:briefing.approach,
- evidence:research.clueDiscovery?.evidence||null}:null;
+ evidence:research.record.clueDiscovery?.evidence||null}:null;
 return{researchHint,stale,actions:Tracking.options(s,id),clues:Tracking.clues(s,id),encounter:Tracking.encounter(q),tracking:q.tracking||null,q,place,destination,issuer,monster:m,at,stage,label,biome,battle,loot,done,finished,failed,playing,remaining:Math.max(0,q.deadline-s.minutes),steps:[['수락',q.status!=='open'],['현장',!!q.fieldNote||q.progress>0||!!battle||(q.tracking?.observations||0)>0],['토벌',done],['회수',q.proofs.length>0&&q.proofs.every(id=>s.adventure.ground.find(l=>l.id===id)?.claimed)],['정산',finished]]};}
 return{view};});

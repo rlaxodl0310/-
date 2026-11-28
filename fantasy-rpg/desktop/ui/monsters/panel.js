@@ -11,14 +11,13 @@ else{
  }
 }
 for(const [label,key]of [['외형','appearance'],['서식','habitat'],['생태','ecology'],['전투','combat'],['약점','weakness']])card.append(n('h4',label),n('p',d[key]));card.append(n('h4','정수'),n('p',d.essenceRule));for(const e of d.essences)card.append(n('p',e.name+' · '+e.effect));if(d.activeSkill){const a=d.activeSkill;card.append(n('h4','추가 액티브 · '+a.name),n('p',a.effect),n('p',a.cost),n('p',a.limits));}if(d.research&&d.known){
- const record=state.fieldResearch?.[d.id];
+ const {record,clue,complete,submitted}=MonsterCatalog.researchStatus(state,d.id);
  card.append(n('h4','현장 조사 노트'));
  for(const [id,task] of Object.entries(d.research)){
   const entry=record?.observations?.[id];
   card.append(n('p',task.label+' · '+(entry?entry.evidence:'미확인')));
  }
- const clue=MonsterCatalog.fieldClues[d.id];
- if(record?.submitted){
+ if(submitted){
   card.append(n('p','협회 제출 완료'));
   if(clue){
    card.append(n('h4','협회 조사 단서'),n('p',clue.site+' · '+clue.timing),n('p',clue.approach));
@@ -27,7 +26,7 @@ for(const [label,key]of [['외형','appearance'],['서식','habitat'],['생태',
     card.append(n('p','최근 탐사에서 이 행동을 확인하지 못했습니다. '+clue.timing));
   }
  }
- else if(Object.keys(d.research).every(id=>record?.observations?.[id]))card.append(n('p','조사 완료 · 협회에 제출할 수 있습니다.'));
+ else if(complete)card.append(n('p','조사 완료 · 협회에 제출할 수 있습니다.'));
 }
 if(d.artNote)card.append(n('p',d.artNote));card.append(n('p',d.derivatives));content.append(card);}};check.onchange=()=>{creator=check.checked;draw();};body.append(toggle,content);draw();}
 r.MonsterUI={render};

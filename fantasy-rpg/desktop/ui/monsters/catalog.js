@@ -34,96 +34,6 @@ const profiles={
   terrakion:{"status":"draft","adultAverage":{"heightM":2.25,"lengthM":4.7,"massKg":1750.0},"temperament":"평소 움직임이 적고, 물러날 길이 막히면 몸을 낮추고 버틴다.","habits":"건조한 암벽 지대와 너덜지대에서 쉬며 흔들리는 바닥을 피한다.","nutrition":"풍화된 암석과 광물질을 섭취해 닳은 바위 조직을 천천히 보충한다.","ecosystemRole":"이동 중 느슨한 돌을 밀어내 작은 동물이 드나들 바위 틈과 자갈 퇴적지를 만든다."},
   viridion:{"status":"baseline","adultAverage":{"heightM":2.4,"lengthM":5.5,"massKg":380.0},"temperament":"신중하고 예민하며 낯선 자극에 호기심을 보인다.","habits":"아침에는 햇빛이 드는 공터, 한낮에는 그늘과 물가를 이용하고 밤에는 잎 조직을 접는다.","nutrition":"빛을 받아 광합성하고 물과 광물질을 흡수한 뒤 휴식하며 조직을 유지한다.","ecosystemRole":"씨앗과 꽃가루를 옮기고 떨어진 잎으로 주변 토양에 유기물을 돌려준다."},
 };
-const researchTasks={
- "goblin": {
-  "label": "몽둥이 내리치기",
-  "pattern": "몽둥이로.{0,20}내리치|몽둥이를.{0,12}내리치"
- },
- "slime": {
-  "label": "몸 튕기기",
-  "pattern": "몸(?:을|이).{0,12}튕"
- },
- "moa": {
-  "label": "뿌리 고정",
-  "pattern": "뿌리를.{0,15}(?:고정|박|내리)"
- },
- "ruke": {
-  "label": "앞발 낮추기",
-  "pattern": "앞발을.{0,12}낮"
- },
- "por": {
-  "label": "분사 가속",
-  "pattern": "물을.{0,12}(?:뿜|내뿜).{0,18}(?:가속|빨라|달려)"
- },
- "tork": {
-  "label": "꼬리치기",
-  "pattern": "꼬리로.{0,15}(?:치|후려)|꼬리를.{0,12}휘둘"
- },
- "kar": {
-  "label": "급강하",
-  "pattern": "급강하"
- },
- "ves": {
-  "label": "사각 접근",
-  "pattern": "(?:사각|사각지대)에서.{0,16}접근"
- },
- "rat": {
-  "label": "몸 낮추기",
-  "pattern": "낮게.{0,8}웅크"
- },
- "chitin": {
-  "label": "톱니 앞턱 물기",
-  "pattern": "(?:앞턱|톱니 턱)으로.{0,15}(?:물|문)"
- },
- "ant": {
-  "label": "무리의 측면 접근",
-  "pattern": "(?:무리|여럿).{0,30}(?:옆구리|측면|옆쪽).{0,15}(?:접근|다가|파고)"
- },
- "clad": {
-  "label": "압착 턱 붙잡기",
-  "pattern": "턱으로.{0,15}(?:붙잡|움켜|물어 잡)"
- },
- "velum": {
-  "label": "낮은 활공",
-  "pattern": "낮게.{0,10}활공|낮은.{0,8}활공"
- },
- "draven": {
-  "label": "목주머니 팽창",
-  "pattern": "목주머니.{0,12}(?:부풀|팽창)"
- },
- "noxvern": {
-  "label": "벽면 이동",
-  "pattern": "벽(?:을|면을).{0,12}(?:타고|올라|기어)"
- },
- "lairon": {
-  "label": "낮은 자세 돌진",
-  "pattern": "몸을.{0,10}낮.{0,18}돌진"
- },
- "nerpang": {
-  "label": "젖은 지면 활주",
-  "pattern": "(?:수막|젖은 지면).{0,24}(?:활주|미끄러)"
- },
- "fizz": {
-  "label": "삼지창을 든 도약",
-  "pattern": "삼지창을.{0,20}(?:도약|뛰어오르|뛰어올)"
- },
- "grauk": {
-  "label": "수중 접근",
-  "pattern": "(?:물속|수중)에서.{0,18}(?:다가|접근)"
- },
- "cobalion": {
-  "label": "발톱으로 지면 찍기",
-  "pattern": "발톱으로.{0,16}(?:지면|땅)을.{0,10}찍"
- },
- "terrakion": {
-  "label": "몸을 낮춰 충격에 버팀",
-  "pattern": "몸을.{0,10}낮.{0,20}(?:버티|버텨|견디)"
- },
- "viridion": {
-  "label": "잎날 베기",
-  "pattern": "잎날로.{0,15}(?:베어|베는|벤다|베었다|벨)"
- }
-};
 const records=Object.freeze([...seedMonsters,ant,clad,...added,lairon,nerpang,...aquatic105,cobalion106,terrakion107,viridion108].map(m=>{const e=E.records.find(e=>e.id===m.id);const profile=m.profile||profiles[m.id];return Object.freeze({...m,profile:Object.freeze({...profile,adultAverage:Object.freeze(profile.adultAverage)}),activeSkill:e.activeSkill||null,essences:Object.freeze([e.effect]),essenceRule:'극히 드문 드롭. '+e.effect.name+' 하나를 고정 습득하고 '+(e.stats?Object.entries(e.stats).map(([k,v])=>k+' +'+v).join(', '):'관련 스탯이 소폭 상승한다(수치 미정)')+(e.activeSkill?' 추가 고정 액티브 '+e.activeSkill.name+' 포함':'')+'. 정수 슬롯 하나 사용, 생성 후 30분 미섭취 시 소멸. 성급만으로 우열이 정해지지 않으며 조합·소모·신체 부담과 활용이 중요하다.'});}));
 const byId=new Map(records.map(record=>[record.id,record]));
 function observe(state){
@@ -138,15 +48,10 @@ function observe(state){
  return flags.size===(state.flags||[]).length?state:{...state,flags:[...flags]};
 }
 function known(state,id){return(state?.flags||[]).includes('known_monster_'+id);}
-function detail(state,id,{creator=false}={}){const m=byId.get(id)||sightings.find(entry=>entry.id===id);if(!m)return null;return known(state,id)||creator?{...m,...(researchTasks[id]&&{research:registeredResearch(id)}),known:known(state,id)}:{id:m.id,known:false,name:'미발견'};}
+function detail(state,id,{creator=false}={}){const m=byId.get(id)||sightings.find(entry=>entry.id===id);if(!m)return null;return known(state,id)||creator?{...m,...(researchById.has(id)&&{research:researchById.get(id).research}),known:known(state,id)}:{id:m.id,known:false,name:'미발견'};}
 const previews=Object.freeze([
   {
     "id": "empereut",
-    "research": {
-      "sighting": {"label": "직접 목격"},
-      "wings": {"label": "날개 펼침", "pattern": "날개(?:지느러미)?를\\s*(?:크게\\s*)?(?:펼|펼쳤)"},
-      "dive": {"label": "잠수", "pattern": "잠수(?:한다|했다|하며|하는)|물속으로\\s*(?:잠겨|잠수|들어간|뛰어든)"}
-    },
     "name": "엠페르트",
     "stars": 7,
     "lineage": "익룡·수장룡 혼합 해룡형",
@@ -203,174 +108,258 @@ const previews=Object.freeze([
   }
 ].map(Object.freeze));
 const sightings=Object.freeze(previews.filter(monster=>monster.artFrames?.main));
-const registeredResearch=id=>({sighting:{label:'직접 목격'},behavior:researchTasks[id]});
-const fieldClues=Object.freeze({
+const researchDefinitions={
  goblin:{
-  site:'숲 가장자리나 폐허',
-  timing:'잔해나 관목 주변에서 움직일 때 살핀다.',
-  approach:'가려진 자리에서 고블린이 숨는 곳과 돌아갈 길을 함께 살피는지 본다.',
-  subject:'잔해나 관목을 엄폐로 이용',
-  pattern:'(?:잔해|관목).{0,25}(?:엄폐|몸을 숨|숨어|몸을 가)',
+  tasks:{behavior:{label:'몽둥이 내리치기',pattern:'몽둥이로.{0,20}내리치|몽둥이를.{0,12}내리치'}},
+  clue:{
+   site:'숲 가장자리나 폐허',
+   timing:'잔해나 관목 주변에서 움직일 때 살핀다.',
+   approach:'가려진 자리에서 고블린이 숨는 곳과 돌아갈 길을 함께 살피는지 본다.',
+   subject:'잔해나 관목을 엄폐로 이용',
+   pattern:'(?:잔해|관목).{0,25}(?:엄폐|몸을 숨|숨어|몸을 가)',
+  },
  },
  moa:{
-  site:'빛이 드는 숲 바닥이나 풀밭',
-  timing:'낮에 햇빛 드는 자리가 바뀔 때 살핀다.',
-  approach:'숲 바닥을 밟고 들어가지 않고 빛을 따라 움직이는지 지켜본다.',
-  subject:'햇빛을 따라 이동',
-  pattern:'(?:빛|햇살).{0,20}(?:따라|드는 쪽).{0,20}(?:움직|옮|이동|걸)',
+  tasks:{behavior:{label:'뿌리 고정',pattern:'뿌리를.{0,15}(?:고정|박|내리)'}},
+  clue:{
+   site:'빛이 드는 숲 바닥이나 풀밭',
+   timing:'낮에 햇빛 드는 자리가 바뀔 때 살핀다.',
+   approach:'숲 바닥을 밟고 들어가지 않고 빛을 따라 움직이는지 지켜본다.',
+   subject:'햇빛을 따라 이동',
+   pattern:'(?:빛|햇살).{0,20}(?:따라|드는 쪽).{0,20}(?:움직|옮|이동|걸)',
+  },
  },
  ruke:{
-  site:'관목이 우거진 구릉이나 숲 가장자리',
-  timing:'바람이 부는 곳에서 쉬는 개체를 살핀다.',
-  approach:'관목 안으로 들어가지 않고 쉬는 개체가 바람을 등지는지 본다.',
-  subject:'바람을 등지고 휴식',
-  pattern:'바람을.{0,12}등.{0,20}(?:쉬|쉰|앉|엎드|누워)',
+  tasks:{behavior:{label:'앞발 낮추기',pattern:'앞발을.{0,12}낮'}},
+  clue:{
+   site:'관목이 우거진 구릉이나 숲 가장자리',
+   timing:'바람이 부는 곳에서 쉬는 개체를 살핀다.',
+   approach:'관목 안으로 들어가지 않고 쉬는 개체가 바람을 등지는지 본다.',
+   subject:'바람을 등지고 휴식',
+   pattern:'바람을.{0,12}등.{0,20}(?:쉬|쉰|앉|엎드|누워)',
+  },
  },
  por:{
-  site:'얕은 강이나 호수의 수초 주변',
-  timing:'수초 사이에서 작은 무리가 움직일 때 살핀다.',
-  approach:'물가에서 수초 사이로 개체들이 모였다 흩어지는 모습을 본다.',
-  subject:'수초 주변의 무리 이동',
-  pattern:'수초.{0,36}(?:무리|여럿).{0,25}(?:모이|모여|흩어|모였)',
+  tasks:{behavior:{label:'분사 가속',pattern:'물을.{0,12}(?:뿜|내뿜).{0,18}(?:가속|빨라|달려)'}},
+  clue:{
+   site:'얕은 강이나 호수의 수초 주변',
+   timing:'수초 사이에서 작은 무리가 움직일 때 살핀다.',
+   approach:'물가에서 수초 사이로 개체들이 모였다 흩어지는 모습을 본다.',
+   subject:'수초 주변의 무리 이동',
+   pattern:'수초.{0,36}(?:무리|여럿).{0,25}(?:모이|모여|흩어|모였)',
+  },
  },
  tork:{
-  site:'햇볕 드는 바위와 가까운 그늘',
-  timing:'햇볕이 드는 바위에 개체가 보일 때 살핀다.',
-  approach:'바위 틈을 건드리지 않고 햇볕 드는 곳과 그늘 사이를 지켜본다.',
-  subject:'바위에서 그늘로 이동',
-  pattern:'그늘(?:로| 쪽으로).{0,20}(?:옮|이동|기어|들어)',
+  tasks:{behavior:{label:'꼬리치기',pattern:'꼬리로.{0,15}(?:치|후려)|꼬리를.{0,12}휘둘'}},
+  clue:{
+   site:'햇볕 드는 바위와 가까운 그늘',
+   timing:'햇볕이 드는 바위에 개체가 보일 때 살핀다.',
+   approach:'바위 틈을 건드리지 않고 햇볕 드는 곳과 그늘 사이를 지켜본다.',
+   subject:'바위에서 그늘로 이동',
+   pattern:'그늘(?:로| 쪽으로).{0,20}(?:옮|이동|기어|들어)',
+  },
  },
  ves:{
-  site:'어둡고 좁은 동굴',
-  timing:'동굴 안에서 울음이 들리는 때 살핀다.',
-  approach:'동굴 안쪽으로 따라가지 않고 울음의 반향에 맞춰 통로를 확인하는지 본다.',
-  subject:'반향으로 통로 확인',
-  pattern:'(?:반향|메아리).{0,25}(?:통로|벽면|방향).{0,18}(?:확인|살피|살핀|틀)',
+  tasks:{behavior:{label:'사각 접근',pattern:'(?:사각|사각지대)에서.{0,16}접근'}},
+  clue:{
+   site:'어둡고 좁은 동굴',
+   timing:'동굴 안에서 울음이 들리는 때 살핀다.',
+   approach:'동굴 안쪽으로 따라가지 않고 울음의 반향에 맞춰 통로를 확인하는지 본다.',
+   subject:'반향으로 통로 확인',
+   pattern:'(?:반향|메아리).{0,25}(?:통로|벽면|방향).{0,18}(?:확인|살피|살핀|틀)',
+  },
  },
  rat:{
-  site:'창고 벽가나 하수로 가장자리',
-  timing:'벽 가장자리를 따라 움직이는 개체를 살핀다.',
-  approach:'먹이를 던지지 않고 냄새를 맡은 뒤 어느 쪽으로 움직이는지 본다.',
-  subject:'냄새를 따라 이동',
-  pattern:'냄새.{0,18}(?:따라|맡고).{0,22}(?:움직|이동|달|옮|걸)',
+  tasks:{behavior:{label:'몸 낮추기',pattern:'낮게.{0,8}웅크'}},
+  clue:{
+   site:'창고 벽가나 하수로 가장자리',
+   timing:'벽 가장자리를 따라 움직이는 개체를 살핀다.',
+   approach:'먹이를 던지지 않고 냄새를 맡은 뒤 어느 쪽으로 움직이는지 본다.',
+   subject:'냄새를 따라 이동',
+   pattern:'냄새.{0,18}(?:따라|맡고).{0,22}(?:움직|이동|달|옮|걸)',
+  },
  },
  chitin:{
-  site:'썩은 나무와 습한 흙굴 주변',
-  timing:'썩은 나무나 굴 입구에 개체가 보일 때 살핀다.',
-  approach:'나무를 들추지 않고 자연스럽게 밖으로 나오는 경로를 지켜본다.',
-  subject:'썩은 나무 아래에서 나오기',
-  pattern:'썩은 나무.{0,15}(?:아래|밑).{0,15}(?:나오|나왔|기어 나|빠져나|모습을 드러)',
+  tasks:{behavior:{label:'톱니 앞턱 물기',pattern:'(?:앞턱|톱니 턱)으로.{0,15}(?:물|문)'}},
+  clue:{
+   site:'썩은 나무와 습한 흙굴 주변',
+   timing:'썩은 나무나 굴 입구에 개체가 보일 때 살핀다.',
+   approach:'나무를 들추지 않고 자연스럽게 밖으로 나오는 경로를 지켜본다.',
+   subject:'썩은 나무 아래에서 나오기',
+   pattern:'썩은 나무.{0,15}(?:아래|밑).{0,15}(?:나오|나왔|기어 나|빠져나|모습을 드러)',
+  },
  },
  ant:{
-  site:'숲 가장자리나 초원의 흙 둥지 주변',
-  timing:'먹이 쪽으로 여러 개체가 움직일 때 살핀다.',
-  approach:'둥지나 먹이에 손대지 않고 같은 길을 따라가는지 본다.',
-  subject:'먹이 냄새를 따라 집단 이동',
-  pattern:'먹이 냄새.{0,40}(?:따라|이어진).{0,30}(?:움직|행렬|이동|따라간)',
+  tasks:{behavior:{label:'무리의 측면 접근',pattern:'(?:무리|여럿).{0,30}(?:옆구리|측면|옆쪽).{0,15}(?:접근|다가|파고)'}},
+  clue:{
+   site:'숲 가장자리나 초원의 흙 둥지 주변',
+   timing:'먹이 쪽으로 여러 개체가 움직일 때 살핀다.',
+   approach:'둥지나 먹이에 손대지 않고 같은 길을 따라가는지 본다.',
+   subject:'먹이 냄새를 따라 집단 이동',
+   pattern:'먹이 냄새.{0,40}(?:따라|이어진).{0,30}(?:움직|행렬|이동|따라간)',
+  },
  },
  clad:{
-  site:'폐광 입구나 낙석이 있는 바위 지대',
-  timing:'좁은 통로를 마주한 개체가 보일 때 살핀다.',
-  approach:'통로를 막지 않고 몸을 돌릴 공간이 부족할 때 어떻게 물러나는지 본다.',
-  subject:'좁은 굴에서 후진',
-  pattern:'(?:좁은 굴|좁은 통로).{0,30}(?:후진|뒤로).{0,16}(?:물러|빠져|움직|나온)',
+  tasks:{behavior:{label:'압착 턱 붙잡기',pattern:'턱으로.{0,15}(?:붙잡|움켜|물어 잡)'}},
+  clue:{
+   site:'폐광 입구나 낙석이 있는 바위 지대',
+   timing:'좁은 통로를 마주한 개체가 보일 때 살핀다.',
+   approach:'통로를 막지 않고 몸을 돌릴 공간이 부족할 때 어떻게 물러나는지 본다.',
+   subject:'좁은 굴에서 후진',
+   pattern:'(?:좁은 굴|좁은 통로).{0,30}(?:후진|뒤로).{0,16}(?:물러|빠져|움직|나온)',
+  },
  },
  velum:{
-  site:'절벽이나 큰 나무 아래',
-  timing:'낮에 쉬는 개체가 보일 때 살핀다.',
-  approach:'절벽 아래로 들어가지 않고 큰 나무나 절벽에 매달려 쉬는 자세를 본다.',
-  subject:'거꾸로 매달려 휴식',
-  pattern:'거꾸로.{0,12}매달.{0,20}(?:쉬|쉰|휴식|잠)',
+  tasks:{behavior:{label:'낮은 활공',pattern:'낮게.{0,10}활공|낮은.{0,8}활공'}},
+  clue:{
+   site:'절벽이나 큰 나무 아래',
+   timing:'낮에 쉬는 개체가 보일 때 살핀다.',
+   approach:'절벽 아래로 들어가지 않고 큰 나무나 절벽에 매달려 쉬는 자세를 본다.',
+   subject:'거꾸로 매달려 휴식',
+   pattern:'거꾸로.{0,12}매달.{0,20}(?:쉬|쉰|휴식|잠)',
+  },
  },
  draven:{
-  site:'바위 구릉이나 숲속 동굴 주변',
-  timing:'개체가 먹이를 옮기는 모습이 보일 때 살핀다.',
-  approach:'먹이와 동굴 입구에서 거리를 두고 남은 먹이를 어디에 두는지 본다.',
-  subject:'돌 틈에 남은 먹이 숨기기',
-  pattern:'먹이.{0,25}(?:돌|바위) 틈.{0,20}(?:숨기|숨긴|밀어 넣|감추)',
+  tasks:{behavior:{label:'목주머니 팽창',pattern:'목주머니.{0,12}(?:부풀|팽창)'}},
+  clue:{
+   site:'바위 구릉이나 숲속 동굴 주변',
+   timing:'개체가 먹이를 옮기는 모습이 보일 때 살핀다.',
+   approach:'먹이와 동굴 입구에서 거리를 두고 남은 먹이를 어디에 두는지 본다.',
+   subject:'돌 틈에 남은 먹이 숨기기',
+   pattern:'먹이.{0,25}(?:돌|바위) 틈.{0,20}(?:숨기|숨긴|밀어 넣|감추)',
+  },
  },
  noxvern:{
-  site:'깊은 동굴이나 폐광의 벽과 천장이 보이는 곳',
-  timing:'바닥에서 다른 생물의 움직임이 느껴지는 때 살핀다.',
-  approach:'인위적으로 바닥을 울리지 않고, 천장에 있는 개체가 현장의 진동에 어떻게 반응하는지 본다.',
-  subject:'천장에서 진동에 반응',
-  pattern:'천장.{0,32}진동.{0,20}(?:반응|움찔|고개를 돌|움직|따라)',
+  tasks:{behavior:{label:'벽면 이동',pattern:'벽(?:을|면을).{0,12}(?:타고|올라|기어)'}},
+  clue:{
+   site:'깊은 동굴이나 폐광의 벽과 천장이 보이는 곳',
+   timing:'바닥에서 다른 생물의 움직임이 느껴지는 때 살핀다.',
+   approach:'인위적으로 바닥을 울리지 않고, 천장에 있는 개체가 현장의 진동에 어떻게 반응하는지 본다.',
+   subject:'천장에서 진동에 반응',
+   pattern:'천장.{0,32}진동.{0,20}(?:반응|움찔|고개를 돌|움직|따라)',
+  },
  },
  lairon:{
-  site:'철광석이 드러난 암반이나 광산 입구',
-  timing:'개체가 광맥이나 지지대 곁에 멈췄을 때 살핀다.',
-  approach:'지지대에 접근하지 않고 광물을 긁는 모습을 멀리서 확인한다.',
-  subject:'노출된 광물 긁기',
-  pattern:'(?:광물|철광석|광맥).{0,18}(?:긁|긁어내)',
+  tasks:{behavior:{label:'낮은 자세 돌진',pattern:'몸을.{0,10}낮.{0,18}돌진'}},
+  clue:{
+   site:'철광석이 드러난 암반이나 광산 입구',
+   timing:'개체가 광맥이나 지지대 곁에 멈췄을 때 살핀다.',
+   approach:'지지대에 접근하지 않고 광물을 긁는 모습을 멀리서 확인한다.',
+   subject:'노출된 광물 긁기',
+   pattern:'(?:광물|철광석|광맥).{0,18}(?:긁|긁어내)',
+  },
  },
  nerpang:{
-  site:'해안 동굴 입구나 강 하구',
-  timing:'작은 무리가 쉬고 있는 때 살핀다.',
-  approach:'물에 들어가지 않고 낮은 울음에 다른 개체가 응답하는지 듣는다.',
-  subject:'낮은 울음으로 무리와 연락',
-  pattern:'낮은 울음.{0,32}(?:응답|화답|울음으로 답|서로)',
+  tasks:{behavior:{label:'젖은 지면 활주',pattern:'(?:수막|젖은 지면).{0,24}(?:활주|미끄러)'}},
+  clue:{
+   site:'해안 동굴 입구나 강 하구',
+   timing:'작은 무리가 쉬고 있는 때 살핀다.',
+   approach:'물에 들어가지 않고 낮은 울음에 다른 개체가 응답하는지 듣는다.',
+   subject:'낮은 울음으로 무리와 연락',
+   pattern:'낮은 울음.{0,32}(?:응답|화답|울음으로 답|서로)',
+  },
  },
  fizz:{
-  site:'침수 유적이나 깊은 하구 주변',
-  timing:'피즈가 물가에서 사냥할 때 멀리서 살핀다.',
-  approach:'다른 개체의 출현을 전제로 삼지 않고 그라우크와 신호를 주고받는지 본다.',
-  subject:'그라우크와 사냥 신호 교환',
-  pattern:'(?:그라우크.{0,33}신호|신호.{0,33}그라우크).{0,22}(?:주고받|화답|응답|보내고.{0,10}답)',
+  tasks:{behavior:{label:'삼지창을 든 도약',pattern:'삼지창을.{0,20}(?:도약|뛰어오르|뛰어올)'}},
+  clue:{
+   site:'침수 유적이나 깊은 하구 주변',
+   timing:'피즈가 물가에서 사냥할 때 멀리서 살핀다.',
+   approach:'다른 개체의 출현을 전제로 삼지 않고 그라우크와 신호를 주고받는지 본다.',
+   subject:'그라우크와 사냥 신호 교환',
+   pattern:'(?:그라우크.{0,33}신호|신호.{0,33}그라우크).{0,22}(?:주고받|화답|응답|보내고.{0,10}답)',
+  },
  },
  grauk:{
-  site:'해안 동굴이나 깊은 하구의 물길',
-  timing:'깊은 물길이 보일 때 안전한 육지에서 살핀다.',
-  approach:'얕은 물에 들어가지 않고 개체가 물길 깊은 곳에서 잠복하는 모습을 본다.',
-  subject:'깊은 물길에서 잠복',
-  pattern:'깊은.{0,15}(?:물길|물속).{0,25}(?:잠복|숨은 채|숨어.{0,10}기다|가만히.{0,10}기다)',
+  tasks:{behavior:{label:'수중 접근',pattern:'(?:물속|수중)에서.{0,18}(?:다가|접근)'}},
+  clue:{
+   site:'해안 동굴이나 깊은 하구의 물길',
+   timing:'깊은 물길이 보일 때 안전한 육지에서 살핀다.',
+   approach:'얕은 물에 들어가지 않고 개체가 물길 깊은 곳에서 잠복하는 모습을 본다.',
+   subject:'깊은 물길에서 잠복',
+   pattern:'깊은.{0,15}(?:물길|물속).{0,25}(?:잠복|숨은 채|숨어.{0,10}기다|가만히.{0,10}기다)',
+  },
  },
  cobalion:{
-  site:'철광맥이 드러난 고산 지대',
-  timing:'발밑을 살피며 이동하는 개체가 보일 때 관찰한다.',
-  approach:'이동 경로를 막지 않고 느슨한 지면 가장자리에서 어떤 바닥을 고르는지 본다.',
-  subject:'단단한 바닥을 골라 이동',
-  pattern:'단단한.{0,15}(?:바닥|암반|지면).{0,24}(?:골라|골랐|디디|밟고|택해)',
+  tasks:{behavior:{label:'발톱으로 지면 찍기',pattern:'발톱으로.{0,16}(?:지면|땅)을.{0,10}찍'}},
+  clue:{
+   site:'철광맥이 드러난 고산 지대',
+   timing:'발밑을 살피며 이동하는 개체가 보일 때 관찰한다.',
+   approach:'이동 경로를 막지 않고 느슨한 지면 가장자리에서 어떤 바닥을 고르는지 본다.',
+   subject:'단단한 바닥을 골라 이동',
+   pattern:'단단한.{0,15}(?:바닥|암반|지면).{0,24}(?:골라|골랐|디디|밟고|택해)',
+  },
  },
  terrakion:{
-  site:'건조한 암벽이나 너덜지대',
-  timing:'개체가 멈춰 쉴 곳을 찾을 때 살핀다.',
-  approach:'자갈을 움직이지 않고 개체가 흔들리는 바닥을 피해 어디에서 쉬는지 본다.',
-  subject:'흔들리는 바닥을 피해 이동',
-  pattern:'(?:흔들리는 바닥|움직이는 자갈|흔들리는 돌).{0,28}(?:피해|피하|피했|돌아가|비켜)',
+  tasks:{behavior:{label:'몸을 낮춰 충격에 버팀',pattern:'몸을.{0,10}낮.{0,20}(?:버티|버텨|견디)'}},
+  clue:{
+   site:'건조한 암벽이나 너덜지대',
+   timing:'개체가 멈춰 쉴 곳을 찾을 때 살핀다.',
+   approach:'자갈을 움직이지 않고 개체가 흔들리는 바닥을 피해 어디에서 쉬는지 본다.',
+   subject:'흔들리는 바닥을 피해 이동',
+   pattern:'(?:흔들리는 바닥|움직이는 자갈|흔들리는 돌).{0,28}(?:피해|피하|피했|돌아가|비켜)',
+  },
  },
  viridion:{
-  site:'숲의 공터와 인근 그늘',
-  timing:'한낮에 햇빛이 강할 때 살핀다.',
-  approach:'숲 안에서 뒤쫓지 않고 공터 가장자리에서 그늘로 옮겨가는 모습을 본다.',
-  subject:'한낮에 그늘로 이동',
-  pattern:'그늘(?:로| 쪽으로).{0,22}(?:옮|이동|걸어|들어)',
+  tasks:{behavior:{label:'잎날 베기',pattern:'잎날로.{0,15}(?:베어|베는|벤다|베었다|벨)'}},
+  clue:{
+   site:'숲의 공터와 인근 그늘',
+   timing:'한낮에 햇빛이 강할 때 살핀다.',
+   approach:'숲 안에서 뒤쫓지 않고 공터 가장자리에서 그늘로 옮겨가는 모습을 본다.',
+   subject:'한낮에 그늘로 이동',
+   pattern:'그늘(?:로| 쪽으로).{0,22}(?:옮|이동|걸어|들어)',
+  },
  },
  empereut:{
-  site:'해안 절벽이나 암초',
-  timing:'밀물 때와 썰물 때를 비교한다.',
-  approach:'물 밖의 안전한 높은 곳에서 무리가 먹이를 모는 수면을 살핀다.',
-  subject:'무리 사냥',
-  pattern:'(?:무리|여럿).{0,45}(?:몰아|사냥)|(?:물고기|먹이).{0,20}(?:몰아|에워싸)',
+  tasks:{"wings":{"label":"날개 펼침","pattern":"날개(?:지느러미)?를\\s*(?:크게\\s*)?(?:펼|펼쳤)"},"dive":{"label":"잠수","pattern":"잠수(?:한다|했다|하며|하는)|물속으로\\s*(?:잠겨|잠수|들어간|뛰어든)"}},
+  clue:{
+   site:'해안 절벽이나 암초',
+   timing:'밀물 때와 썰물 때를 비교한다.',
+   approach:'물 밖의 안전한 높은 곳에서 무리가 먹이를 모는 수면을 살핀다.',
+   subject:'무리 사냥',
+   pattern:'(?:무리|여럿).{0,45}(?:몰아|사냥)|(?:물고기|먹이).{0,20}(?:몰아|에워싸)',
+  },
  },
  slime:{
-  site:'그늘진 얕은 물가나 습한 폐허 바닥',
-  timing:'바닥이 아직 젖어 있을 때 살핀다.',
-  approach:'발밑의 물기를 확인하고 젖은 바닥에서 돌 틈까지 이어지는 경로를 멀리서 본다.',
-  subject:'젖은 지면을 따라 이동',
-  pattern:'(?:젖은|축축한).{0,15}(?:바닥|돌|지면).{0,30}(?:미끄러|이동|기어)',
+  tasks:{behavior:{label:'몸 튕기기',pattern:'몸(?:을|이).{0,12}튕'}},
+  clue:{
+   site:'그늘진 얕은 물가나 습한 폐허 바닥',
+   timing:'바닥이 아직 젖어 있을 때 살핀다.',
+   approach:'발밑의 물기를 확인하고 젖은 바닥에서 돌 틈까지 이어지는 경로를 멀리서 본다.',
+   subject:'젖은 지면을 따라 이동',
+   pattern:'(?:젖은|축축한).{0,15}(?:바닥|돌|지면).{0,30}(?:미끄러|이동|기어)',
+  },
  },
  kar:{
-  site:'숲 가장자리나 절벽',
-  timing:'높은 가지나 바위턱에 앉아 아래를 살피는 순간을 기다린다.',
-  approach:'나무나 바위 뒤에서 높은 자리와 탁 트인 지면 사이의 비행 경로를 본다.',
-  subject:'높은 자리에서 아래를 살피는 행동',
-  pattern:'(?:가지|바위턱|절벽의 턱).{0,30}(?:아래를|바닥을).{0,18}(?:내려다|살피|주시)',
+  tasks:{behavior:{label:'급강하',pattern:'급강하'}},
+  clue:{
+   site:'숲 가장자리나 절벽',
+   timing:'높은 가지나 바위턱에 앉아 아래를 살피는 순간을 기다린다.',
+   approach:'나무나 바위 뒤에서 높은 자리와 탁 트인 지면 사이의 비행 경로를 본다.',
+   subject:'높은 자리에서 아래를 살피는 행동',
+   pattern:'(?:가지|바위턱|절벽의 턱).{0,30}(?:아래를|바닥을).{0,18}(?:내려다|살피|주시)',
+  },
  },
+};
+const researchMonsters=Object.freeze([...records,...sightings].flatMap(({id,name})=>{
+ const definition=researchDefinitions[id];
+ if(!definition)return [];
+ const research=Object.freeze({sighting:{label:'직접 목격'},...definition.tasks});
+ return [Object.freeze({id,name,research,clue:Object.freeze(definition.clue),input:name+'의 협회 조사 단서를 확인한다'})];
+}));
+const researchById=new Map(researchMonsters.map(monster=>[monster.id,monster]));
+const fieldResearchActions=Object.freeze({
+ observe:'안전한 거리에서 더 관찰한다',
+ submit:'협회에 현장 조사 기록을 제출한다',
 });
-const clueInput=name=>name+'의 협회 조사 단서를 확인한다';
-const researchMonsters=Object.freeze([
- ...records.filter(({id})=>researchTasks[id]).map(({id})=>({id,research:registeredResearch(id)})),
- ...sightings.filter(m=>m.research),
-]);
-return {records,previews,sightings,researchMonsters,fieldClues,clueInput,known,detail,observe};
+const researchFor=id=>researchById.get(id);
+const researchAvailable=state=>state.era==='fantasy'&&state.combat?.status!=='playing'&&state.player.hp>0;
+function researchStatus(state,id){
+ const definition=researchFor(id);
+ if(!definition)return null;
+ const record=state.fieldResearch?.[id];
+ const submitted=!!record?.submitted;
+ return {record,submitted,complete:Object.keys(definition.research).every(key=>!!record?.observations?.[key]),
+  clue:submitted?definition.clue:null};
+}
+return {records,previews,sightings,researchMonsters,researchFor,researchStatus,researchAvailable,fieldResearchActions,known,detail,observe};
 });

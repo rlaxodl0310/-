@@ -282,7 +282,7 @@ t('registered monsters have field research and a new species can be observed and
 t('association clues unlock after submission and persist follow-up evidence',async()=>{
  const Catalog=require('../ui/monsters/catalog.js');
  const Research=require('../electron/field-research.cjs');
- const input=Catalog.clueInput('엠페르트');
+ const input=Catalog.researchFor('empereut').input;
  const seed={...initial(),era:'fantasy',location:'north-city-03',scene:'exploration',present:[],focus:'taei'};
  let candidate;
  const {dir,d}=await setup(async messages=>{
@@ -314,8 +314,7 @@ t('association clues unlock after submission and persist follow-up evidence',asy
    ['kar','카르가 높은 가지에 앉아 아래를 내려다본다.'],
   ]){
    const state={...s,fieldResearch:{[id]:{submitted}}};
-   const name=Catalog.detail(state,id,{creator:true}).name;
-   Research.recordClue(state,Research.followClue(state,Catalog.clueInput(name)),[{id,evidence}]);
+   Research.recordClue(state,Research.followClue(state,Catalog.researchFor(id).input),[{id,evidence}]);
    a.equal(state.fieldResearch[id].clueDiscovery.evidence,evidence);
   }
  }finally{await fs.rm(dir,{recursive:true,force:true});}
@@ -324,13 +323,12 @@ t('association clues unlock after submission and persist follow-up evidence',asy
 t('association clues cover every field research species and evidence remains species-specific',()=>{
  const Catalog=require('../ui/monsters/catalog.js');
  const Research=require('../electron/field-research.cjs');
- a.deepEqual(Object.keys(Catalog.fieldClues).sort(),Catalog.researchMonsters.map(({id})=>id).sort());
- for(const [id,clue] of Object.entries(Catalog.fieldClues)){
+ a.equal(Catalog.researchMonsters.length,23);
+ for(const {id,clue,input} of Catalog.researchMonsters){
   a(clue.site&&clue.timing&&clue.approach&&clue.subject&&clue.pattern);
   a.doesNotThrow(()=>new RegExp(clue.pattern));
-  const name=Catalog.detail({},id,{creator:true}).name;
   const state={...initial(),era:'fantasy',fieldResearch:{[id]:{submitted:{minutes:0}}}};
-  a.equal(Research.followClue(state,Catalog.clueInput(name)).species,id);
+  a.equal(Research.followClue(state,input).species,id);
  }
  const examples={
   goblin:'고블린이 잔해 뒤에 몸을 숨긴다.',
@@ -356,7 +354,7 @@ t('association clues cover every field research species and evidence remains spe
  };
  for(const [id,evidence] of Object.entries(examples)){
   const state={location:'test-location',minutes:10,fieldResearch:{[id]:{submitted:{minutes:0}}}};
-  const clue={species:id,...Catalog.fieldClues[id]};
+  const clue={species:id,...Catalog.researchFor(id).clue};
   Research.recordClue(state,clue,[{id:'empereut',evidence},{id,evidence:evidence+'라고 들었다.'}]);
   a.equal(state.fieldResearch[id].clueDiscovery,null,id);
   Research.recordClue(state,clue,[{id,evidence}]);
