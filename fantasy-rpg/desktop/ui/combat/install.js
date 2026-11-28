@@ -101,6 +101,8 @@
         actor: source.id,
         target: target.id,
         damage: Math.min(target.hp, result.hpDamage),
+        hpBefore:target.hp,
+        hpAfter:Math.max(0,target.hp-result.hpDamage),
         verdict: math,
       });
       this.formulaLog = this.formulaLog.slice(-4096);

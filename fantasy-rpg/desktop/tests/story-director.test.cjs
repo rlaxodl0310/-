@@ -384,3 +384,28 @@ t('research compensation uses the association budget and defers once when underf
  a.equal(Money.total(paid.next.adventure.economy),ledger.initialTotal);
  a.throws(()=>submit(paid.next),/완성 조사 기록/);
 });
+
+t('explicit numbered enemy labels bind to the actual combat actor',async()=>{
+ const C=require('../ui/story/combat.js');
+ const seed={...initial(),era:'fantasy',scene:'combat',location:'north-city-03'};
+ seed.combat=C.createCombat(['ant','ant'],'chat','앤트 대치');
+ seed.combat.distance=1;
+ const selected=seed.combat.enemies[1];
+ const input=C.targetLabel(seed.combat,selected)+'에게 접근해 공격한다.';
+ a.equal(C.namedTarget(seed.combat,input),selected.id);
+ a.equal(C.namedTarget(seed.combat,'앤트 20에게 접근한다.'),null);
+ a.equal(C.namedTarget(seed.combat,'앤트 1과 앤트 2를 공격한다.'),null);
+ const {dir,d}=await setup(async()=>answer(seed,{
+  combat:{...answer().combat,importance:'ordinary',monsters:['ant','ant'],intent:'attack',target:0},
+  panels:[{speaker:'narrator',text:'공방이 이어진다.'}],facts:[]
+ }));
+ try{
+  const saved=await d.save(seed);
+  const next=await d.send({text:input,revision:saved.revision,requestId:'numbered-attack-1'});
+  a.equal(next.combat.enemies[0].hp,seed.combat.enemies[0].hp);
+  const hit=next.turns.at(-1).resolution.formulaEvents.find(e=>e.actor==='taei');
+  a.equal(hit.target,'enemy-'+selected.id);
+  a.equal(hit.hpBefore,selected.hp);
+  a.equal(hit.hpAfter,next.combat.enemies[1].hp);
+ }finally{await fs.rm(dir,{recursive:true,force:true});}
+});

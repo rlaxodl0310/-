@@ -237,3 +237,28 @@ body[data-story-mode=director] .dialogue-wrap{background:linear-gradient(90deg,#
  .scene[data-chat-combat] .story-fighter[data-formation=back]{left:calc(-7% + var(--offset)*11%);bottom:29%;width:23vw}
  .scene[data-chat-combat] .story-fighter[data-formation=front]{left:29%;bottom:4%;width:22vw}
 }
+
+.scene[data-chat-combat] .story-monster[data-battle-target]{pointer-events:auto;cursor:pointer}
+.scene[data-chat-combat] .story-monster.battle-selected>img{
+ filter:var(--actor-tone) drop-shadow(0 0 3px #f6d693);
+}
+.battle-target{
+ position:relative;min-width:0;width:100%;padding:4px 6px;text-align:left;
+ border:1px solid #cda69455;border-radius:4px;color:inherit;background:#211b26;
+}
+.battle-target-name{display:block;font-size:13px;color:#ffe1d1}
+.battle-target[aria-pressed=true]{border-color:#ebc889;background:#413039}
+.battle-target-impact{border-color:#ff9078}
+.battle-impact-value{position:absolute;right:6px;top:3px;font-weight:700;font-size:12px;color:#ffb0a0}
+.battle-target-status{
+ grid-column:1/-1;margin:0;color:#f0d09a;text-align:center;font-size:12px;
+}
+.combat-meter-impact{position:relative}
+.combat-meter-impact::-webkit-progress-value{
+ animation:combat-meter-loss 350ms ease-out;
+}
+@keyframes combat-meter-loss{
+ from{width:calc(var(--impact-from)*100%)}
+ to{width:calc(var(--impact-to)*100%)}
+}
+@media(prefers-reduced-motion:reduce){.combat-meter-impact::-webkit-progress-value{animation:none}}

@@ -118,6 +118,8 @@
         actor: source === player ? "taei" : "enemy-" + source.id,
         target: victim === player ? "taei" : victim.id?.startsWith?.("escort-") ? victim.id : "enemy-" + victim.id,
         damage: actual,
+        hpBefore:before,
+        hpAfter:victim.hp,
         verdict,
       });
       return { actual, verdict };
@@ -264,5 +266,18 @@
     combat.rngState = random.state;
     return { combat, player, resolution };
   }
-  return { createCombat, resolveCombat };
+  function targetLabel(combat,enemy){
+    const name=Roster.get(enemy.kind)?.name||enemy.kind;
+    const group=combat.enemies.filter(unit=>unit.kind===enemy.kind);
+    return group.length>1?name+" "+(group.findIndex(unit=>unit.id===enemy.id)+1):name;
+  }
+  function namedTarget(combat,input){
+    if(combat?.mode!=="chat"||combat.status!=="playing")return null;
+    const matches=combat.enemies.filter(enemy=>{
+      const label=targetLabel(combat,enemy).replace(/[.*+?^{}$()|[\]\\]/g,"\\$&");
+      return new RegExp("(?:^|\\s)"+label+"(?:에게|한테|을|를|과|와|(?=[\\s,.!?]|$))").test(input);
+    });
+    return matches.length===1&&matches[0].hp>0?matches[0].id:null;
+  }
+  return { createCombat, resolveCombat, targetLabel, namedTarget };
 });

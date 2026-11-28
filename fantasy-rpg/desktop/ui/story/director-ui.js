@@ -38,12 +38,39 @@ function openDirectWalk(){
   label:art?.label||$('scene-place').textContent,onTalk:()=>$('chat-input').focus(),
  });
 }
+let selectedBattleTarget=null,battleImpact=null;
+function chosenEnemy(combat){
+ if(!selectedBattleTarget||selectedBattleTarget.battle!==combat?.id)return null;
+ return combat.enemies.find(enemy=>enemy.id===selectedBattleTarget.id&&enemy.hp>0)||null;
+}
+const targetAttackText=(combat,enemy)=>NarrativeCombat.targetLabel(combat,enemy)+'에게 접근해 공격한다.';
+function selectEnemy(combat,enemy){
+ if(working||combat.status!=='playing'||enemy.hp<=0)return;
+ const previous=chosenEnemy(combat),input=$('chat-input');
+ if(previous&&input.value===targetAttackText(combat,previous))input.value=targetAttackText(combat,enemy);
+ selectedBattleTarget={battle:combat.id,id:enemy.id};
+ updateTargetIndicators(combat);
+}
+function updateTargetIndicators(combat){
+ const target=chosenEnemy(combat);
+ for(const node of document.querySelectorAll('[data-battle-target]')){
+  const selected=target&&node.dataset.battleTarget===String(target.id);
+  node.classList.toggle('battle-selected',!!selected);
+  if(node.tagName==='BUTTON')node.setAttribute('aria-pressed',String(!!selected));
+ }
+ const status=$('battle-target-status');
+ if(status){
+  status.hidden=!target;
+  status.textContent=target?NarrativeCombat.targetLabel(combat,target)+' 선택 · '+
+   (combat.distance>1?'근접 공격은 접근 필요':'근접 공격 거리'):'';
+ }
+}
 function combatParty(){
  return ['taei',...(state.party||[]).filter(id=>id!=='taei'&&state.present.includes(id))];
 }
 function renderCombatHud(combat){
  const scene=document.querySelector('.scene');
- const active=combat?.mode==='chat'&&combat.status==='playing';
+ const active=combat?.mode==='chat'&&(combat.status==='playing'||!!poseOverride);
  if(active)scene.dataset.chatCombat='true';
  else delete scene.dataset.chatCombat;
  let hud=$('chat-combat-hud');
@@ -64,8 +91,10 @@ function renderCombatHud(combat){
   parent.append(node);
   return node;
  }
- function meter(parent,label,value,max,type){
+ function meter(parent,label,value,max,type,actor){
   if(!Number.isFinite(value))return;
+  const impact=battleImpact?.target===actor?battleImpact:null;
+  if(Number.isFinite(impact?.hpAfter))value=impact.hpAfter;
   const knownMax=Number.isFinite(max)&&max>0;
   const line=element('div','',parent,'chat-combat-meter');
   element('span',label,line);
@@ -75,12 +104,18 @@ function renderCombatHud(combat){
    bar.max=max;
    bar.value=Math.max(0,Math.min(max,value));
    bar.setAttribute('aria-label',label);
+   if(impact?.damage>0){
+    bar.classList.add('combat-meter-impact');
+    bar.style.setProperty('--impact-from',String(Math.min(max,impact.hpBefore??value+impact.damage)/max));
+    bar.style.setProperty('--impact-to',String(value/max));
+   }
+
   }
   element('strong',String(Math.round(value))+(knownMax?' / '+Math.round(max):''),line);
  }
  const player=element('div','',hud,'chat-combat-side');
  element('h2','김태이',player);
- meter(player,'HP',state.player.hp,state.player.max,'hp');
+ meter(player,'HP',state.player.hp,state.player.max,'hp','taei');
  meter(player,'MP',state.player.mana,state.player.maxMana,'mp');
  const party=combatParty().slice(1);
  if(party.length){
@@ -101,18 +136,26 @@ function renderCombatHud(combat){
  if(combat.tracking?.opening&&combat.round===0)
   element('span',combat.tracking.opening.side==='side'?'측면 진입':'정면 진입',center);
  const targets=element('div','',hud,'chat-combat-side chat-combat-enemies');
- const alive=combat.enemies.filter(enemy=>enemy.hp>0);
- for(const enemy of alive){
-  const row=element('div','',targets);
-  const name=CombatRoster.get(enemy.kind)?.name||enemy.kind;
-  const group=combat.enemies.filter(item=>item.kind===enemy.kind);
-  element('h2',name+(group.length>1?' '+(group.indexOf(enemy)+1):''),row);
-  meter(row,'HP',enemy.hp,enemy.max,'enemy');
+ for(const enemy of combat.enemies.filter(enemy=>enemy.hp>0||battleImpact?.target==='enemy-'+enemy.id)){
+  const row=element('button','',targets,'battle-target');
+  row.type='button';
+  row.dataset.battleTarget=String(enemy.id);
+  row.disabled=working||combat.status!=='playing'||enemy.hp<=0;
+  row.onclick=()=>selectEnemy(combat,enemy);
+  element('strong',NarrativeCombat.targetLabel(combat,enemy),row,'battle-target-name');
+  meter(row,'HP',enemy.hp,enemy.max,'enemy','enemy-'+enemy.id);
+  if(battleImpact?.target==='enemy-'+enemy.id){
+   row.classList.add('battle-target-impact');
+   if(battleImpact.damage>0)element('span','−'+battleImpact.damage,row,'battle-impact-value');
+  }
  }
+ const status=element('p','',hud,'battle-target-status');
+ status.id='battle-target-status';
+ status.setAttribute('role','status');
 }
 function render(){if(!state||!enabled)return;StoryIllustrations.clear();let companionHud=$('companion-hud');if(!companionHud){companionHud=document.createElement('button');companionHud.id='companion-hud';companionHud.onclick=()=>openPanel('companions');$('dialogue-content').prepend(companionHud);}companionHud.textContent='동료와 이야기';companionHud.hidden=state.era!=='fantasy'||!CompanionTalk.actors(state).length;companionHud.disabled=working||state.combat?.status==='playing';let target=$('companion-chat-target');if(!target){target=document.createElement('button');target.id='companion-chat-target';target.className='companion-chat-target';target.onclick=()=>{companionTarget=null;pending=null;render();};$('dialogue-content').append(target);}target.hidden=!companionTarget;target.textContent=companionTarget?(CompanionTalk.actors(state).find(a=>a.id===companionTarget.actorId)?.name||'동료')+'에게 · '+CompanionTalk.topics[companionTarget.topic]+' (눌러 해제)':'';let prepHud=$('preparation-hud');if(!prepHud){prepHud=document.createElement('button');prepHud.id='preparation-hud';prepHud.onclick=()=>openPanel('preparation');$('dialogue-content').prepend(prepHud);}prepHud.hidden=state.era!=='fantasy'||!Preparation.quests(state).length;prepHud.textContent='의뢰 출발 준비';prepHud.disabled=working;let arrivalHud=$('arrival-hud');if(!arrivalHud){arrivalHud=document.createElement('button');arrivalHud.id='arrival-hud';arrivalHud.onclick=()=>openPanel('arrival');$('dialogue-content').prepend(arrivalHud);}const local=ArrivalModel.view(state);arrivalHud.hidden=!local;arrivalHud.textContent=local?(local.pending?'도착 · ':'주변 안내 · ')+local.name:'';arrivalHud.disabled=working||!!local?.busy;$('chat-form').hidden=false;let escortHud=$('escort-hud');if(!escortHud){escortHud=document.createElement('button');escortHud.id='escort-hud';escortHud.onclick=()=>openPanel(escortHud.dataset.kind||'escort');$('dialogue-content').prepend(escortHud);}CaravanEscortUI.hud(escortHud,state);escortHud.dataset.kind='escort';if(escortHud.hidden){PersonalEscortUI.hud(escortHud,state);escortHud.dataset.kind='personalEscort';}if(escortHud.hidden){DungeonQuestUI.hud(escortHud,state);escortHud.dataset.kind='dungeon';}if(escortHud.hidden){RescueQuestUI.hud(escortHud,state);escortHud.dataset.kind='rescue';}if(escortHud.hidden){MiningQuestUI.hud(escortHud,state);escortHud.dataset.kind='mining';}let passageHud=$('passage-hud');if(!passageHud){passageHud=document.createElement('button');passageHud.id='passage-hud';passageHud.onclick=()=>openPanel('passage');$('dialogue-content').prepend(passageHud);}passageHud.hidden=state.era!=='fantasy';const activePassage=PassageEngine.active(state.passages);passageHud.textContent=activePassage?({reserved:'예약',onboard:'탑승 중',incident:'운항 안내'})[activePassage.phase]+' · '+activePassage.name:'운항편·탑승';let journeyHud=$('journey-hud');if(!journeyHud){journeyHud=document.createElement('button');journeyHud.id='journey-hud';journeyHud.onclick=()=>openPanel('journey');$('dialogue-content').prepend(journeyHud);}journeyHud.hidden=state.era!=='fantasy';journeyHud.textContent=state.journeys?.trip&&!['arrived','stopped'].includes(state.journeys.trip.phase)?'여정 · '+state.journeys.trip.index+'/'+state.journeys.trip.legs.length+'구간':'여정·야영';let huntHud=$('hunt-field-hud');if(!huntHud){huntHud=document.createElement('button');huntHud.id='hunt-field-hud';huntHud.className='hunt-hud';$('dialogue-content').prepend(huntHud);}const hunt=(state.adventure?.quests||[]).find(q=>q.type==='hunt'&&q.status==='accepted'&&(q.destination===state.location||q.issuerLocation===state.location))||(state.adventure?.quests||[]).find(q=>q.type==='hunt'&&q.status==='accepted');huntHud.hidden=!hunt||state.era!=='fantasy';if(hunt){const field=HuntField.view(state,hunt.id);huntHud.textContent=field.label+' · '+hunt.title+' · '+Math.min(hunt.progress,hunt.target)+'/'+hunt.target;huntHud.onclick=()=>HuntFieldUI.open(state,hunt.id,async action=>{if(working)throw Error('앞선 요청을 마쳐 주세요.');working=true;try{state=await call('directorAdventure',{requestId:crypto.randomUUID(),revision:state.revision,action});panelIndex=0;render();return state;}finally{working=false;render();}},{onTravel:planTravel,onCombat:()=>{closePanel();render();},onRewards:()=>openPanel('rewards'),onPassage:()=>openPanel('passage')});}let fatigueLabel=$('fatigue-status');if(!fatigueLabel){fatigueLabel=document.createElement('button');fatigueLabel.id='fatigue-status';fatigueLabel.className='outline';fatigueLabel.onclick=()=>openPanel('services');$('menu-system').append(fatigueLabel);}const f=StatRules.fatigue(state.player);fatigueLabel.textContent='피로 '+f.value.toFixed(1)+'/100 · '+f.name;let roleStrip=$('party-role-strip');if(!roleStrip){roleStrip=document.createElement('div');roleStrip.id='party-role-strip';roleStrip.setAttribute('aria-label','현재 파티 역할');$('dialogue-content').prepend(roleStrip);}RoleUI.strip(roleStrip,{...Object.fromEntries(StoryKitData.content.records.filter(r=>r.roles?.length).map(r=>[r.id,r.roles])),...(state.roleAssignments||{})},['taei',...(state.party||[]).filter(id=>state.present.includes(id))].map(id=>({id,name:names[id]||id})),{nameAbove:true});const p=state.panels[Math.min(panelIndex,state.panels.length-1)],combat=state.scene==='combat'&&state.combat;renderCombatHud(combat);roleStrip.hidden=!state.combat||state.combat.mode!=='chat'||(state.combat.status!=='playing'&&state.scene!=='combat')||!roleStrip.children.length;document.body.dataset.storyMode='director';$('speaker').textContent=p.speaker==='narrator'?'상황':StoryKitData.content.displayName(state,p.speaker)||names[p.speaker]||state.locals?.find(n=>n.id===p.speaker)?.name||p.speaker;$('emotion').textContent=combat?'전투':'현재';if($('line').textContent!==p.text){$('line').textContent=p.text;$('dialogue-content').scrollTop=0;}let outcome=$('action-outcome');if(!outcome){outcome=document.createElement('p');outcome.id='action-outcome';outcome.setAttribute('role','status');$('line').after(outcome);}const actionResult=state.turns.at(-1)?.resolution;const npcResult=actionResult?.npcReactions?.find(r=>r.response!=='autonomous');outcome.hidden=!actionResult?.steps?.length&&!npcResult;const npcName=npcResult?(names[npcResult.actor]||state.locals?.find(n=>n.id===npcResult.actor)?.name||'주변 인물'):'';const last=npcName.charCodeAt(npcName.length-1);const particle=last>=0xac00&&last<=0xd7a3&&(last-0xac00)%28?'은':'는';const responseText=npcResult?npcName+particle+({accept:npcResult.request==='withdraw'?' 뒤로 물러섰다.':npcResult.request==='hold'?' 자리를 지키기로 했다.':' 가능한 범위에서 돕기로 했다.',refuse:' 부탁을 거절했다.',hesitate:' 바로 움직이지 못했다.',unavailable:' 지금 반응할 수 없다.'}[npcResult.response]||''):'';outcome.textContent=[actionResult?.steps?.[0]?.reason,responseText].filter(Boolean).join(' ');$('choices').replaceChildren();const button=(label,fn)=>{const b=document.createElement('button');b.textContent=label;b.onclick=fn;$('choices').append(b);return b;};if(panelIndex<state.panels.length-1)button('이야기 계속 →',()=>{panelIndex++;render();});else{if(combat?.mode==='chat'&&combat.status==='playing'){
  for(const [label,text] of [['공격','적에게 접근해 공격한다.'],['방어','다가오는 공격에 대비해 방어한다.'],['이탈','뒤로 물러나 전투에서 이탈을 시도한다.']]){
-  const command=button(label,()=>{chatMode='story';showChatMode();renderRecommendations();const input=$('chat-input');input.value=text;input.focus();});
+  const command=button(label,()=>{chatMode='story';showChatMode();renderRecommendations();const input=$('chat-input');const enemy=label==='공격'?chosenEnemy(combat):null;input.value=enemy?targetAttackText(combat,enemy):text;input.focus();});
   command.dataset.combatCommand=label;
   command.disabled=working;
  }
@@ -129,7 +172,14 @@ function render(){if(!state||!enabled)return;StoryIllustrations.clear();let comp
    tag.textContent=StoryKitData.content.displayName(state,id)||names[id]||id;
    fighter.append(tag);
   }
- }for(const [i,m]of combat.enemies.entries()){const id='enemy-'+m.id;if(m.hp>0||['hit','guard'].includes(poseFor(id)))monsterLayer(layer,m.kind,i,id);}}
+ }for(const [i,m]of combat.enemies.entries()){const id='enemy-'+m.id;if(m.hp>0||['hit','guard'].includes(poseFor(id))){
+  monsterLayer(layer,m.kind,i,id);
+  const actor=layer.lastElementChild;
+  if(combat.mode==='chat'&&actor?.dataset.actor===id&&m.hp>0&&combat.status==='playing'){
+   actor.dataset.battleTarget=String(m.id);
+   actor.onclick=()=>selectEnemy(combat,m);
+  }
+ }}}
  if(state.era==='fantasy'&&!combat){
   const visible=(state.monsterAppearances||[]).filter(item=>item.panel===panelIndex&&p.speaker==='narrator'&&p.text.includes(item.evidence)&&Object.hasOwn(StoryMonsterFrames,item.id));
   if(visible.length){
@@ -139,12 +189,14 @@ function render(){if(!state||!enabled)return;StoryIllustrations.clear();let comp
  }else delete layer.dataset.presentation;
  if(state.era==='fantasy'&&!combat&&!PassageHost.onboard(state)){const art=ArrivalModel.art(state);if(art){background.style.backgroundImage='url("'+art.src+'")';background.style.backgroundSize=art.size;background.style.backgroundPosition=art.position;}else if(GameGeography.records.find(p=>p.id===state.location)?.kind==='village'){background.style.backgroundImage='linear-gradient(145deg,#1e3027,#3a4433,#192820)';background.style.backgroundSize='cover';}else if(state.location!=='arrival_meadow'){background.style.backgroundImage='url("assets/combat/locations.png")';background.style.backgroundSize='200% 200%';background.style.backgroundPosition='0% 0%';}}
  if(!combat)StoryIllustrations.attach({state,actorId:sceneActor(p),host:$('dialogue-content'),stage:background.parentElement,portrait,player,disabled:working});
+ if(combat?.mode==='chat')updateTargetIndicators(combat);
  renderTurnContext();$('elapsed').textContent=(state.minutes||0)+'분';$('scene-era').textContent=state.era==='fantasy'?'이세계':'현실';$('episode-no').textContent='LIVE · '+String(state.revision).padStart(2,'0');$('scene-title').textContent=combat?(combat.mode==='realtime'?'중요한 대치':'엇갈리는 공방'):'이어지는 이야기';$('scene-place').textContent=state.era==='earth'?({subway:'현실 · 지하철',platform:'현실 · 승강장',station:'현실 · 역 대합실'})[state.location]:GameGeography.records.find(x=>x.id===state.location)?.name||(state.location==='arrival_meadow'?'이세계 · 낯선 풀밭':state.location);if(PassageHost.onboard(state)){const ride=PassageHost.onboard(state);$('scene-title').textContent=ride.phase==='incident'?'운항 조정 안내':'운항 중';$('scene-place').textContent=ride.name+' · '+ride.progress+'/'+ride.duration+'분';background.style.backgroundImage=ride.mode==='ship'?'linear-gradient(150deg,#122c39,#264d56,#182c32)':ride.mode==='airship'?'linear-gradient(150deg,#202a41,#414767,#243743)':'linear-gradient(150deg,#30271e,#4d4937,#202d26)';background.style.backgroundSize='cover';}$('save-state').textContent=working?'상황과 기억을 확인하는 중…':'이야기 자동 저장 · '+state.revision+'번째 대화';$('chat-input').disabled=working||combat?.mode==='realtime'&&combat.status==='playing';$('chat-input').maxLength=1000;document.querySelector('#chat-form button[type=submit]').disabled=working;showChatMode();renderRecommendations();showRestorePreview();showRestoredDraft();$('sd').hidden=true;$('scene-minimap').hidden=true;const footer=document.querySelector('main>footer');footer.querySelector('.footer-trait').textContent=combat?'HP '+state.player.hp+'/'+state.player.max:'실시간 생성 이야기';footer.children[2].textContent=$('scene-place').textContent;}
 function skillFx(){const r=state?.turns.at(-1)?.resolution,parent=$('story-battle-layers')?.hidden?$('scene-art'):$('story-battle-layers');if(!r?.visual||!parent)return;const canvas=document.createElement('canvas');canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none';canvas.width=Math.max(1,parent.clientWidth);canvas.height=Math.max(1,parent.clientHeight);parent.append(canvas);const ctx=canvas.getContext('2d'),start=performance.now(),reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;function frame(now){if(!canvas.isConnected)return;const age=(now-start)/1000;ctx.clearRect(0,0,canvas.width,canvas.height);SkillEffects.draw(ctx,{x:canvas.width*.63,y:canvas.height*.52,face:{x:1,y:0},visual:r.visual},p=>p,42,age,reduced);if(age<.55)requestAnimationFrame(frame);else canvas.remove();}requestAnimationFrame(frame);}
 function stopReplay(){
   for(const timer of replayTimers)clearTimeout(timer);
   replayTimers=[];
   poseOverride=null;
+  battleImpact=null;
 }
 function playResolution(){
   stopReplay();
@@ -158,8 +210,10 @@ function playResolution(){
   const show=(i)=>{
     if(state!==snapshot){stopReplay();return;}
     poseOverride=phases[i]||null;
+    const event=impacts[impactIndex];
+    battleImpact=event&&poseOverride?.[event.actor]==='attack'&&['hit','guard','ready'].includes(poseOverride?.[event.target])?event:null;
     render();
-    const event=impacts[impactIndex];if(event&&poseOverride?.[event.actor]==='attack'&&['hit','guard','ready'].includes(poseOverride?.[event.target])){impactIndex++;const actor=[...$('story-battle-layers').querySelectorAll('[data-actor]')].find(e=>e.dataset.actor===event.target);if(actor){const text=document.createElement('span');text.className='battle-confirmed-hit';text.textContent=event.damage>0?'−'+event.damage:event.verdict?.absorbed>0?'차단':'피해 없음';actor.append(text);}}
+    if(event&&poseOverride?.[event.actor]==='attack'&&['hit','guard','ready'].includes(poseOverride?.[event.target])){impactIndex++;const actor=[...$('story-battle-layers').querySelectorAll('[data-actor]')].find(e=>e.dataset.actor===event.target);if(actor){const text=document.createElement('span');text.className='battle-confirmed-hit';text.textContent=event.damage>0?'−'+event.damage:event.verdict?.absorbed>0?'차단':'피해 없음';actor.append(text);}}
 
     if(!showedSkill&&(poseOverride?.taei||!phases.length)){
       skillFx();
